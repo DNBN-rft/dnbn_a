@@ -1,0 +1,286 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+    },
+    headerContainer: {
+        height: 56,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    backButton: {
+        position: 'absolute',
+        left: 16,
+        padding: 8,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    topContainer: {
+        flexDirection: 'row',
+    },
+
+    tabButton: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+
+    activeTab: {
+        borderBottomWidth: 2,
+        borderBottomColor: '#EF7810',
+    },
+    searchContainer: {
+        marginHorizontal: 16,
+        marginTop: 12,
+        marginBottom: 12,
+
+        height: 40,
+        paddingHorizontal: 12,
+
+        backgroundColor: '#ffffffff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+
+        fontSize: 14,
+        color: '#333',
+    },
+    searchContainerFocused: {
+        borderColor: '#EF781066',
+        backgroundColor: '#fff',
+    },
+
+    filterContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        gap: 12,
+    },
+    selectBox: {
+        paddingVertical: 5,
+        paddingHorizontal: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 6,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    selectBoxText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#666',
+    },
+
+    listContainer: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        gap: 12,
+    },
+    orderContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        marginBottom: 12,
+        overflow: 'hidden',
+    },
+    orderTopContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    orderDate: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+    },
+    orderDetailButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+    },
+    orderDetailButtonText: {
+        fontSize: 13,
+        color: '#666',
+    },
+    orderItemContainer: {
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+        borderRadius: 8,
+        marginBottom: 12,
+        backgroundColor: '#fff',
+        paddingBottom: 17,
+    },
+    orderStoreContainer: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    storeName: {
+        fontSize: 15,
+        color: '#666',
+    },
+    orderStateContainer: {
+        paddingHorizontal: 16,
+        paddingVertical: 7,
+    },
+    orderState: {
+        fontSize: 13,
+        color: '#EF7810',
+        fontWeight: '600',
+    },
+    orderProductInfoContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        gap: 12,
+    },
+    orderProductImgContainer: {
+        width: 80,
+        height: 80,
+        borderWidth: 1,
+        borderColor: '#cfcfcfff',
+        borderRadius: 6,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    orderProductDetailContainer: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    productName: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 4,
+    },
+    productQuantity: {
+        fontSize: 12,
+        color: '#999',
+        marginBottom: 4,
+    },
+    productPrice: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#000',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    filterModalContent: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        padding: 16,
+        maxHeight: '80%',
+        width: '100%',
+        marginTop: 'auto',
+    },
+    filterModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    filterModalCloseButton: {
+        fontSize: 14,
+        color: '#666',
+    },
+    filterSection: {
+        marginBottom: 24,
+    },
+    filterSectionTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    filterOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    filterOptionButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 6,
+        backgroundColor: '#ffffffff',
+    },
+    filterOptionButtonActive: {
+        borderColor: '#EF7810',
+        backgroundColor: '#fff5f0',
+    },
+    filterDateOptions: {
+        gap: 8,
+    },
+    filterDateButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 6,
+        backgroundColor: '#ffffffff',
+    },
+    filterDateButtonActive: {
+        borderColor: '#EF7810',
+        backgroundColor: '#fff5f0',
+    },
+    applyButton: {
+        paddingVertical: 14,
+        borderWidth: 1,
+        borderColor: '#EF7810',
+        backgroundColor: '#ffffffff',
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 24,
+    },
+    applyButtonText: {
+        color: '#EF7810',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 16,
+        minWidth: 200,
+    },
+    modalItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        fontSize: 16,
+    },
+    scrollToTopButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#EF7810',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    scrollToTopButtonText: {
+        fontSize: 10,
+        color: '#fff',
+        fontWeight: '700',
+    },
+});
