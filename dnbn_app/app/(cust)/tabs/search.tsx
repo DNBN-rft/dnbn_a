@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './search.styles';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 
 export default function SearchView() {
@@ -18,24 +19,24 @@ export default function SearchView() {
     ]
 
     const products = [
-        {id: "1", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "2", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "3", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
-        {id: "4", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "5", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "6", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
-        {id: "7", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "8", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "9", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
-        {id: "10", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "11", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "12", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
-        {id: "13", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "14", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "15", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
-        {id: "16", uri: require('@/assets/images/star.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
-        {id: "17", uri: require('@/assets/images/star.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
-        {id: "18", uri: require('@/assets/images/star.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "1", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "2", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "3", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "4", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "5", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "6", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "7", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "8", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "9", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "10", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "11", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "12", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "13", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "14", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "15", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
+        {id: "16", uri: require('@/assets/images/logo.png'),name: "상품1", discountRate: 20, price: "가격1", description:"상품설명1", averageRate: 3.4, reviewCount: 1280},
+        {id: "17", uri: require('@/assets/images/logo.png'), name: "상품2", discountRate: 20, price: "가격2", description:"상품설명2", averageRate: 3.4, reviewCount: 1280},
+        {id: "18", uri: require('@/assets/images/logo.png'), name: "상품3", discountRate: 20, price: "가격3", description:"상품설명3", averageRate: 3.4, reviewCount: 1280},
     ]
 
     return (
@@ -90,7 +91,7 @@ export default function SearchView() {
                     </View>
                     <Text>{product.description}</Text>
                     <View style={styles.reviewInfo}>
-                        <Image style={styles.reviewStar} source={require('@/assets/images/star.png')} />
+                        <Ionicons name="star" size={16} color="#FFD700" />
                         <Text> {product.averageRate}</Text>
                         <Text>({product.reviewCount})</Text>
                     </View>

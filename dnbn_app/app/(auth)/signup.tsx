@@ -1,9 +1,7 @@
-import { router } from 'expo-router';
 import React, { useState } from 'react';
+import { RadioGroup } from 'react-native-radio-buttons-group';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import RadioGroup from 'react-native-radio-buttons-group/lib/RadioGroup';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Header from '../components/header';
 import { styles } from './signup.styles';
 
 export default function PracticeView() {
@@ -15,15 +13,8 @@ export default function PracticeView() {
     {id: '2', label: '여', value: "female"}
   ]
 
-    const handleBackPress = () => {
-      console.log('뒤로가기');
-      router.back();
-    };
-
   return (
     <View style={[styles.practiceView, {paddingTop: insets.top}]}>
-      <Header onBackPress={handleBackPress} />
-
       <View style={styles.inputContainer}>
           <View style={styles.viewMargin}>
             <Text style={styles.welcome}>동네방네에 오신 것을 환영합니다.</Text>
