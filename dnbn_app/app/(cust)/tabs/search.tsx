@@ -1,9 +1,9 @@
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './search.styles';
-import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 
 export default function SearchView() {
@@ -52,7 +52,7 @@ export default function SearchView() {
                 onBlur={() => setIsFocused(false)}
                     />
                     {/* 여기 search-result로 라우팅 되어야함. */}
-            <Pressable onPress={() => router.push('/tabs/search')} style={styles.searchButton}>
+            <Pressable onPress={() => router.push('/tabs/search-result')} style={styles.searchButton}>
                 <Text style={styles.searchButtonText}>검색</Text>
             </Pressable>
             </View>

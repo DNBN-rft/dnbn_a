@@ -68,10 +68,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
-  reviewStar: {
-    width: 13,
-    height: 13,
-  },
   stores: {
     marginBottom: 10,
     flexDirection: "row",
