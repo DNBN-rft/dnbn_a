@@ -1,5 +1,5 @@
 
-import { ScrollView, Pressable, Text, View } from 'react-native';
+import { ScrollView, Pressable, Text, View, TouchableOpacity } from 'react-native';
 import { styles } from './storeInfo.styles';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,11 +12,17 @@ export default function StoreInfo() {
 
     return (
         <ScrollView style={[styles.container, { paddingTop: insets.top }]}>
-            <View style={styles.headerContainer}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
-                <Text style={styles.headerTitleText}>가게 이름 넣어야함</Text>
+                </TouchableOpacity>
+                <Text style={styles.title} pointerEvents="none">
+                    내 위치 설정
+                </Text>
+                <View style={styles.placeholder} />
             </View>
             {/* 가게 이미지 */}
             <View style={styles.storeImgContainer}>

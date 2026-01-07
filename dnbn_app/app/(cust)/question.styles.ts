@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-    container: {
+    container:{
         flex: 1,
         backgroundColor: '#fff',
     },
@@ -30,10 +30,10 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    noticeListContainer: {
+    questionListContainer: {
         padding: 16,
     },
-    noticeItemContainer: {
+    questionItemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -43,16 +43,27 @@ export const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 12,
     },
-    noticeItemDetailContainer: {
-        flex: 1
+    questionItemDetailContainer: {
+        flex: 1,
     },
-    noticeItemTitleText: {
-        fontSize: 14,
+    questionItemTitleText: {
+        fontSize: 16,
         fontWeight: '500',
         marginBottom: 6,
     },
-    noticeItemDateText: {
-        fontSize: 12,
+    questionItemDateText: {
+        fontSize: 14,
         color: '#666',
+    },
+    questionItemStatusContainer: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+        backgroundColor: 'rgba(241, 129, 30, 0.2)',
+        marginRight: 12,
+    },
+    questionItemStatusText: {
+        fontSize: 14,
+        color: 'rgba(241, 129, 30, 1)',
     },
 });

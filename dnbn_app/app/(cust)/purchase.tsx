@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, TextInput, Modal, ScrollView, View, Text } from 'react-native';
+import { Pressable, TextInput, Modal, ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './purchase.styles';
@@ -39,12 +39,17 @@ export default function PurchaseScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.headerContainer}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="chevron-back" size={24} color="#000" />
-        </Pressable>
-
-        <Text style={styles.headerTitle}>구매 내역</Text>
+        </TouchableOpacity>
+        <Text style={styles.title} pointerEvents="none">
+          내 위치 설정
+        </Text>
+        <View style={styles.placeholder} />
       </View>
 
       <View style={styles.topContainer}>

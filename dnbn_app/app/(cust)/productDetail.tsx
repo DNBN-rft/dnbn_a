@@ -1,5 +1,5 @@
 
-import { ScrollView, Pressable, Text, View } from 'react-native';
+import { ScrollView, Pressable, Text, View, TouchableOpacity } from 'react-native';
 import { styles } from './productdetail.styles';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,11 +17,17 @@ export default function ProductDetailScreen() {
 
     return (
         <View style={[styles.screenContainer, { paddingTop: insets.top }]}>
-            <View style={styles.headerContainer}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
-                <Text style={styles.headerTitleText}>상품 이름 들어가야함</Text>
+                </TouchableOpacity>
+                <Text style={styles.title} pointerEvents="none">
+                    내 위치 설정
+                </Text>
+                <View style={styles.placeholder} />
             </View>
             <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
                 <View style={styles.productDetailImgContainer}>

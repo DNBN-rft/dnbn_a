@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, Pressable } from 'react-native';
+import { Text, View, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { styles } from './cart.styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,11 +11,17 @@ export default function CartScreen() {
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
-            <View style={styles.headerContainer}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
-                <Text style={styles.headerTitleText}>장바구니</Text>
+                </TouchableOpacity>
+                <Text style={styles.title} pointerEvents="none">
+                    내 위치 설정
+                </Text>
+                <View style={styles.placeholder} />
             </View>
             {/* 상단 전체선택/삭제 */}
             <View style={styles.cartTopContainer}>
