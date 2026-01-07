@@ -16,7 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="(cust)" />
         <Stack.Screen name="(store)" />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </ThemeProvider>
   );
 }

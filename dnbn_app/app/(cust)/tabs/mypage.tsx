@@ -58,7 +58,7 @@ export default function Mypage() {
               <Ionicons name="chevron-forward" size={24} color="black" />
             </View>
             <TouchableOpacity style={styles.contentContainer}
-              onPress={() => router.push('/notifications')}>
+              onPress={() => router.push('/notification-setting')}>
               <Text style={styles.contentText}>알림 설정</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>

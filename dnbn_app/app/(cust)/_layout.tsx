@@ -65,6 +65,14 @@ export default function CustLayout() {
         }}
       />
       <Stack.Screen
+        name="notification-setting"
+        options={{
+          title: "알림 설정",
+          headerShown: false,
+          headerTitle: "알림 설정",
+        }}
+      />
+      <Stack.Screen
         name="notice"
         options={{
           title: "공지사항",
