@@ -1,33 +1,70 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
-  container: {
+  mypageViewContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    padding: 20,
+    backgroundColor: "white",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
+  mypageView: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  infoContainer: {},
+  menuContainer: {
+    minHeight: SCREEN_HEIGHT - 200,
+    justifyContent: 'flex-start',
+  },
+  serviceContainer: {},
+  developerContainer: {},
+  logoutContainer: {},
+  contentContainer: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    margin: 10
+  },
+  contentText: {
+    fontSize: 20,
+  },
+  dnbnInfoContainer: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 10,
-    color: "#333",
+    color: '#333',
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 30,
+  textBlock: {
+    marginBottom: 15,
   },
-  logoutButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
+  regularText: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 3,
   },
-  logoutButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  labelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 12,
+    marginBottom: 5,
   },
-});
+  copyRight: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 10,
+  },
+  line: {
+    borderWidth: 1,
+    borderColor: "#0000000e",
+    marginTop: 50,
+    marginBottom: 5
+  }
+
+})

@@ -1,6 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function CustLayout() {
   return (
@@ -75,6 +75,14 @@ export default function CustLayout() {
           href: null, // 탭바에서 숨김
           title: '장바구니',
           headerTitle: '장바구니',
+        }}
+      />
+      <Tabs.Screen
+        name="search-result"
+        options={{
+          href: null, // 탭바에서 숨김
+          title: '검색 결과',
+          headerTitle: '검색 결과',
         }}
       />
     </Tabs>
