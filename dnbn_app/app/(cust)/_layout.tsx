@@ -56,6 +56,47 @@ export default function CustLayout() {
           headerTitle: "리뷰 작성",
         }}
       />
+      <Stack.Screen
+        name="myInfo"
+        options={{
+          title: "내 정보 수정",
+          headerShown: false,
+          headerTitle: "내 정보 수정",
+        }}
+      />
+      <Stack.Screen
+        name="notice"
+        options={{
+          title: "공지사항",
+          headerShown: false,
+          headerTitle: "공지사항",
+        }}
+      />
+      <Stack.Screen
+        name="productDetail"
+        options={{
+          title: "상품 상세",
+          headerShown: false,
+          headerTitle: "상품 상세",
+        }}
+      />
+      <Stack.Screen
+        name="purchase"
+        options={{
+          title: "구매 내역",
+          headerShown: false,
+          headerTitle: "구매 내역",
+        }}
+      />
+      <Stack.Screen
+        name="storeInfo"
+        options={{
+          title: "가게 정보",
+          headerShown: false,
+          headerTitle: "가게 정보 ",
+        }}
+      />
     </Stack>
+
   );
 }

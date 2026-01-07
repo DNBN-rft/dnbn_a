@@ -90,7 +90,7 @@ export default function CustHomeScreen() {
             <TouchableOpacity style={styles.headerButton} onPress={() => router.replace("/(cust)/notifications")}>
               <Ionicons name="notifications-outline" size={24} color="#000" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerButton} onPress={() => router.replace("/(cust)/cart")}>
+            <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/cart")}>
               <Ionicons name="cart-outline" size={24} color="#000" />
             </TouchableOpacity>
         </View>
