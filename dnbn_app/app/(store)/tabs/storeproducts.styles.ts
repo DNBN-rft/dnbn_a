@@ -3,12 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  content: {
-    padding: 20,
-    flex: 1,
-    minHeight: 400,
+    backgroundColor: "#ffffff",
   },
   header: {
     flexDirection: "row",
@@ -35,8 +30,33 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  emptyText: {
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  content: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  contentWrapper: {
+    padding: 20,
+  },
+  subtitle: {
     fontSize: 16,
     color: "#666",
+  },
+  addProductButton: {
+    borderWidth: 1,
+    borderColor: "#ef7810",
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

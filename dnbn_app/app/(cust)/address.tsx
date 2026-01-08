@@ -24,12 +24,6 @@ export default function AddressScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <Link href="/(cust)/address-select" asChild>
-        <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.addButtonText}>+ 새 주소 추가</Text>
-        </TouchableOpacity>
-      </Link>
-
       <View>
         <FlatList
         data={addr}
@@ -43,6 +37,11 @@ export default function AddressScreen() {
 
         )}></FlatList>
       </View>
+      <Link href="/(cust)/address-select" asChild>
+        <TouchableOpacity style={styles.addButton}>
+          <Text style={styles.addButtonText}>+ 새 주소 추가</Text>
+        </TouchableOpacity>
+      </Link>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000"}} />
       )}

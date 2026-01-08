@@ -3,12 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  content: {
-    padding: 20,
-    flex: 1,
-    minHeight: 400,
+    backgroundColor: "#ffffff",
   },
   header: {
     flexDirection: "row",
@@ -35,8 +30,37 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  emptyText: {
+  content: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  contentWrapper: {
+    padding: 20,
+  },
+  section: {
+    boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    padding: 16,
+    marginBottom: 20,
+  },
+  sectionTitle: {
     fontSize: 16,
-    color: "#666",
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+  },
+  menuItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  menuText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  logoutText: {
+    color: "#FF3B30",
   },
 });

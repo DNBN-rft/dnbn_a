@@ -31,7 +31,10 @@ export default function CustMapScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#ffffff" }} />
+      )}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -68,6 +71,9 @@ export default function CustMapScreen() {
           </View>
         )}
       </View>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
   );
 }

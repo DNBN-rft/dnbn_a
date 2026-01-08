@@ -5,17 +5,30 @@ export const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#ffffffff',
     },
-    headerContainer: {
-        height: 56,
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     backButton: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
         position: 'absolute',
-        left: 16,
-        padding: 8,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+    },
+    placeholder: {
+        width: 40,
     },
     headerTitleText: {
         fontSize: 18,

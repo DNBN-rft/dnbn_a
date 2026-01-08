@@ -7,8 +7,9 @@ export const styles = StyleSheet.create({
     },
     content: {
         padding: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
         minHeight: 400,
-        flex: 1,
     },
     header: {
         flexDirection: 'row',
@@ -23,13 +24,6 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-start',
     },
-    backButtonText: {
-        width: 44,
-        height: 44,
-        fontWeight: 'bold',
-        fontSize: 24,
-        color: '#333',
-    },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -41,11 +35,6 @@ export const styles = StyleSheet.create({
     },
     placeholder: {
         width: 40,
-    },
-    centertitle: {
-        fontSize: 20,
-        textAlign: 'center',
-        marginBottom: 20,
     },
     emptyText: {
         fontSize: 16,

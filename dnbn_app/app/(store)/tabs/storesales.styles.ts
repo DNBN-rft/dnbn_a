@@ -3,12 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  content: {
-    padding: 20,
-    flex: 1,
-    minHeight: 400,
+    backgroundColor: "#ffffff",
   },
   header: {
     flexDirection: "row",
@@ -35,7 +30,14 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  emptyText: {
+  content: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  contentWrapper: {
+    padding: 20,
+  },
+  subtitle: {
     fontSize: 16,
     color: "#666",
   },

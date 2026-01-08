@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
         borderColor: '#EF7810',
         borderWidth: 1,
         marginHorizontal: 20,
-        marginBottom: 20,
+        marginTop: 50,
     },
     addButtonText: {
         color: '#EF7810',

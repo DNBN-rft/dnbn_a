@@ -1,62 +1,28 @@
-import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Stack } from "expo-router";
 
 export default function StoreLayout() {
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: '#FF9500',
-        tabBarInactiveTintColor: '#8E8E93',
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
+      {/* 탭이 있는 메인 화면 */}
+      <Stack.Screen
+        name="tabs"
         options={{
-          title: '대시보드',
-          headerTitle: '가맹점 관리',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color} />
-          ),
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
+
+      {/* 탭이 없는 추가 화면들 */}
+      <Stack.Screen
         name="orders"
         options={{
-          title: '주문관리',
-          headerTitle: '주문 관리',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list" size={size} color={color} />
-          ),
+          title: "주문 관리",
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="products"
-        options={{
-          title: '상품관리',
-          headerTitle: '상품 관리',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cube" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: '설정',
-          headerTitle: '가맹점 설정',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    </Stack>
   );
 }
