@@ -392,7 +392,9 @@ export default function GiftBox() {
             columnWrapperStyle={{ gap: 10 }}
             keyExtractor={(item) => item.id}
             renderItem={({ item: product }) => (
-              <TouchableOpacity style={styles.products}>
+              <TouchableOpacity style={styles.products}
+                onPress={() => router.navigate('/(cust)/use-gift')}
+              >
                 <Image source={product.uri} style={styles.productImage} />
                 <Text style={styles.notUsedAndUsedText}>미사용 상품 이름</Text>
                 <Text style={styles.date}>2026-01-07</Text>

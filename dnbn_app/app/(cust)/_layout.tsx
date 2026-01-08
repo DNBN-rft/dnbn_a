@@ -81,6 +81,14 @@ export default function CustLayout() {
         }}
       />
       <Stack.Screen
+        name="use-gift"
+        options={{
+          title: "선물함 사용하기",
+          headerShown: false,
+          headerTitle: "선물함 사용하기",
+        }}
+      />
+      <Stack.Screen
         name="notice"
         options={{
           title: "공지사항",
