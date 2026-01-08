@@ -3,6 +3,10 @@ import { Dimensions, StyleSheet } from "react-native";
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    backgroundColor: "#ffffffff",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",

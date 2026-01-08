@@ -1,8 +1,9 @@
-import { Pressable, Text, TextInput, View, ScrollView, Modal } from 'react-native';
+import { Pressable, Text, TextInput, View, ScrollView, Modal, TouchableOpacity } from 'react-native';
 import { styles } from './myinfo.styles';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 export default function MyInfoScreen() {
     const [gender, setGender] = useState('male');
@@ -16,16 +17,21 @@ export default function MyInfoScreen() {
     return (
         <View style={styles.container}>
             {insets.top > 0 && (
-                <View style={{ height: insets.top, backgroundColor: '#ffffff'}} />
+                <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
             )}
-
-            <View style={styles.headerContainer}>
-                <Pressable style={styles.headerBackButton}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
-                <Text style={styles.headerTitle}>회원정보</Text>
-                <View style={{ width: 24 }} />
+                </TouchableOpacity>
+                <Text style={styles.title} pointerEvents="none">
+                    내 정보
+                </Text>
+                <View style={styles.placeholder} />
             </View>
+
 
             <ScrollView>
                 <View style={styles.myInfoContainer}>
@@ -107,7 +113,7 @@ export default function MyInfoScreen() {
                         <Text style={styles.modalTitle}>비밀번호 변경</Text>
 
                         <View style={styles.modalInputSection}>
-                            <Text style={styles.modalLabel}>현재 비밀번호 *</Text>
+                            <Text style={styles.modalText}>현재 비밀번호 *</Text>
                             <TextInput
                                 style={styles.modalTextInput}
                                 placeholder="현재 비밀번호 입력"
@@ -118,7 +124,7 @@ export default function MyInfoScreen() {
                         </View>
 
                         <View style={styles.modalInputSection}>
-                            <Text style={styles.modalLabel}>새 비밀번호 *</Text>
+                            <Text style={styles.modalText}>새 비밀번호 *</Text>
                             <TextInput
                                 style={styles.modalTextInput}
                                 placeholder="새 비밀번호 입력"
@@ -132,7 +138,7 @@ export default function MyInfoScreen() {
                         </View>
 
                         <View style={styles.modalInputSection}>
-                            <Text style={styles.modalLabel}>비밀번호 확인 *</Text>
+                            <Text style={styles.modalText}>비밀번호 확인 *</Text>
                             <TextInput
                                 style={styles.modalTextInput}
                                 placeholder="비밀번호 확인"

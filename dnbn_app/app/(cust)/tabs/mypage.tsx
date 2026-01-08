@@ -15,12 +15,10 @@ export default function Mypage() {
   };
 
   return (
-    <View style={[styles.mypageViewContainer]}>
-      <StatusBar style="dark" />
+    <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#ffffff" }} />
+        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -114,9 +112,9 @@ export default function Mypage() {
             <View>
               <TouchableOpacity
                 style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/tabs/custhome")}
+                onPress={() => router.navigate("/(cust)/faqList")}
               >
-                <Text style={styles.contentText}>문의</Text>
+                <Text style={styles.contentText}>자주 묻는 질문</Text>
                 <Ionicons name="chevron-forward" size={24} color="black" />
               </TouchableOpacity>
             </View>

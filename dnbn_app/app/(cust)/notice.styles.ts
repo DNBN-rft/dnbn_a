@@ -3,19 +3,20 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffffff',
     },
-    headerContainer: {
-        height: 56,
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     backButton: {
-        position: 'absolute',
-        left: 16,
-        padding: 8,
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
     },
     title: {
         fontSize: 18,
@@ -46,12 +47,12 @@ export const styles = StyleSheet.create({
         flex:1
     },
     noticeItemTitleText: {
-        fontSize: 14,
+        fontSize: 20,
         fontWeight: '500',
-        marginBottom: 6,
+        marginBottom: 8,
     },
     noticeItemDateText: {
-        fontSize: 12,
+        fontSize: 18,
         color: '#666',
     },
 });

@@ -12,14 +12,17 @@ export default function NoticeScreen() {
     return (
         <View style={styles.container}>
             {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#FFFFFF"}} />
-      )}
-            <View style={styles.headerContainer}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+            )}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
+                </TouchableOpacity>
                 <Text style={styles.title} pointerEvents="none">
-                    내 위치 설정
+                    공지사항
                 </Text>
                 <View style={styles.placeholder} />
             </View>
@@ -30,91 +33,91 @@ export default function NoticeScreen() {
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
                 <Pressable style={styles.noticeItemContainer}>
                     <View style={styles.noticeItemDetailContainer}>
                         <Text style={styles.noticeItemTitleText}>공지사항 제목 1</Text>
                         <Text style={styles.noticeItemDateText}>2024-06-01</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                    <Ionicons name="chevron-forward" size={24} color="#EF7810" />
                 </Pressable>
             </ScrollView>
             {insets.bottom > 0 && (

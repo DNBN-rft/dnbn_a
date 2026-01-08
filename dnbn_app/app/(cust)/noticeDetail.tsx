@@ -7,8 +7,11 @@ import { Ionicons } from '@expo/vector-icons';
 export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
 
-    return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        return (
+        <View style={styles.container}>
+            {insets.top > 0 && (
+                <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+            )}
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -17,7 +20,7 @@ export default function NoticeDetailScreen() {
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={styles.title} pointerEvents="none">
-                    공지사항 제목이 들어가야할 자리
+                    공지사항
                 </Text>
                 <View style={styles.placeholder} />
             </View>
@@ -36,7 +39,7 @@ export default function NoticeDetailScreen() {
                             <Text style={styles.noticeDetailFileText}>첨부파일 이름.jpg</Text>
                             <Text style={styles.noticeDetailFileSizeText}>120KB</Text>
                         </View>
-                        <Ionicons name="download-outline" size={20} color="#000" />
+                        <Ionicons name="download-outline" size={24} color="#000" />
                     </View>
                 </View>
             </ScrollView>

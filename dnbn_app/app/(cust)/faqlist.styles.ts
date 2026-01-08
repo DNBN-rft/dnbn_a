@@ -20,6 +20,7 @@ export const styles = StyleSheet.create({
     },
     faqInnerContainer: {
         flex: 1,
+        marginHorizontal: 20,
     },
     title: {
         fontSize: 18,
@@ -35,7 +36,6 @@ export const styles = StyleSheet.create({
     },
     faqHeaderContainer: {
         alignItems: 'center',
-        padding: 20,
     },
     faqSearchContainer: {
         width: '100%',
@@ -45,38 +45,49 @@ export const styles = StyleSheet.create({
         borderColor: '#CCCCCC',
         borderRadius: 8,
         paddingHorizontal: 10,
-        paddingVertical: 8,
+        paddingVertical: 10,
         backgroundColor: '#ffffffff',
     },
     faqSearchPlaceholderText: {
         flex: 1,        
         color: '#CCCCCC',
-        fontSize: 16,
+        fontSize: 18,
     },
     faqSubjectContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
         paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
+        gap: 10,
+        marginTop: 10,
     },
     faqSubjectButton: {
         paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#EF7810',
+        paddingHorizontal: 14,
         borderRadius: 20,
     },
+    faqSubjectButtonSelected: {
+        backgroundColor: '#EF7810',
+    },
+    faqSubjectButtonUnselected: {
+        borderColor: '#EF7810', 
+        borderWidth: 1,
+        backgroundColor: '#FFFFFF',
+    },
     faqSubjectButtonText: {
+        fontSize: 18,
+    },
+    faqSubjectButtonTextSelected: {
         color: '#FFFFFF',
-        fontSize: 16,
+    },
+    faqSubjectButtonTextUnselected: {
+        color: '#EF7810',
     },
     faqListContainer: {
-        padding: 20,
+        marginTop: 20,
     },
     faqSubjectTitleText: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 15,
+        marginBottom: 10,
     },
     faqItemContainer: {
         flexDirection: 'row',
@@ -87,8 +98,44 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#F0F0F0',
     },
     faqItemQuestionText: {
-        fontSize: 16,
+        fontSize: 18,
         color: '#333333',
     },
-
+    questionReqContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    questionReqText: {
+        fontSize: 20,
+        color: '#666666',
+        marginBottom: 20,
+    },
+    questionReqButton: {
+        backgroundColor: '#ffffffff',
+        borderWidth: 1,
+        borderColor: '#EF7810',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    questionReqButtonText: {
+        color: '#EF7810',
+        fontSize: 18,
+    },
+    questionBtnContainer: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    questionListViewButton: {
+        backgroundColor: '#ffffffff',
+        borderWidth: 1,
+        borderColor: '#EF7810',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    questionListViewText: {
+        color: '#EF7810',
+        fontSize: 18,
+    },
 });

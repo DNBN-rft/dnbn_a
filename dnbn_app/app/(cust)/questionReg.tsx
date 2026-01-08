@@ -10,7 +10,7 @@ export default function NoticeDetailScreen() {
     const [questionTypeModalVisible, setQuestionTypeModalVisible] = useState(false);
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.container}>
             {insets.top > 0 && (
                 <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
             )}

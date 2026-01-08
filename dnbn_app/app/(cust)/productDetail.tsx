@@ -15,20 +15,25 @@ export default function ProductDetailScreen() {
         scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     };
 
-    return (
-        <View style={styles.screenContainer}>
+        return (
+        <View style={styles.container}>
             {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#FFFFFF"}} />
-      )}
-            <View style={styles.headerContainer}>
-                <Pressable onPress={() => router.back()} style={styles.backButton}>
+                <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+            )}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#000" />
-                </Pressable>
+                </TouchableOpacity>
                 <Text style={styles.title} pointerEvents="none">
-                    내 위치 설정
+                    상품이름 나오기
                 </Text>
                 <View style={styles.placeholder} />
             </View>
+
+
             <ScrollView ref={scrollViewRef} style={styles.container} showsVerticalScrollIndicator={false}>
                 <View style={styles.productDetailImgContainer}>
                     <Text>상품 이미지</Text>
@@ -42,9 +47,9 @@ export default function ProductDetailScreen() {
 
                     <View style={styles.productDetailAddressContainer}>
                         <View>
-                            <Text style={styles.productDetailAddrDetailText}>우리동네빵집점</Text>
+                            <Text style={styles.productStoreNmText}>우리동네빵집점</Text>
                             <View style={styles.productDetailMapContainer}>
-                                <Text style={styles.productDetailNameText}>대전 서구 문주로 12</Text>
+                                <Text style={styles.productStoreAddrText}>대전 서구 문주로 12</Text>
                                 <Pressable>
                                     <Text style={styles.mapIconText}>🗺️</Text>
                                 </Pressable>
@@ -88,7 +93,7 @@ export default function ProductDetailScreen() {
 
                 {/* 별점 정보 */}
                 <View style={styles.productDetailRateInfoContainer}>
-                    <Text style={styles.rateText}>★★★★★ 5.0(10)</Text>
+                    <Text style={styles.rateText}>★★★★★ 5.0 (10)</Text>
                 </View>
 
                 {/* 상품/리뷰 탭 */}
@@ -126,14 +131,14 @@ export default function ProductDetailScreen() {
                         {/* 리뷰 아이템 1 */}
                         <View style={styles.reviewItemContainer}>
                             <View style={styles.reviewRefInfoContainer}>
-                                <Text style={styles.reviewRegNmContainer}>사용자 이름</Text>
-                                <Text style={styles.reviewRegDateContainer}>2026.01.05</Text>
+                                <Text style={styles.reviewRegNmText}>사용자 이름</Text>
+                                <Text style={styles.reviewRegDateText}>2026.01.05</Text>
                             </View>
-                            <Text style={styles.reviewRateContainer}>★★★★★ 5점</Text>
+                            <Text style={styles.reviewRateText}>★★★★★ 5점</Text>
                             <View style={styles.reviewImgContainer}>
                                 <Text>리뷰 이미지</Text>
                             </View>
-                            <Text style={styles.reviewContentContainer}>
+                            <Text style={styles.reviewContentText}>
                                 맛있는 빵이에요! 추천합니다.
                             </Text>
                         </View>
@@ -141,14 +146,14 @@ export default function ProductDetailScreen() {
                         {/* 리뷰 아이템 2 */}
                         <View style={styles.reviewItemContainer}>
                             <View style={styles.reviewRefInfoContainer}>
-                                <Text style={styles.reviewRegNmContainer}>또다른 사용자</Text>
-                                <Text style={styles.reviewRegDateContainer}>2026.01.04</Text>
+                                <Text style={styles.reviewRegNmText}>또다른 사용자</Text>
+                                <Text style={styles.reviewRegDateText}>2026.01.04</Text>
                             </View>
-                            <Text style={styles.reviewRateContainer}>★★★★☆ 4점</Text>
+                            <Text style={styles.reviewRateText}>★★★★☆ 4점</Text>
                             <View style={styles.reviewImgContainer}>
                                 <Text>리뷰 이미지</Text>
                             </View>
-                            <Text style={styles.reviewContentContainer}>
+                            <Text style={styles.reviewContentText}>
                                 가격도 저렴하고 맛있습니다!
                             </Text>
                         </View>
@@ -174,8 +179,8 @@ export default function ProductDetailScreen() {
             </Pressable>
 
             {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000"}} />
-      )}
+                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+            )}
         </View>
     );
 }

@@ -18,160 +18,161 @@ export default function StoreInfo() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={() => router.back()}
+        >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title} pointerEvents="none">
-          가맹명
+          가맹점이름들어가기
         </Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView
-      showsVerticalScrollIndicator={false}>
-      {/* 가게 이미지 */}
-      <View style={styles.storeImgContainer}>
-        <Text>가게 이미지</Text>
-      </View>
-
-      {/* 가게 정보 상단 */}
-      <View style={styles.storeInfoTopContainer}>
-        <View style={styles.storeIconContainer}>
-          <Text>🏪</Text>
+        showsVerticalScrollIndicator={false}>
+        {/* 가게 이미지 */}
+        <View style={styles.storeImgContainer}>
+          <Text>가게 이미지</Text>
         </View>
 
-        <View style={styles.storeAddressContainer}>
-          <View>
-            <Text style={styles.storeNameText}>대전 서구 문주로 12</Text>
-            <View style={styles.storeMapContainer}>
-              <Text style={styles.storeAddrDetailText}>우리동네빵집점</Text>
-              <Pressable>
-                <Text style={styles.mapIconText}>🗺️</Text>
-              </Pressable>
+        {/* 가게 정보 상단 */}
+        <View style={styles.storeInfoTopContainer}>
+          <View style={styles.storeIconContainer}>
+            <Text>🏪</Text>
+          </View>
+
+          <View style={styles.storeAddressContainer}>
+            <View>
+              <Text style={styles.storeNameText}>대전 서구 문주로 12</Text>
+              <View style={styles.storeMapContainer}>
+                <Text style={styles.storeAddrDetailText}>우리동네빵집점</Text>
+                <Pressable>
+                  <Text style={styles.mapIconText}>🗺️</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
 
-        <Pressable style={styles.storeShareContainer}>
-          <Text style={styles.iconText}>공유</Text>
-        </Pressable>
+          <Pressable style={styles.storeShareContainer}>
+            <Text style={styles.iconText}>공유</Text>
+          </Pressable>
 
-        <Pressable style={styles.storeWishContainer}>
+          <Pressable style={styles.storeWishContainer}>
             <Ionicons name="heart-outline" size={20} color="red" />
-        </Pressable>
+          </Pressable>
 
-        <Pressable style={styles.storeMoreContainer}>
-          <Text style={styles.moreText}>⋮</Text>
-        </Pressable>
-      </View>
+          <Pressable style={styles.storeMoreContainer}>
+            <Text style={styles.moreText}>⋮</Text>
+          </Pressable>
+        </View>
 
-      {/* 가게 설명 */}
-      <View style={styles.storeInfoDetailContainer}>
-        <Text style={styles.descriptionText}>
-          대전관광은 맛있는 빵집~ 우리동네빵집은 정품입니다 도네빵집! 맛있는
-          도우!
-        </Text>
-      </View>
-
-      {/* 별점 정보 */}
-      <View style={styles.storeRateInfoContainer}>
-        <Text style={styles.rateText}>★ 3.8(10)</Text>
-      </View>
-
-      {/* 상품/리뷰 탭 */}
-      <View style={styles.tabContainer}>
-        <Pressable
-          style={[
-            styles.tabButton,
-            activeTab === "product" && styles.tabButtonActive,
-          ]}
-          onPress={() => setActiveTab("product")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "product" && styles.tabTextActive,
-            ]}
-          >
-            상품(4)
+        {/* 가게 설명 */}
+        <View style={styles.storeInfoDetailContainer}>
+          <Text style={styles.descriptionText}>
+            대전관광은 맛있는 빵집~ 우리동네빵집은 정품입니다 도네빵집! 맛있는
+            도우!
           </Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.tabButton,
-            activeTab === "review" && styles.tabButtonActive,
-          ]}
-          onPress={() => setActiveTab("review")}
-        >
-          <Text
+        </View>
+
+        {/* 별점 정보 */}
+        <View style={styles.storeRateInfoContainer}>
+          <Text style={styles.rateText}>★ 3.8(10)</Text>
+        </View>
+
+        {/* 상품/리뷰 탭 */}
+        <View style={styles.tabContainer}>
+          <Pressable
             style={[
-              styles.tabText,
-              activeTab === "review" && styles.tabTextActive,
+              styles.tabButton,
+              activeTab === "product" && styles.tabButtonActive,
             ]}
+            onPress={() => setActiveTab("product")}
           >
-            리뷰(2)
-          </Text>
-        </Pressable>
-      </View>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "product" && styles.tabTextActive,
+              ]}
+            >
+              상품(4)
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.tabButton,
+              activeTab === "review" && styles.tabButtonActive,
+            ]}
+            onPress={() => setActiveTab("review")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "review" && styles.tabTextActive,
+              ]}
+            >
+              리뷰(2)
+            </Text>
+          </Pressable>
+        </View>
 
-      {/* 상품 탭 콘텐츠 */}
-      {activeTab === "product" && (
-        <View style={styles.storeProductContainer}>
-          <View style={styles.productGridContainer}>
-            {/* 상품 1 */}
-            <View style={styles.storeProductItemContainer}>
-              <View style={styles.storeProductImgContainer}>
-                <Text>상품이미지</Text>
+        {/* 상품 탭 콘텐츠 */}
+        {activeTab === "product" && (
+          <View style={styles.storeProductContainer}>
+            <View style={styles.productGridContainer}>
+              {/* 상품 1 */}
+              <View style={styles.storeProductItemContainer}>
+                <View style={styles.storeProductImgContainer}>
+                  <Text>상품이미지</Text>
+                </View>
+                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
+                <View style={styles.storeProductPriceContainer}>
+                  <Text style={styles.salePercentText}>20%</Text>
+                  <Text style={styles.priceText}>70,000원</Text>
+                </View>
+                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
               </View>
-              <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-              <View style={styles.storeProductPriceContainer}>
-                <Text style={styles.salePercentText}>20%</Text>
-                <Text style={styles.priceText}>70,000원</Text>
-              </View>
-              <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-            </View>
 
-            {/* 상품 2 */}
-            <View style={styles.storeProductItemContainer}>
-              <View style={styles.storeProductImgContainer}>
-                <Text>상품이미지</Text>
+              {/* 상품 2 */}
+              <View style={styles.storeProductItemContainer}>
+                <View style={styles.storeProductImgContainer}>
+                  <Text>상품이미지</Text>
+                </View>
+                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
+                <View style={styles.storeProductPriceContainer}>
+                  <Text style={styles.salePercentText}>20%</Text>
+                  <Text style={styles.priceText}>70,000원</Text>
+                </View>
+                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
               </View>
-              <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-              <View style={styles.storeProductPriceContainer}>
-                <Text style={styles.salePercentText}>20%</Text>
-                <Text style={styles.priceText}>70,000원</Text>
-              </View>
-              <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-            </View>
 
-            {/* 상품 3 */}
-            <View style={styles.storeProductItemContainer}>
-              <View style={styles.storeProductImgContainer}>
-                <Text>상품이미지</Text>
+              {/* 상품 3 */}
+              <View style={styles.storeProductItemContainer}>
+                <View style={styles.storeProductImgContainer}>
+                  <Text>상품이미지</Text>
+                </View>
+                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
+                <View style={styles.storeProductPriceContainer}>
+                  <Text style={styles.salePercentText}>20%</Text>
+                  <Text style={styles.priceText}>70,000원</Text>
+                </View>
+                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
               </View>
-              <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-              <View style={styles.storeProductPriceContainer}>
-                <Text style={styles.salePercentText}>20%</Text>
-                <Text style={styles.priceText}>70,000원</Text>
-              </View>
-              <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-            </View>
 
-            {/* 상품 4 */}
-            <View style={styles.storeProductItemContainer}>
-              <View style={styles.storeProductImgContainer}>
-                <Text>상품이미지</Text>
+              {/* 상품 4 */}
+              <View style={styles.storeProductItemContainer}>
+                <View style={styles.storeProductImgContainer}>
+                  <Text>상품이미지</Text>
+                </View>
+                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
+                <View style={styles.storeProductPriceContainer}>
+                  <Text style={styles.salePercentText}>20%</Text>
+                  <Text style={styles.priceText}>70,000원</Text>
+                </View>
+                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
               </View>
-              <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-              <View style={styles.storeProductPriceContainer}>
-                <Text style={styles.salePercentText}>20%</Text>
-                <Text style={styles.priceText}>70,000원</Text>
-              </View>
-              <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
             </View>
           </View>
-        </View>
-      )}
+        )}
       </ScrollView>
 
       {/* 리뷰 탭 콘텐츠 */}

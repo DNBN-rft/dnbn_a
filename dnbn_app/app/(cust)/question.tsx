@@ -8,7 +8,7 @@ export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.container}>
             {insets.top > 0 && (
                 <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
             )}

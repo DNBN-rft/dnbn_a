@@ -36,21 +36,22 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#e0e0e0',
     },
     noticeDetailTitleText: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '700',
         marginBottom: 8,
     },
     noticeDetailDateText: {
-        fontSize: 14,
+        fontSize: 18,
         color: '#888',
     },
     noticeDetailContentContainer: {
         padding: 16,
     },
     noticeDetailContentText: {
-        fontSize: 16,
+        fontSize: 18,
         lineHeight: 24,
         marginBottom: 16,
+        letterSpacing: 0.2
     },
     noticeDetailImageContainer: {
         width: '100%',
@@ -67,18 +68,18 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 15,
         backgroundColor: 'rgba(241, 129, 30, 0.2)',
         borderRadius: 8,
-        height: 40,
+        minHeight: 60,
         justifyContent: 'space-between',
     },
     noticeDetailFileItemContainer: {
         flex: 1,
     },
     noticeDetailFileText: {
-        fontSize: 12,
+        fontSize: 18,
         marginRight: 6,
     },
     noticeDetailFileSizeText: {
-        fontSize: 12,
+        fontSize: 18,
         color: '#888',
         marginRight: 6,
     },
