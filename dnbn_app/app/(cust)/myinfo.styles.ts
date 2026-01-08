@@ -1,9 +1,34 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-    container: {
+container: {
         flex: 1,
         backgroundColor: '#ffffffff',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: '#fff',
+    },
+    backButton: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+    },
+    placeholder: {
+        width: 40,
     },
     myInfoContainer: {
         flex: 1,
@@ -39,7 +64,7 @@ export const styles = StyleSheet.create({
         marginVertical: 1,
     },
     myInfoItemText: {
-        fontSize: 13,
+        fontSize: 20,
         color: '#EF7810',
         marginBottom: 8,
     },
@@ -55,7 +80,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
         paddingHorizontal: 12,
         paddingVertical: 10,
-        fontSize: 14,
+        fontSize: 18,
         color: '#919191ff',
         backgroundColor: '#fff',
     },
@@ -68,7 +93,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
     },
     myInfoPwChangeButtonText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#EF7810',
     },
     myInfoVerifyButton: {
@@ -80,7 +105,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
     },
     myInfoVerifyButtonText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#EF7810',
     },
     myInfoRadioContainer: {
@@ -108,7 +133,7 @@ export const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     myInfoRadioButtonText: {
-        fontSize: 14,
+        fontSize: 18,
         color: '#5b5b5bff',
     },
     myInfoCategoryContainer: {
@@ -126,7 +151,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     myInfoCategoryButtonText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#555555ff',
     },
     myInfoCategoryButtonArrow: {
@@ -145,7 +170,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     myInfoSaveButtonText: {
-        fontSize: 15,
+        fontSize: 20,
         color: '#EF7810',
         fontWeight: '600',
     },
@@ -164,7 +189,7 @@ export const styles = StyleSheet.create({
         maxWidth: 400,
     },
     modalTitle: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '700',
         color: '#000',
         marginBottom: 24,
@@ -173,28 +198,30 @@ export const styles = StyleSheet.create({
     modalInputSection: {
         marginBottom: 18,
     },
-    modalLabel: {
-        fontSize: 13,
+    modalText: {
+        fontSize: 18,
         color: '#EF7810',
         marginBottom: 8,
     },
     modalPasswordHint:{
-        fontSize: 10,
+        fontSize: 16,
         color: '#999',
         marginTop: 6,
     },
     modalTextInput: {
+        marginTop: 4,
         borderWidth: 1,
         borderColor: '#e0e0e0',
         borderRadius: 6,
         paddingHorizontal: 12,
         paddingVertical: 10,
-        fontSize: 14,
+        fontSize: 16,
         color: '#919191ff',
         backgroundColor: '#fff',
     },
     categoryText:{
-        fontSize: 13,
+        fontSize: 18,
+        marginBottom: 8,
     },
     modalButtonContainer: {
         flexDirection: 'row',
@@ -210,7 +237,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalCancelButtonText: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#666',
     },
@@ -224,7 +251,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalConfirmButtonText: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#EF7810',
     },

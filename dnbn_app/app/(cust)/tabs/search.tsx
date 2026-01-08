@@ -1,17 +1,10 @@
-import { router } from "expo-router";
-import React, { useState } from "react";
-import {
-  FlatList,
-  Image,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./search.styles";
-import Ionicons from "@expo/vector-icons/build/Ionicons";
+import Ionicons from '@expo/vector-icons/build/Ionicons';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './search.styles';
+
 
 export default function SearchView() {
   const insets = useSafeAreaInsets();
@@ -208,20 +201,21 @@ export default function SearchView() {
     },
   ];
 
-  return (
-    <View style={[styles.searchView, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title} pointerEvents="none">
-          검색
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
+    return (
+        <View style={[styles.searchView, { paddingTop: insets.top }]}>
+            
+            <View style={styles.header}>
+                <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.push('/tabs/search')}
+                >
+                <Ionicons name="chevron-back" size={24} color="#000" />
+                </TouchableOpacity>
+                <Text style={styles.title} pointerEvents="none">
+                검색
+                </Text>
+                <View style={styles.placeholder} />
+            </View>
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBarContainer}>

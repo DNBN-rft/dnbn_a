@@ -3,25 +3,32 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#ffffffff',
     },
-    headerContainer: {
-        width: '100%',
-        backgroundColor: '#fff',
-        height: 56,
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     backButton: {
-        position: 'absolute',
-        left: 16,
-        padding: 8,
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
     },
-    headerTitleText: {
+    title: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: 'bold',
+        color: '#333',
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+    },
+    placeholder: {
+        width: 40,
     },
     productDetailImgContainer: {
         width: '100%',
@@ -51,12 +58,12 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
     productDetailNameText: {
-        fontSize: 13,
+        fontSize: 16,
         color: '#999',
         marginBottom: 4,
     },
     productSaleRateText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#EF7810',
         lineHeight: 18,
     },
@@ -67,35 +74,39 @@ export const styles = StyleSheet.create({
         gap: 6,
     },
     productSalePriceText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#999',
         lineHeight: 18,
         textDecorationLine: 'line-through',
     },
     productLeftQuantityText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#333',
         lineHeight: 18,
     },
     productDetailMapContainer: {
+        marginTop: 4,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
     },
-    productDetailAddrDetailText: {
-        fontSize: 14,
+    productStoreNmText: {
+        fontSize: 20,
         fontWeight: '600',
         color: '#000',
     },
+    productStoreAddrText:{
+        fontSize: 18,
+    },
     mapIconText: {
-        fontSize: 16,
+        fontSize: 18,
     },
     productDetailShareContainer: {
         paddingHorizontal: 8,
         paddingVertical: 6,
     },
     iconText: {
-        fontSize: 12,
+        fontSize: 18,
         color: '#666',
     },
     productDetailWishContainer: {
@@ -110,7 +121,7 @@ export const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     moreText: {
-        fontSize: 16,
+        fontSize: 18,
         color: '#666',
     },
     productDetailRateInfoContainer: {
@@ -120,7 +131,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#f0f0f0',
     },
     rateText: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
         marginBottom: 12,
@@ -130,16 +141,16 @@ export const styles = StyleSheet.create({
         paddingVertical: 5,
     },
     productNmText: {
-        fontSize: 15,
+        fontSize: 20,
         color: '#000000ff',
-        lineHeight: 18,
+        lineHeight: 20,
         fontWeight: '600',
-        marginBottom: 5,
+        marginBottom: 8,
     },
     productPriceText: {
-        fontSize: 15,
+        fontSize: 20,
         color: '#000000ff',
-        lineHeight: 18,
+        lineHeight: 20,
         fontWeight: '600',
 
     },
@@ -160,7 +171,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#EF7810',
     },
     tabText: {
-        fontSize: 14,
+        fontSize: 18,
         color: '#999',
         fontWeight: '500',
     },
@@ -169,7 +180,7 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
     },
     productDetailProductInfoText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#333',
     },
     reviewContainer: {
@@ -199,17 +210,17 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 8,
     },
-    reviewRegNmContainer: {
-        fontSize: 13,
+    reviewRegNmText: {
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
     },
-    reviewRegDateContainer: {
-        fontSize: 12,
+    reviewRegDateText: {
+        fontSize: 18,
         color: '#999',
     },
-    reviewRateContainer: {
-        fontSize: 12,
+    reviewRateText: {
+        fontSize: 18,
         color: '#ff9800',
         fontWeight: '600',
         marginBottom: 8,
@@ -222,10 +233,10 @@ export const styles = StyleSheet.create({
         borderColor: '#f0f0f0',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 10,
     },
-    reviewContentContainer: {
-        fontSize: 12,
+    reviewContentText: {
+        fontSize: 18,
         color: '#666',
         lineHeight: 16,
     },
@@ -283,7 +294,7 @@ export const styles = StyleSheet.create({
         paddingVertical: 16,
     },
     productDetailTabText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#333',
         lineHeight: 18,
     },

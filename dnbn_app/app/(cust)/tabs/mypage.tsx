@@ -18,9 +18,8 @@ export default function Mypage() {
   return (
     <View style={[styles.mypageViewContainer]}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#ffffff" }} />
+        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -89,7 +88,7 @@ export default function Mypage() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/use-gift")}
+              onPress={() => router.navigate("/(cust)/gift-box")}
             >
               <Text style={styles.menuText}>선물함</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
@@ -114,9 +113,9 @@ export default function Mypage() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/tabs/custhome")}
+              onPress={() => router.navigate("/(cust)/faqList")}
             >
-              <Text style={styles.menuText}>문의</Text>
+              <Text style={styles.menuText}>자주 묻는 질문</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity

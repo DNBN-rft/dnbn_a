@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, TextInput, Modal, ScrollView, View, Text } from 'react-native';
+import { Pressable, TextInput, Modal, ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './purchase.styles';
@@ -39,15 +39,20 @@ export default function PurchaseScreen() {
 
   return (
     <View style={styles.container}>
-            {insets.top > 0 && (
-                <View style={{ height: insets.top, backgroundColor: '#FFFFFF' }} />
-            )}
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+      )}
       <View style={styles.headerContainer}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="chevron-back" size={24} color="#000" />
-        </Pressable>
-
-        <Text style={styles.headerTitle}>구매 내역</Text>
+        </TouchableOpacity>
+        <Text style={styles.title} pointerEvents="none">
+          구매내역
+        </Text>
+        <View style={styles.placeholder} />
       </View>
 
       <View style={styles.topContainer}>
@@ -58,7 +63,7 @@ export default function PurchaseScreen() {
           ]}
           onPress={() => setActiveTab('UNUSED')}
         >
-          <Text>미사용</Text>
+          <Text style={styles.tabButtonText}>미사용</Text>
         </Pressable>
 
         <Pressable
@@ -68,7 +73,7 @@ export default function PurchaseScreen() {
           ]}
           onPress={() => setActiveTab('USED')}
         >
-          <Text>사용완료</Text>
+          <Text style={styles.tabButtonText}>사용완료</Text>
         </Pressable>
       </View>
 
@@ -114,7 +119,8 @@ export default function PurchaseScreen() {
           <View style={styles.orderTopContainer}>
             <Text style={styles.orderDate}>2026.01.05</Text>
             <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세 ></Text>
+              <Text style={styles.orderDetailButtonText}>주문상세</Text>
+              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
             </Pressable>
           </View>
 
@@ -144,7 +150,8 @@ export default function PurchaseScreen() {
           <View style={styles.orderTopContainer}>
             <Text style={styles.orderDate}>2026.01.05</Text>
             <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세 ></Text>
+              <Text style={styles.orderDetailButtonText}>주문상세</Text>
+              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
             </Pressable>
           </View>
 
@@ -174,7 +181,8 @@ export default function PurchaseScreen() {
           <View style={styles.orderTopContainer}>
             <Text style={styles.orderDate}>2026.01.05</Text>
             <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세 ></Text>
+              <Text style={styles.orderDetailButtonText}>주문상세</Text>
+              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
             </Pressable>
           </View>
 
@@ -202,7 +210,10 @@ export default function PurchaseScreen() {
       </ScrollView>
 
       {/* FloatingButton - 최상단 이동 */}
-      <Pressable style={styles.scrollToTopButton} onPress={scrollToTop}>
+      <Pressable 
+        style={[styles.scrollToTopButton, { bottom: insets.bottom + 20 }]} 
+        onPress={scrollToTop}
+      >
         <Text style={styles.scrollToTopButtonText}>▲</Text>
       </Pressable>
 
@@ -235,7 +246,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempStatus('ALL')}
                 >
-                  <Text>전체</Text>
+                  <Text style={styles.filterOptionButtonText}>전체</Text>
                 </Pressable>
                 <Pressable
                   style={[
@@ -244,7 +255,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempStatus('CANCEL')}
                 >
-                  <Text>취소</Text>
+                  <Text style={styles.filterOptionButtonText}>취소</Text>
                 </Pressable>
                 <Pressable
                   style={[
@@ -253,7 +264,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempStatus('USED')}
                 >
-                  <Text>사용완료</Text>
+                  <Text style={styles.filterOptionButtonText}>사용완료</Text>
                 </Pressable>
               </View>
             </View>
@@ -269,7 +280,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempPeriod('1M')}
                 >
-                  <Text>최근 1개월</Text>
+                  <Text style={styles.filterOptionButtonText}>최근 1개월</Text>
                 </Pressable>
                 <Pressable
                   style={[
@@ -278,7 +289,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempPeriod('3M')}
                 >
-                  <Text>최근 3개월</Text>
+                  <Text style={styles.filterOptionButtonText}>최근 3개월</Text>
                 </Pressable>
                 <Pressable
                   style={[
@@ -287,7 +298,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempPeriod('6M')}
                 >
-                  <Text>최근 6개월</Text>
+                  <Text style={styles.filterOptionButtonText}>최근 6개월</Text>
                 </Pressable>
                 <Pressable
                   style={[
@@ -296,7 +307,7 @@ export default function PurchaseScreen() {
                   ]}
                   onPress={() => setTempPeriod('1Y')}
                 >
-                  <Text>최근 1년</Text>
+                  <Text style={styles.filterOptionButtonText}>최근 1년</Text>
                 </Pressable>
               </View>
             </View>
@@ -311,9 +322,9 @@ export default function PurchaseScreen() {
           </View>
         </Pressable>
       </Modal>
-            {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-            )}
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
+      )}
     </View>
   );
 }

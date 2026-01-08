@@ -30,10 +30,6 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    headerTitleText: {
-        fontSize: 18,
-        fontWeight: '600',
-    },
     storeImgContainer: {
         width: '100%',
         height: 220,

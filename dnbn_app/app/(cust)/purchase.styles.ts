@@ -6,31 +6,43 @@ export const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
     },
     headerContainer: {
-        height: 56,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     backButton: {
-        position: 'absolute',
-        left: 16,
-        padding: 8,
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
     },
-    headerTitle: {
+    title: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: 'bold',
+        color: '#333',
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+    },
+    placeholder: {
+        width: 40,
     },
     topContainer: {
         flexDirection: 'row',
     },
-
     tabButton: {
         flex: 1,
         alignItems: 'center',
         paddingVertical: 12,
     },
-
+    tabButtonText: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#333',
+    },
     activeTab: {
         borderBottomWidth: 2,
         borderBottomColor: '#EF7810',
@@ -48,7 +60,7 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ddd',
 
-        fontSize: 14,
+        fontSize: 16,
         color: '#333',
     },
     searchContainerFocused: {
@@ -72,7 +84,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     selectBoxText: {
-        fontSize: 12,
+        fontSize: 18,
         fontWeight: '500',
         color: '#666',
     },
@@ -93,22 +105,24 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 3,
         paddingVertical: 8,
         borderBottomWidth: 1,
         borderBottomColor: '#f0f0f0',
     },
     orderDate: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
     },
     orderDetailButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
         paddingVertical: 6,
-        paddingHorizontal: 10,
     },
     orderDetailButtonText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#666',
     },
     orderItemContainer: {
@@ -126,7 +140,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#f0f0f0',
     },
     storeName: {
-        fontSize: 15,
+        fontSize: 20,
         color: '#666',
     },
     orderStateContainer: {
@@ -134,7 +148,7 @@ export const styles = StyleSheet.create({
         paddingVertical: 7,
     },
     orderState: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#EF7810',
         fontWeight: '600',
     },
@@ -157,18 +171,18 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     productName: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
         marginBottom: 4,
     },
     productQuantity: {
-        fontSize: 12,
+        fontSize: 18,
         color: '#999',
         marginBottom: 4,
     },
     productPrice: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
     },
@@ -189,21 +203,25 @@ export const styles = StyleSheet.create({
     },
     filterModalHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginBottom: 24,
     },
     filterModalCloseButton: {
-        fontSize: 14,
+        fontSize: 20,
         color: '#666',
     },
     filterSection: {
         marginBottom: 24,
     },
     filterSectionTitle: {
-        fontSize: 14,
+        fontSize: 20,
         fontWeight: '600',
         marginBottom: 12,
+    },
+    filterOptionButtonText:{
+        fontSize: 18,
+        color: '#333',
     },
     filterOptions: {
         flexDirection: 'row',
@@ -248,7 +266,7 @@ export const styles = StyleSheet.create({
     },
     applyButtonText: {
         color: '#EF7810',
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '600',
     },
     modalContent: {
@@ -264,11 +282,10 @@ export const styles = StyleSheet.create({
     },
     scrollToTopButton: {
         position: 'absolute',
-        bottom: 20,
         right: 20,
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         backgroundColor: '#EF7810',
         justifyContent: 'center',
         alignItems: 'center',
@@ -279,7 +296,7 @@ export const styles = StyleSheet.create({
         elevation: 5,
     },
     scrollToTopButtonText: {
-        fontSize: 10,
+        fontSize: 20,
         color: '#fff',
         fontWeight: '700',
     },

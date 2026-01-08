@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-    container: {
+    container:{
         flex: 1,
-        backgroundColor: '#ffffffff',
+        backgroundColor: '#fff',
     },
     header: {
         flexDirection: 'row',
@@ -30,29 +30,40 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    noticeListContainer: {
+    questionListContainer: {
         padding: 16,
     },
-    noticeItemContainer: {
+    questionItemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        minHeight: 70,           // 원하는 행 높이
+        minHeight: 70,         
         borderBottomColor: '#eee',
         borderBottomWidth: 1,
         paddingVertical: 12,
         paddingHorizontal: 12,
     },
-    noticeItemDetailContainer:{
-        flex:1
+    questionItemDetailContainer: {
+        flex: 1,
     },
-    noticeItemTitleText: {
-        fontSize: 20,
+    questionItemTitleText: {
+        fontSize: 16,
         fontWeight: '500',
-        marginBottom: 8,
+        marginBottom: 6,
     },
-    noticeItemDateText: {
-        fontSize: 18,
+    questionItemDateText: {
+        fontSize: 14,
         color: '#666',
+    },
+    questionItemStatusContainer: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+        backgroundColor: 'rgba(241, 129, 30, 0.2)',
+        marginRight: 12,
+    },
+    questionItemStatusText: {
+        fontSize: 14,
+        color: 'rgba(241, 129, 30, 1)',
     },
 });
