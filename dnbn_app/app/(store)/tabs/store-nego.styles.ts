@@ -30,11 +30,6 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-  },
   content: {
     flex: 1,
     backgroundColor: "#fff",
@@ -46,17 +41,52 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
   },
-  addProductButton: {
-    borderWidth: 1,
-    borderColor: "#ef7810",
-    flex: 1,
-    marginHorizontal: 20,
-    marginBottom: 20,
+  negoProduct: {
+    marginVertical: 10,
+    marginHorizontal: 10,
+    paddingHorizontal: 10,
     paddingVertical: 10,
-    height: 60,
-    borderRadius: 10,
+    borderRadius: 8,
+    boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
     backgroundColor: "#fff",
+  },
+  productContainer: {
+    flexDirection: "row",
+  },
+  negoPriceText: {
+    fontWeight: "bold"
+  },
+  productImageContainer: {
+    width: 120,
+    height: 120,
+  },
+  productImage: {
+    width:"100%",
+    height:"100%",
+    resizeMode: "contain"
+  },
+  productInfoContainer: {
+    flex: 1,
+    justifyContent: "space-evenly",
+    marginLeft: 10
+  },
+  priceContainer: {
+    // flexDirection: "row"
+  },
+  registPriceText: {
+    fontSize: 13,
+    color: "#bdbdbd"
+  },
+  cancelButtonContainer: {
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 30,
+    marginVertical: 5,
+    borderColor: "#ff9500",
   },
+  cancelButtonText: {
+    color: "#ff9500"
+  }
 });

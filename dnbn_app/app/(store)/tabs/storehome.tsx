@@ -1,8 +1,8 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./storehome.styles";
-import { Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./storehome.styles";
 
 export default function StoreHome() {
   const insets = useSafeAreaInsets();
@@ -45,33 +45,32 @@ export default function StoreHome() {
           </View>
 
           <View style={styles.quickMenu}>
-            <Text style={styles.sectionTitle}>빠른 메뉴</Text>
+            <Text style={styles.sectionTitle}>빠른 서비스</Text>
             <View style={styles.menuGrid}>
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => router.push("/(store)/tabs/storeproducts")}
               >
-                <Ionicons name="cube-outline" size={28} color="#FF9500" />
-                <Text style={styles.menuText}>상품관리</Text>
-                <Text style={{fontSize: 10}}>여기에 하단 탭 혹은 실제 등록이 가능한 버튼을 연결하는게 낫겠죠?</Text>
+                <Ionicons name="duplicate-outline" size={28} color="#FF9500" />
+                <Text style={styles.menuText}>상품 등록</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storesales")}
+                onPress={() => router.push("/(store)/tabs/storeproducts")}
               >
-                <Ionicons name="pricetag-outline" size={28} color="#FF9500" />
-                <Text style={styles.menuText}>할인관리</Text>
+                <Ionicons name="chatbox-ellipses-outline" size={28} color="#FF9500" />
+                <Text style={styles.menuText}>네고 요청</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storenego")}
+                onPress={() => router.push("/(store)/tabs/storeproducts")}
               >
-                <Ionicons name="chatbubbles-outline" size={28} color="#FF9500" />
-                <Text style={styles.menuText}>네고관리</Text>
+                <Ionicons name="pencil-outline" size={28} color="#FF9500" />
+                <Text style={styles.menuText}>리뷰 조회</Text>
               </TouchableOpacity>
-
+              
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => router.push("/(cust)/tabs/custhome")}
@@ -84,7 +83,7 @@ export default function StoreHome() {
                 style={styles.menuItem}
                 onPress={() => router.push("/(cust)/tabs/custhome")}
               >
-                <Ionicons name="storefront" size={28} color="#FF9500" />
+                <Ionicons name="storefront-outline" size={28} color="#FF9500" />
                 <Text style={styles.menuText}>고객 화면</Text>
               </TouchableOpacity>
             </View>
