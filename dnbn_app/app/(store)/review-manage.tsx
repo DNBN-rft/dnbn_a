@@ -14,7 +14,7 @@ export default function ReviewManage() {
       productImage: require('@/assets/images/image1.jpg'),
       category: "음료",
       productName: "아메리카노",
-      rating: 5.0,
+      rating: 5,
       date: "2026.01.10",
       reviewContent: "정말 맛있어요! 커피 향이 진하고 깔끔합니다. 매장 분위기도 좋고 다음에 또 방문하고 싶어요.",
       userName: "김진용",
@@ -26,7 +26,7 @@ export default function ReviewManage() {
       productImage: require('@/assets/images/image1.jpg'),
       category: "디저트",
       productName: "초콜릿 케이크",
-      rating: 4.2,
+      rating: 4,
       date: "2026.01.09",
       reviewContent: "달콤하고 부드러운 케이크였습니다. 다만 가격이 조금 비싼 것 같아요.",
       userName: "박소윤",
@@ -38,7 +38,7 @@ export default function ReviewManage() {
       productImage: require('@/assets/images/image1.jpg'),
       category: "음료",
       productName: "카페라떼",
-      rating: 3.4,
+      rating: 3.5,
       date: "2026.01.08",
       reviewContent: "보통이었어요. 특별히 나쁘지도 좋지도 않았습니다.",
       userName: "전형운",
@@ -72,7 +72,7 @@ export default function ReviewManage() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.title} pointerEvents="none">
+        <Text style={styles.title}>
           리뷰 관리
         </Text>
         <View style={styles.placeholder} />
