@@ -54,13 +54,19 @@ export default function StoreMypage() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>서비스</Text>
+            <Text style={styles.sectionTitle}>히스토리</Text>
             <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuText}>상품?</Text>
+              <Text style={styles.menuText}>리뷰</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuText}>리뷰?</Text>
+              <Text style={styles.menuText}>할인</Text>
+              <Ionicons name="chevron-forward" size={24} color="#666" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Text style={styles.menuText}>네고</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
           </View>

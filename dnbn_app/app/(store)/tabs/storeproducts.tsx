@@ -77,13 +77,14 @@ export default function StoreProducts() {
           <Ionicons name="add" size={24} color="#EF7810" />
         </View>
       </TouchableOpacity>
+
       <Modal
         visible={detailModal}
         transparent={true}
         animationType="fade"
         onRequestClose={() => setDetailModal(false)}
       >
-        <TouchableOpacity
+        <TouchableOpacity 
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setDetailModal(false)}
@@ -102,6 +103,7 @@ export default function StoreProducts() {
               <Ionicons name="information-circle-outline" size={20} color="#333" />
               <Text style={styles.modalButtonText}>상세정보</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
@@ -116,7 +118,9 @@ export default function StoreProducts() {
               <Ionicons name="create-outline" size={20} color="#333" />
               <Text style={styles.modalButtonText}>수정</Text>
             </TouchableOpacity>
+            
             <View style={styles.modalDivider} />
+            
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
@@ -124,12 +128,13 @@ export default function StoreProducts() {
                 setDeleteModal(true);
               }}
             >
-              <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-              <Text style={[styles.modalButtonText, { color: '#FF3B30' }]}>삭제</Text>
+              <Ionicons name="trash-outline" size={20} color="#ff3b30" />
+              <Text style={[styles.modalButtonText, { color: '#ff3b30' }]}>삭제</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
+
       <Modal
         visible={deleteModal}
         transparent={true}
@@ -142,6 +147,7 @@ export default function StoreProducts() {
             <Text style={styles.deleteModalMessage}>
               정말로 이 상품을 삭제하시겠습니까?{"\n"}삭제된 상품은 복구할 수 없습니다.
             </Text>
+            
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}
@@ -153,6 +159,7 @@ export default function StoreProducts() {
                 }}>
                 <Text style={styles.confirmButtonText}>삭제</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.cancelButton]}
                 onPress={() => setDeleteModal(false)}>
