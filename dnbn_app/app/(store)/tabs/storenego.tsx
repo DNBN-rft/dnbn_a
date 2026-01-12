@@ -13,9 +13,9 @@ export default function StoreNego() {
   const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
 
   const negoList = [
-    { id: "1", uri: require("@/assets/images/image1.jpg"), category: "카테고리 1", productName: "상품 1", price: 9000},
-    { id: "2", uri: require("@/assets/images/image1.jpg"), category: "카테고리 2", productName: "상품 2", price: 18000},
-    { id: "3", uri: require("@/assets/images/image1.jpg"), category: "카테고리 3", productName: "상품 3", price: 25000},
+    { id: "1", uri: require("@/assets/images/image1.jpg"), category: "카테고리 1", productName: "상품 1", status:"진행", price: 9000},
+    { id: "2", uri: require("@/assets/images/image1.jpg"), category: "카테고리 2", productName: "상품 2", status:"대기", price: 18000},
+    { id: "3", uri: require("@/assets/images/image1.jpg"), category: "카테고리 3", productName: "상품 3", status:"진행", price: 25000},
   ];
 
   const negoRequest = [
@@ -76,15 +76,25 @@ export default function StoreNego() {
                 </View>
     
                 <View style={styles.productInfoContainer}>
-                  <Text>{item.category}</Text>
+                  <View>
+                    <Text style={styles.categoryText}>{item.category}</Text>
 
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >{item.productName}</Text>
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={styles.productNameText}
+                    >{item.productName}</Text>
+                  </View>
                   
-                  <Text style={styles.negoPriceText}>
-                      {item.price}원</Text>
+                  <View style={styles.negoStatusAndPriceContainer}>
+                    <Text style={styles.negoPriceText}>
+                      {item.price.toLocaleString()}원
+                    </Text>
+                  
+                    <Text style={styles.negoStatusText}>
+                      {item.status}
+                    </Text>
+                  </View>
                 </View>
               </View>
     
@@ -110,16 +120,18 @@ export default function StoreNego() {
                   </View>
       
                   <View style={styles.negoRequestproductInfoContainer}>
-                    <Text>{item.productName}</Text>
+                    <View>
+                      <Text style={styles.productNameText}>{item.productName}</Text>
+                    </View>
                     
                     <View>
                       <View>
-                        <Text style={styles.registPriceText}>{item.price}원</Text>
+                        <Text style={styles.registPriceText}>{item.price.toLocaleString()}원</Text>
                       </View>
       
                       <View>
                         <Text style={styles.negoPriceText}>
-                          {item.offeredPrice}원</Text>
+                          {item.offeredPrice.toLocaleString()}원</Text>
                       </View>
                     </View>
 

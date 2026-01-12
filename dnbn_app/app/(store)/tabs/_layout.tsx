@@ -41,7 +41,7 @@ export default function StoreTabsLayout() {
       />
 
       <Tabs.Screen
-        name="storesales"
+        name="storesale"
         options={{
           title: "할인관리",
           headerShown: false,

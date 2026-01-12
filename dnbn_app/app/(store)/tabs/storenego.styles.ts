@@ -85,11 +85,20 @@ export const styles = StyleSheet.create({
   productInfoContainer: {
     flex: 1,
     justifyContent: "center",
-    gap: 10,
+    gap: 8,
     marginLeft: 10
   },
+  categoryText: {
+    fontSize: 12,
+    color: "#999",
+  },
+  productNameText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
   registPriceText: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#bdbdbd"
   },
   negoRequestProduct: {
@@ -115,11 +124,21 @@ export const styles = StyleSheet.create({
   },
   negoRequestproductInfoContainer: {
     flex: 1,
-    justifyContent: "space-evenly",
+    justifyContent: "center",
+    gap: 8,
     marginLeft: 10
   },
+  negoStatusAndPriceContainer: {
+    gap: 5,
+  },
+  negoStatusText: {
+    fontSize: 12,
+    color: "#666",
+  },
   negoPriceText: {
-    fontWeight: "bold"
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
   },
   requestor: {
     flexDirection: "row",
