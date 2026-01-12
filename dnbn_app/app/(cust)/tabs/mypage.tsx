@@ -4,143 +4,137 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./mypage.styles";
 import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Mypage() {
   const insets = useSafeAreaInsets();
   const [openInfo, setOpenInfo] = useState(false);
+  const { userType } = useAuth();
 
   const changeArrow = () => {
     setOpenInfo((prev) => !prev);
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.mypageViewContainer}>
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => {
+            if (userType === "store") {
+              router.push("/(store)/tabs/storehome");
+            } else {
+              router.back();
+            }
+          }}
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title} pointerEvents="none">
           마이페이지
         </Text>
-        <View style={styles.placeholder} />
+        {userType === "store" && (
+          <TouchableOpacity
+            style={styles.storeButton}
+            onPress={() => router.push("/(store)/tabs/storehome")}
+          >
+            <Text style={styles.storeButtonText}>Store</Text>
+          </TouchableOpacity>
+        )}
+        {userType !== "store" && <View style={styles.placeholder} />}
       </View>
 
       <ScrollView
         style={styles.mypageView}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.infoContainer}>
-          <View>
+        <View style={styles.contentView}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>회원 정보</Text>
             <TouchableOpacity
-              style={styles.contentContainer}
+              style={styles.menuItem}
               onPress={() => router.navigate("/(cust)/myInfo")}
             >
-              <Text style={styles.contentText}>내 정보</Text>
+              <Text style={styles.menuText}>내 정보</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/tabs/custhome")}
+            >
+              <Text style={styles.menuText}>카테고리 설정</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/tabs/custhome")}
+            >
+              <Text style={styles.menuText}>알림 설정</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.menuContainer}>
-          <View style={styles.serviceContainer}>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/orderList")}
-              >
-                <Text style={styles.contentText}>구매내역</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/gitf-box")}
-              >
-                <Text style={styles.contentText}>선물함</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/review")}
-              >
-                <Text style={styles.contentText}>리뷰</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/category")}
-              >
-                <Text style={styles.contentText}>카테고리 설정</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/notification-setting")}
-              >
-                <Text style={styles.contentText}>알림 설정</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>히스토리</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/purchase")}
+            >
+              <Text style={styles.menuText}>구매내역</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/gift-box")}
+            >
+              <Text style={styles.menuText}>선물함</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/review")}
+            >
+              <Text style={styles.menuText}>리뷰</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.line}></View>
-
-          <View style={styles.developerContainer}>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/notice")}
-              >
-                <Text style={styles.contentText}>공지사항</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/faqList")}
-              >
-                <Text style={styles.contentText}>자주 묻는 질문</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/report")}
-              >
-                <Text style={styles.contentText}>신고</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>서비스</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/notice")}
+            >
+              <Text style={styles.menuText}>공지사항</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/faqList")}
+            >
+              <Text style={styles.menuText}>자주 묻는 질문</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/tabs/custhome")}
+            >
+              <Text style={styles.menuText}>신고</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.line}></View>
-
-          <View style={styles.logoutContainer}>
-            <View>
-              <TouchableOpacity
-                style={styles.contentContainer}
-                onPress={() => router.navigate("/(auth)/login")}
-              >
-                <Text style={styles.contentText}>로그아웃</Text>
-                <Ionicons name="chevron-forward" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(auth)/login")}
+            >
+              <Text style={styles.menuText}>로그아웃</Text>
+              <Ionicons name="chevron-forward" size={24} color="#FF3B30" />
+            </TouchableOpacity>
           </View>
         </View>
 

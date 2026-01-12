@@ -1,9 +1,9 @@
+import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./faqlist.styles";
-import { router } from "expo-router";
-import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { useRef, useState } from "react";
 
 export default function FaqListScreen() {
     const insets = useSafeAreaInsets();
@@ -41,7 +41,7 @@ export default function FaqListScreen() {
                 >
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.title} pointerEvents="none">
+                <Text style={styles.title}>
                     자주 묻는 질문
                 </Text>
                 <View style={styles.placeholder} />
@@ -106,8 +106,8 @@ export default function FaqListScreen() {
                 </View>
             </ScrollView>
             {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-            )}
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
         </View>
     );
 }

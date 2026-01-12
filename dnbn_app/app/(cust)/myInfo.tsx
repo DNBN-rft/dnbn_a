@@ -1,9 +1,9 @@
-import { Pressable, Text, TextInput, View, ScrollView, Modal, TouchableOpacity } from 'react-native';
-import { styles } from './myinfo.styles';
-import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useState } from 'react';
+import { Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './myinfo.styles';
 
 export default function MyInfoScreen() {
     const [gender, setGender] = useState('male');
@@ -26,7 +26,7 @@ export default function MyInfoScreen() {
                 >
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.title} pointerEvents="none">
+                <Text style={styles.title}>
                     내 정보
                 </Text>
                 <View style={styles.placeholder} />

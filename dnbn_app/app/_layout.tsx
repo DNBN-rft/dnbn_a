@@ -4,19 +4,34 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(cust)" />
-        <Stack.Screen name="(store)" />
-      </Stack>
-      <StatusBar style="dark" />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen 
+            name="(cust)" 
+            options={{ 
+              headerShown: false,
+              // cust, store 접근 가능하도록 나중에 처리 필요
+            }} 
+          />
+          <Stack.Screen 
+            name="(store)" 
+            options={{ 
+              headerShown: false,
+              // store만 접근 가능하도록 나중에 처리 필요
+            }} 
+          />
+        </Stack>
+        <StatusBar style="dark" />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

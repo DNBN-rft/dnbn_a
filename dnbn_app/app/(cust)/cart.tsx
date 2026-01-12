@@ -1,9 +1,9 @@
-import { Text, View, ScrollView, Pressable, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
-import { styles } from './cart.styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './cart.styles';
 
 const initialCartItems = [
     {
@@ -96,14 +96,14 @@ export default function CartScreen() {
             {insets.top > 0 && (
                 <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
             )}
-            <View style={styles.headerContainer}>
+            <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => router.back()}
                 >
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.title} pointerEvents="none">
+                <Text style={styles.title}>
                     장바구니
                 </Text>
                 <View style={styles.placeholder} />
@@ -193,9 +193,9 @@ export default function CartScreen() {
 
             </View>
 
-            <Pressable style={styles.purchaseButtonContainer}>
-                <Text style={styles.purchaseButtonText}>주문하기</Text>
-            </Pressable>
+      <Pressable style={styles.purchaseButtonContainer}>
+        <Text style={styles.purchaseButtonText}>주문하기</Text>
+      </Pressable>
 
             {insets.bottom > 0 && (
                 <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

@@ -22,8 +22,8 @@ export default function CustLayout() {
         options={{
           title: '홈',
           headerTitle: 'DNBN',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -32,8 +32,8 @@ export default function CustLayout() {
         options={{
           title: '지도',
           headerTitle: '매장 찾기',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "map" : "map-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -42,8 +42,8 @@ export default function CustLayout() {
         options={{
           title: '관심 매장',
           headerTitle: '관심 매장',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "heart" : "heart-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -52,8 +52,8 @@ export default function CustLayout() {
         options={{
           title: '검색',
           headerTitle: '검색',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "search" : "search-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -62,8 +62,8 @@ export default function CustLayout() {
         options={{
           title: '마이페이지',
           headerTitle: '마이페이지',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "person" : "person-outline"} size={size} color={color} />
           ),
         }}
       />

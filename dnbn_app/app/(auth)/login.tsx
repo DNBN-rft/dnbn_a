@@ -3,23 +3,30 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { styles } from "./login.styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
   const [userType, setUserType] = useState<"cust" | "store">("cust");
   const insets = useSafeAreaInsets();
 
   const handleLogin = (type: "cust" | "store") => {
+    // AuthContext에 로그인 상태 저장
+    login(type);
+    
     if (type === "cust") {
       router.replace("/(cust)/tabs/custhome");
     } else {
-      router.replace("/(store)");
+      router.replace("/(store)/tabs/storehome");
     }
   };
 
   const handleSNSLogin = (provider: "kakao" | "naver") => {
     // SNS 로그인 처리 (나중에 구현)
     console.log(`${provider} 로그인`);
+    // SNS 로그인은 cust로 처리
+    login("cust");
     router.replace("/(cust)/tabs/custhome");
   };
 

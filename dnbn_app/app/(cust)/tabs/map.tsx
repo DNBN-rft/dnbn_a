@@ -1,9 +1,9 @@
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { styles } from "./map.styles";
-import { router, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useLayoutEffect } from "react";
+import { router, useNavigation } from "expo-router";
+import { useLayoutEffect, useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./map.styles";
 
 export default function CustMapScreen() {
   const navigation = useNavigation();
@@ -31,7 +31,10 @@ export default function CustMapScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#000" }} />
+      )}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}

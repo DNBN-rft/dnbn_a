@@ -32,8 +32,7 @@ export const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
     minHeight: 400,
   },
   emptyText: {

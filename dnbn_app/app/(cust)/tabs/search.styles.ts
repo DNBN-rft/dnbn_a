@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
     width: 300,
     borderBottomWidth: 1,
     opacity: 1,
-    outline: "none",
+    outlineWidth: 0,
     flex: 1,
   },
   searchButton: {

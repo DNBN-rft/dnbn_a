@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#ffffffff',
     },
-    headerContainer: {
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -26,6 +26,7 @@ export const styles = StyleSheet.create({
         left: 0,
         right: 0,
         textAlign: 'center',
+        pointerEvents: "none",
     },
     placeholder: {
         width: 40,

@@ -1,8 +1,8 @@
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { styles } from './noticedetail.styles'
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './noticedetail.styles';
 
 export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
@@ -44,8 +44,8 @@ export default function NoticeDetailScreen() {
                 </View>
             </ScrollView>
             {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-            )}
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
         </View>
     );
 };  

@@ -31,6 +31,7 @@ export const styles = StyleSheet.create({
         width: 40,
     },
     questionListContainer: {
+        flex: 1,
         padding: 16,
     },
     questionItemContainer: {

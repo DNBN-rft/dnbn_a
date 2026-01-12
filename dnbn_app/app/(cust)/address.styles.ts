@@ -33,6 +33,7 @@ export const styles = StyleSheet.create({
         left: 0,
         right: 0,
         textAlign: 'center',
+        pointerEvents: 'none',
     },
     placeholder: {
         width: 40,
@@ -45,7 +46,7 @@ export const styles = StyleSheet.create({
         borderColor: '#EF7810',
         borderWidth: 1,
         marginHorizontal: 20,
-        marginBottom: 20,
+        marginTop: 50,
     },
     addButtonText: {
         color: '#EF7810',
