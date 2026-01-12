@@ -30,15 +30,6 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
-  content: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    paddingVertical: 10,
-    marginVertical: 5,
-    borderRadius: 10,
-    boxShadow: "0 0px 6px rgba(0,0,0,0.1)",
-  },
   tabContainer: {
     flexDirection: "row",
     justifyContent: "space-evenly",
@@ -70,157 +61,222 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-  listTouchable: {
-    justifyContent: "flex-start",
-  },
-  listContainer: {
-    flexDirection: "row",
-    borderRadius: 10,
-    overflow: "hidden",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-  },
-  listImageContainer: {
-    width: 130,
-    height: 130,
-  },
-  listImage: {
-    width: "100%",
-    height: "100%",
-  },
-  listInfoContainer: {
-    flex: 1,
-    paddingHorizontal: 15,
-    justifyContent: "center",
-  },
-  listcategoryName: {
-    fontSize: 12,
-    color: "#888",
-  },
-  listproductName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 4,
-  },
-  listprice: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#ef7810",
-  },
-  listButtonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
+  negoProduct: {
     marginVertical: 10,
-    marginHorizontal: 20,
-  },
-  negoCancelButton: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderColor: "#ef7810",
-    borderWidth: 1,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginRight: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  negoCancelButtonText: {
-    color: "#ef7810",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  historyTouchable: {
-    justifyContent: "flex-start",
-  },
-  historyContainer: {
-    flexDirection: "row",
-    borderRadius: 10,
-    overflow: "hidden",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    paddingVertical: 20,
+    marginHorizontal: 10,
     paddingHorizontal: 10,
-  },
-  historyImageContainer: {
-    width: 130,
-    height: 130,
-  },
-  historyImage: {
-    width: "100%",
-    height: "100%",
-  },
-  historyInfoContainer: {
-    flex: 1,
-    paddingHorizontal: 15,
-    justifyContent: "center",
-  },
-  historycategoryName: {
-    fontSize: 12,
-    color: "#888",
-  },
-  historyproductName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 4,
-  },
-  historyofferedPrice: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#ef7810",
-  },
-  historyButtonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    marginVertical: 10,
-    marginHorizontal: 20,
-  },
-  approveButton: {
-    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
     backgroundColor: "#fff",
-    borderColor: "#ef7810",
-    borderWidth: 1,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginRight: 8,
+  },
+  productContainer: {
+    flexDirection: "row",
+  },
+  productImageContainer: {
+    width: 120,
+    height: 120,
+  },
+  productImage: {
+    width:"100%",
+    height:"100%",
+    resizeMode: "contain"
+  },
+  productInfoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    gap: 10,
+    marginLeft: 10
+  },
+  registPriceText: {
+    fontSize: 13,
+    color: "#bdbdbd"
+  },
+  negoRequestProduct: {
+    marginVertical: 10,
+    marginHorizontal: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 8,
+    boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+    backgroundColor: "#fff",
+  },
+  negoRequestProductContainer: {
+    flexDirection: "row",
+  },
+  negoRequestProductImageContainer: {
+    width: 120,
+    height: 120,
+  },
+  negoRequestProductImage: {
+    width:"100%",
+    height:"100%",
+    resizeMode: "contain"
+  },
+  negoRequestproductInfoContainer: {
+    flex: 1,
+    justifyContent: "space-evenly",
+    marginLeft: 10
+  },
+  negoPriceText: {
+    fontWeight: "bold"
+  },
+  requestor: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  cancelButtonContainer: {
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 30,
+    marginVertical: 5,
+    borderColor: "#ef7810",
+  },
+  cancelButtonText: {
+    fontWeight: "bold",
+    color: "#ef7810"
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  requestButtonContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  approveButtonContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 30,
+    marginVertical: 5,
+    marginRight: 4,
+    borderColor: "#ef7810",
   },
   approveButtonText: {
-    color: "#ef7810",
-    fontSize: 14,
     fontWeight: "bold",
+    color: "#ef7810"
   },
-  rejectButton: {
+  rejectButtonContainer: {
     flex: 1,
-    backgroundColor: "#fff",
-    borderColor: "#ef7810",
-    borderWidth: 1,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 30,
+    marginVertical: 5,
+    marginLeft: 4,
+    borderColor: "#ef7810",
   },
   rejectButtonText: {
-    color: "#ef7810",
-    fontSize: 14,
     fontWeight: "bold",
+    color: "#ef7810"
   },
   moreButton: {
     backgroundColor: "#fff",
     borderColor: "#ddd",
     borderWidth: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    height: 30,
     borderRadius: 6,
     marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+
+
+  
+  // 모달 스타일
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    minWidth: 160,
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
+  },
+
+  deleteModalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    width: "85%",
+    maxWidth: 340,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  deleteModalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  deleteModalMessage: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 22,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteModalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#F5F5F5",
+  },
+  modalCancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#666",
+  },
+  confirmButton: {
+    backgroundColor: "#FF3B30",
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
   },
 });
