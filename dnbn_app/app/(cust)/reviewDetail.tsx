@@ -5,11 +5,12 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ReviewDetail {
-  id: string;
-  uri: string;
-  productName: string;
-  rating: number;
-  comment: string;
+    id: string;
+    uri: string;
+    productName: string;
+    rating: number;
+    comment: string;
+    images: any[];
 }
 
 export default function ReviewDetailScreen() {
@@ -22,6 +23,11 @@ export default function ReviewDetailScreen() {
             productName: "상품이름asdasdasdasdasdasdasdasdasdasA",
             rating: 5,
             comment: "정말 맛있었어요! 강추합니다. 백암에서 제일로 맛있는 무언가",
+            images: [
+                require('@/assets/images/icon.png'),
+                require('@/assets/images/icon.png'),
+                require('@/assets/images/icon.png')
+            ]
         }
     ];
     return (
@@ -58,6 +64,18 @@ export default function ReviewDetailScreen() {
                     <Text style={styles.regDate}>2024-06-15</Text>
                 </View>
                 <Text style={styles.ratingText}>{"⭐".repeat(review[0].rating)}</Text>
+
+                <View style={styles.imageContainer}>
+                    {review[0].images.map((image, index) => (
+                        <View key={index} style={styles.imageWrapper}>
+                            <Image
+                                source={image}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                        </View>
+                    ))}
+                </View>
                 <Text style={styles.reviewContent}>
                     {review[0].comment}
                 </Text>

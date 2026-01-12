@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { ImageComponent, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
     container: {
@@ -80,5 +80,18 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         color: "#555",
         lineHeight: 20,
+    },
+    imageContainer:{
+        flexDirection: "row",
+        marginBottom: 10,
+    },
+    imageWrapper:{
+        marginRight: 10,
+        borderRadius: 8,
+        overflow: "hidden",
+    },
+    image:{
+        width: 80,
+        height: 80,
     },
 });
