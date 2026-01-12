@@ -89,7 +89,6 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     overflow: "hidden",
-    elevation: 2,
     borderBottomWidth: 1,
     paddingBottom: 16,
     borderColor: "rgba(0, 0, 0, 0.05)",

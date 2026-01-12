@@ -76,142 +76,144 @@ export default function CustHomeScreen() {
   }, [banners.length]);
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} style={[styles.container,  { paddingTop: insets.top }]}>
-      <View style={styles.headerContainer}>
-        <View style={styles.header}>
-          <Ionicons name="location" size={24} color="#EF7810" />
-          <TouchableOpacity style={styles.addr}>
-            <Text style={styles.addrText}>행궁동</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/address")}>
-            <Ionicons name="chevron-down" size={24} color="#000" />
-          </TouchableOpacity>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
+      <ScrollView showsVerticalScrollIndicator={false} >
+        <View style={styles.headerContainer}>
+          <View style={styles.header}>
+            <Ionicons name="location" size={24} color="#EF7810" />
+            <TouchableOpacity style={styles.addr}>
+              <Text style={styles.addrText}>행궁동</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/address")}>
+              <Ionicons name="chevron-down" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/notifications")}>
+              <Ionicons name="notifications-outline" size={24} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/cart")}>
+              <Ionicons name="cart-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/notifications")}>
-            <Ionicons name="notifications-outline" size={24} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => router.push("/(cust)/cart")}>
-            <Ionicons name="cart-outline" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      <View style={styles.bannerContainer}>
-        <FlatList
-          ref={bannerRef}
-          data={banners}
-          keyExtractor={item => item.id}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled={true}
-          snapToAlignment="center"
-          decelerationRate="fast"
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig.current}
-          getItemLayout={(data, index) => ({
-            length: screenWidth,
-            offset: screenWidth * index,
-            index,
-          })}
-          renderItem={({ item }) => (
-            <View style={styles.bannerSlide}>
-              <Image
-                source={item.uri}
-                style={styles.bannerImage}
-                resizeMode="stretch"
-              />
-            </View>
-          )} />
-      </View>
-
-      <View style={styles.contentSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>할인상품</Text>
-          <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/saleProductList")}>
-            <Text style={styles.sectionMoreText}>+</Text>
-          </TouchableOpacity>
+        <View style={styles.bannerContainer}>
+          <FlatList
+            ref={bannerRef}
+            data={banners}
+            keyExtractor={item => item.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled={true}
+            snapToAlignment="center"
+            decelerationRate="fast"
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig.current}
+            getItemLayout={(data, index) => ({
+              length: screenWidth,
+              offset: screenWidth * index,
+              index,
+            })}
+            renderItem={({ item }) => (
+              <View style={styles.bannerSlide}>
+                <Image
+                  source={item.uri}
+                  style={styles.bannerImage}
+                  resizeMode="stretch"
+                />
+              </View>
+            )} />
         </View>
-        <FlatList
-          data={saleImages}
-          keyExtractor={item => item.id}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
-              <Image
-                source={item.uri}
-                style={styles.productImage}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
-                <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
-                <View style={styles.priceRow}>
-                  <Text style={styles.discount}>{item.discount}%</Text>
+
+        <View style={styles.contentSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>할인상품</Text>
+            <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/saleProductList")}>
+              <Text style={styles.sectionMoreText}>+</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={saleImages}
+            keyExtractor={item => item.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+                <Image
+                  source={item.uri}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
+                  <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.discount}>{item.discount}%</Text>
+                    <Text style={styles.price}>{item.price.toLocaleString()}원</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )} />
+        </View>
+
+        <View style={styles.contentSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>네고왕</Text>
+            <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/negoList")}>
+              <Text style={styles.sectionMoreText}>+</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={negoImages}
+            keyExtractor={item => item.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+                <Image
+                  source={item.uri}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
+                  <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
                   <Text style={styles.price}>{item.price.toLocaleString()}원</Text>
                 </View>
-              </View>
-            </TouchableOpacity>
-          )} />
-      </View>
-
-      <View style={styles.contentSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>네고왕</Text>
-          <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/negoList")}>
-            <Text style={styles.sectionMoreText}>+</Text>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            )} />
         </View>
-        <FlatList
-          data={negoImages}
-          keyExtractor={item => item.id}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
-              <Image
-                source={item.uri}
-                style={styles.productImage}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
-                <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
-                <Text style={styles.price}>{item.price.toLocaleString()}원</Text>
-              </View>
-            </TouchableOpacity>
-          )} />
-      </View>
 
-      <View style={styles.contentSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>일반 상품</Text>
-          <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/productList")}>
-            <Text style={styles.sectionMoreText}>+</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={commonImages}
-          keyExtractor={item => item.id}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
-              <Image
-                source={item.uri}
-                style={styles.productImage}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
-                <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
-                <Text style={styles.price}>{item.price.toLocaleString()}원</Text>
-              </View>
+        <View style={styles.contentSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>일반 상품</Text>
+            <TouchableOpacity style={styles.sectionMore} onPress={() => router.push("/(cust)/productList")}>
+              <Text style={styles.sectionMoreText}>+</Text>
             </TouchableOpacity>
-          )} />
-        {insets.bottom > 0 && (
-          <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-        )}
-      </View>
-    </ScrollView>
+          </View>
+          <FlatList
+            data={commonImages}
+            keyExtractor={item => item.id}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+                <Image
+                  source={item.uri}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
+                  <Text style={styles.storeName} numberOfLines={1}>{item.storeName}</Text>
+                  <Text style={styles.price}>{item.price.toLocaleString()}원</Text>
+                </View>
+              </TouchableOpacity>
+            )} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

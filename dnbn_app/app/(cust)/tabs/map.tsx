@@ -71,9 +71,6 @@ export default function CustMapScreen() {
           </View>
         )}
       </View>
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
     </View>
   );
 }

@@ -72,7 +72,7 @@ export default function CustReviewListScreen() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={[styles.safeAreaTop, { height: insets.top }]} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
         <TouchableOpacity
@@ -82,7 +82,7 @@ export default function CustReviewListScreen() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          리뷰
+          문의사항
         </Text>
         <View style={styles.placeholder} />
       </View>
@@ -133,9 +133,11 @@ export default function CustReviewListScreen() {
                     >
                       {item.productName}
                     </Text>
-                    <Text style={styles.ratingText}>
-                      {"⭐".repeat(item.rating)}
-                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 2 }}>
+                      {[...Array(item.rating)].map((_, i) => (
+                        <Ionicons key={i} name="star" size={16} color="#FFD700" />
+                      ))}
+                    </View>
                     <Text
                       style={styles.commentText}
                       numberOfLines={1}
@@ -188,7 +190,7 @@ export default function CustReviewListScreen() {
         )}
       </ScrollView>
       {insets.bottom > 0 && (
-        <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
