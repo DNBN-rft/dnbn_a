@@ -65,10 +65,10 @@ export default function StoreHome() {
 
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storeproducts")}
+                onPress={() => router.push("/(store)/review-manage")}
               >
                 <Ionicons name="pencil-outline" size={28} color="#FF9500" />
-                <Text style={styles.menuText}>리뷰 조회</Text>
+                <Text style={styles.menuText}>리뷰 관리</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
