@@ -86,29 +86,34 @@ export default function orderDetailScreen() {
                                 </View>
 
                                 <View style={styles.itemsContainer}>
-                                    {item.items.map((product: { id: string; productName: string; quantity: number; totalPrice: number; unitPrice: number; options: string; status: string; usedAt?: string }) => (
-                                        <View key={product.id}>
-                                            <Text style={styles.orderStatusText}>{product.status}</Text>
-                                            {product.usedAt && <Text style={styles.timestampText}>사용일시: {product.usedAt}</Text>}
+                                    <FlatList
+                                        data={item.items}
+                                        scrollEnabled={false}
+                                        keyExtractor={(product) => product.id}
+                                        renderItem={({ item: product }) => (
+                                            <View>
+                                                <Text style={styles.orderStatusText}>{product.status}</Text>
+                                                {product.usedAt && <Text style={styles.timestampText}>사용일시: {product.usedAt}</Text>}
 
-                                            <View style={styles.itemRow}>
-                                                <View style={styles.productImageContainer}>
-                                                    <Image
-                                                        source={require("@/assets/images/logo.png")}
-                                                        style={styles.productImageContainer}
-                                                        resizeMode="contain"
-                                                    />
-                                                </View>
-                                                <View style={styles.productInfoContainer}>
-                                                    <View>
-                                                        <Text style={styles.productNameText}>{product.productName}</Text>
-                                                        <Text style={styles.productQuantityText}>수량: {product.quantity}개</Text>
-                                                        <Text style={styles.productPriceText}>{product.totalPrice.toLocaleString()}원</Text>
+                                                <View style={styles.itemRow}>
+                                                    <View style={styles.productImageContainer}>
+                                                        <Image
+                                                            source={require("@/assets/images/logo.png")}
+                                                            style={styles.productImageContainer}
+                                                            resizeMode="contain"
+                                                        />
+                                                    </View>
+                                                    <View style={styles.productInfoContainer}>
+                                                        <View>
+                                                            <Text style={styles.productNameText}>{product.productName}</Text>
+                                                            <Text style={styles.productQuantityText}>수량: {product.quantity}개</Text>
+                                                            <Text style={styles.productPriceText}>{product.totalPrice.toLocaleString()}원</Text>
+                                                        </View>
                                                     </View>
                                                 </View>
                                             </View>
-                                        </View>
-                                    ))}
+                                        )}
+                                    />
                                 </View>
                             </View>
 

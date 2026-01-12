@@ -33,7 +33,7 @@ export default function CustMapScreen() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#000" }} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
         <TouchableOpacity

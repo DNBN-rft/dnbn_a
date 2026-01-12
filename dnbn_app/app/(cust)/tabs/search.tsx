@@ -219,19 +219,23 @@ export default function SearchView() {
   ];
 
   return (
-    <View style={[styles.searchView, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.push('/tabs/search')}
+          onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          검색
+          문의사항
         </Text>
         <View style={styles.placeholder} />
       </View>
+
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBarContainer}>
@@ -298,9 +302,11 @@ export default function SearchView() {
         </View>
       </View>
 
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
-    </View>
+      {
+        insets.bottom > 0 && (
+          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        )
+      }
+    </View >
   );
 }

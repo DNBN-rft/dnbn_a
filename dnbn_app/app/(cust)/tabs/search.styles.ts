@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -22,7 +26,7 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: "center",
-    pointerEvents: "none"
+    pointerEvents: "none",
   },
   placeholder: {
     width: 40,
