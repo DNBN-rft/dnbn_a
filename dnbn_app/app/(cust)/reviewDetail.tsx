@@ -48,41 +48,44 @@ export default function ReviewDetailScreen() {
                 <View style={styles.placeholder} />
             </View>
 
-            <View style={styles.productInfoContainer}>
-                <TouchableOpacity onPress={() => router.push("/(cust)/productDetail")}>
-                    <Image source={require('@/assets/images/qr.png')} style={styles.productImage} resizeMode="contain" />
-                </TouchableOpacity>
-                <View style={styles.productTextContainer}>
-                    <Text style={styles.productName} numberOfLines={1}>{review[0].productName}</Text>
-                    <Text style={styles.storeName}>과일가게</Text>
+            <View style={{ flex: 1 }}>
+                <View style={styles.productInfoContainer}>
+                    <TouchableOpacity onPress={() => router.push("/(cust)/productDetail")}>
+                        <Image source={require('@/assets/images/qr.png')} style={styles.productImage} resizeMode="contain" />
+                    </TouchableOpacity>
+                    <View style={styles.productTextContainer}>
+                        <Text style={styles.productName} numberOfLines={1}>{review[0].productName}</Text>
+                        <Text style={styles.storeName}>과일가게</Text>
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.reviewInfoContainer}>
-                <View style={styles.regContainer}>
-                    <Text style={styles.regNm}>사람이름</Text>
-                    <Text style={styles.regDate}>2024-06-15</Text>
-                </View>
-                <Text style={styles.ratingText}>{"⭐".repeat(review[0].rating)}</Text>
+                <View style={styles.reviewInfoContainer}>
+                    <View style={styles.regContainer}>
+                        <Text style={styles.regNm}>사람이름</Text>
+                        <Text style={styles.regDate}>2024-06-15</Text>
+                    </View>
+                    <Text style={styles.ratingText}>{"⭐".repeat(review[0].rating)}</Text>
 
-                <View style={styles.imageContainer}>
-                    {review[0].images.map((image, index) => (
-                        <View key={index} style={styles.imageWrapper}>
-                            <Image
-                                source={image}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
-                        </View>
-                    ))}
+                    <View style={styles.imageContainer}>
+                        {review[0].images.map((image, index) => (
+                            <View key={index} style={styles.imageWrapper}>
+                                <Image
+                                    source={image}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            </View>
+                        ))}
+                    </View>
+                    <Text style={styles.reviewContent}>
+                        {review[0].comment}
+                    </Text>
                 </View>
-                <Text style={styles.reviewContent}>
-                    {review[0].comment}
-                </Text>
             </View>
             {insets.bottom > 0 && (
                 <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
             )}
         </View>
+
     );
 }
