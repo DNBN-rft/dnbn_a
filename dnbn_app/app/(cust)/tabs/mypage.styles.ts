@@ -5,7 +5,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 export const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor: "#ffffffff",
+    backgroundColor: "#ffffff",
   },
   header: {
         flexDirection: 'row',

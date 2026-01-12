@@ -136,29 +136,6 @@ container: {
         fontSize: 18,
         color: '#5b5b5bff',
     },
-    myInfoCategoryContainer: {
-        marginTop: 10,
-    },
-    myInfoCategoryButton: {
-        flexDirection: 'row',
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 6,
-        marginRight: 8,
-        marginBottom: 8,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    myInfoCategoryButtonText: {
-        fontSize: 18,
-        color: '#555555ff',
-    },
-    myInfoCategoryButtonArrow: {
-        fontSize: 14,
-        color: '#999',
-        marginLeft: 8,
-    },
     myInfoSaveButton: {
         marginHorizontal: 16,
         marginVertical: 20,

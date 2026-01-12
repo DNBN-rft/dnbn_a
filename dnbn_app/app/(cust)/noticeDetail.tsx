@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
 
-        return (
+    return (
         <View style={styles.container}>
             {insets.top > 0 && (
                 <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
@@ -43,6 +43,9 @@ export default function NoticeDetailScreen() {
                     </View>
                 </View>
             </ScrollView>
+            {insets.bottom > 0 && (
+                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
+            )}
         </View>
     );
 };  

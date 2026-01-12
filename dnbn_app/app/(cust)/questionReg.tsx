@@ -55,7 +55,8 @@ export default function NoticeDetailScreen() {
                 <Pressable style={styles.submitButton}>
                     <Text style={styles.submitButtonText}>문의하기</Text>
                 </Pressable>
-                <Pressable style={styles.cancelButton}>
+                <Pressable style={styles.cancelButton}
+                    onPress={() => router.back()}>
                     <Text style={styles.cancelButtonText}>취소하기</Text>
                 </Pressable>
             </View>
@@ -80,6 +81,9 @@ export default function NoticeDetailScreen() {
                     </View>
                 </View>
             </Modal>
+            {insets.bottom > 0 && (
+                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
+            )}
         </View>
     );
 }

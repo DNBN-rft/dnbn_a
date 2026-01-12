@@ -30,44 +30,47 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    topContainer: {
+    searchTopContainer: {
         flexDirection: 'row',
-    },
-    tabButton: {
-        flex: 1,
         alignItems: 'center',
-        paddingVertical: 12,
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
     },
-    tabButtonText: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#333',
-    },
-    activeTab: {
-        borderBottomWidth: 2,
-        borderBottomColor: '#EF7810',
-    },
-    searchContainer: {
-        marginHorizontal: 16,
-        marginTop: 12,
-        marginBottom: 12,
-
-        height: 40,
-        paddingHorizontal: 12,
-
-        backgroundColor: '#ffffffff',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ddd',
-
+    searchText: {
         fontSize: 16,
-        color: '#333',
+        color: '#999',
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 0, 0, 0.2)',
+        borderRadius: 5,
+        alignItems: "center",
+        justifyContent: "center",
+        width: 300,
+        height: 40,
+        borderBottomWidth: 1,
+        opacity: 1,
+        outline: "none",
+        flex: 1,
     },
-    searchContainerFocused: {
+    searchTextFocused: {
         borderColor: '#EF781066',
         backgroundColor: '#fff',
     },
-
+    searchButton: {
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: "#EF7810",
+        marginLeft: 10,
+        height: 40,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    searchButtonText: {
+        fontSize: 18,
+        paddingHorizontal: 25,
+        color: "#EF7810",
+    },
     filterContainer: {
         flexDirection: 'row',
         paddingHorizontal: 16,
@@ -88,7 +91,6 @@ export const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#666',
     },
-
     listContainer: {
         flex: 1,
         paddingHorizontal: 16,
@@ -219,7 +221,7 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 12,
     },
-    filterOptionButtonText:{
+    filterOptionButtonText: {
         fontSize: 18,
         color: '#333',
     },

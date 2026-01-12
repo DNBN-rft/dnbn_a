@@ -1,6 +1,10 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -22,6 +26,7 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: "center",
+    pointerEvents: "none",
   },
   placeholder: {
     width: 40,
@@ -39,26 +44,29 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     height: 50,
   },
-  activeTab: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 195,
-    height: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: "orange",
+  tabButton: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
-  inActiveTab: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 195,
-    height: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: "white",
+  tabButtonActive: {
+    borderBottomColor: '#EF7810',
   },
   tabText: {
-    color: "black",
+    fontSize: 20,
+    color: '#999',
+    fontWeight: '500',
   },
-
+  tabTextActive: {
+    color: '#EF7810',
+    fontWeight: '600',
+  },
+  filter: {
+    fontSize: 16,
+    color: '#999',
+  },
   searchResult: {
     marginTop: 15,
     marginLeft: 15,
@@ -70,46 +78,115 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
+  resultCountHeaderText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   products: {
-    marginBottom: 10,
+    flex: 1,
     flexDirection: "row",
+    backgroundColor: "#fff",
+    marginVertical: 8,
+    borderRadius: 8,
+    overflow: "hidden",
+    elevation: 2,
+    borderBottomWidth: 1,
+    paddingBottom: 16,
+    borderColor: "rgba(0, 0, 0, 0.05)",
   },
   productInfo: {
-    marginLeft: 10,
+    marginLeft: 12,
+    flex: 1,
+    justifyContent: "center",
+    alignSelf: "flex-start",
   },
   productImage: {
-    backgroundColor: "white",
-    width: 90,
-    height: 70,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
+    width: 140,
+    height: 140,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    marginRight: 10,
   },
   priceInfo: {
     flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  discountRateText: {
+    fontSize: 18,
+    color: "#EF7810",
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  originalPriceText: {
+    fontSize: 18,
+    color: "#999",
+    textDecorationLine: "line-through",
+  },
+  priceText: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  descriptionText: {
+    fontSize: 18,
+    color: "#666",
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  averageRate: {
+    fontSize: 18,
+    color: "#333",
+  },
+  reviewCount: {
+    fontSize: 18,
+    color: "#666",
+    marginLeft: 4,
   },
   reviewInfo: {
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  reviewStar: {
-    width: 13,
-    height: 13,
   },
   stores: {
-    marginBottom: 10,
+    flex: 1,
     flexDirection: "row",
+    backgroundColor: "#fff",
+    marginVertical: 8,
+    borderRadius: 8,
+    overflow: "hidden",
+    elevation: 2,
+    borderBottomWidth: 1,
+    paddingBottom: 16,
+    borderColor: "rgba(0, 0, 0, 0.05)",
   },
   storeInfo: {
     marginLeft: 10,
+    flex: 1,
   },
   storeImage: {
-    backgroundColor: "white",
-    width: 90,
-    height: 70,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
+    width: 140,
+    height: 140,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    marginRight: 10,
+
   },
+  category: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 4,
+  },
+  storeNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  }
 });

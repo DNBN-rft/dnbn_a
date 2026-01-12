@@ -52,10 +52,42 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    list: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#fff',
+        marginVertical: 1,
+    },
+    listItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        justifyContent: 'space-between',
+    },
+    itemText: {
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    itemDetailText: {
+        fontSize: 14,
+        color: '#555',
+        marginTop: 5
+    },
+    deleteButton: {
+        paddingHorizontal: 15,
+        paddingVertical: 15,
+        justifyContent: 'center'
+    },
+    deleteButtonText: {
+        fontSize: 20,
+        color: '#999',
+    },
     emptyText: {
         fontSize: 16,
         color: '#666',
         textAlign: 'center',
         marginTop: 40,
     },
+
 });

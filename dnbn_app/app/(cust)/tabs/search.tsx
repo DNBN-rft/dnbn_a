@@ -1,14 +1,13 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, TextInput, Touchable, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './search.styles';
 
 
 export default function SearchView() {
   const insets = useSafeAreaInsets();
-  const [isFocused, setIsFocused] = useState(false);
 
   const recentSearch = [
     { id: "1", keyword: "상품1" },
@@ -24,7 +23,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -34,7 +34,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -44,7 +45,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -54,7 +56,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -64,7 +67,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -74,7 +78,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -84,7 +89,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -94,7 +100,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -104,7 +111,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -114,7 +122,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -124,7 +133,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -134,7 +144,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -144,7 +155,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -154,7 +166,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -164,7 +177,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -174,7 +188,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품1",
       discountRate: 20,
-      price: "가격1",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명1",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -184,7 +199,8 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품2",
       discountRate: 20,
-      price: "가격2",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명2",
       averageRate: 3.4,
       reviewCount: 1280,
@@ -194,39 +210,36 @@ export default function SearchView() {
       uri: require("@/assets/images/logo.png"),
       name: "상품3",
       discountRate: 20,
-      price: "가격3",
+      price: "8000",
+      originalPrice: "10000",
       description: "상품설명3",
       averageRate: 3.4,
       reviewCount: 1280,
     },
   ];
 
-    return (
-        <View style={[styles.searchView, { paddingTop: insets.top }]}>
-            
-            <View style={styles.header}>
-                <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => router.push('/tabs/search')}
-                >
-                <Ionicons name="chevron-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.title} pointerEvents="none">
-                검색
-                </Text>
-                <View style={styles.placeholder} />
-            </View>
+  return (
+    <View style={[styles.searchView, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push('/tabs/search')}
+        >
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.title} pointerEvents="none">
+          검색
+        </Text>
+        <View style={styles.placeholder} />
+      </View>
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBarContainer}>
           <TextInput
             placeholder={
-              isFocused ? "" : "어떤 가게나 메뉴를 검색하고 싶으세요?"
+              "어떤 가게나 메뉴를 검색하고 싶으세요?"
             }
-            placeholderTextColor="black"
-            style={[styles.searchBar, isFocused && { borderColor: "#EF7810" }]}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            style={styles.searchBar}
           />
           <Pressable
             onPress={() => router.push("/tabs/search-result")}
@@ -243,9 +256,9 @@ export default function SearchView() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.recentSearchKeyword}>
-                <Text>{item.keyword}</Text>
+                <Text style={styles.recentKeywordText}>{item.keyword}</Text>
                 <Pressable style={styles.deleteButton}>
-                    <Ionicons name="close" size={16} color="black" />
+                  <Ionicons name="close" size={16} color="black" />
                 </Pressable>
               </View>
             )}
@@ -260,28 +273,34 @@ export default function SearchView() {
             data={products}
             keyExtractor={(item) => item.id}
             renderItem={({ item: product }) => (
-              <View style={styles.products}>
-                <Image source={product.uri} style={styles.productImage} />
-                <View style={styles.productInfo}>
-                  <Text>{product.name}</Text>
-                  <View style={styles.priceInfo}>
-                    <Text>{product.discountRate}% </Text>
-                    <Text>{product.price}원</Text>
+              <View>
+                <TouchableOpacity onPress={() => router.push('/(cust)/productDetail')} style={styles.products}>
+                  <Image resizeMode='contain' source={product.uri} style={styles.productImage} />
+                  <View style={styles.productInfo}>
+                    <Text style={styles.name}>{product.name}</Text>
+                    <View style={styles.priceInfo}>
+                      <Text style={styles.originalPriceText}>{product.originalPrice}원</Text>
+                      <Text style={styles.discountRateText}>{product.discountRate}% </Text>
+                    </View>
+                    <Text style={styles.priceText}>{product.price}원</Text>
+                    <View style={styles.reviewInfo}>
+                      <Ionicons name="star" size={16} color="#FFD700" />
+                      <Text style={styles.averageRate}> {product.averageRate}</Text>
+                      <Text style={styles.reviewCount}>({product.reviewCount})</Text>
+                    </View>
                   </View>
-                  <Text>{product.description}</Text>
-                  <View style={styles.reviewInfo}>
-                    <Ionicons name="star" size={16} color="#FFD700" />
-                    <Text> {product.averageRate}</Text>
-                    <Text>({product.reviewCount})</Text>
-                  </View>
-                </View>
+                </TouchableOpacity>
               </View>
             )}
             showsVerticalScrollIndicator={false}
-            scrollEnabled={true} // 명시적으로 true 설정
+            scrollEnabled={true}
           />
         </View>
       </View>
+
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
   );
 }

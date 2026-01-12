@@ -63,9 +63,13 @@ export const styles = StyleSheet.create({
     marginLeft: 10,
   },
   sectionMore: {
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  sectionMoreText: {
     fontSize: 24,
     fontWeight: "600",
-    marginRight: 10,
+    color: "#333",
   },
   productCard: {
     width: 150,

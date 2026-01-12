@@ -1,5 +1,5 @@
 
-import { ScrollView, Pressable, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Pressable, Text, View, TouchableOpacity, FlatList, Image } from 'react-native';
 import { styles } from './storeInfo.styles';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function StoreInfo() {
   const [activeTab, setActiveTab] = useState<"product" | "review">("product");
   const insets = useSafeAreaInsets();
+
+  const productList = [
+    { id: '1', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
+    { id: '2', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
+    { id: '3', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
+    { id: '4', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
+  ];
+
+  const reviewList = [
+    { id: '1', name: '사용자 이름', date: '2026.01.05', rating: '★★★★★ 5점', content: '맛있는 빵이에요! 추천합니다.' },
+    { id: '2', name: '또다른 사용자', date: '2026.01.04', rating: '★★★★☆ 4점', content: '가격도 저렴하고 맛있습니다!' },
+  ];
 
   return (
     <View style={styles.container}>
@@ -62,7 +74,7 @@ export default function StoreInfo() {
           </Pressable>
 
           <Pressable style={styles.storeMoreContainer}>
-            <Text style={styles.moreText}>⋮</Text>
+            <Ionicons name="ellipsis-vertical" size={20} color="#000" />
           </Pressable>
         </View>
 
@@ -118,97 +130,55 @@ export default function StoreInfo() {
         {/* 상품 탭 콘텐츠 */}
         {activeTab === "product" && (
           <View style={styles.storeProductContainer}>
-            <View style={styles.productGridContainer}>
-              {/* 상품 1 */}
-              <View style={styles.storeProductItemContainer}>
-                <View style={styles.storeProductImgContainer}>
-                  <Text>상품이미지</Text>
-                </View>
-                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-                <View style={styles.storeProductPriceContainer}>
-                  <Text style={styles.salePercentText}>20%</Text>
-                  <Text style={styles.priceText}>70,000원</Text>
-                </View>
-                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-              </View>
+            <FlatList
+              data={productList}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={{ justifyContent: 'space-between' }}
+              renderItem={({ item }) => (
+                <View style={styles.storeProductItemContainer}>
+                  <Image resizeMode='contain' source={item.uri} style={styles.storeProductImgContainer} />
+                  <Text style={styles.storeProductNmText}>{item.name}</Text>
+                  <View style={styles.storeProductPriceContainer}>
+                    <Text style={styles.originalPriceText}>{item.originalPrice.toLocaleString()}원</Text>
 
-              {/* 상품 2 */}
-              <View style={styles.storeProductItemContainer}>
-                <View style={styles.storeProductImgContainer}>
-                  <Text>상품이미지</Text>
-                </View>
-                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-                <View style={styles.storeProductPriceContainer}>
-                  <Text style={styles.salePercentText}>20%</Text>
-                  <Text style={styles.priceText}>70,000원</Text>
-                </View>
-                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-              </View>
+                    <Text style={styles.salePercentText}>{item.discount}%</Text>
+                  </View>
+                  <Text style={styles.priceText}>{item.price.toLocaleString()}원</Text>
 
-              {/* 상품 3 */}
-              <View style={styles.storeProductItemContainer}>
-                <View style={styles.storeProductImgContainer}>
-                  <Text>상품이미지</Text>
+                  <Text style={styles.ratingText}>★ {item.rating}</Text>
                 </View>
-                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-                <View style={styles.storeProductPriceContainer}>
-                  <Text style={styles.salePercentText}>20%</Text>
-                  <Text style={styles.priceText}>70,000원</Text>
-                </View>
-                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-              </View>
+              )}
+            />
+          </View>
+        )}
 
-              {/* 상품 4 */}
-              <View style={styles.storeProductItemContainer}>
-                <View style={styles.storeProductImgContainer}>
-                  <Text>상품이미지</Text>
+
+        {/* 리뷰 탭 콘텐츠 */}
+        {activeTab === "review" && (
+          <View style={styles.storeReviewContainer}>
+            <FlatList
+              data={reviewList}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.reviewItemContainer}>
+                  <View style={styles.reviewRefInfoContainer}>
+                    <Text style={styles.reviewRegNmText}>{item.name}</Text>
+                    <Text style={styles.reviewRegDateText}>{item.date}</Text>
+                  </View>
+                  <Text style={styles.reviewRateText}>{item.rating}</Text>
+                  <View style={styles.reviewImgContainer}>
+                    <Text>리뷰 이미지</Text>
+                  </View>
+                  <Text style={styles.reviewContentText}>
+                    {item.content}
+                  </Text>
                 </View>
-                <Text style={styles.storeProductNmContainer}>맛있는 두쫀쿠</Text>
-                <View style={styles.storeProductPriceContainer}>
-                  <Text style={styles.salePercentText}>20%</Text>
-                  <Text style={styles.priceText}>70,000원</Text>
-                </View>
-                <Text style={styles.ratingText}>★ 4.8(1,250)</Text>
-              </View>
-            </View>
+              )}
+            />
           </View>
         )}
       </ScrollView>
-
-      {/* 리뷰 탭 콘텐츠 */}
-      {activeTab === "review" && (
-        <View style={styles.storeReviewContainer}>
-          {/* 리뷰 아이템 1 */}
-          <View style={styles.reviewItemContainer}>
-            <View style={styles.reviewRefInfoContainer}>
-              <Text style={styles.reviewRegNmContainer}>사용자 이름</Text>
-              <Text style={styles.reviewRegDateContainer}>2026.01.05</Text>
-            </View>
-            <Text style={styles.reviewRateContainer}>★★★★★ 5점</Text>
-            <View style={styles.reviewImgContainer}>
-              <Text>리뷰 이미지</Text>
-            </View>
-            <Text style={styles.reviewContentContainer}>
-              맛있는 빵이에요! 추천합니다.
-            </Text>
-          </View>
-
-          {/* 리뷰 아이템 2 */}
-          <View style={styles.reviewItemContainer}>
-            <View style={styles.reviewRefInfoContainer}>
-              <Text style={styles.reviewRegNmContainer}>또다른 사용자</Text>
-              <Text style={styles.reviewRegDateContainer}>2026.01.04</Text>
-            </View>
-            <Text style={styles.reviewRateContainer}>★★★★☆ 4점</Text>
-            <View style={styles.reviewImgContainer}>
-              <Text>리뷰 이미지</Text>
-            </View>
-            <Text style={styles.reviewContentContainer}>
-              가격도 저렴하고 맛있습니다!
-            </Text>
-          </View>
-        </View>
-      )}
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}

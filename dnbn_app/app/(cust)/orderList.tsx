@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
-import { Pressable, TextInput, Modal, ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { Pressable, TextInput, Modal, ScrollView, View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { styles } from './purchase.styles';
+import { styles } from './orderlist.styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PurchaseScreen() {
@@ -19,12 +19,52 @@ export default function PurchaseScreen() {
   const [tempStatus, setTempStatus] = useState<'ALL' | 'CANCEL' | 'USED'>('ALL');
   const [tempPeriod, setTempPeriod] = useState<'1M' | '3M' | '6M' | '1Y'>('1M');
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const listRef = useRef<FlatList>(null);
 
-  const scrollToTop = () => {
-    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  type OrderItem = {
+    id: string;
+    storeName: string;
+    status: string;
+    productName: string;
+    quantity: number;
+    price: number;
   };
 
+  type Order = {
+    id: string;
+    date: string;
+    items: OrderItem[];
+  };
+
+  const purchaseList: Order[] = [
+    {
+      id: '1',
+      date: '2026.01.05',
+      items: [
+        { id: '1-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
+        { id: '1-2', storeName: '가게이름2', status: '구매확정', productName: '맛있는 케이크', quantity: 2, price: 8000 },
+      ]
+    },
+    {
+      id: '2',
+      date: '2026.01.04',
+      items: [
+        { id: '2-1', storeName: '가게이름', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
+      ]
+    },
+    {
+      id: '3',
+      date: '2026.01.03',
+      items: [
+        { id: '3-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
+        { id: '3-2', storeName: '가게이름3', status: '구매확정', productName: '맛있는 빵', quantity: 3, price: 3000 },
+      ]
+    },
+  ];
+
+  const scrollToTop = () => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
   const handleOpenFilterModal = () => {
     setTempStatus(status);
     setTempPeriod(period === 'ALL' ? '1M' : period);
@@ -55,35 +95,20 @@ export default function PurchaseScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <View style={styles.topContainer}>
+      <View style={styles.searchTopContainer}>
+        <TextInput
+          placeholder="구매한 상품/스토어를 검색해보세요"
+          style={[styles.searchText, searchFocused && styles.searchTextFocused]}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+        />
         <Pressable
-          style={[
-            styles.tabButton,
-            activeTab === 'UNUSED' && styles.activeTab,
-          ]}
-          onPress={() => setActiveTab('UNUSED')}
+          onPress={() => router.push("/(cust)/tabs/custhome")}
+          style={styles.searchButton}
         >
-          <Text style={styles.tabButtonText}>미사용</Text>
-        </Pressable>
-
-        <Pressable
-          style={[
-            styles.tabButton,
-            activeTab === 'USED' && styles.activeTab,
-          ]}
-          onPress={() => setActiveTab('USED')}
-        >
-          <Text style={styles.tabButtonText}>사용완료</Text>
+          <Text style={styles.searchButtonText}>검색</Text>
         </Pressable>
       </View>
-
-
-      <TextInput
-        placeholder="구매한 상품/스토어를 검색해보세요"
-        style={[styles.searchContainer, searchFocused && styles.searchContainerFocused]}
-        onFocus={() => setSearchFocused(true)}
-        onBlur={() => setSearchFocused(false)}
-      />
 
       <View style={styles.filterContainer}>
         {/* 상태 */}
@@ -113,105 +138,56 @@ export default function PurchaseScreen() {
         </Pressable>
       </View>
 
-
-      <ScrollView ref={scrollViewRef} style={styles.listContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.orderContainer}>
-          <View style={styles.orderTopContainer}>
-            <Text style={styles.orderDate}>2026.01.05</Text>
-            <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세</Text>
-              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-            </Pressable>
-          </View>
-
-          <View style={styles.orderItemContainer}>
-            <View style={styles.orderStoreContainer}>
-              <Text style={styles.storeName}>가게이름</Text>
+      <FlatList
+        ref={listRef}
+        data={purchaseList}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item: order }) => (
+          <View style={styles.orderContainer}>
+            <View style={styles.orderTopContainer}>
+              <Text style={styles.orderDate}>{order.date}</Text>
+              <Pressable
+                style={styles.orderDetailButton}
+                onPress={() => router.navigate("/(cust)/orderDetail")}
+              >
+                <Text style={styles.orderDetailButtonText}>주문상세</Text>
+                <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+              </Pressable>
             </View>
 
-            <View style={styles.orderStateContainer}>
-              <Text style={styles.orderState}>구매확정</Text>
-            </View>
+            {order.items.map((item: OrderItem) => (
+              <View key={item.id} style={styles.orderItemContainer}>
+                <View style={styles.orderStoreContainer}>
+                  <Text style={styles.storeName}>{item.storeName}</Text>
+                </View>
 
-            <View style={styles.orderProductInfoContainer}>
-              <View style={styles.orderProductImgContainer}>
+                <View style={styles.orderStateContainer}>
+                  <Text style={styles.orderState}>{item.status}</Text>
+                </View>
+
+                <View style={styles.orderProductInfoContainer}>
+                  <View style={styles.orderProductImgContainer} />
+                  <View style={styles.orderProductDetailContainer}>
+                    <Text style={styles.productName}>{item.productName}</Text>
+                    <Text style={styles.productQuantity}>
+                      수량: {item.quantity}개
+                    </Text>
+                    <Text style={styles.productPrice}>
+                      {item.price.toLocaleString()}원
+                    </Text>
+                  </View>
+                </View>
               </View>
-
-              <View style={styles.orderProductDetailContainer}>
-                <Text style={styles.productName}>맛있는 두쫀쿠</Text>
-                <Text style={styles.productQuantity}>수량: 1개</Text>
-                <Text style={styles.productPrice}>5,500원</Text>
-              </View>
-            </View>
+            ))}
           </View>
-        </View>
-
-        <View style={styles.orderContainer}>
-          <View style={styles.orderTopContainer}>
-            <Text style={styles.orderDate}>2026.01.05</Text>
-            <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세</Text>
-              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-            </Pressable>
-          </View>
-
-          <View style={styles.orderItemContainer}>
-            <View style={styles.orderStoreContainer}>
-              <Text style={styles.storeName}>가게이름</Text>
-            </View>
-
-            <View style={styles.orderStateContainer}>
-              <Text style={styles.orderState}>구매확정</Text>
-            </View>
-
-            <View style={styles.orderProductInfoContainer}>
-              <View style={styles.orderProductImgContainer}>
-              </View>
-
-              <View style={styles.orderProductDetailContainer}>
-                <Text style={styles.productName}>맛있는 두쫀쿠</Text>
-                <Text style={styles.productQuantity}>수량: 1개</Text>
-                <Text style={styles.productPrice}>5,500원</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.orderContainer}>
-          <View style={styles.orderTopContainer}>
-            <Text style={styles.orderDate}>2026.01.05</Text>
-            <Pressable style={styles.orderDetailButton}>
-              <Text style={styles.orderDetailButtonText}>주문상세</Text>
-              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-            </Pressable>
-          </View>
-
-          <View style={styles.orderItemContainer}>
-            <View style={styles.orderStoreContainer}>
-              <Text style={styles.storeName}>가게이름</Text>
-            </View>
-
-            <View style={styles.orderStateContainer}>
-              <Text style={styles.orderState}>구매확정</Text>
-            </View>
-
-            <View style={styles.orderProductInfoContainer}>
-              <View style={styles.orderProductImgContainer}>
-              </View>
-
-              <View style={styles.orderProductDetailContainer}>
-                <Text style={styles.productName}>맛있는 두쫀쿠</Text>
-                <Text style={styles.productQuantity}>수량: 1개</Text>
-                <Text style={styles.productPrice}>5,500원</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
+        )}
+      />
 
       {/* FloatingButton - 최상단 이동 */}
-      <Pressable 
-        style={[styles.scrollToTopButton, { bottom: insets.bottom + 20 }]} 
+      <Pressable
+        style={[styles.scrollToTopButton, { bottom: insets.bottom + 20 }]}
         onPress={scrollToTop}
       >
         <Text style={styles.scrollToTopButtonText}>▲</Text>

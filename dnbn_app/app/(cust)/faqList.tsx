@@ -96,15 +96,18 @@ export default function FaqListScreen() {
                     <View style={styles.questionBtnContainer}>
                         <TouchableOpacity style={styles.questionReqButton}>
                             <Text style={styles.questionReqButtonText}
-                            onPress={() => router.navigate('/(cust)/questionReg')}>1:1 문의하기</Text>
+                                onPress={() => router.navigate('/(cust)/questionReg')}>1:1 문의하기</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.questionListViewButton}>
                             <Text style={styles.questionListViewText}
-                            onPress={() => router.navigate('/(cust)/question')}>내 문의 목록 보기</Text>
+                                onPress={() => router.navigate('/(cust)/question')}>내 문의 목록 보기</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>
+            {insets.bottom > 0 && (
+                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
+            )}
         </View>
     );
 }

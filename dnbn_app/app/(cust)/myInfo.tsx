@@ -77,17 +77,6 @@ export default function MyInfoScreen() {
                             </Pressable>
                         </View>
                     </View>
-
-                    {/* 관심 카테고리 */}
-                    <View style={styles.myInfoItemContainer}>
-                        <Text style={styles.myInfoItemText}>관심 카테고리</Text>
-                        <View style={styles.myInfoCategoryContainer}>
-                            <Pressable style={styles.myInfoCategoryButton} onPress={() => setCategoryModalVisible(true)}>
-                                <Text style={styles.myInfoCategoryButtonText}>한식, 양식</Text>
-                                <Text style={styles.myInfoCategoryButtonArrow}>{'>'}</Text>
-                            </Pressable>
-                        </View>
-                    </View>
                 </View>
             </ScrollView>
 
@@ -195,6 +184,9 @@ export default function MyInfoScreen() {
                     </View>
                 </View >
             </Modal >
+            {insets.bottom > 0 && (
+                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
+            )}
         </View >
     );
 }

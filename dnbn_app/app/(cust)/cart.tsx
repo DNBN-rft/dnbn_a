@@ -5,9 +5,91 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { router } from 'expo-router';
 
+const initialCartItems = [
+    {
+        id: '1',
+        storeId: 'store1',
+        storeName: '행복',
+        selected: false,
+        products: [
+            { id: 'prod1', name: '쫀쿠 치즈맛', salePrice: '9,000원', originalPrice: '10,000원', qty: 2, selected: false },
+            { id: 'prod2', name: '쫀쿠 초코맛', salePrice: '9,000원', originalPrice: '10,000원', qty: 1, selected: false },
+        ],
+        totalPrice: '27,000원',
+    },
+    {
+        id: '2',
+        storeId: 'store1',
+        storeName: '행복',
+        selected: false,
+        products: [
+            { id: 'prod3', name: '쫀쿠 치즈맛', salePrice: '9,000원', originalPrice: '10,000원', qty: 2, selected: false },
+            { id: 'prod4', name: '쫀쿠 초코맛', salePrice: '9,000원', originalPrice: '10,000원', qty: 1, selected: false },
+        ],
+        totalPrice: '27,000원',
+    },
+];
+
 export default function CartScreen() {
+    const [cartItems, setCartItems] = useState(initialCartItems);
     const [selectAll, setSelectAll] = useState(false);
     const insets = useSafeAreaInsets();
+
+    const handleSelectAll = () => {
+        const newSelectAllState = !selectAll;
+        setSelectAll(newSelectAllState);
+        setCartItems(
+            cartItems.map((store) => ({
+                ...store,
+                selected: newSelectAllState,
+                products: store.products.map((product) => ({
+                    ...product,
+                    selected: newSelectAllState,
+                })),
+            }))
+        );
+    };
+
+    const handleStoreSelect = (storeId: string) => {
+        setCartItems(
+            cartItems.map((store) => {
+                if (store.id === storeId) {
+                    const newSelected = !store.selected;
+                    return {
+                        ...store,
+                        selected: newSelected,
+                        products: store.products.map((product) => ({
+                            ...product,
+                            selected: newSelected,
+                        })),
+                    };
+                }
+                return store;
+            })
+        );
+    };
+
+    const handleProductSelect = (storeId: string, productId: string) => {
+        setCartItems(
+            cartItems.map((store) => {
+                if (store.id === storeId) {
+                    const updatedProducts = store.products.map((product) => {
+                        if (product.id === productId) {
+                            return { ...product, selected: !product.selected };
+                        }
+                        return product;
+                    });
+                    const allSelected = updatedProducts.every((p) => p.selected);
+                    return {
+                        ...store,
+                        selected: allSelected,
+                        products: updatedProducts,
+                    };
+                }
+                return store;
+            })
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -29,8 +111,8 @@ export default function CartScreen() {
 
             {/* 상단 전체선택/삭제 */}
             <View style={styles.cartTopContainer}>
-                <Pressable style={styles.cartTopLeftSection} onPress={() => setSelectAll(!selectAll)}>
-                    <Ionicons name="square-outline" size={20} color={'#666'} />
+                <Pressable style={styles.cartTopLeftSection} onPress={handleSelectAll}>
+                    <Ionicons name={selectAll ? "checkbox" : "square-outline"} size={20} color={selectAll ? '#EF7810' : '#666'} />
                     <Text style={styles.cartTopSelectAllText}>전체선택</Text>
                 </Pressable>
                 <View style={styles.cartTopDeleteContainer}>
@@ -45,151 +127,56 @@ export default function CartScreen() {
             </View>
 
             <ScrollView>
-                <View style={styles.cartItemContainer}>
-                    <View style={styles.cartStoreInfoContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <Text style={styles.cartStoreNameText}>너무 졸리다</Text>
-                    </View>
-                    {/* 상품 1 */}
-                    <View style={styles.cartItemDetailContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <View style={styles.cartItemImgContainer}>
-                            <Text>상품이미지</Text>
-                        </View>
-                        <View style={styles.cartItemInfoContainer}>
-                            <Text style={styles.cartItemNmText}>쫀쿠 치즈맛</Text>
-                            <View style={styles.cartItemPriceContainer}>
-                                <Text style={styles.cartItemSalePriceText}>9,000원</Text>
-                                <Text style={styles.cartItemOriginalPriceText}>10,000원</Text>
-                            </View>
-                            <View style={styles.cartItemQtyContainer}>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>−</Text>
-                                </Pressable>
-                                <Text style={styles.cartItemQtyText}>2</Text>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>+</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <Pressable style={styles.cartItemDeleteButton}>
-                            <Text style={styles.cartItemDeleteButtonText}>×</Text>
+                {cartItems.map((store) => (
+                    <View key={store.id} style={styles.cartItemContainer}>
+                        <Pressable
+                            style={styles.cartStoreInfoContainer}
+                            onPress={() => handleStoreSelect(store.id)}
+                        >
+                            <Ionicons name={store.selected ? "checkbox" : "square-outline"} size={20} color={store.selected ? '#EF7810' : '#666'} />
+                            <Text style={styles.cartStoreNameText}>{store.storeName}</Text>
                         </Pressable>
-                    </View>
-                    <View style={styles.cartItemEachPriceContainer}>
-                        <Text style={styles.cartItemEachText}>상품 가격</Text>
-                        <Text style={styles.cartItemEachPriceText}>18,000원</Text>
-                    </View>
-
-                    {/* 상품 2 */}
-                    <View style={styles.cartItemDetailContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <View style={styles.cartItemImgContainer}>
-                            <Text>상품이미지</Text>
-                        </View>
-                        <View style={styles.cartItemInfoContainer}>
-                            <Text style={styles.cartItemNmText}>쫀쿠 초코맛</Text>
-                            <View style={styles.cartItemPriceContainer}>
-                                <Text style={styles.cartItemSalePriceText}>9,000원</Text>
-                                <Text style={styles.cartItemOriginalPriceText}>10,000원</Text>
-                            </View>
-                            <View style={styles.cartItemQtyContainer}>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>−</Text>
+                        {store.products.map((product) => (
+                            <View key={product.id}>
+                                <Pressable
+                                    style={styles.cartItemDetailContainer}
+                                    onPress={() => handleProductSelect(store.id, product.id)}
+                                >
+                                    <Ionicons name={product.selected ? "checkbox" : "square-outline"} size={20} color={product.selected ? '#EF7810' : '#666'} />
+                                    <View style={styles.cartItemImgContainer}>
+                                        <Text>상품이미지</Text>
+                                    </View>
+                                    <View style={styles.cartItemInfoContainer}>
+                                        <Text style={styles.cartItemNmText}>{product.name}</Text>
+                                        <View style={styles.cartItemPriceContainer}>
+                                            <Text style={styles.cartItemSalePriceText}>{product.salePrice}</Text>
+                                            <Text style={styles.cartItemOriginalPriceText}>{product.originalPrice}</Text>
+                                        </View>
+                                        <View style={styles.cartItemQtyContainer}>
+                                            <Pressable style={styles.cartItemQtyButton}>
+                                                <Text style={styles.cartItemQtyText}>−</Text>
+                                            </Pressable>
+                                            <Text style={styles.cartItemQtyText}>{product.qty}</Text>
+                                            <Pressable style={styles.cartItemQtyButton}>
+                                                <Text style={styles.cartItemQtyText}>+</Text>
+                                            </Pressable>
+                                        </View>
+                                    </View>
                                 </Pressable>
-                                <Text style={styles.cartItemQtyText}>1</Text>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>+</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <Pressable style={styles.cartItemDeleteButton}>
-                            <Text style={styles.cartItemDeleteButtonText}>×</Text>
-                        </Pressable>
-                    </View>
-                    <View style={styles.cartItemEachPriceContainer}>
-                        <Text style={styles.cartItemEachText}>상품 가격</Text>
-                        <Text style={styles.cartItemEachPriceText}>9,000원</Text>
-                    </View>
-
-                    <View style={styles.cartItemDetailTotalContainer}>
-                        <Text style={styles.cartItemTotalText}>총 금액</Text>
-                        <Text style={styles.cartItemTotalSalePriceText}>27,000원</Text>
-                    </View>
-                </View>
-
-                <View style={styles.cartItemContainer}>
-                    <View style={styles.cartStoreInfoContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <Text style={styles.cartStoreNameText}>너무 졸리다</Text>
-                    </View>
-                    {/* 상품 1 */}
-                    <View style={styles.cartItemDetailContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <View style={styles.cartItemImgContainer}>
-                            <Text>상품이미지</Text>
-                        </View>
-                        <View style={styles.cartItemInfoContainer}>
-                            <Text style={styles.cartItemNmText}>쫀쿠 치즈맛</Text>
-                            <View style={styles.cartItemPriceContainer}>
-                                <Text style={styles.cartItemSalePriceText}>9,000원</Text>
-                                <Text style={styles.cartItemOriginalPriceText}>10,000원</Text>
-                            </View>
-                            <View style={styles.cartItemQtyContainer}>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>−</Text>
-                                </Pressable>
-                                <Text style={styles.cartItemQtyText}>2</Text>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>+</Text>
+                                <Pressable
+                                    style={styles.cartItemDeleteButton}
+                                    onPress={() => handleProductSelect(store.id, product.id)}
+                                >
+                                    <Text style={styles.cartItemDeleteButtonText}>×</Text>
                                 </Pressable>
                             </View>
+                        ))}
+                        <View style={styles.cartItemDetailTotalContainer}>
+                            <Text style={styles.cartItemTotalText}>총 금액</Text>
+                            <Text style={styles.cartItemTotalSalePriceText}>{store.totalPrice}</Text>
                         </View>
-                        <Pressable style={styles.cartItemDeleteButton}>
-                            <Text style={styles.cartItemDeleteButtonText}>×</Text>
-                        </Pressable>
                     </View>
-                    <View style={styles.cartItemEachPriceContainer}>
-                        <Text style={styles.cartItemEachText}>상품 가격</Text>
-                        <Text style={styles.cartItemEachPriceText}>18,000원</Text>
-                    </View>
-
-                    {/* 상품 2 */}
-                    <View style={styles.cartItemDetailContainer}>
-                        <Ionicons name="square-outline" size={20} color={'#666'} />
-                        <View style={styles.cartItemImgContainer}>
-                            <Text>상품이미지</Text>
-                        </View>
-                        <View style={styles.cartItemInfoContainer}>
-                            <Text style={styles.cartItemNmText}>쫀쿠 초코맛</Text>
-                            <View style={styles.cartItemPriceContainer}>
-                                <Text style={styles.cartItemSalePriceText}>9,000원</Text>
-                                <Text style={styles.cartItemOriginalPriceText}>10,000원</Text>
-                            </View>
-                            <View style={styles.cartItemQtyContainer}>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>−</Text>
-                                </Pressable>
-                                <Text style={styles.cartItemQtyText}>1</Text>
-                                <Pressable style={styles.cartItemQtyButton}>
-                                    <Text style={styles.cartItemQtyText}>+</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <Pressable style={styles.cartItemDeleteButton}>
-                            <Text style={styles.cartItemDeleteButtonText}>×</Text>
-                        </Pressable>
-                    </View>
-                    <View style={styles.cartItemEachPriceContainer}>
-                        <Text style={styles.cartItemEachText}>상품 가격</Text>
-                        <Text style={styles.cartItemEachPriceText}>9,000원</Text>
-                    </View>
-
-                    <View style={styles.cartItemDetailTotalContainer}>
-                        <Text style={styles.cartItemTotalText}>총 금액</Text>
-                        <Text style={styles.cartItemTotalSalePriceText}>27,000원</Text>
-                    </View>
-                </View>
+                ))}
             </ScrollView>
 
             {/* 결제 정보 */}

@@ -1,64 +1,103 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffffff',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
+  },
   welcome: {
     color: "#FF6F2B",
-    marginBottom: 5
-  },
-  header: {
-    fontSize: 20
+    marginBottom: 5,
+    fontSize: 18,
+    fontWeight: "bold"
   },
   practiceView: {
     flex: 1,
     backgroundColor: "white",
   },
   viewMargin: {
-    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    marginVertical: 1,
   },
   inputContainer: {
     margin: 20,
   },
   inputComponent: {
-    flexDirection: "row",
-    height: 35,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   inputStyle: {
-    backgroundColor: "#F2F2F2",
-    borderRadius: 5,
-    flex: 1
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 18,
+    color: '#919191ff',
+    backgroundColor: '#fff',
   },
   inputTitle: {
-    color: "#FF6F2B"
+    fontSize: 20,
+    color: '#EF7810',
+    marginBottom: 8,
   },
   pressableStyle: {
-    marginLeft: 10,
-    backgroundColor: "white",
-    justifyContent: "center",
-    padding: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     borderWidth: 1,
-    borderRadius: 5,
-    borderColor: "black"
+    borderColor: '#EF7810',
+    backgroundColor: '#fff',
+    borderRadius: 6,
   },
   pressableTextStyle: {
-    fontWeight: "bold",
-    color: "black",
-    fontSize: 15,
+    fontSize: 18,
+    color: '#EF7810',
   },
   descriptionStyle: {
-    fontSize: 11,
-    color: "#C2BE3D"
+    fontSize: 16,
+    color: '#999',
+    marginTop: 6,
   },
   registButton: {
     height: 50,
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth:1,
+    borderWidth: 1,
     borderRadius: 5,
-    borderColor:"#FF6F2B"
+    borderColor: "#FF6F2B"
   },
   registButtonText: {
-    fontWeight: "bold",
+    fontSize: 20,
     color: "#FF6F2B",
   }
 });

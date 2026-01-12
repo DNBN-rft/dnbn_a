@@ -53,7 +53,7 @@ export default function Mypage() {
             <View>
               <TouchableOpacity
                 style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/purchase")}
+                onPress={() => router.navigate("/(cust)/orderList")}
               >
                 <Text style={styles.contentText}>구매내역</Text>
                 <Ionicons name="chevron-forward" size={24} color="black" />
@@ -80,7 +80,7 @@ export default function Mypage() {
             <View>
               <TouchableOpacity
                 style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/tabs/custhome")}
+                onPress={() => router.navigate("/(cust)/category")}
               >
                 <Text style={styles.contentText}>카테고리 설정</Text>
                 <Ionicons name="chevron-forward" size={24} color="black" />
@@ -121,7 +121,7 @@ export default function Mypage() {
             <View>
               <TouchableOpacity
                 style={styles.contentContainer}
-                onPress={() => router.navigate("/(cust)/tabs/custhome")}
+                onPress={() => router.navigate("/(cust)/report")}
               >
                 <Text style={styles.contentText}>신고</Text>
                 <Ionicons name="chevron-forward" size={24} color="black" />

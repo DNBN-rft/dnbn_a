@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
     storeNameText: {
-        fontSize: 13,
+        fontSize: 20,
         color: '#999',
         marginBottom: 4,
     },
@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
         gap: 8,
     },
     storeAddrDetailText: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
     },
@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     iconText: {
-        fontSize: 12,
+        fontSize: 18,
         color: '#666',
     },
     storeWishContainer: {
@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#f0f0f0',
     },
     rateText: {
-        fontSize: 14,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
         marginBottom: 12,
@@ -116,9 +116,9 @@ export const styles = StyleSheet.create({
         paddingVertical: 5,
     },
     descriptionText: {
-        fontSize: 13,
+        fontSize: 18,
         color: '#666',
-        lineHeight: 18,
+        lineHeight: 24,
     },
     tabContainer: {
         flexDirection: 'row',
@@ -137,7 +137,7 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#EF7810',
     },
     tabText: {
-        fontSize: 14,
+        fontSize: 20,
         color: '#999',
         fontWeight: '500',
     },
@@ -172,17 +172,17 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 8,
     },
-    reviewRegNmContainer: {
-        fontSize: 13,
+    reviewRegNmText: {
+        fontSize: 20,
         fontWeight: '600',
         color: '#000',
     },
-    reviewRegDateContainer: {
-        fontSize: 12,
+    reviewRegDateText: {
+        fontSize: 18,
         color: '#999',
     },
-    reviewRateContainer: {
-        fontSize: 12,
+    reviewRateText: {
+        fontSize: 18,
         color: '#ff9800',
         fontWeight: '600',
         marginBottom: 8,
@@ -197,10 +197,10 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 8,
     },
-    reviewContentContainer: {
-        fontSize: 12,
+    reviewContentText: {
+        fontSize: 18,
         color: '#666',
-        lineHeight: 16,
+        lineHeight: 24,
     },
     storeProductContainer: {
         paddingHorizontal: 16,
@@ -212,43 +212,57 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     storeProductItemContainer: {
-        width: '48%',
+        width: 190,
         height: 250,
         backgroundColor: '#fff',
+        justifyContent: 'flex-start',
+        overflow: 'hidden',
+        borderRadius: 8,
+        elevation: 2,
+        marginBottom: 16,
+        paddingVertical: 12,
     },
     storeProductImgContainer: {
-        width: '100%',
+        width: 180,
         height: 140,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#f0f0f0',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 10,
     },
-    storeProductNmContainer: {
-        fontSize: 12,
+    storeProductNmText: {
+        fontSize: 20,
         color: '#333',
-        lineHeight: 16,
+        lineHeight: 24,
+        marginBottom: 4,
+        fontWeight: 'bold',
     },
     storeProductPriceContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         gap:6,
+        marginBottom: 4,
     },
     salePercentText: {
-        fontSize: 12,
+        fontSize: 18,
         fontWeight: '600',
-        color: '#ff6b6b',
+        color: '#EF7810',
+    },
+    originalPriceText:{
+        fontSize: 18,
+        textDecorationLine: 'line-through',
+        color: '#999',
     },
     priceText: {
-        fontSize: 12,
+        fontSize: 18,
         fontWeight: '600',
         color: '#000',
     },
     ratingText: {
-        fontSize: 11,
+        fontSize: 18,
         color: '#999',
-       lineHeight: 15,
+       lineHeight: 24,
     },
 });

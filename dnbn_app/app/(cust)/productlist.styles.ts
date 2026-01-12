@@ -1,4 +1,3 @@
-import { store } from "expo-router/build/global-state/router-store";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -32,60 +31,70 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    storeItemContainer: {
+    listItemWrapper:{
         flex: 1,
         flexDirection: "row",
+        justifyContent: "flex-start",
+    },
+    productItemContainer: {
+        flexDirection: "column",
+        width: 180,
         backgroundColor: "#fff",
-        marginVertical: 8,
-        marginHorizontal: 14,
         borderRadius: 8,
         overflow: "hidden",
         elevation: 2,
-        borderBottomWidth: 1,
         paddingBottom: 16,
-        borderColor: "rgba(0, 0, 0, 0.05)",
+        margin: "1%",
     },
-    storeImage: {
-        width: 150,
+    productImage: {
+        width: 160,
         height: 140,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: "#eee",
+        marginBottom: 8,
     },
-    storeInfo: {
+    productInfo: {
         marginLeft: 12,
         flex: 1,
         justifyContent: "center",
         alignSelf: "flex-start",
     },
-    storeHeader:{
-        flexDirection: "row",
-        alignItems: "center",
+    productName: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#333",
         marginBottom: 4,
     },
     storeName: {
-        fontSize: 20,
+        fontSize: 18,
+        marginBottom: 8,
+        color: "#666",
+    },
+    priceContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    discountText: {
+        fontSize: 18,
+        color: "#EF7810",
+        marginLeft: 10,
         fontWeight: "bold",
-        marginBottom: 4,
+    },
+    priceText: {
+        fontSize: 18,
+        color: "#333",
+        fontWeight: "bold",
+    },
+    originalPriceText: {
+        fontSize: 18,
+        color: "#999",
+        textDecorationLine: "line-through",
     },
     reviewText: {
-        fontSize: 18,
-        color: "#666",
-        marginBottom: 8,
-    },
-    categoryText: {
-        marginLeft: 8,
         fontSize: 16,
-        color: "#666",
-        marginBottom: 4,
-    },
-    addrText: {
-        fontSize: 18,
-        color: "#666",
-        marginBottom: 4,
-    },
-    totalProductsText: {
-        fontSize: 18,
-        color: "#666",
-    },
+        color: "#888",
+        marginTop: 4,
+    }
 });
