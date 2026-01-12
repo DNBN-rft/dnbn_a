@@ -340,7 +340,11 @@ export default function SearchView() {
   ];
 
   return (
-    <View style={[styles.searchResultView, {paddingTop: insets.top}]}>
+    <View style={styles.searchResultView}>
+
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff"}} />
+      )}
 
       <View style={styles.header}>
         <TouchableOpacity
@@ -375,27 +379,36 @@ export default function SearchView() {
             <Text style={styles.tabText}>상점</Text>
           </Pressable>
         </View>
+
         <View style={styles.searchResult}>
           <View style={styles.infoContainer}>
             <Text>
               총 {activeTab === "product" ? products.length : stores.length}개
             </Text>
+
             <Text>리뷰 순</Text>
           </View>
+
           {activeTab === "product" ? (
             <FlatList
               data={products}
               keyExtractor={(item) => item.id}
               renderItem={({ item: product }) => (
                 <View style={styles.products}>
-                  <Image source={product.uri} style={styles.productImage} />
+                  <View>
+                    <Image source={product.uri} style={styles.productImage} />
+                  </View>
+
                   <View style={styles.productInfo}>
                     <Text>{product.name}</Text>
+
                     <View style={styles.priceInfo}>
                       <Text>{product.discountRate}% </Text>
                       <Text>{product.price}원</Text>
                     </View>
+
                     <Text>{product.description}</Text>
+
                     <View style={styles.reviewInfo}>
                       <Ionicons name="star" size={16} color="#FFD700" />
                       <Text> {product.averageRate}</Text>
@@ -414,12 +427,17 @@ export default function SearchView() {
               renderItem={({ item: store }) => (
                 <View style={styles.stores}>
                   <Image source={store.uri} style={styles.storeImage} />
+                  
                   <View style={styles.storeInfo}>
                     <Text>{store.name}</Text>
+
                     <Text>{store.description}</Text>
+                    
                     <View style={styles.reviewInfo}>
                       <Ionicons name="star" size={16} color="#FFD700" />
+
                       <Text> {store.averageRate}</Text>
+                      
                       <Text>({store.reviewCount})</Text>
                     </View>
                   </View>

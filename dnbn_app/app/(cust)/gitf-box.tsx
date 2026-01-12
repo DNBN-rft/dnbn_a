@@ -383,7 +383,7 @@ export default function GiftBox() {
               <Text style={styles.countText}>
                 총 {activeTab === "notUsed" ? notUsedProducts.length : usedProducts.length}개
               </Text>
-        </View>
+          </View>
 
         {activeTab === "notUsed" ? (
           <FlatList
@@ -391,13 +391,19 @@ export default function GiftBox() {
             numColumns={2}
             columnWrapperStyle={{ gap: 10 }}
             keyExtractor={(item) => item.id}
-            renderItem={({ item: product }) => (
+            renderItem={({ item: notUsed }) => (
               <TouchableOpacity style={styles.products}
                 onPress={() => router.navigate('/(cust)/use-gift')}
               >
-                <Image source={product.uri} style={styles.productImage} />
-                <Text style={styles.notUsedAndUsedText}>미사용 상품 이름</Text>
-                <Text style={styles.date}>2026-01-07</Text>
+                <View style={styles.productImageContainer}>
+                  <Image source={notUsed.uri} style={styles.productImage} />
+                </View>
+                
+                <View>
+                  <Text style={styles.notUsedAndUsedText}>미사용 상품 이름</Text>
+
+                  <Text style={styles.date}>2026-01-07</Text>
+                </View>
               </TouchableOpacity>
             )}
             showsVerticalScrollIndicator={false}
@@ -409,10 +415,13 @@ export default function GiftBox() {
             numColumns={2}
             columnWrapperStyle={{ gap: 10 }}
             keyExtractor={(item) => item.id}
-            renderItem={({ item: store }) => (
+            renderItem={({ item: used }) => (
               <TouchableOpacity style={styles.products}>
-                <Image source={store.uri} style={styles.productImage} />
+                <View style={styles.productImageContainer}>
+                  <Image source={used.uri} style={styles.productImage} />
+                </View>
                 <Text style={styles.notUsedAndUsedText}>사용 상품 이름</Text>
+
                 <Text style={styles.date}>2026-01-07</Text>
               </TouchableOpacity>
             )}

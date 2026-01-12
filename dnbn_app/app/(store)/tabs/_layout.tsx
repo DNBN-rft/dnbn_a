@@ -22,8 +22,9 @@ export default function StoreTabsLayout() {
         options={{
           title: "홈",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused}
+          ) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -33,19 +34,19 @@ export default function StoreTabsLayout() {
         options={{
           title: "상품관리",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cube-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "cube" : "cube-outline"} size={size} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="storesales"
+        name="storesale"
         options={{
           title: "할인관리",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="pricetag-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "pricetag" : "pricetag-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -55,8 +56,8 @@ export default function StoreTabsLayout() {
         options={{
           title: "네고관리",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "chatbubbles" : "chatbubbles-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -66,8 +67,8 @@ export default function StoreTabsLayout() {
         options={{
           title: "마이페이지",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "person" : "person-outline"} size={size} color={color} />
           ),
         }}
       />
