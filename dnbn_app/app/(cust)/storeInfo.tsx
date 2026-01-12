@@ -88,7 +88,8 @@ export default function StoreInfo() {
 
         {/* 별점 정보 */}
         <View style={styles.storeRateInfoContainer}>
-          <Text style={styles.rateText}>★ 3.8(10)</Text>
+          <Text style={styles.rateText}>
+            <Ionicons name="star" size={16} color="#FFD700" /> 3.8(10)</Text>
         </View>
 
         {/* 상품/리뷰 탭 */}

@@ -88,7 +88,7 @@ export default function ReviewRegScreen() {
                             <Ionicons
                                 name={rating >= star ? "star" : "star-outline"}
                                 size={32}
-                                color="#EF7810"
+                                color="#FFD700"
                             />
                         </Pressable>
                     ))}

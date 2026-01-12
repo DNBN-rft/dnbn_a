@@ -56,9 +56,6 @@ export default function WishlistScreen() {
                     )}>
                 </FlatList>
             </View>
-            {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-            )}
         </View>
     );
 }

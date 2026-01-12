@@ -231,7 +231,7 @@ export default function SearchView() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          문의사항
+          검색
         </Text>
         <View style={styles.placeholder} />
       </View>
@@ -301,12 +301,6 @@ export default function SearchView() {
           />
         </View>
       </View>
-
-      {
-        insets.bottom > 0 && (
-          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-        )
-      }
     </View >
   );
 }
