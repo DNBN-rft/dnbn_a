@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
@@ -31,6 +31,15 @@ export const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -38,9 +47,8 @@ export const styles = StyleSheet.create({
   },
   addProductButton: {
     borderWidth: 1,
-    borderColor: "#ef7810",
+    borderColor: "#EF7810",
     marginHorizontal: 20,
-    marginBottom: 10,
     paddingVertical: 10,
     borderRadius: 10,
     justifyContent: "center",
@@ -93,7 +101,7 @@ export const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#ef7810",
+    color: "#EF7810",
   },
   productButtonContainer: {
     flexDirection: "row",
@@ -105,7 +113,7 @@ export const styles = StyleSheet.create({
   saleButton: {
     flex: 1,
     backgroundColor: "#fff",
-    borderColor: "#ef7810",
+    borderColor: "#EF7810",
     borderWidth: 1,
     paddingVertical: 6,
     borderRadius: 6,
@@ -114,14 +122,14 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   saleButtonText: {
-    color: "#ef7810",
+    color: "#EF7810",
     fontSize: 14,
     fontWeight: "bold",
   },
   negoButton: {
     flex: 1,
     backgroundColor: "#fff",
-    borderColor: "#ef7810",
+    borderColor: "#EF7810",
     borderWidth: 1,
     paddingVertical: 6,
     borderRadius: 6,
@@ -130,7 +138,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   negoButtonText: {
-    color: "#ef7810",
+    color: "#EF7810",
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -145,7 +153,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
+
   // 모달 스타일
   modalOverlay: {
     flex: 1,
@@ -178,9 +186,9 @@ export const styles = StyleSheet.create({
   },
   modalDivider: {
     height: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#F0F0F0",
   },
-  
+
   deleteModalContent: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -218,7 +226,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F5F5F5",
   },
   cancelButtonText: {
     fontSize: 16,
@@ -226,7 +234,7 @@ export const styles = StyleSheet.create({
     color: "#666",
   },
   confirmButton: {
-    backgroundColor: "#ff3b30",
+    backgroundColor: "#FF3B30",
   },
   confirmButtonText: {
     fontSize: 16,

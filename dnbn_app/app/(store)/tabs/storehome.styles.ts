@@ -65,6 +65,7 @@ export const styles = StyleSheet.create({
   },
   quickMenu: {
     marginTop: 8,
+    flex: 1,
   },
   sectionTitle: {
     fontSize: 18,
