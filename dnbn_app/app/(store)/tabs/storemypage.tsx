@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storemypage.styles";
 
@@ -33,7 +33,9 @@ export default function StoreMypage() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0}}
+      >
         <View style={styles.contentWrapper}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>회원 정보</Text>

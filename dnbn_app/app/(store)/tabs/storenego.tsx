@@ -71,6 +71,7 @@ export default function StoreNego() {
 
       {activeTab === "list" ? (
         <FlatList
+          contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
           data={negoList}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
@@ -117,6 +118,7 @@ export default function StoreNego() {
         ></FlatList>
       ) : (
           <FlatList
+            contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
             data={negoRequest}
             keyExtractor={item => item.id}
             showsVerticalScrollIndicator={false}

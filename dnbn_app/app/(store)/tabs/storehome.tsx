@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storehome.styles";
 
@@ -23,7 +23,10 @@ export default function StoreHome() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0}}
+      >
         <View style={styles.contentWrapper}>
           <Text style={styles.welcomeText}>환영합니다! 가맹점님</Text>
 
@@ -90,6 +93,7 @@ export default function StoreHome() {
           </View>
         </View>
       </ScrollView>
+
     </View>
   );
 }

@@ -99,8 +99,7 @@ export const styles = StyleSheet.create({
     color: "#666",
     lineHeight: 20,
   },
-  hideInfoContainer: {
-    flexDirection: "row",
+  hideInfosContainer: {
     justifyContent: "center",
     alignItems: "center",
     gap: 6,
@@ -110,8 +109,31 @@ export const styles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 8,
   },
+  hideInfoHeader: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  hideInfoIcon: {
+    lineHeight: 24,
+  },
   hideInfoText: {
-    fontSize: 13,
+    fontSize: 14,
+    color: "#999",
+  },
+  hideClearInfoContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#d1d1d1",
+    backgroundColor: "#f1f1f1",
+    borderRadius: 4,
+    paddingVertical: 8,
+  },
+  hideClearInfoText: {
+    fontSize: 14,
     color: "#999",
   },
   actionButtonsContainer: {
@@ -157,6 +179,95 @@ export const styles = StyleSheet.create({
     backgroundColor: "#999",
   },
   hiddenButtonText: {
+    color: "#fff",
+  },
+
+
+  // 모달 스타일
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    minWidth: 160,
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
+  },
+
+  deleteModalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    width: "85%",
+    maxWidth: 340,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  deleteModalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  deleteModalMessage: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 22,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteModalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#F5F5F5",
+  },
+  modalCancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#666",
+  },
+  confirmButton: {
+    backgroundColor: "#FF3B30",
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "#fff",
   },
 });
