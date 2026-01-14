@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./detailnego.styles";
+import { styles } from "./nego-history-detail.styles";
 
-export default function DetailNegoProductPage() {
+export default function NegoHistoryDetailPage() {
   const insets = useSafeAreaInsets();
 
   return (
@@ -21,7 +21,7 @@ export default function DetailNegoProductPage() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>네고 상세</Text>
+        <Text style={styles.title}>네고 이력 상세</Text>
         <View style={styles.placeholder}></View>
       </View>
 
@@ -30,7 +30,7 @@ export default function DetailNegoProductPage() {
           <View style={styles.contentRow}>
             <View style={styles.productImagesContainer}>
               <View style={styles.productMetaContainer}>
-                <Text style={styles.productStatus}>네고 진행 중</Text>
+                <Text style={styles.productStatus}>완료</Text>
                 <Text style={styles.registrationDate}>등록일: 2024.01.12</Text>
               </View>
               
@@ -44,7 +44,8 @@ export default function DetailNegoProductPage() {
                 
                 <Image 
                   style={styles.productMainImage}
-                  source={{ uri: 'https://via.placeholder.com/300' }}
+                  source={require('@/assets/images/image1.jpg')}
+                  resizeMode="contain"
                 />
                 
                 <TouchableOpacity
@@ -58,27 +59,27 @@ export default function DetailNegoProductPage() {
               <View style={styles.productSubImages}>
                 <Image 
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={require('@/assets/images/image1.jpg')}
                 />
                 <Image 
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={require('@/assets/images/image1.jpg')}
                 />
                 <Image 
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={require('@/assets/images/image1.jpg')}
                 />
               </View>
             </View>
 
             <View style={styles.productInfoContainer}>
-              <Text style={styles.categoryName}>전자제품</Text>
-              <Text style={styles.productName}>고급 무선 이어폰</Text>
-              <Text style={styles.productPrice}>₩ 89,000</Text>
-              <Text style={styles.productStock}>재고: 15개</Text>
+              <Text style={styles.categoryName}>음료</Text>
+              <Text style={styles.productName}>아메리카노</Text>
+              <Text style={styles.productPrice}>₩ 4,500</Text>
+              <Text style={styles.productStock}>재고: 20개</Text>
               <Text style={styles.productDescription}>
-                고음질 사운드를 제공하는 프리미엄 무선 이어폰입니다.
-                노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.
+                고급 원두로 만든 프리미엄 아메리카노입니다.
+                깊고 진한 커피 향이 일품입니다.
               </Text>
             </View>
           </View>
@@ -86,17 +87,7 @@ export default function DetailNegoProductPage() {
           <View style={styles.productStatusContainer}>
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>네고 기간</Text>
-              <Text style={styles.statusInfoContent}>2024.01.12 10:00 ~ 2024.01.13 10:00</Text>
-            </View>
-
-            <View style={styles.statusInfoRow}>
-              <Text style={styles.statusInfoTitle}>상품 구분</Text>
-              <Text style={styles.statusInfoContent}>일반</Text>
-            </View>
-
-            <View style={styles.statusInfoRow}>
-              <Text style={styles.statusInfoTitle}>상품 타입</Text>
-              <Text style={styles.statusInfoContent}>일반</Text>
+              <Text style={styles.statusInfoContent}>2024.01.10 10:00 ~ 2024.01.12 10:00</Text>
             </View>
           </View>
         </View>
