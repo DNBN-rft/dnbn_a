@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./nego-history.styles";
 
@@ -118,7 +118,6 @@ export default function NegoHistory() {
 
       {activeTab === "product" ? (
         <FlatList
-          contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
           data={productList}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
@@ -170,7 +169,6 @@ export default function NegoHistory() {
         />
       ) : (
         <FlatList
-          contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
           data={requestList}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}

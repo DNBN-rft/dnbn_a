@@ -30,6 +30,16 @@ export default function ReviewAnswer() {
   const [isRegist, setIsRegist] = useState(reviewData.reviewAnswerContent !== null);
   const [answerText, setAnswerText] = useState(reviewData.reviewAnswerContent || "");
 
+  const handleRegisterAnswer = () => { 
+    if (answerText.trim() === "") { 
+      alert("답변 내용을 입력해주세요.");
+      return;
+    } else {
+      setIsRegist(true)      
+    }
+  }
+  
+  
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -132,7 +142,7 @@ export default function ReviewAnswer() {
                     // 등록 버튼만 (등록 전 상태)
                     <TouchableOpacity 
                       style={styles.registerButton}
-                      onPress={() => setIsRegist(true)}
+                      onPress={() => handleRegisterAnswer()}
                     >
                       <Text style={styles.registerButtonText}>등록</Text>
                     </TouchableOpacity>
