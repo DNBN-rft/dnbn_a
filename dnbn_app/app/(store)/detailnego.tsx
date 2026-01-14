@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./detailproduct.styles";
+import { styles } from "./detailnego.styles";
 
-export default function DetailProductPage() {
+export default function DetailNegoProductPage() {
   const insets = useSafeAreaInsets();
 
   return (
@@ -21,7 +21,7 @@ export default function DetailProductPage() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>상품 상세</Text>
+        <Text style={styles.title}>네고 상세</Text>
         <View style={styles.placeholder}></View>
       </View>
 
@@ -30,7 +30,7 @@ export default function DetailProductPage() {
           <View style={styles.contentRow}>
             <View style={styles.productImagesContainer}>
               <View style={styles.productMetaContainer}>
-                <Text style={styles.productStatus}>판매 중</Text>
+                <Text style={styles.productStatus}>네고 진행 중</Text>
                 <Text style={styles.registrationDate}>등록일: 2024.01.12</Text>
               </View>
               
@@ -85,18 +85,13 @@ export default function DetailProductPage() {
 
           <View style={styles.productStatusContainer}>
             <View style={styles.statusInfoRow}>
-              <Text style={styles.statusInfoTitle}>할인 여부</Text>
-              <Text style={styles.statusInfoContent}>할인 중</Text>
-            </View>
-
-            <View style={styles.statusInfoRow}>
-              <Text style={styles.statusInfoTitle}>네고 여부</Text>
-              <Text style={styles.statusInfoContent}>네고 중</Text>
+              <Text style={styles.statusInfoTitle}>네고 기간</Text>
+              <Text style={styles.statusInfoContent}>2024.01.12 10:00 ~ 2024.01.13 10:00</Text>
             </View>
 
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>상품 구분</Text>
-              <Text style={styles.statusInfoContent}>전체</Text>
+              <Text style={styles.statusInfoContent}>일반</Text>
             </View>
 
             <View style={styles.statusInfoRow}>

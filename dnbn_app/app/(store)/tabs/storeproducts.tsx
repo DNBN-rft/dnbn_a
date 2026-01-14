@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storeproducts.styles";
 export default function StoreProducts() {
@@ -9,6 +10,22 @@ export default function StoreProducts() {
   const [detailModal, setDetailModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedProductCode, setSelectedProductCode] = useState<string | null>(null);
+  const [saleModal, setSaleModal] = useState(false);
+  const [negoModal, setNegoModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [saleStartDate, setSaleStartDate] = useState(new Date());
+  const [discountType, setDiscountType] = useState<'rate' | 'price'>('rate'); // 할인률 또는 할인가
+  const [discountValue, setDiscountValue] = useState('');
+  const [currentProductPrice, setCurrentProductPrice] = useState(10000); // 예시로 현재 상품 가격
+  const [discountDurationHours, setDiscountDurationHours] = useState(24); // DB에서 가져온 할인 기간(시간)
+  
+  // 네고 모달용 state
+  const [showNegoDatePicker, setShowNegoDatePicker] = useState(false);
+  const [showNegoTimePicker, setShowNegoTimePicker] = useState(false);
+  const [negoStartDate, setNegoStartDate] = useState(new Date());
+  const [negoDurationHours, setNegoDurationHours] = useState(24); // DB에서 가져온 네고 기간(시간)
+
   const products = [
     { id: "1", uri: require("@/assets/images/image1.jpg"), name: "상품 1", price: 10000, categoryName: "카테고리 1"},
     { id: "2", uri: require("@/assets/images/image1.jpg"), name: "상품 2", price: 20000, categoryName: "카테고리 2"},
@@ -29,12 +46,22 @@ export default function StoreProducts() {
         <Text style={styles.title}>
           상품 관리
         </Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.navigate("/(store)/addproduct")}
+        >
+          <Ionicons name="add" size={28} color="#EF7810" />
+        </TouchableOpacity>
       </View>
       <FlatList
         data={products}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0,
+          paddingHorizontal: 16,
+          paddingTop: 8,
+        }}
         renderItem={({ item: products }) => (
           <View style={styles.content}>
             <TouchableOpacity style={styles.productTouchable}>
@@ -43,8 +70,10 @@ export default function StoreProducts() {
                   <Image source={products.uri} style={styles.productImage} resizeMode="cover"/>
                 </View>
                 <View style={styles.productInfoContainer}>
-                  <Text style={styles.categoryName}>{products.categoryName}</Text>
-                  <Text style={styles.productName}>{products.name}</Text>
+                  <View style={styles.categoryTag}>
+                    <Text style={styles.categoryName}>{products.categoryName}</Text>
+                  </View>
+                  <Text style={styles.productName} numberOfLines={2}>{products.name}</Text>
                   <Text style={styles.price}>
                     {products.price.toLocaleString()}원
                   </Text>
@@ -52,10 +81,14 @@ export default function StoreProducts() {
               </View>
             </TouchableOpacity>
             <View style={styles.productButtonContainer}>
-              <TouchableOpacity style={styles.saleButton}>
+              <TouchableOpacity style={styles.saleButton}
+              onPress={() => setSaleModal(true)}>
+                <Ionicons name="pricetag-outline" size={16} color="#EF7810" />
                 <Text style={styles.saleButtonText}>할인 등록</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.negoButton}>
+              <TouchableOpacity style={styles.negoButton}
+              onPress={() => setNegoModal(true)}>
+                <Ionicons name="chatbubble-outline" size={16} color="#4B5563" />
                 <Text style={styles.negoButtonText}>네고 등록</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.moreButton}
@@ -64,19 +97,12 @@ export default function StoreProducts() {
                 setSelectedProductCode(products.id);
                 setDetailModal(true);
               }}>
-                <Text><Ionicons name="ellipsis-horizontal" size={20} color="#666" /></Text>
+                <Ionicons name="ellipsis-horizontal" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
           </View>
         )}
-      ></FlatList>
-      <TouchableOpacity
-        onPress={() => router.navigate("/(store)/addproduct")}
-      >
-        <View style={styles.addProductButton}>
-          <Ionicons name="add" size={24} color="#EF7810" />
-        </View>
-      </TouchableOpacity>
+      />
 
       <Modal
         visible={detailModal}
@@ -168,6 +194,253 @@ export default function StoreProducts() {
             </View>
           </View>
         </View>
+      </Modal>
+
+      <Modal
+        visible={saleModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSaleModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setSaleModal(false)}
+        >
+          <View style={styles.saleModalWrapper}>
+            <TouchableOpacity 
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+              style={styles.saleModalContent}
+            >
+              <View style={styles.saleModalHeader}>
+                <Text style={styles.saleModalTitle}>할인 등록</Text>
+              </View>
+
+              <View style={styles.saleOptionGroup}>
+                <Text style={styles.saleLabel}>할인 방식 선택</Text>
+                <View style={styles.saleRadioGroup}>
+                  <TouchableOpacity 
+                    style={styles.saleRadioOption}
+                    onPress={() => {
+                      setDiscountType('rate');
+                      setDiscountValue('');
+                    }}
+                  >
+                    <View style={styles.saleRadioCircle}>
+                      {discountType === 'rate' && <View style={styles.saleRadioCircleSelected} />}
+                    </View>
+                    <Text style={styles.saleRadioText}>할인률 (%)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.saleRadioOption}
+                    onPress={() => {
+                      setDiscountType('price');
+                      setDiscountValue('');
+                    }}
+                  >
+                    <View style={styles.saleRadioCircle}>
+                      {discountType === 'price' && <View style={styles.saleRadioCircleSelected} />}
+                    </View>
+                    <Text style={styles.saleRadioText}>할인가 (원)</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.saleInputGroup}>
+                <Text style={styles.saleLabel}>할인 값</Text>
+                <TextInput 
+                  style={styles.saleInput}
+                  placeholder="숫자를 입력하세요"
+                  keyboardType="numeric"
+                  placeholderTextColor="#999"
+                  value={discountValue}
+                  onChangeText={(text) => {
+                    const numValue = parseInt(text) || 0;
+                    if (discountType === 'rate') {
+                      if (numValue >= 1 && numValue <= 100) {
+                        setDiscountValue(text);
+                      } else if (text === '') {
+                        setDiscountValue('');
+                      }
+                    } else {
+                      if (numValue >= 1 && numValue <= currentProductPrice) {
+                        setDiscountValue(text);
+                      } else if (text === '') {
+                        setDiscountValue('');
+                      }
+                    }
+                  }}
+                />
+              </View>
+
+              <View style={styles.saleInputGroup}>
+                <Text style={styles.saleLabel}>할인 시작 시간</Text>
+                <TouchableOpacity 
+                  style={styles.saleDateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                  <Text style={styles.saleDateText}>
+                    {saleStartDate.toLocaleDateString('ko-KR')} {saleStartDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+                
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={saleStartDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        setSaleStartDate(selectedDate);
+                        if (Platform.OS !== 'ios') {
+                          setShowTimePicker(true);
+                        }
+                      }
+                    }}
+                  />
+                )}
+                
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={saleStartDate}
+                    mode="time"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowTimePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        setSaleStartDate(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+              </View>
+
+              <View style={styles.saleInputGroup}>
+                <Text style={styles.saleLabel}>할인 종료일시</Text>
+                <View style={[styles.saleInput, styles.saleInputDisabled]}>
+                  <Text style={styles.saleInputDisabledText}>
+                    {(() => {
+                      const endDate = new Date(saleStartDate);
+                      endDate.setHours(endDate.getHours() + discountDurationHours);
+                      return `${endDate.toLocaleDateString('ko-KR')} ${endDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`;
+                    })()}
+                  </Text>
+                </View>
+                <Text style={styles.saleHelpText}>시작 시간으로부터 {discountDurationHours}시간 후 자동 종료</Text>
+              </View>
+
+              <View style={styles.saleModalButtons}>
+                <TouchableOpacity style={styles.saleConfirmButton}>
+                  <Text style={styles.saleConfirmButtonText}>등록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.saleCancelButton}
+                  onPress={() => setSaleModal(false)}
+                >
+                  <Text style={styles.saleCancelButtonText}>취소</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={negoModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setNegoModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setNegoModal(false)}
+        >
+          <View style={styles.saleModalWrapper}>
+            <TouchableOpacity 
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+              style={styles.saleModalContent}
+            >
+              <View style={styles.saleModalHeader}>
+                <Text style={styles.saleModalTitle}>네고 등록</Text>
+              </View>
+
+              <View style={styles.saleInputGroup}>
+                <Text style={styles.saleLabel}>네고 시작 시간</Text>
+                <TouchableOpacity 
+                  style={styles.saleDateButton}
+                  onPress={() => setShowNegoDatePicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                  <Text style={styles.saleDateText}>
+                    {negoStartDate.toLocaleDateString('ko-KR')} {negoStartDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+                
+                {showNegoDatePicker && (
+                  <DateTimePicker
+                    value={negoStartDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowNegoDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        setNegoStartDate(selectedDate);
+                        if (Platform.OS !== 'ios') {
+                          setShowNegoTimePicker(true);
+                        }
+                      }
+                    }}
+                  />
+                )}
+                
+                {showNegoTimePicker && (
+                  <DateTimePicker
+                    value={negoStartDate}
+                    mode="time"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowNegoTimePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        setNegoStartDate(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+              </View>
+
+              <View style={styles.saleInputGroup}>
+                <Text style={styles.saleLabel}>네고 종료일시</Text>
+                <View style={[styles.saleInput, styles.saleInputDisabled]}>
+                  <Text style={styles.saleInputDisabledText}>
+                    {(() => {
+                      const endDate = new Date(negoStartDate);
+                      endDate.setHours(endDate.getHours() + negoDurationHours);
+                      return `${endDate.toLocaleDateString('ko-KR')} ${endDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`;
+                    })()}
+                  </Text>
+                </View>
+                <Text style={styles.saleHelpText}>시작 시간으로부터 {negoDurationHours}시간 후 자동 종료</Text>
+              </View>
+
+              <View style={styles.saleModalButtons}>
+                <TouchableOpacity style={styles.saleConfirmButton}>
+                  <Text style={styles.saleConfirmButtonText}>등록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.saleCancelButton}
+                  onPress={() => setNegoModal(false)}
+                >
+                  <Text style={styles.saleCancelButtonText}>취소</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );

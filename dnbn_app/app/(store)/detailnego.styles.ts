@@ -51,7 +51,7 @@ export const styles = StyleSheet.create({
   productStatus: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#22c55e",
+    color: "#3b82f6",
   },
   registrationDate: {
     fontSize: 13,

@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storemypage.styles";
 
@@ -33,39 +33,46 @@ export default function StoreMypage() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0}}
+      >
         <View style={styles.contentWrapper}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>회원 정보</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push("/(store)/tabs/storehome")}
+              onPress={() => router.navigate("/(store)/storeinfo")}
             >
               <Text style={styles.menuText}>내 가맹점</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push("/(store)/tabs/storehome")}
+              onPress={() => router.navigate("/(store)/storeemployee")}
             >
               <Text style={styles.menuText}>직원관리</Text>
+              <Ionicons name="chevron-forward" size={24} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/notification-setting")}
+            >
+              <Text style={styles.menuText}>알림설정</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>히스토리</Text>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuText}>리뷰</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/discounthistory")}>
               <Text style={styles.menuText}>할인</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push("/(store)/nego-history")}>
               <Text style={styles.menuText}>네고</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>

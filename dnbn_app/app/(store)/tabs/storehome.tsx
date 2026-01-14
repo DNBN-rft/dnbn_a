@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storehome.styles";
 
@@ -23,7 +23,10 @@ export default function StoreHome() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0}}
+      >
         <View style={styles.contentWrapper}>
           <Text style={styles.welcomeText}>환영합니다! 가맹점님</Text>
 
@@ -49,7 +52,7 @@ export default function StoreHome() {
             <View style={styles.menuGrid}>
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storeproducts")}
+                onPress={() => router.push("/(store)/addproduct")}
               >
                 <Ionicons name="duplicate-outline" size={28} color="#FF9500" />
                 <Text style={styles.menuText}>상품 등록</Text>
@@ -57,7 +60,7 @@ export default function StoreHome() {
 
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storeproducts")}
+                onPress={() => router.navigate("/(store)/tabs/storenego?tab=request")}
               >
                 <Ionicons name="chatbox-ellipses-outline" size={28} color="#FF9500" />
                 <Text style={styles.menuText}>네고 요청</Text>
@@ -65,15 +68,15 @@ export default function StoreHome() {
 
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(store)/tabs/storeproducts")}
+                onPress={() => router.push("/(store)/review-manage")}
               >
                 <Ionicons name="pencil-outline" size={28} color="#FF9500" />
-                <Text style={styles.menuText}>리뷰 조회</Text>
+                <Text style={styles.menuText}>리뷰 관리</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => router.push("/(cust)/tabs/custhome")}
+                onPress={() => router.push("/(store)/storestatistic")}
               >
                 <Ionicons name="bar-chart-outline" size={28} color="#FF9500" />
                 <Text style={styles.menuText}>매출 통계</Text>
@@ -90,6 +93,7 @@ export default function StoreHome() {
           </View>
         </View>
       </ScrollView>
+
     </View>
   );
 }

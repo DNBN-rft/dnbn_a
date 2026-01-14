@@ -1,13 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
-import { FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
+import { FlatList, Image, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storenego.styles";
 
 export default function StoreNego() {
   const insets = useSafeAreaInsets();
+  const { tab } = useLocalSearchParams<{ tab?: "list" | "request" }>();
   const [activeTab, setActiveTab] = useState<"list" | "request">("list");
+
+  useFocusEffect(
+    useCallback(() => {
+      setActiveTab(tab || "list");
+    }, [tab])
+  );
 
   const [approveModal, setApproveModal] = useState<"approve" | "reject" | "noOpen">("noOpen");
   const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
@@ -51,21 +58,23 @@ export default function StoreNego() {
         <View style={styles.placeholder} />
       </View>
 
-      <View>
         <View style={styles.tabContainer}>
-          <TouchableOpacity style={activeTab === "list" ? styles.tabButtonActive : styles.tabButton} onPress={() => setActiveTab("list")}>
+          <TouchableOpacity style={activeTab === "list" ? styles.tabButtonActive : styles.tabButton} onPress={() => {setActiveTab("list");
+            router.setParams({ tab: undefined });
+          }}>
             <Text style={activeTab === "list" ? styles.tabButtonTextActive : styles.tabButtonText}>목록</Text>
           </TouchableOpacity>
           <TouchableOpacity style={activeTab === "request" ? styles.tabButtonActive : styles.tabButton} onPress={() => setActiveTab("request")}>
             <Text style={activeTab === "request" ? styles.tabButtonTextActive : styles.tabButtonText}>요청</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
       {activeTab === "list" ? (
         <FlatList
+          contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
           data={negoList}
           keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
@@ -98,9 +107,10 @@ export default function StoreNego() {
                 </View>
               </View>
     
-              <View style={styles.cancelButtonContainer}>
-                <TouchableOpacity>
-                  <Text style={styles.cancelButtonText}>상세</Text>
+              <View style={styles.detailButtonContainer}>
+                <TouchableOpacity style={styles.detailButton}
+                  onPress={() => router.navigate("/(store)/detailnego")}>
+                  <Text style={styles.detailButtonText}>상세</Text>
                 </TouchableOpacity>
               </View>
           </View>
@@ -108,8 +118,10 @@ export default function StoreNego() {
         ></FlatList>
       ) : (
           <FlatList
+            contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
             data={negoRequest}
             keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <View style={styles.negoRequestProduct}>
                 <View style={styles.negoRequestProductContainer}>

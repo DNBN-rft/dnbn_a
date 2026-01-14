@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   
   productMetaContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 12,
     marginLeft: 48,
@@ -126,17 +126,68 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    gap: 12,
   },
   categoryName: {
     fontSize: 13,
     color: "#666",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   productName: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#1a1a1a",
-    marginBottom: 12,
+  },
+  priceContainer: {
+    gap: 4,
+  },
+  originalPriceText: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    textDecorationLine: "line-through",
+  },
+  negoPriceText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#EF7810",
+  },
+  requestorInfoContainer: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  requestorText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  requestorPhoneText: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statusLabel: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+  },
+  statusApprove: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#10B981",
+  },
+  statusReject: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#EF4444",
+  },
+  statusCancel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
   },
   productPrice: {
     fontSize: 24,

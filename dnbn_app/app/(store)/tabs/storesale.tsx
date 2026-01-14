@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storesale.styles";
 
@@ -41,6 +41,16 @@ export default function StoreSale() {
       discountRate: 15,
       salePrice: 25500
     },
+    { 
+      id: "4", 
+      uri: require("@/assets/images/image1.jpg"), 
+      category: "카테고리 4", 
+      productName: "상품 4", 
+      status: "대기",
+      originalPrice: 90000, 
+      discountRate: 10,
+      salePrice: 81000
+    },
   ];
 
   const handleDelete = () => {
@@ -70,8 +80,10 @@ export default function StoreSale() {
       </View>
 
       <FlatList
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
         data={saleList}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.saleProduct}>
             <View style={styles.productContainer}>
