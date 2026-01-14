@@ -6,6 +6,7 @@ import { styles } from './noticedetail.styles';
 
 export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
+    const isPinned = true; // 실제로는 route params나 state로 전달받아야 함
 
     return (
         <View style={styles.container}>
@@ -26,6 +27,12 @@ export default function NoticeDetailScreen() {
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.noticeDetailHeaderContainer}>
+                    {isPinned && (
+                        <View style={styles.pinnedBadge}>
+                            <Ionicons name="pin" size={12} color="#FFFFFF" />
+                            <Text style={styles.pinnedBadgeText}>고정</Text>
+                        </View>
+                    )}
                     <Text style={styles.noticeDetailTitleText}>공지사항 제목이 들어갑니다</Text>
                     <Text style={styles.noticeDetailDateText}>2024.06.01</Text>
                 </View>
@@ -39,7 +46,9 @@ export default function NoticeDetailScreen() {
                             <Text style={styles.noticeDetailFileText}>첨부파일 이름.jpg</Text>
                             <Text style={styles.noticeDetailFileSizeText}>120KB</Text>
                         </View>
-                        <Ionicons name="download-outline" size={24} color="#000" />
+                        <TouchableOpacity style={styles.downloadIcon}>
+                            <Ionicons name="download-outline" size={22} color="#EF7810" />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>
