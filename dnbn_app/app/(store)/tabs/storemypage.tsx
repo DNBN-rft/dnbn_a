@@ -41,28 +41,31 @@ export default function StoreMypage() {
             <Text style={styles.sectionTitle}>회원 정보</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push("/(store)/tabs/storehome")}
+              onPress={() => router.navigate("/(store)/storeinfo")}
             >
               <Text style={styles.menuText}>내 가맹점</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.push("/(store)/tabs/storehome")}
+              onPress={() => router.navigate("/(store)/storeemployee")}
             >
               <Text style={styles.menuText}>직원관리</Text>
+              <Ionicons name="chevron-forward" size={24} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/notification-setting")}
+            >
+              <Text style={styles.menuText}>알림설정</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>히스토리</Text>
-            <TouchableOpacity style={styles.menuItem}>
-              <Text style={styles.menuText}>리뷰</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/discounthistory")}>
               <Text style={styles.menuText}>할인</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
