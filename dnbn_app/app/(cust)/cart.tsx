@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './cart.styles';
-
 const initialCartItems = [
     {
         id: '1',
