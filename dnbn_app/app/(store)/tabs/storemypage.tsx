@@ -70,7 +70,9 @@ export default function StoreMypage() {
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push("/(store)/nego-history")}>
               <Text style={styles.menuText}>네고</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>

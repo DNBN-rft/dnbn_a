@@ -45,6 +45,8 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
+    marginLeft: 48,
+    marginRight: 48,
   },
   productStatus: {
     fontSize: 14,
@@ -72,12 +74,25 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  mainImageContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  mainImageButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 20,
+  },
   productMainImage: {
-    width: "100%",
+    flex: 1,
     aspectRatio: 1,
     borderRadius: 8,
     backgroundColor: "#f0f0f0",
-    marginBottom: 12,
   },
   productSubImages: {
     flexDirection: "row",

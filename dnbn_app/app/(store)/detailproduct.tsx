@@ -33,17 +33,29 @@ export default function DetailProductPage() {
                 <Text style={styles.productStatus}>판매 중</Text>
                 <Text style={styles.registrationDate}>등록일: 2024.01.12</Text>
               </View>
-              <Image 
-                style={styles.productMainImage}
-                source={{ uri: 'https://via.placeholder.com/300' }}
-              />
+              
+              <View style={styles.mainImageContainer}>
+                <TouchableOpacity
+                  style={styles.mainImageButton}
+                  onPress={() => {/*이전 이미지 함수 */}}
+                >
+                  <Ionicons name="chevron-back" size={24} color="#666" />
+                </TouchableOpacity>
+                
+                <Image 
+                  style={styles.productMainImage}
+                  source={{ uri: 'https://via.placeholder.com/300' }}
+                />
+                
+                <TouchableOpacity
+                  style={styles.mainImageButton}
+                  onPress={() => {/*다음 이미지 함수 */}}
+                >
+                  <Ionicons name="chevron-forward" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+              
               <View style={styles.productSubImages}>
-                <TouchableOpacity
-                  style={styles.subImageButton}
-                  onPress={() => {/*이전 서브이미지 함수 */}}
-                >
-                  <Ionicons name="chevron-back" size={20} color="#666" />
-                </TouchableOpacity>
                 <Image 
                   style={styles.productSubImage}
                   source={{ uri: 'https://via.placeholder.com/80' }}
@@ -56,12 +68,6 @@ export default function DetailProductPage() {
                   style={styles.productSubImage}
                   source={{ uri: 'https://via.placeholder.com/80' }}
                 />
-                <TouchableOpacity
-                  style={styles.subImageButton}
-                  onPress={() => {/*다음 서브이미지 함수 */}}
-                >
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
-                </TouchableOpacity>
               </View>
             </View>
 

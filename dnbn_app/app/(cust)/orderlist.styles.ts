@@ -51,7 +51,6 @@ export const styles = StyleSheet.create({
         height: 40,
         borderBottomWidth: 1,
         opacity: 1,
-        outline: "none",
         flex: 1,
     },
     searchTextFocused: {

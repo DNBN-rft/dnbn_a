@@ -63,17 +63,29 @@ export default function DiscountDetailPage() {
                   등록일: {discountData.registrationDate}
                 </Text>
               </View>
-              <Image 
-                style={styles.productMainImage}
-                source={{ uri: discountData.images[0] }}
-              />
-              <View style={styles.productSubImages}>
+              
+              <View style={styles.mainImageContainer}>
                 <TouchableOpacity
-                  style={styles.subImageButton}
-                  onPress={() => {/* 이전 서브이미지 함수 */}}
+                  style={styles.mainImageButton}
+                  onPress={() => {/* 이전 이미지 함수 */}}
                 >
-                  <Ionicons name="chevron-back" size={20} color="#666" />
+                  <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
+                
+                <Image 
+                  style={styles.productMainImage}
+                  source={{ uri: discountData.images[0] }}
+                />
+                
+                <TouchableOpacity
+                  style={styles.mainImageButton}
+                  onPress={() => {/* 다음 이미지 함수 */}}
+                >
+                  <Ionicons name="chevron-forward" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.productSubImages}>
                 {discountData.images.slice(1).map((uri, index) => (
                   <Image 
                     key={index}
@@ -81,12 +93,6 @@ export default function DiscountDetailPage() {
                     source={{ uri }}
                   />
                 ))}
-                <TouchableOpacity
-                  style={styles.subImageButton}
-                  onPress={() => {/* 다음 서브이미지 함수 */}}
-                >
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
-                </TouchableOpacity>
               </View>
             </View>
 
