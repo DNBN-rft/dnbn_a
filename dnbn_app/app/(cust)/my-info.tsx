@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, Text, TextInput, Touchable, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './my-info.styles';
 
@@ -67,15 +67,16 @@ export default function MyInfoScreen() {
 
                     {/*결제 정보 */}
                     <View style={styles.sectionCard}>
-                        <View style={styles.sectionHeader}>
+                        <Pressable 
+                            style={styles.sectionHeaderPressable}
+                            onPress={() => router.push("/(cust)/PaymentList")}
+                        >
                             <View style={styles.sectionTitleContainer}>
                                 <Ionicons name="card" size={22} color="#EF7810" />
                                 <Text style={styles.sectionTitle}>결제 정보</Text>
                             </View>
-                            <TouchableOpacity onPress={() => router.push("/(cust)/PaymentList")}>
-                                <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-                            </TouchableOpacity>
-                        </View>
+                            <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                        </Pressable>
                         <View style={styles.infoContainer}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>카드 종류</Text>
@@ -90,15 +91,16 @@ export default function MyInfoScreen() {
 
                     {/* 내 위치 */}
                     <View style={styles.sectionCard}>
-                        <View style={styles.sectionHeader}>
+                        <Pressable 
+                            style={styles.sectionHeaderPressable}
+                            onPress={() => router.push("/(cust)/address")}
+                        >
                             <View style={styles.sectionTitleContainer}>
                                 <Ionicons name="location" size={22} color="#EF7810" />
                                 <Text style={styles.sectionTitle}>내 위치</Text>
                             </View>
-                            <TouchableOpacity onPress={() => router.push("/(cust)/address")}>
-                                <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-                            </TouchableOpacity>
-                        </View>
+                            <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                        </Pressable>
                         <View style={styles.infoContainer}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>위치 이름</Text>
@@ -113,15 +115,16 @@ export default function MyInfoScreen() {
 
                     {/* 미수령상품 */}
                     <View style={styles.sectionCard}>
-                        <View style={styles.sectionHeader}>
+                        <Pressable 
+                            style={styles.sectionHeaderPressable}
+                            onPress={() => router.push("/(cust)/gift-box")}
+                        >
                             <View style={styles.sectionTitleContainer}>
                                 <Ionicons name="cube" size={22} color="#EF7810" />
                                 <Text style={styles.sectionTitle}>미수령 상품</Text>
                             </View>
-                            <TouchableOpacity onPress={() => router.push("/(cust)/gift-box")}>
-                                <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-                            </TouchableOpacity>
-                        </View>
+                            <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+                        </Pressable>
                         <View style={styles.giftinfoContainer}>
                             <View style={styles.giftBox}>
                                 <Image source={require('@/assets/images/qr.png')} style={styles.giftImage} resizeMode="contain" />

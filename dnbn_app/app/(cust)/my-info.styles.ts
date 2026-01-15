@@ -80,6 +80,16 @@ export const styles = StyleSheet.create({
         marginBottom: 16,
         gap: 8,
     },
+    sectionHeaderPressable: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        gap: 8,
+        paddingVertical: 8,
+        marginHorizontal: -16,
+        paddingHorizontal: 16,
+    },
     sectionTitleContainer:{
         flexDirection: 'row',
         alignItems: 'center',

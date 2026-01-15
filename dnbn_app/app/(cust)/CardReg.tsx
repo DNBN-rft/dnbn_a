@@ -157,16 +157,16 @@ export default function CardRegScreen() {
             {/* 하단 버튼 */}
             <View style={styles.bottomButtonContainer}>
                 <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => router.back()}
-                >
-                    <Text style={styles.cancelButtonText}>취소</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                     style={styles.registerButton}
                     onPress={handleRegister}
                 >
                     <Text style={styles.registerButtonText}>등록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => router.back()}
+                >
+                    <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
             </View>
 

@@ -243,7 +243,7 @@ export const styles = StyleSheet.create({
         color: '#fff',
     },
     genderContainer: {
-        flexDirection: 'column',
+        flexDirection: 'row',
         gap: 12,
     },
     genderButton: {
