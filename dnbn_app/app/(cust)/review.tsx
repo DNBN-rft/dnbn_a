@@ -118,7 +118,7 @@ export default function CustReviewListScreen() {
                 <View style={styles.writtenReviewRow}>
                   {/* 사진 */}
                   <TouchableOpacity
-                    onPress={() => router.push("/(cust)/productDetail")}>
+                    onPress={() => router.push("/(cust)/product-detail")}>
                     <Image
                       source={item.uri}
                       style={styles.reviewImage}

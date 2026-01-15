@@ -50,7 +50,7 @@ export default function ReviewDetailScreen() {
 
             <View style={{ flex: 1 }}>
                 <View style={styles.productInfoContainer}>
-                    <TouchableOpacity onPress={() => router.push("/(cust)/productDetail")}>
+                    <TouchableOpacity onPress={() => router.push("/(cust)/product-detail")}>
                         <Image source={require('@/assets/images/qr.png')} style={styles.productImage} resizeMode="contain" />
                     </TouchableOpacity>
                     <View style={styles.productTextContainer}>

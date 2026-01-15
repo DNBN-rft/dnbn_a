@@ -1,18 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useCallback, useEffect, useRef } from "react";
 import {
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
+  Dimensions,
   FlatList,
   Image,
-  Dimensions,
-  TouchableHighlight,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { router } from "expo-router";
-import { useRef, useEffect, useCallback } from "react";
-import { styles } from "./custhome.styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { styles } from "./custhome.styles";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -142,7 +141,7 @@ export default function CustHomeScreen() {
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/sale-product-detail")}>
                 <Image
                   source={item.uri}
                   style={styles.productImage}
@@ -172,7 +171,7 @@ export default function CustHomeScreen() {
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/nego-product-detail")}>
                 <Image
                   source={item.uri}
                   style={styles.productImage}
@@ -199,7 +198,7 @@ export default function CustHomeScreen() {
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/productDetail")}>
+              <TouchableOpacity style={styles.productCard} onPress={() => router.push("/(cust)/product-detail")}>
                 <Image
                   source={item.uri}
                   style={styles.productImage}

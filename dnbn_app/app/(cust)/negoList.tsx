@@ -41,7 +41,7 @@ export default function NegoListScreen() {
                 numColumns={(1)}
                 renderItem={({ item }) => (
                     <View>
-                        <TouchableOpacity style={styles.productItemContainer} onPress={() => router.push("/(cust)/productDetail")}>
+                        <TouchableOpacity style={styles.productItemContainer} onPress={() => router.push("/(cust)/product-detail")}>
                             <Image resizeMode="contain"
                                 source={item.uri} style={styles.productImage} />
                             <View style={styles.productInfo}>

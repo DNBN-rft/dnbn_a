@@ -278,7 +278,7 @@ export default function SearchView() {
             keyExtractor={(item) => item.id}
             renderItem={({ item: product }) => (
               <View>
-                <TouchableOpacity onPress={() => router.push('/(cust)/productDetail')} style={styles.products}>
+                <TouchableOpacity onPress={() => router.push('/(cust)/product-detail')} style={styles.products}>
                   <Image resizeMode='contain' source={product.uri} style={styles.productImage} />
                   <View style={styles.productInfo}>
                     <Text style={styles.name}>{product.name}</Text>

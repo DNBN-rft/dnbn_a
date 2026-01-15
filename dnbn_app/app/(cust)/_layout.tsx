@@ -129,7 +129,7 @@ export default function CustLayout() {
         }}
       />
       <Stack.Screen
-        name="productDetail"
+        name="product-detail"
         options={{
           title: "상품 상세",
           headerShown: false,
