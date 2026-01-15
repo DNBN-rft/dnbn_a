@@ -18,13 +18,6 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-start',
     },
-    backButtonText: {
-        width: 44,
-        height: 44,
-        fontWeight: 'bold',
-        fontSize: 24,
-        color: '#333',
-    },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -33,6 +26,7 @@ export const styles = StyleSheet.create({
         left: 0,
         right: 0,
         textAlign: 'center',
+        pointerEvents: 'none',
     },
     placeholder: {
         width: 40,

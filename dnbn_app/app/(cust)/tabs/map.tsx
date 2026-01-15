@@ -1,11 +1,11 @@
+import Postcode from "@actbase/react-daum-postcode";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useNavigation } from "expo-router";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Animated, FlatList, Modal, PanResponder, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Animated, FlatList, Modal, PanResponder, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import Postcode from "@actbase/react-daum-postcode";
 import { styles } from "./map.styles";
 
 const KAKAO_JAVASCRIPT_KEY = "46f0bc8ab705f2263a98ee3adeebd719";
@@ -493,6 +493,8 @@ export default function CustMapScreen() {
 
   const getUserLocation = useCallback(async () => {
     try {
+      const current = await Location.getForegroundPermissionsAsync();
+      console.log("Location permission status:", current.status);
       const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {

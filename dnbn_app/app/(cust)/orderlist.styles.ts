@@ -197,10 +197,17 @@ export const styles = StyleSheet.create({
         color: '#999',
     },
     modalOverlay: {
-        flex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+        zIndex: 999,
+    },
+    modalContentWrapper: {
+        flex: 1,
+        justifyContent: 'flex-end',
     },
     filterModalContent: {
         backgroundColor: '#fff',
@@ -209,13 +216,6 @@ export const styles = StyleSheet.create({
         padding: 16,
         maxHeight: '80%',
         width: '100%',
-        marginTop: 'auto',
-    },
-    filterModalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        marginBottom: 24,
     },
     filterModalCloseButton: {
         fontSize: 20,

@@ -35,20 +35,23 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  scrollView: {
+    flex: 1,
+  },
   searchContainer: {
     marginTop: 15,
     marginLeft: 15,
     marginRight: 15,
-    flex: 1,
+    paddingBottom: 20,
   },
   searchBarContainer: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 25,
     height: 40,
   },
   searchBar: {
     fontSize: 16,
-    color: '#999',
+    color: '#000',
     paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.2)',
@@ -75,12 +78,21 @@ export const styles = StyleSheet.create({
     color: "#EF7810",
   },
   recentSearchContainer: {
+    marginBottom: 20,
+  },
+  recentSearchHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 10,
   },
   recentSearchKeywordText: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
+  },
+  deleteAllText: {
+    fontSize: 14,
+    color: '#666',
   },
   recentKeywordText: {
     fontSize: 16,
@@ -88,7 +100,7 @@ export const styles = StyleSheet.create({
   recentSearchKeyword: {
     flexDirection: "row",
     borderRadius: 10,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "rgba(239, 120, 16, 0.15)",
     margin: 5,
     padding: 5,
   },
@@ -98,86 +110,113 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  recommendProductContainer: {
-    flex: 1,
+  categorySection: {
+    marginBottom: 25,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e8e8e8',
   },
-  recommendProductText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+  categoryContainer: {
+    paddingVertical: 10,
   },
-  products: {
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    marginVertical: 8,
-    borderRadius: 8,
-    overflow: "hidden",
-    borderBottomWidth: 1,
-    paddingBottom: 16,
-    borderColor: "rgba(0, 0, 0, 0.05)",
+  categoryItem: {
+    alignItems: 'center',
+    marginRight: 20,
   },
-  productInfo: {
-    marginLeft: 12,
-    flex: 1,
-    justifyContent: "center",
-    alignSelf: "flex-start",
-  },
-  productImage: {
-    width: 140,
-    height: 140,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  priceInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  discountRateText: {
-    fontSize: 18,
-    color: "#EF7810",
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  originalPriceText: {
-    fontSize: 18,
-    color: "#999",
-    textDecorationLine: "line-through",
-  },
-  priceText: {
-    fontSize: 18,
-    color: "#333",
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  descriptionText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 4,
+  categoryImageBox: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
-  averageRate: {
+  categoryImage: {
+    width: 70,
+    height: 70,
+  },
+  categoryName: {
     fontSize: 16,
-    color: "#333",
+    fontWeight: "bold",
+    color: '#333',
+    textAlign: 'center',
   },
-  reviewCount: {
+
+  productSection: {
+    marginBottom: 25,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e8e8e8',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: '#333',
+  },
+  galleryContainer: {
+    paddingVertical: 10,
+  },
+  galleryItem: {
+    width: 170,
+    marginRight: 15,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  galleryImage: {
+    width: 170,
+    height: 170,
+    backgroundColor: '#f5f5f5',
+  },
+  galleryInfo: {
+    padding: 10,
+  },
+  storeName: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 4,
+  },
+  productName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  originalPrice: {
+    fontSize: 14,
+    color: '#999',
+    textDecorationLine: 'line-through',
+    marginRight: 8,
+  },
+  discountPrice: {
+    fontSize: 14,
+    color: '#EF7810',
+    fontWeight: 'bold',
+    opacity: 0.5,
+  },
+  productPrice: {
     fontSize: 16,
-    color: "#666",
-    marginLeft: 4,
+    fontWeight: 'bold',
+    color: '#EF7810',
   },
-  reviewInfo: {
-    flexDirection: "row",
-  },
-  reviewStar: {
-    width: 13,
-    height: 13,
+  moreButton: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 8,
+    marginRight: 15,
+    boxShadow: '0 0 4px rgba(0,0,0,0.2)',
   },
 });
