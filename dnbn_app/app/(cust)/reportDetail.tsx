@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./reportdetail.styles";
-import { router } from "expo-router";
 
 export default function ReportDetailScreen() {
     const insets = useSafeAreaInsets();
@@ -38,86 +38,75 @@ export default function ReportDetailScreen() {
                 <View style={styles.placeholder} />
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 <View style={styles.contentWrapper}>
-                    {/* 신고 제목 */}
-                    <Text style={styles.reportTitle}>
-                        {report.title}
-                    </Text>
-
-                    {/* 신고 정보 */}
-                    <View style={styles.reportInfoContainer}>
-                        <View>
-                            <Text style={styles.reportInfoLabel}>신고유형</Text>
-                            <Text style={styles.reportInfoValue}>
-                                {report.type}
-                            </Text>
-                        </View>
-                        <View>
-                            <Text style={styles.reportInfoLabel}>신고일시</Text>
-                            <Text style={styles.reportInfoValue}>
-                                {report.date}
-                            </Text>
-                        </View>
-                        <View>
-                            <Text style={styles.reportInfoLabel}>처리상태</Text>
-                            <View style={styles.statusBadge}>
-                                <Text style={styles.statusText}>
+                    {/* 신고 정보 카드 */}
+                    <View style={styles.infoCard}>
+                        <View style={styles.cardHeader}>
+                            <Text style={styles.reportTitle}>{report.title}</Text>
+                            <View style={[
+                                styles.statusBadge,
+                                report.status === "답변완료" && styles.statusBadgeCompleted
+                            ]}>
+                                <Text style={[
+                                    styles.statusText,
+                                    report.status === "답변완료" && styles.statusTextCompleted
+                                ]}>
                                     {report.status}
                                 </Text>
                             </View>
                         </View>
-                    </View>
 
-                    {/* 신고 내용 */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>
-                            신고 내용
-                        </Text>
-                        <View style={styles.descriptionBox}>
-                            <Text style={styles.descriptionText}>
-                                {report.description}
-                            </Text>
-                        </View>
-                    </View>
-
-                    {/* 첨부 이미지 */}
-                    {report.images.length > 0 && (
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>
-                                첨부 이미지
-                            </Text>
-                            <View style={styles.imageContainer}>
-                                {report.images.map((image, index) => (
-                                    <View key={index} style={styles.imageWrapper}>
-                                        <Image
-                                            source={image}
-                                            style={styles.image}
-                                            resizeMode="cover"
-                                        />
-                                    </View>
-                                ))}
+                        <View style={styles.reportInfoContainer}>
+                            <View style={styles.infoItem}>
+                                <Text style={styles.reportInfoLabel}>신고유형</Text>
+                                <Text style={styles.reportInfoValue}>{report.type}</Text>
+                            </View>
+                            <View style={styles.infoDivider} />
+                            <View style={styles.infoItem}>
+                                <Text style={styles.reportInfoLabel}>신고일시</Text>
+                                <Text style={styles.reportInfoValue}>{report.date}</Text>
                             </View>
                         </View>
-                    )}
+                    </View>
 
-                    {/* 처리 답변 */}
-                    <View>
-                        <Text style={styles.sectionTitle}>
-                            처리 결과
-                        </Text>
-                        <View style={styles.answerBox}>
-                            <Text style={styles.answerDate}>답변일: {report.date}</Text>
-                            <Text style={styles.answerText}>
-                                {report.answer}
-                            </Text>
+                    {/* 신고 내용 카드 */}
+                    <View style={styles.contentCard}>
+                        <Text style={styles.sectionTitle}>신고 내용</Text>
+                        <Text style={styles.descriptionText}>{report.description}</Text>
+
+                        {/* 첨부 이미지 */}
+                        {report.images.length > 0 && (
+                            <View style={styles.imageSection}>
+                                <Text style={styles.imageSectionTitle}>첨부 이미지</Text>
+                                <View style={styles.imageContainer}>
+                                    {report.images.map((image, index) => (
+                                        <View key={index} style={styles.imageWrapper}>
+                                            <Image
+                                                source={image}
+                                                style={styles.image}
+                                                resizeMode="cover"
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* 처리 답변 카드 */}
+                    <View style={styles.answerCard}>
+                        <View style={styles.answerHeader}>
+                            <Text style={styles.sectionTitle}>처리 결과</Text>
+                            <Text style={styles.answerDate}>{report.date}</Text>
                         </View>
+                        <Text style={styles.answerText}>{report.answer}</Text>
                     </View>
                 </View>
             </ScrollView>
 
             {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
             )}
         </View>
     );

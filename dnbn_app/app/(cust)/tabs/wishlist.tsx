@@ -1,18 +1,18 @@
-import { Text, View, TouchableOpacity, Image, FlatList } from "react-native";
-import { styles } from "./wishlist.styles";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./wishlist.styles";
 
 export default function WishlistScreen() {
     const insets = useSafeAreaInsets();
 
     const storeList = [
-        { id: '1', uri: require('@/assets/images/logo.png'), storeName: '족발집', review: '⭐ 4.8(120)', category: '음식점', addr: '서울시 강남구 역삼동', totalProducts: 34 },
-        { id: '2', uri: require('@/assets/images/logo.png'), storeName: '과일가게', review: '⭐ 4.5(80)', category: '과일', addr: '서울시 서초구 반포동', totalProducts: 12 },
-        { id: '3', uri: require('@/assets/images/logo.png'), storeName: '행복마트', review: '⭐ 4.7(200)', category: '마트', addr: '서울시 송파구 잠실동', totalProducts: 56 },
-        { id: '4', uri: require('@/assets/images/logo.png'), storeName: '프레시마켓', review: '⭐ 4.6(150)', category: '신선식품', addr: '서울시 강동구 천호동', totalProducts: 23 },
-        { id: '5', uri: require('@/assets/images/logo.png'), storeName: 'A전자', review: '⭐ 4.9(90)', category: '가전제품', addr: '서울시 용산구 이태원동', totalProducts: 45 },
+        { id: '1', uri: require('@/assets/images/logo.png'), storeName: '족발집', rating: 4.8, reviewCount: 120, category: '음식점', businessType: '일반음식점', address: '서울시 강남구', totalProducts: 34 },
+        { id: '2', uri: require('@/assets/images/logo.png'), storeName: '과일가게', rating: 4.5, reviewCount: 80, category: '과일', businessType: '소매업', address: '서울시 서초구', totalProducts: 12 },
+        { id: '3', uri: require('@/assets/images/logo.png'), storeName: '행복마트', rating: 4.7, reviewCount: 200, category: '마트', businessType: '대형마트', address: '서울시 송파구', totalProducts: 56 },
+        { id: '4', uri: require('@/assets/images/logo.png'), storeName: '프레시마켓', rating: 4.6, reviewCount: 150, category: '신선식품', businessType: '식품유통', address: '서울시 강동구', totalProducts: 23 },
+        { id: '5', uri: require('@/assets/images/logo.png'), storeName: 'A전자', rating: 4.9, reviewCount: 90, category: '가전제품', businessType: '전자제품 판매', address: '서울시 용산구', totalProducts: 45 },
     ]
     return (
         <View style={styles.container}>
@@ -31,31 +31,69 @@ export default function WishlistScreen() {
                 </Text>
                 <View style={styles.placeholder} />
             </View>
-            <View>
-                <FlatList
-                    data={storeList}
-                    showsVerticalScrollIndicator={false}
-                    keyExtractor={(item) => item.id}
-                    horizontal={false}
-                    numColumns={(1)}
-                    renderItem={({ item }) => (
-                        <View>
-                            <TouchableOpacity style={styles.storeItemContainer} onPress={() => router.push("/(cust)/storeInfo")}>
-                                <Image resizeMode="contain" source={item.uri} style={styles.storeImage} />
-                                <View style={styles.storeInfo}>
-                                    <View style={styles.storeHeader}>
-                                        <Text style={styles.storeName}>{item.storeName}</Text>
-                                        <Text style={styles.categoryText}>{item.category}</Text>
-                                    </View>
-                                    <Text style={styles.addrText}>{item.addr}</Text>
-                                    <Text style={styles.reviewText}>{item.review}</Text>
-                                    <Text style={styles.totalProductsText}>등록 상품 {item.totalProducts}개</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    )}>
-                </FlatList>
+            {/* 찜한 가맹점 총 개수 */}
+            <View style={styles.countContainer}>
+                <Text style={styles.countText}>총 {storeList.length}개의 가맹점</Text>
             </View>
+
+            {/* 가맹점 리스트 */}
+            <FlatList
+                data={storeList}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContainer}
+                renderItem={({ item }) => (
+                    <TouchableOpacity 
+                        style={styles.storeItemContainer} 
+                        onPress={() => router.push("/(cust)/storeInfo")}
+                        activeOpacity={0.7}
+                    >
+                        {/* 가게 이미지 */}
+                        <Image 
+                            resizeMode="contain" 
+                            source={item.uri} 
+                            style={styles.storeImage} 
+                        />
+                        
+                        {/* 가게 정보 */}
+                        <View style={styles.storeInfo}>
+                            {/* 가게 이름 및 주소 */}
+                            <View style={styles.nameAddressContainer}>
+                                <Text style={styles.storeName} numberOfLines={1}>
+                                    {item.storeName}
+                                </Text>
+                                <Text style={styles.addressText} numberOfLines={1}>
+                                    {item.address}
+                                </Text>
+                            </View>
+                            
+                            {/* 업종/업태 */}
+                            <Text style={styles.businessTypeText}>
+                                {item.category} / {item.businessType}
+                            </Text>
+                            
+                            {/* 평균 별점 및 리뷰 수 */}
+                            <View style={styles.ratingContainer}>
+                                <Ionicons name="star" size={16} color="#FFB800" />
+                                <Text style={styles.ratingText}>
+                                    {item.rating.toFixed(1)}
+                                </Text>
+                                <Text style={styles.reviewCountText}>
+                                    ({item.reviewCount})
+                                </Text>
+                            </View>
+                            
+                            {/* 등록 상품 수 */}
+                            <View style={styles.productCountContainer}>
+                                <Ionicons name="pricetag-outline" size={14} color="#666" />
+                                <Text style={styles.productCountText}>
+                                    등록 상품 {item.totalProducts}개
+                                </Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                )}
+            />
         </View>
     );
 }

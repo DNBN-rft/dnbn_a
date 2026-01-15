@@ -33,15 +33,37 @@ export const styles = StyleSheet.create({
     },
     productContainer: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: "#eee",
     },
     productImage: {
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         marginRight: 15,
+        borderRadius: 8,
+    },
+    productInfoBox: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    storeNameSmall: {
+        fontSize: 12,
+        color: "#999",
+        marginBottom: 4,
+    },
+    productNameBold: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#000",
+    },
+    questionText: {
+        fontSize: 16,
+        color: "#333",
+        textAlign: "center",
+        marginBottom: 16,
+        marginTop: 8,
     },
     productTextContainer: {
         flex: 1,
@@ -68,10 +90,17 @@ export const styles = StyleSheet.create({
         marginBottom: 10,
     },
     ratingContainer: {
-        marginBottom: 20,
+        marginBottom: 30,
         flexDirection: "row",
         justifyContent: "center",
-        gap: 10,
+        alignItems: "center",
+        gap: 8,
+        paddingVertical: 20,
+    },
+    ratingContainerSmall: {
+        marginBottom: 20,
+        paddingVertical: 10,
+        justifyContent: "center",
     },
     ratingPlaceholder: {
         fontSize: 14,
@@ -101,15 +130,22 @@ export const styles = StyleSheet.create({
     submitButton: {
         borderWidth: 1,
         borderColor: "#FF6B35",
-        backgroundColor: "#fff",
+        backgroundColor: "#FF6B35",
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: "center",
     },
+    submitButtonDisabled: {
+        backgroundColor: "#f0f0f0",
+        borderColor: "#ddd",
+    },
     submitButtonText: {
-        color: "#FF6B35",
+        color: "#fff",
         fontSize: 18,
         fontWeight: "bold",
+    },
+    submitButtonTextDisabled: {
+        color: "#999",
     },
     photoContainer: {
         marginBottom: 20,
