@@ -1,9 +1,9 @@
-import { router } from 'expo-router';
-import { Pressable, TextInput, Modal, ScrollView, View, Text, TouchableOpacity, FlatList } from 'react-native';
-import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { styles } from './orderlist.styles';
+import { router } from 'expo-router';
+import { useRef, useState } from 'react';
+import { FlatList, Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './orderlist.styles';
 
 export default function PurchaseScreen() {
   const insets = useSafeAreaInsets();
@@ -28,6 +28,7 @@ export default function PurchaseScreen() {
     productName: string;
     quantity: number;
     price: number;
+    datetime: string;
   };
 
   type Order = {
@@ -41,23 +42,38 @@ export default function PurchaseScreen() {
       id: '1',
       date: '2026.01.05',
       items: [
-        { id: '1-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
-        { id: '1-2', storeName: '가게이름2', status: '구매확정', productName: '맛있는 케이크', quantity: 2, price: 8000 },
+        { id: '1-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500, datetime: '2026.01.05 14:30' },
+        { id: '1-2', storeName: '가게이름2', status: '구매확정', productName: '맛있는 케이크', quantity: 2, price: 8000, datetime: '2026.01.05 15:20' },
       ]
     },
     {
       id: '2',
       date: '2026.01.04',
       items: [
-        { id: '2-1', storeName: '가게이름', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
+        { id: '2-1', storeName: '가게이름', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500, datetime: '2026.01.04 10:15' },
       ]
     },
     {
       id: '3',
       date: '2026.01.03',
       items: [
-        { id: '3-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500 },
-        { id: '3-2', storeName: '가게이름3', status: '구매확정', productName: '맛있는 빵', quantity: 3, price: 3000 },
+        { id: '3-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500, datetime: '2026.01.03 12:45' },
+        { id: '3-2', storeName: '가게이름3', status: '구매확정', productName: '맛있는 빵', quantity: 3, price: 3000, datetime: '2026.01.03 16:30' },
+      ]
+    },
+    {
+      id: '4',
+      date: '2026.01.02',
+      items: [
+        { id: '4-1', storeName: '가게이름', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500, datetime: '2026.01.02 09:00' },
+      ]
+    },
+    {
+      id: '5',
+      date: '2026.01.01',
+      items: [
+        { id: '5-1', storeName: '가게이름1', status: '구매확정', productName: '맛있는 두쫀쿠', quantity: 1, price: 5500, datetime: '2026.01.01 11:20' },
+        { id: '5-2', storeName: '가게이름2', status: '구매확정', productName: '맛있는 케이크', quantity: 2, price: 8000, datetime: '2026.01.01 13:40' },
       ]
     },
   ];
@@ -121,6 +137,7 @@ export default function PurchaseScreen() {
             {status === 'CANCEL' && '취소'}
             {status === 'USED' && '사용완료'}
           </Text>
+          <Ionicons name="chevron-down" size={16} color="#666" style={{ marginLeft: 6 }} />
         </Pressable>
 
         {/* 기간 */}
@@ -135,6 +152,7 @@ export default function PurchaseScreen() {
             {period === '1Y' && '최근 1년'}
             {period === 'ALL' && '기간선택'}
           </Text>
+          <Ionicons name="chevron-down" size={16} color="#666" style={{ marginLeft: 6 }} />
         </Pressable>
       </View>
 
@@ -144,39 +162,38 @@ export default function PurchaseScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
+        style={{ flex: 1 }}
         renderItem={({ item: order }) => (
           <View style={styles.orderContainer}>
-            <View style={styles.orderTopContainer}>
+            <View style={styles.orderDateContainer}>
               <Text style={styles.orderDate}>{order.date}</Text>
-              <Pressable
-                style={styles.orderDetailButton}
-                onPress={() => router.navigate("/(cust)/orderDetail")}
-              >
-                <Text style={styles.orderDetailButtonText}>주문상세</Text>
-                <Ionicons name="chevron-forward" size={20} color="#EF7810" />
-              </Pressable>
             </View>
-
             {order.items.map((item: OrderItem) => (
               <View key={item.id} style={styles.orderItemContainer}>
-                <View style={styles.orderStoreContainer}>
-                  <Text style={styles.storeName}>{item.storeName}</Text>
-                </View>
-
-                <View style={styles.orderStateContainer}>
-                  <Text style={styles.orderState}>{item.status}</Text>
-                </View>
-
                 <View style={styles.orderProductInfoContainer}>
                   <View style={styles.orderProductImgContainer} />
+                  
                   <View style={styles.orderProductDetailContainer}>
+                    <View style={styles.topInfoRow}>
+                      <Text style={styles.orderState}>{item.status}</Text>
+                      <Pressable
+                        style={styles.orderDetailButton}
+                        onPress={() => router.navigate("/(cust)/orderDetail")}
+                      >
+                        <Text style={styles.orderDetailButtonText}>주문상세</Text>
+                        <Ionicons name="chevron-forward" size={18} color="#666" />
+                      </Pressable>
+                    </View>
+                    
                     <Text style={styles.productName}>{item.productName}</Text>
-                    <Text style={styles.productQuantity}>
-                      수량: {item.quantity}개
-                    </Text>
-                    <Text style={styles.productPrice}>
-                      {item.price.toLocaleString()}원
-                    </Text>
+                    
+                    <View style={styles.bottomInfoRow}>
+                      <Text style={styles.productPrice}>
+                        {item.price.toLocaleString()}원
+                      </Text>
+                      <Text style={styles.separator}> | </Text>
+                      <Text style={styles.productDate}>{item.datetime}</Text>
+                    </View>
                   </View>
                 </View>
               </View>

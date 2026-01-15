@@ -31,142 +31,193 @@ export const styles = StyleSheet.create({
     placeholder: {
         width: 40,
     },
-    wrapper:{
-        borderWidth: 1,
-        borderColor: "#eee",
-        borderRadius: 8,
-        backgroundColor: "#fff",
-    },
     contentContainer:{
         flex: 1,
+        backgroundColor: "#fff",
     },
     orderDetailContainer: {
-        flex: 1,
         padding: 16,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#fff",
     },
     orderInfoContainer: {
         flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         backgroundColor: "#fff",
         borderRadius: 8,
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
+        borderWidth: 1,
+        borderColor: "#e0e0e0",
+        padding: 16,
+        marginBottom: 12,
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+    },
+    orderInfoLeft: {
+        flex: 1,
     },
     orderDateText: {
-        fontSize: 18,
-        color: "#000000ff",
-        marginBottom: 4,
+        fontSize: 16,
+        color: "#000",
+        marginBottom: 6,
         fontWeight: "600",
-        marginRight: 12,
     },
     orderNumberText: {
-        fontSize: 16,
+        fontSize: 14,
         color: "#999",
-        marginBottom: 4,
     },
-    paymentMethodText: {
-        textAlign: "right",
-        fontSize: 16,
-        color: "#999",
-        marginBottom: 4,
+    receiptButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 4,
+        backgroundColor: "#fff",
     },
-    orderStatusText: {
+    receiptButtonText: {
+        fontSize: 13,
+        color: "#666",
+        fontWeight: "500",
+    },
+    mainTitle: {
         fontSize: 18,
-        fontWeight: "bold",
-        color: "#EF7810",
-        marginBottom: 8,
+        fontWeight: "700",
+        color: "#000",
+        marginBottom: 12,
+        paddingHorizontal: 4,
     },
-    storeInfoContainer: {
-        flexDirection: "row",
+    sectionBox: {
         backgroundColor: "#fff",
         borderRadius: 8,
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-        marginTop: 12,
+        borderWidth: 1,
+        borderColor: "#e0e0e0",
+        padding: 16,
+        marginBottom: 12,
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#000",
+        marginBottom: 16,
+    },
+    storeSection: {
+        marginBottom: 16,
     },
     storeNameText: {
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: "600",
         color: "#333",
-        marginBottom: 4,
-        marginRight: 12,
-
+        marginBottom: 12,
     },
-    storeAddressText: {
-        fontSize: 13,
-        color: "#999",
+    divider: {
+        height: 1,
+        backgroundColor: "#eee",
+        marginVertical: 12,
     },
-    itemsContainer: {
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        padding: 12,
+    storeDivider: {
+        height: 1,
+        backgroundColor: "#ddd",
+        marginVertical: 20,
     },
-    itemRow: {
-        flexDirection: "row",
+    productSection: {
         marginBottom: 16,
     },
+    productStatusRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    orderStatusText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#EF7810",
+    },
+    timestampText: {
+        fontSize: 12,
+        color: "#666",
+    },
+    productRow: {
+        flexDirection: "row",
+        gap: 12,
+    },
     productImageContainer: {
-        width: 110,
-        height: 110,
+        width: 80,
+        height: 80,
         backgroundColor: "#f5f5f5",
-        borderRadius: 4,
-        marginRight: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: "#eee",
         justifyContent: "center",
         alignItems: "center",
+    },
+    productImage: {
+        width: 70,
+        height: 70,
     },
     productInfoContainer: {
         flex: 1,
         justifyContent: "space-between",
     },
     productNameText: {
-        fontSize: 18,
+        fontSize: 16,
         color: "#333",
         fontWeight: "600",
         marginBottom: 4,
     },
     productQuantityText: {
-        fontSize: 16,
+        fontSize: 14,
         color: "#999",
         marginBottom: 4,
     },
     productPriceText: {
-        fontSize: 18,
-        color: "#333",
-        fontWeight: "bold",
-        marginBottom: 8,
+        fontSize: 16,
+        color: "#000",
+        fontWeight: "600",
     },
-    priceSummaryContainer: {
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        padding: 12,
+    paymentSummary: {
+        
     },
-    priceSummaryItemContainer:{
+    paymentRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-    },
-    totalPriceText: {
-        fontSize: 18,
-        color: "#333",
+        alignItems: "center",
         marginBottom: 8,
     },
-    discountPriceText: {
-        fontSize: 18,
+    paymentLabel: {
+        fontSize: 16,
+        color: "#000",
+        fontWeight: "600",
+    },
+    paymentValue: {
+        fontSize: 16,
+        color: "#000",
+        fontWeight: "600",
+    },
+    paymentLabelSub: {
+        fontSize: 15,
+        color: "#666",
+        paddingLeft: 12,
+    },
+    paymentValueSub: {
+        fontSize: 15,
+        color: "#666",
+    },
+    discountValue: {
+        fontSize: 15,
         color: "#EF7810",
-        marginBottom: 8,
+    },
+    paymentMethodLabel: {
+        fontSize: 15,
+        color: "#000",
+        fontWeight: "600",
     },
     finalPriceText: {
-        fontSize: 18    ,
-        fontWeight: "bold",
-        color: "#333",
-        paddingTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: "#eee",
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#000",
     },
-    timestampText: {
+    paymentInfoText: {
         fontSize: 13,
         color: "#999",
-        marginBottom: 8,
+        marginTop: 4,
     },
 });

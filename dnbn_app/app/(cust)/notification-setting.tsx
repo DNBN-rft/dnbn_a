@@ -28,31 +28,11 @@ export default function NotificationSetting() {
 
       <View style={styles.notificationContainer}>
         <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
+          <Text>앱 푸시 설정</Text>
           <CumtomToggle/>
         </View>
         <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
+          <Text>알림 설정</Text>
           <CumtomToggle/>
         </View>
       </View>

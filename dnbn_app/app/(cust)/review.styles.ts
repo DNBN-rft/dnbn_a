@@ -68,6 +68,65 @@ export const styles = StyleSheet.create({
     },
     writtenReviewRow: {
         flexDirection: 'row',
+        marginBottom: 12,
+    },
+    writtenReviewContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    writtenStoreName: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#999',
+        marginBottom: 4,
+    },
+    writtenProductName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#000',
+    },
+    reviewInfoSection: {
+        marginTop: 8,
+    },
+    reviewActionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    ratingScore: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    actionText: {
+        fontSize: 13,
+        color: '#666',
+        fontWeight: '500',
+    },
+    actionDivider: {
+        fontSize: 13,
+        color: '#ccc',
+    },
+    reviewCommentText: {
+        fontSize: 14,
+        color: '#333',
+        lineHeight: 20,
+        marginBottom: 8,
+    },
+    reviewDateText: {
+        fontSize: 12,
+        color: '#999',
     },
     reviewImage: {
         width: 60,
@@ -97,6 +156,42 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
         lineHeight: 20,
+    },
+    orderHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingBottom: 8,
+    },
+    orderHeaderText: {
+        fontSize: 14,
+        color: '#999',
+        fontWeight: '600',
+    },
+    unwrittenReviewRow: {
+        flexDirection: 'row',
+        marginBottom: 12,
+    },
+    unwrittenReviewContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    unwrittenStoreName: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#999',
+        marginBottom: 4,
+    },
+    unwrittenProductName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 4,
+    },
+    unwrittenStatus: {
+        fontSize: 12,
+        color: '#888',
     },
     unwrittenOrderDate: {
         fontSize: 16,
@@ -138,5 +233,58 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 24,
+        width: '80%',
+        maxWidth: 320,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    modalMessage: {
+        fontSize: 15,
+        color: '#666',
+        marginBottom: 24,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    confirmButton: {
+        backgroundColor: '#FF6B35',
+    },
+    cancelButton: {
+        backgroundColor: '#f0f0f0',
+    },
+    confirmButtonText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '600',
+    },
+    cancelButtonText: {
+        color: '#666',
+        fontSize: 15,
+        fontWeight: '600',
     },
 });

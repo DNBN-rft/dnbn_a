@@ -33,63 +33,82 @@ export const styles = StyleSheet.create({
     },
     reportContainer: {
         flex: 1,
-        flexDirection: "column",
-        backgroundColor: "#ffffff",
-        padding: 20,
+        backgroundColor: "#fff",
     },
-    reportItemWrapper: {
+    listContent: {
+        padding: 16,
+        paddingBottom: 20,
+    },
+    cardContainer: {
+        backgroundColor: "#ffffff",
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        boxShadow: "0 0px 4px rgba(0, 0, 0, 0.3)",
+    },
+    cardHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        marginBottom: 12,
     },
-    reportItem:{
-        flex: 1,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
+    typeTag: {
+        backgroundColor: "#f0f0f0",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
     },
-    reportType:{
-        fontSize: 16,
-        color: "#333",
-        marginBottom: 4,
+    typeText: {
+        fontSize: 13,
+        color: "#666",
+        fontWeight: "600",
     },
-    reportTitle:{
-        fontSize: 16,
-        color: "#555",
-        marginBottom: 4,
-    },
-    reportDate:{
-        fontSize: 14,
-        color: "#777",
-    },
-    reportStatusContainer: {
-        paddingHorizontal: 10,
+    statusBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        backgroundColor: "#FFF5ED",
         borderWidth: 1,
         borderColor: "#EF7810",
-        borderRadius: 12,
-        paddingVertical: 4,
     },
-    reportStatus:{
-        fontSize: 14,
+    statusBadgeCompleted: {
+        backgroundColor: "#E8F5E9",
+        borderColor: "#4CAF50",
+    },
+    statusText: {
+        fontSize: 13,
         color: "#EF7810",
-        fontWeight: "bold",
+        fontWeight: "600",
+    },
+    statusTextCompleted: {
+        color: "#4CAF50",
+    },
+    reportTitle: {
+        fontSize: 16,
+        color: "#222",
+        fontWeight: "600",
+        marginBottom: 8,
+        lineHeight: 22,
+    },
+    reportDate: {
+        fontSize: 13,
+        color: "#999",
     },
     reportAnswerContainer: {
-        backgroundColor: "#f9f9f9",
-        paddingVertical: 15,
-        paddingHorizontal: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
+        marginTop: 16,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#f0f0f0",
     },
     reportAnswerLabel: {
-        fontSize: 14,
-        fontWeight: "bold",
+        fontSize: 13,
+        fontWeight: "600",
         color: "#EF7810",
         marginBottom: 8,
     },
     reportAnswer: {
         fontSize: 14,
         color: "#555",
-        lineHeight: 20,
+        lineHeight: 21,
     },
 });

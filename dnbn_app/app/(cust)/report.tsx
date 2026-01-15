@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./report.styles";
-import { useState } from "react";
 
 export default function ReportListScreen() {
     const insets = useSafeAreaInsets();
@@ -42,24 +42,35 @@ export default function ReportListScreen() {
                 <FlatList
                     data={reports}
                     keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
                         <TouchableOpacity
+                            style={styles.cardContainer}
                             onPress={() => router.navigate(`/(cust)/reportDetail`)}
                             activeOpacity={0.7}
                         >
-                            <View style={styles.reportItemWrapper}>
-                                <View style={styles.reportItem}>
-                                    <Text style={styles.reportType}>{item.type}</Text>
-                                    <Text style={styles.reportTitle}>{item.title}</Text>
-                                    <Text style={styles.reportDate}>{item.date}</Text>
+                            <View style={styles.cardHeader}>
+                                <View style={styles.typeTag}>
+                                    <Text style={styles.typeText}>{item.type}</Text>
                                 </View>
-                                <View style={styles.reportStatusContainer}>
-                                    <Text style={styles.reportStatus}>{item.status}</Text>
+                                <View style={[
+                                    styles.statusBadge,
+                                    item.status === "답변완료" && styles.statusBadgeCompleted
+                                ]}>
+                                    <Text style={[
+                                        styles.statusText,
+                                        item.status === "답변완료" && styles.statusTextCompleted
+                                    ]}>{item.status}</Text>
                                 </View>
                             </View>
+                            
+                            <Text style={styles.reportTitle}>{item.title}</Text>
+                            <Text style={styles.reportDate}>{item.date}</Text>
+                            
                             {expandedId === item.id && (
                                 <View style={styles.reportAnswerContainer}>
-                                    <Text style={styles.reportAnswerLabel}>답변:</Text>
+                                    <Text style={styles.reportAnswerLabel}>답변</Text>
                                     <Text style={styles.reportAnswer}>
                                         {item.answer || "아직 답변이 없습니다."}
                                     </Text>

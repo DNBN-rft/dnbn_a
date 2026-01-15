@@ -85,11 +85,6 @@ export default function MyInfoScreen() {
                 <Text style={styles.myInfoSaveButtonText}>정보 수정하기</Text>
             </Pressable>
 
-            {/* 하단 Safe Area - 색상 지정 가능 */}
-            {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-            )}
-
             {/* 비밀번호 변경 모달 */}
             <Modal
                 visible={pwModalVisible}
