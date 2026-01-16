@@ -12,10 +12,9 @@ export default function NotificationsScreen() {
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        {/* 현재 onPress의 router.back()이 작동하지 않아 navigate로 대체함 */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.navigate("/(cust)/tabs/custhome")}
+          onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
