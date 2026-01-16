@@ -6,7 +6,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Animated, FlatList, Modal, PanResponder, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
-import { styles } from "./map.styles";
+import { styles } from "../styles/map.styles";
 
 const KAKAO_JAVASCRIPT_KEY = "46f0bc8ab705f2263a98ee3adeebd719";
 const KAKAO_REST_API_KEY = "4739cdd728a97e32f1ad213ae111e099";

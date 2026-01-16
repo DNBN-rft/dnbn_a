@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./search-result.styles";
+import { styles } from "../styles/search-result.styles";
 
 export default function SearchView() {
   const insets = useSafeAreaInsets();

@@ -11,7 +11,7 @@ import {
   View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./custhome.styles";
+import { styles } from "../styles/custhome.styles";
 
 const screenWidth = Dimensions.get('window').width;
 
