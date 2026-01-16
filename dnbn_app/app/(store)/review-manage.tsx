@@ -57,7 +57,7 @@ export default function ReviewManage() {
       date: "2026.01.08",
       reviewContent: "보통이었어요. 특별히 나쁘지도 좋지도 않았습니다.",
       userName: "전형운",
-      hiddenExpireAt: "2026-01-16",
+      hiddenExpireAt: "2026-01-20",
       isHidden: true,
       hasAnswer: false,
     },

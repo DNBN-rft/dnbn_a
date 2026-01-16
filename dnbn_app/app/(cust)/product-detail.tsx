@@ -21,7 +21,8 @@ export default function ProductDetailScreen() {
     discountPrice: 40000,
     discountRate: 20,
     remainingStock: 15,
-    isAdult: true,
+    isAdult: false,
+    isStock: true,
     rating: 4.5,
     reviewCount: 200,
     images: [
@@ -105,9 +106,13 @@ export default function ProductDetailScreen() {
             
             <Text style={styles.productName}>{mockProduct.name}</Text>
 
-            {mockProduct.isAdult && (
+            {mockProduct.isAdult ? (
               <View style={styles.adultTag}>
-                <Text style={styles.adultTagText}>성인</Text>
+                <Text style={styles.adultTagText}>서비스</Text>
+              </View>
+            ) : (
+              <View style={styles.serviceTag}>
+                <Text style={styles.serviceTagText}>서비스</Text>
               </View>
             )}
           </View>
