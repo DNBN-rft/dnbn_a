@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./question.styles";
@@ -46,6 +46,7 @@ const questionList: Question[] = [
 
 export default function NoticeDetailScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   // 답변대기를 위로, 답변완료를 아래로 정렬하고, 각 그룹 내에서 날짜 최신순으로 정렬
   const sortedQuestionList = [...questionList].sort((a, b) => {
@@ -79,51 +80,67 @@ export default function NoticeDetailScreen() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.questionItemContainer}
               activeOpacity={0.7}
+              onPress={() => router.navigate("/(cust)/question-answer")}
             >
               <View style={styles.questionItemLeftSection}>
-                <View style={[styles.questionIconContainer,
-                  item.status === "답변대기" && styles.questionItemStatusPending
-                ]}>
+                <View
+                  style={[
+                    styles.questionIconContainer,
+                    item.status === "답변대기" &&
+                      styles.questionItemStatusPending,
+                  ]}
+                >
                   {item.status === "답변대기" ? (
-                    <Ionicons name="chatbubble-ellipses-outline" size={24} color="#999999" />
+                    <Ionicons
+                      name="chatbubble-ellipses-outline"
+                      size={24}
+                      color="#999999"
+                    />
                   ) : (
-                    <Ionicons name="checkmark-circle-outline" size={24} color="#EF7810" />)}
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={24}
+                      color="#EF7810"
+                    />
+                  )}
                 </View>
-                
+
                 <View style={styles.questionItemDetailContainer}>
                   <View style={styles.questionItemRightSection}>
                     <View
                       style={[
                         styles.questionItemStatusContainer,
-                        item.status === "답변대기" && styles.questionItemStatusPending,
+                        item.status === "답변대기" &&
+                          styles.questionItemStatusPending,
                       ]}
                     >
                       <Text
                         style={[
                           styles.questionItemStatusText,
-                          item.status === "답변대기" && styles.questionItemStatusTextPending,
+                          item.status === "답변대기" &&
+                            styles.questionItemStatusTextPending,
                         ]}
                       >
                         {item.status}
                       </Text>
                     </View>
                   </View>
-                  
+
                   <Text style={styles.questionItemTitleText} numberOfLines={2}>
                     {item.title}
                   </Text>
-                  
+
                   <View style={styles.questionItemFooter}>
                     <Ionicons name="time-outline" size={14} color="#999" />
-                    
+
                     <Text style={styles.questionItemDateText}>{item.date}</Text>
                   </View>
                 </View>
-                
-                    <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
+
+                <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
               </View>
             </TouchableOpacity>
           )}
