@@ -1,71 +1,108 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        backgroundColor: '#fff',
-    },
-    backButton: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        textAlign: 'center',
-        pointerEvents: "none",
-    },
-    placeholder: {
-        width: 40,
-    },
-    questionListContainer: {
-        flex: 1,
-        padding: 16,
-    },
-    questionItemContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minHeight: 70,
-        borderBottomColor: '#eee',
-        borderBottomWidth: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-    },
-    questionItemDetailContainer: {
-        flex: 1,
-    },
-    questionItemTitleText: {
-        fontSize: 16,
-        fontWeight: '500',
-        marginBottom: 6,
-    },
-    questionItemDateText: {
-        fontSize: 14,
-        color: '#666',
-    },
-    questionItemStatusContainer: {
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        borderRadius: 12,
-        backgroundColor: 'rgba(241, 129, 30, 0.2)',
-        marginRight: 12,
-    },
-    questionItemStatusText: {
-        fontSize: 14,
-        color: 'rgba(241, 129, 30, 1)',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    pointerEvents: "none",
+  },
+  placeholder: {
+    width: 40,
+  },
+  questionListContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  questionItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+    boxShadow: "0 0 4px rgba(0,0,0,0.1)",
+  },
+  questionItemLeftSection: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  questionIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FFF5ED",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  questionItemDetailContainer: {
+    flex: 1,
+    gap: 6,
+  },
+  questionItemTitleText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333333",
+    lineHeight: 22,
+  },
+  questionItemFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  questionItemDateText: {
+    fontSize: 13,
+    color: "#999999",
+  },
+  questionItemRightSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  questionItemStatusContainer: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#FFF5ED",
+  },
+  questionItemStatusPending: {
+    backgroundColor: "#F5F5F5",
+  },
+  questionItemStatusText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#EF7810",
+  },
+  questionItemStatusTextPending: {
+    color: "#999999",
+  },
 });
