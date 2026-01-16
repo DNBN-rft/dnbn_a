@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useState } from "react";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./withdraw.styles";
 
 const WITHDRAW_REASONS = [
@@ -51,7 +51,7 @@ export default function WithdrawScreen() {
                         Alert.alert('안내', '탈퇴가 완료되었습니다.', [
                             {
                                 text: '확인',
-                                onPress: () => router.push('/(auth)/login'),
+                                onPress: () => router.replace('/(auth)/login'),
                             },
                         ]);
                     },
