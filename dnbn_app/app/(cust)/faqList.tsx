@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  FlatList,
   Pressable,
   ScrollView,
   Text,
@@ -15,88 +16,75 @@ import { styles } from "./faqlist.styles";
 export default function FaqListScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
-  const [selectedSubject, setSelectedSubject] = useState("주문/결제");
+  const [selectedSubject, setSelectedSubject] = useState("전체");
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-  
+  const toggleExpand = (categoryIndex: number, itemIndex: number) => {
+    const key = `${categoryIndex}-${itemIndex}`;
+    setExpandedItem((prev) => (prev === key ? null : key));
+  };
+
   const faqData = [
     {
-      faqType: "요금제",
+      faqType: "주문/결제",
       faqList: [
         {
           faqTitle: "1",
-          faqContent: "답변"
+          faqContent: "답변",
         },
         {
           faqTitle: "2",
-          faqContent: "답변"
+          faqContent: "답변",
         },
-        {
-          faqTitle: "3",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "4",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "5",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "6",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "질문",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "질문",
-          faqContent: "답변"
-        }
-      ]
+      ],
     },
     {
-      faqType: "서비스",
+      faqType: "배송",
       faqList: [
         {
           faqTitle: "질문",
-          faqContent: "답변"
+          faqContent: "답변",
         },
         {
           faqTitle: "2",
-          faqContent: "답변"
+          faqContent: "답변",
         },
+      ],
+    },
+    {
+      faqType: "할인",
+      faqList: [
         {
           faqTitle: "질문",
-          faqContent: "답변"
+          faqContent: "답변",
         },
         {
-          faqTitle: "3",
-          faqContent: "답변"
+          faqTitle: "2",
+          faqContent: "답변",
         },
-        {
-          faqTitle: "4",
-          faqContent: "답변"
-        },
-        {
-          faqTitle: "질문",
-          faqContent: "답변"
-        },
+      ],
+    },
+    {
+      faqType: "카테고리",
+      faqList: [
         {
           faqTitle: "질문",
-          faqContent: "답변"
+          faqContent: "답변",
         },
         {
-          faqTitle: "질문",
-          faqContent: "답변"
-        }
-      ]
-    }
+          faqTitle: "2",
+          faqContent: "답변",
+        },
+      ],
+    },
   ];
 
   const currentFaqItems =
-    faqData.find((faq) => faq.faqType === selectedSubject)?.faqList || [];
+    selectedSubject === "전체"
+      ? faqData
+      : faqData.filter((faq) => faq.faqType === selectedSubject);
+
+  const allSubjects = ["전체", ...faqData.map((faq) => faq.faqType)];
 
   return (
     <View style={styles.container}>
@@ -113,71 +101,100 @@ export default function FaqListScreen() {
         <Text style={styles.title}>자주 묻는 질문</Text>
         <View style={styles.placeholder} />
       </View>
-
+      
       <ScrollView
         ref={scrollViewRef}
         style={styles.faqInnerContainer}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <View style={styles.faqHeaderContainer}>
           <View style={styles.faqSearchContainer}>
             <TextInput
               style={styles.faqSearchPlaceholderText}
               placeholder="검색어를 입력해 주세요."
+              
             />
+            
             <Ionicons name="search" size={20} color="#CCCCCC" />
           </View>
         </View>
 
-        <View style={styles.faqSubjectContainer}>
-          <Pressable
-            style={[
-              styles.faqSubjectButton,
-              selectedSubject === "주문/결제"
-                ? styles.faqSubjectButtonSelected
-                : styles.faqSubjectButtonUnselected,
-            ]}
-            onPress={() => setSelectedSubject("주문/결제")}
-          >
-            <Text
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={allSubjects}
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.faqSubjectContainer}
+          renderItem={({ item }) => (
+            <Pressable
               style={[
-                styles.faqSubjectButtonText,
-                selectedSubject === "주문/결제"
-                  ? styles.faqSubjectButtonTextSelected
-                  : styles.faqSubjectButtonTextUnselected,
+                styles.faqSubjectButton,
+                selectedSubject === item
+                  ? styles.faqSubjectButtonSelected
+                  : styles.faqSubjectButtonUnselected,
               ]}
-            >
-              주문/결제
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.faqSubjectButton,
-              selectedSubject === "배송"
-                ? styles.faqSubjectButtonSelected
-                : styles.faqSubjectButtonUnselected,
-            ]}
-            onPress={() => setSelectedSubject("배송")}
-          >
-            <Text
-              style={[
-                styles.faqSubjectButtonText,
-                selectedSubject === "배송"
-                  ? styles.faqSubjectButtonTextSelected
-                  : styles.faqSubjectButtonTextUnselected,
-              ]}
-            >
-              배송
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.faqListContainer}>
-          <Text style={styles.faqSubjectTitleText}>{selectedSubject}</Text>
-          {currentFaqItems.map((item, index) => (
-            <Pressable key={index} style={styles.faqItemContainer}>
-              <Text style={styles.faqItemQuestionText}>{item.question}</Text>
-              <Ionicons name="chevron-forward" size={20} color="#EF7810" />
+              onPress={() => setSelectedSubject(item)}>
+              <Text
+                style={[
+                  styles.faqSubjectButtonText,
+                  selectedSubject === item
+                    ? styles.faqSubjectButtonTextSelected
+                    : styles.faqSubjectButtonTextUnselected,
+                ]}
+              >
+                {item}
+              </Text>
             </Pressable>
+          )}
+        />
+        
+        <View style={styles.faqListContainer}>
+          {currentFaqItems.map((faqCategory, categoryIndex) => (
+            <View key={categoryIndex}>
+              {faqCategory.faqList.map((item, index) => {
+                const itemKey = `${categoryIndex}-${index}`;
+                const isExpanded = expandedItem === itemKey;
+
+                return (
+                  <View key={index} style={styles.faqItemWrapper}>
+                    <Pressable
+                      style={[
+                        styles.faqItemContainer,
+                        isExpanded && styles.faqItemContainerExpanded,]}
+                      onPress={() => toggleExpand(categoryIndex, index)}>
+                      <View style={styles.faqItemQuestionRow}>
+                        <Text style={styles.faqItemQuestionLabel}>
+                          Q
+                        </Text>
+                        
+                        <Text style={styles.faqItemQuestionText}>
+                          {item.faqTitle}
+                        </Text>
+                      </View>
+                      
+                      <Ionicons
+                        name={isExpanded ? "chevron-up" : "chevron-down"}
+                        size={20}
+                        color="#EF7810"
+                      />
+                    </Pressable>
+
+                    {isExpanded && (
+                      <View style={styles.faqItemAnswerContainer}>
+                        <View style={styles.faqItemAnswerRow}>
+                          <Text style={styles.faqItemAnswerLabel}>
+                            A
+                          </Text>
+                          
+                          <Text style={styles.faqItemAnswerText}>
+                            {item.faqContent}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
           ))}
         </View>
 
@@ -186,19 +203,20 @@ export default function FaqListScreen() {
             원하는 답변을 찾지 못하셨나요?
           </Text>
           <View style={styles.questionBtnContainer}>
-            <TouchableOpacity style={styles.questionReqButton}>
+            <TouchableOpacity
+                style={styles.questionReqButton}
+                onPress={() => router.navigate("/(cust)/questionReg")}>
               <Text
-                style={styles.questionReqButtonText}
-                onPress={() => router.navigate("/(cust)/questionReg")}
-              >
+                style={styles.questionReqButtonText}>
                 1:1 문의하기
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.questionListViewButton}>
+            
+            <TouchableOpacity
+                style={styles.questionListViewButton}
+                onPress={() => router.navigate("/(cust)/question")}>
               <Text
-                style={styles.questionListViewText}
-                onPress={() => router.navigate("/(cust)/question")}
-              >
+                style={styles.questionListViewText}>
                 내 문의 목록 보기
               </Text>
             </TouchableOpacity>
