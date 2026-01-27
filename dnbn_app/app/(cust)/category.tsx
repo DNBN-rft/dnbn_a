@@ -1,25 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
 import { FlatList, Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./category.styles";
-import { router } from "expo-router";
-import { useState } from "react";
 
 export default function CategoryScreen() {
     const insets = useSafeAreaInsets();
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     const categories = [
-        { id: "1", uri: require('@/assets/images/qr.png'), name: "소매/잡화" },
-        { id: "2", uri: require('@/assets/images/qr.png'), name: "음식/카페" },
-        { id: "3", uri: require('@/assets/images/qr.png'), name: "뷰티/헬스" },
-        { id: "4", uri: require('@/assets/images/qr.png'), name: "생활서비스" },
-        { id: "5", uri: require('@/assets/images/qr.png'), name: "의료/건강" },
-        { id: "6", uri: require('@/assets/images/qr.png'), name: "교육/취미" },
-        { id: "7", uri: require('@/assets/images/qr.png'), name: "숙박/랜탈" },
-        { id: "8", uri: require('@/assets/images/qr.png'), name: "서비스/전문" },
-        { id: "9", uri: require('@/assets/images/qr.png'), name: "오락/스포츠" },
-        { id: "10", uri: require('@/assets/images/qr.png'), name: "기타" },
+        { id: "1", uri: require('@/assets/images/category/retail_goods.png'), name: "소매/잡화" },
+        { id: "2", uri: require('@/assets/images/category/food_cafe.png'), name: "음식/카페" },
+        { id: "3", uri: require('@/assets/images/category/beauty_health.png'), name: "뷰티/헬스" },
+        { id: "4", uri: require('@/assets/images/category/life_service.png'), name: "생활서비스" },
+        { id: "5", uri: require('@/assets/images/category/medical_health.png'), name: "의료/건강" },
+        { id: "6", uri: require('@/assets/images/category/edu_hobby.png'), name: "교육/취미" },
+        { id: "7", uri: require('@/assets/images/category/hostel_rental.png'), name: "숙박/랜탈" },
+        { id: "8", uri: require('@/assets/images/category/service_pro.png'), name: "서비스/전문" },
+        { id: "9", uri: require('@/assets/images/category/game_sport.png'), name: "오락/스포츠" },
+        { id: "10", uri: require('@/assets/images/category/etc.png'), name: "기타" },
     ]
 
     const toggleCategory = (id: string) => {
