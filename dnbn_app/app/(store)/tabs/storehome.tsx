@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./storehome.styles";
+import { styles } from "../styles/storehome.styles";
 
 export default function StoreHome() {
   const insets = useSafeAreaInsets();

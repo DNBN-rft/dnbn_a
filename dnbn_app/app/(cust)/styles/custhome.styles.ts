@@ -61,6 +61,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     marginLeft: 10,
+    alignItems: "center",
   },
   sectionMore: {
     paddingHorizontal: 10,
