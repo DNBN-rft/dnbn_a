@@ -6,331 +6,25 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Animated, FlatList, Modal, PanResponder, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import { generateMapHTML } from "./mapHtml";
 import { styles } from "./map.styles";
+import {
+  getUserLocation as getLocation,
+  DEFAULT_LOCATION,
+  geocodeAddress,
+  reverseGeocode,
+  fetchNearbyStores,
+  Store,
+  TEST_STORES,
+  slideUp,
+  slideDown,
+  expandPanel,
+  resetPanel,
+  WebViewMessageType,
+  ClickedLocation,
+} from "../../../utils/map";
 
 const KAKAO_JAVASCRIPT_KEY = "46f0bc8ab705f2263a98ee3adeebd719";
-const KAKAO_REST_API_KEY = "4739cdd728a97e32f1ad213ae111e099";
-const DEFAULT_LOCATION = { latitude: 37.4979, longitude: 127.0276 };
-
-interface Store {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  phone?: string;
-  distance?: number;
-}
-
-type WebViewMessageType =
-  | { type: 'init' }
-  | { type: 'userLocation'; latitude: number; longitude: number }
-  | { type: 'userLocationWithZoom'; latitude: number; longitude: number; zoom: number }
-  | { type: 'mapNavigation'; latitude: number; longitude: number; zoom: number }
-  | { type: 'addStores'; stores: Store[] }
-  | { type: 'clearMarkers' }
-  | { type: 'clearAllMarkers' }
-  | { type: 'ready' };
-
-interface ClickedLocation {
-  latitude: number;
-  longitude: number;
-  address?: string;
-}
-
-const TEST_STORES: Store[] = [
-  {
-    id: "test-1",
-    name: "용인점",
-    address: "경기도 용인시 기흥구 구성로 184",
-    latitude: 37.29077309144749,
-    longitude: 127.13013185986694,
-    phone: "031-1111-1111",
-  },
-  {
-    id: "test-2",
-    name: "용인역점",
-    address: "경기도 용인시 처인구 중부대로",
-    latitude: 37.29155500046295,
-    longitude: 127.12782692103407,
-    phone: "031-2222-2222",
-  },
-  {
-    id: "test-3",
-    name: "기흥점",
-    address: "경기도 용인시 기흥구 중심상가",
-    latitude: 37.29150256069689,
-    longitude: 127.12631562423036,
-    phone: "031-3333-3333",
-  },
-  {
-    id: "test-4",
-    name: "백암 만다린",
-    address: "경기도 용인시 처인구 백암면 백암로 100",
-    latitude: 37.170682103830195,
-    longitude: 127.37076993992747,
-    phone: "031-4444-4444",
-  },
-  {
-    id: "test-5",
-    name: "백암 세븐일레븐",
-    address: "경기도 용인시 수지구 수지로 50",
-    latitude: 37.171968683256914,
-    longitude: 127.37138425672894,
-    phone: "031-5555-5555",
-  },
-];
-
-const generateMapHTML = (appKey: string) => `
-  <!DOCTYPE html>
-  <html lang="ko">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Kakao Map</title>
-      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}"></script>
-      <style>
-          * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-          }
-          body {
-              width: 100%;
-              height: 100vh;
-              font-family: Arial, sans-serif;
-          }
-          #map {
-              width: 100%;
-              height: 100%;
-          }
-          .info-window {
-              padding: 12px;
-              background-color: white;
-              border-radius: 8px;
-              font-size: 14px;
-          }
-          .store-name {
-              font-weight: bold;
-              color: #333;
-              margin-bottom: 4px;
-          }
-          .store-info {
-              color: #666;
-              font-size: 12px;
-          }
-      </style>
-  </head>
-  <body>
-      <div id="map"></div>
-      
-      <script>
-          let map;
-          let markers = [];
-          let userLocationMarker = null;
-          let clickedMarker = null;
-          let isReady = false;
-          let initInProgress = false;
-
-          // 메시지 리스너 먼저 등록
-          window.addEventListener('message', function(event) {
-              let data;
-              try {
-                  data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-              } catch (e) {
-                  return;
-              }
-              
-              if (!isReady && data.type !== 'init') {
-                  return;
-              }
-              
-              switch(data.type) {
-                  case 'init':
-                      initMap();
-                      break;
-                  case 'userLocation':
-                      displayUserLocation(data.latitude, data.longitude);
-                      break;
-                  case 'userLocationWithZoom':
-                      displayUserLocation(data.latitude, data.longitude);
-                      map.setLevel(data.zoom);
-                      setTimeout(() => {
-                          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'mapReady' }));
-                      }, 1000);
-                      break;
-                  case 'mapNavigation':
-                      // 지도 이동만 (마커 생성 없음)
-                      map.setCenter(new kakao.maps.LatLng(data.latitude, data.longitude));
-                      map.setLevel(data.zoom);
-                      break;
-                  case 'addStores':
-                      clearMarkers();
-                      data.stores.forEach(store => addStoreMarker(store));
-                      break;
-                  case 'clearMarkers':
-                      clearMarkers();
-                      break;
-                  case 'clearAllMarkers':
-                      clearAllMarkers();
-                      break;
-              }
-          });
-          
-
-          function initMap() {
-              if (initInProgress) return;
-              initInProgress = true;
-              const container = document.getElementById('map');
-              const options = {
-                  center: new kakao.maps.LatLng(37.4979, 127.0276),
-                  level: 5
-              };
-              map = new kakao.maps.Map(container, options);
-              
-              // 줌 변화 이벤트 리스너 - 자연스러운 타일 리로드
-              let zoomTimeout;
-              kakao.maps.event.addListener(map, 'zoom_changed', function() {
-                  clearTimeout(zoomTimeout);
-                  
-                  const center = map.getCenter();
-                  const currentLat = center.getLat();
-                  const currentLng = center.getLng();
-                  
-                  const randomLat = (Math.random() - 0.5) * 0.0000005; // ±0.00000025도
-                  const randomLng = (Math.random() - 0.5) * 0.0000005;
-                  
-                  map.setCenter(new kakao.maps.LatLng(
-                      currentLat + randomLat,
-                      currentLng + randomLng
-                  ));
-                  
-                  zoomTimeout = setTimeout(() => {
-                      map.setCenter(center);
-                  }, 50);
-              });
-              
-              // 지도 클릭 이벤트 리스너
-              kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-                  const latlng = mouseEvent.latLng;
-                  const lat = latlng.getLat();
-                  const lng = latlng.getLng();
-                  
-                  // 이전 클릭 마커 제거
-                  if (clickedMarker) {
-                      clickedMarker.setMap(null);
-                      clickedMarker = null;
-                  }
-                  
-                  // 현재위치 마커 제거
-                  if (userLocationMarker) {
-                      userLocationMarker.setMap(null);
-                      userLocationMarker = null;
-                  }
-                  
-                  // 새 클릭 마커 추가
-                  clickedMarker = new kakao.maps.Marker({
-                      position: new kakao.maps.LatLng(lat, lng),
-                      map: map,
-                      image: createClickedIcon(),
-                      title: '선택한 위치'
-                  });
-                  
-                  window.ReactNativeWebView.postMessage(JSON.stringify({
-                      type: 'mapClicked',
-                      latitude: lat,
-                      longitude: lng
-                  }));
-              });
-              
-              isReady = true;
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-          }
-
-          function displayUserLocation(lat, lng) {
-              if (userLocationMarker) {
-                  userLocationMarker.setMap(null);
-              }
-
-              const userPosition = new kakao.maps.LatLng(lat, lng);
-              
-              userLocationMarker = new kakao.maps.Marker({
-                  position: userPosition,
-                  map: map,
-                  image: createUserIcon(),
-                  title: '내 위치'
-              });
-
-              map.setCenter(userPosition); 
-          }
-
-          function createUserIcon() {
-              const imageSize = new kakao.maps.Size(32, 40);
-              const imageOption = { offset: new kakao.maps.Point(16, 40) };
-              return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40"><path d="M16 0C8.27 0 2 6.27 2 14c0 12 14 26 14 26s14-14 14-26c0-7.73-6.27-14-14-14z" fill="%23EF7810"/><circle cx="16" cy="14" r="5" fill="white"/></svg>',
-                  imageSize,
-                  imageOption
-              );
-          }
-
-          function createStoreIcon() {
-              const imageSize = new kakao.maps.Size(40, 45);
-              const imageOption = { offset: new kakao.maps.Point(20, 45) };
-              return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 45"><path d="M20 0C9.06 0 0 9.06 0 20c0 13 20 25 20 25s20-12 20-25c0-10.94-9.06-20-20-20z" fill="%23FF6B6B"/><circle cx="20" cy="20" r="8" fill="white"/></svg>',
-                  imageSize,
-                  imageOption
-              );
-          }
-
-          function createClickedIcon() {
-              const imageSize = new kakao.maps.Size(40, 45);
-              const imageOption = { offset: new kakao.maps.Point(20, 45) };
-              return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 45"><path d="M20 0C9.06 0 0 9.06 0 20c0 13 20 25 20 25s20-12 20-25c0-10.94-9.06-20-20-20z" fill="%23EF7810" opacity="0.8"/><circle cx="20" cy="20" r="8" fill="white"/></svg>',
-                  imageSize,
-                  imageOption
-              );
-          }
-
-          function addStoreMarker(store) {
-              const position = new kakao.maps.LatLng(store.latitude, store.longitude);
-              
-              const marker = new kakao.maps.Marker({
-                  position: position,
-                  map: map,
-                  image: createStoreIcon(),
-                  title: store.name
-              });
-
-              marker.addListener('click', function() {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'storeSelected', store: store }));
-              });
-
-              markers.push(marker);
-          }
-
-          function clearMarkers() {
-              markers.forEach(marker => marker.setMap(null));
-              markers = [];
-          }
-
-          function clearAllMarkers() {
-              markers.forEach(marker => marker.setMap(null));
-              markers = [];
-              // 클릭 마커도 제거
-              if (clickedMarker) {
-                  clickedMarker.setMap(null);
-                  clickedMarker = null;
-              }
-          }
-
-          // 초기화는 React Native에서 onLoadEnd 이벤트로 처리
-      </script>
-  </body>
-  </html>
-`;
 
 export default function CustMapScreen() {
   const navigation = useNavigation();
@@ -360,54 +54,24 @@ export default function CustMapScreen() {
     }
   }, []);
 
-  const fetchNearbyStores = useCallback(async (latitude: number, longitude: number) => {
+  const handleFetchNearbyStores = useCallback(async (latitude: number, longitude: number) => {
     try {
-      const threshold = 0.05; // 약 5km 범위
-
       // 기존 마커 제거
       sendMessageToWebView({
         type: "clearMarkers",
       });
 
-      // TEST_STORES에서 해당 좌표 범위 내의 가맹점 필터링
-      const nearbyTestStores = TEST_STORES.filter(store => {
-        const latDiff = Math.abs(store.latitude - latitude);
-        const lngDiff = Math.abs(store.longitude - longitude);
-        return latDiff < threshold && lngDiff < threshold;
-      });
-
-      if (nearbyTestStores.length > 0) {
-        setStores(nearbyTestStores);
+      const nearbyStores = await fetchNearbyStores(latitude, longitude);
+      
+      setStores(nearbyStores);
+      if (nearbyStores.length > 0) {
         sendMessageToWebView({
           type: "addStores",
-          stores: nearbyTestStores,
-        });
-        return;
-      }
-
-      //todo: 백엔드 API 구현 전까지는 TEST_STORES에 의존, 백엔드 API 구현 후 윗 부분 삭제
-      // TEST_STORES에 없으면 백엔드 API 호출
-      const response = await fetch(
-        `https://your-api.com/api/stores/nearby?latitude=${latitude}&longitude=${longitude}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success && data.stores) {
-        setStores(data.stores);
-        sendMessageToWebView({
-          type: "addStores",
-          stores: data.stores,
+          stores: nearbyStores,
         });
       }
     } catch (error) {
-      // API 호출 실패 시 빈 배열 (가맹점 없음)
+      console.error("Fetch stores error:", error);
       setStores([]);
       sendMessageToWebView({
         type: "clearMarkers",
@@ -438,185 +102,48 @@ export default function CustMapScreen() {
   // 3. 위치 선택 처리 (좌표 설정 + 주변 가맹점 조회)
   const handleLocationSelection = useCallback(async (latitude: number, longitude: number) => {
     setLocationCoordinates(latitude, longitude);
-    await fetchNearbyStores(latitude, longitude);
+    await handleFetchNearbyStores(latitude, longitude);
     
     // 가맹점 목록 표시
     setShowStoreList(true);
-    storeListAnim.setValue(300);
-    Animated.timing(storeListAnim, {
-      toValue: 0,
-      duration: 400,
-      useNativeDriver: false,
-    }).start();
-  }, [setLocationCoordinates, fetchNearbyStores, storeListAnim]);
+    slideUp(storeListAnim, 400);
+  }, [setLocationCoordinates, handleFetchNearbyStores, storeListAnim]);
 
   // Kakao REST API로 주소를 좌표로 변환
-  const geocodeAddress = useCallback(async (address: string) => {
-    try {
-      const response = await fetch(
-        `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`,
-        {
-          headers: {
-            Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.documents && data.documents.length > 0) {
-        const location = data.documents[0];
-        const lat = parseFloat(location.y);
-        const lng = parseFloat(location.x);
-
-        // 지도 이동
-        await handleMapNavigation(lat, lng);
-        
-        // 주변 가맹점 조회
-        await fetchNearbyStores(lat, lng);
-        
-        // 가맹점 목록 표시
-        setShowStoreList(true);
-        storeListAnim.setValue(300);
-        Animated.timing(storeListAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: false,
-        }).start();
-      } else {
-        Alert.alert("알림", "주소를 찾을 수 없습니다.");
-      }
-    } catch (error) {
-      Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.");
+  const handleGeocodeAddress = useCallback(async (address: string) => {
+    const result = await geocodeAddress(address);
+    
+    if (result) {
+      // 지도 이동
+      await handleMapNavigation(result.latitude, result.longitude);
+      
+      // 주변 가맹점 조회
+      await handleFetchNearbyStores(result.latitude, result.longitude);
+      
+      // 가맹점 목록 표시
+      setShowStoreList(true);
+      slideUp(storeListAnim, 400);
     }
-  }, [handleMapNavigation, fetchNearbyStores, storeListAnim]);
+  }, [handleMapNavigation, handleFetchNearbyStores, storeListAnim]);
 
   const getUserLocation = useCallback(async () => {
-    try {
-      const current = await Location.getForegroundPermissionsAsync();
-      console.log("Location permission status:", current.status);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert(
-          "위치 권한 필요",
-          "지도에서 가까운 가맹점을 찾기 위해 위치 접근 권한이 필요합니다. 기본 위치로 지도를 표시합니다.",
-          [{ text: "확인" }]
-        );
-        setUserLocation(null);
-        setIsLocationReady(true);
-        return;
-      }
-
-      try {
-        const lastLocation = await Location.getLastKnownPositionAsync();
-        if (lastLocation) {
-          setUserLocation(lastLocation);
-          setIsLocationReady(true);
-        }
-      } catch (error) {
-      }
-
-      try {
-        const location = await Promise.race([
-          Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-            timeInterval: 5000,
-            mayShowUserSettingsDialog: false,
-          }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 5000)
-          )
-        ]);
-
-        setUserLocation(location);
-        if (!isLocationReady) {
-          setIsLocationReady(true);
-        }
-      } catch (gpsError) {
-        if (!isLocationReady) {
-          Alert.alert(
-            "위치 서비스 오류",
-            "위치를 가져올 수 없습니다. 기본 위치로 지도를 표시합니다.",
-            [{ text: "확인" }]
-          );
-          setUserLocation(null);
-          setIsLocationReady(true);
-        }
-      }
-    } catch (error) {
-      Alert.alert(
-        "위치 권한 오류",
-        "위치 권한을 요청하는 중 오류가 발생했습니다.",
-        [{ text: "확인" }]
-      );
-      setUserLocation(null);
-      setIsLocationReady(true);
-    }
-  }, [isLocationReady]);
+    const location = await getLocation();
+    setUserLocation(location);
+    setIsLocationReady(true);
+  }, []);
 
   // 좌표를 주소로 변환 (역지오코딩)
-  const reverseGeocode = useCallback(async (latitude: number, longitude: number) => {
-    try {
-      const response = await fetch(
-        `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
-        {
-          headers: {
-            Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.documents && data.documents.length > 0) {
-        const roadAddress = data.documents[0].road_address?.address_name || 
-                           data.documents[0].address?.address_name || 
-                           '주소를 찾을 수 없습니다';
-        
-        setClickedLocation({
-          latitude,
-          longitude,
-          address: roadAddress
-        });
-        
-        // 애니메이션 시작
-        clickedLocationAnim.setValue(500);
-        Animated.timing(clickedLocationAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: false,
-        }).start();
-      } else {
-        setClickedLocation({
-          latitude,
-          longitude,
-          address: '주소를 찾을 수 없습니다'
-        });
-        
-        // 애니메이션 시작
-        clickedLocationAnim.setValue(500);
-        Animated.timing(clickedLocationAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: false,
-        }).start();
-      }
-    } catch (error) {
-      setClickedLocation({
-        latitude,
-        longitude,
-        address: '주소 조회 실패'
-      });
-      
-      // 애니메이션 시작
-      clickedLocationAnim.setValue(500);
-      Animated.timing(clickedLocationAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: false,
-      }).start();
-    }
+  const handleReverseGeocode = useCallback(async (latitude: number, longitude: number) => {
+    const address = await reverseGeocode(latitude, longitude);
+    
+    setClickedLocation({
+      latitude,
+      longitude,
+      address
+    });
+    
+    // 애니메이션 시작
+    slideUp(clickedLocationAnim, 400);
   }, [clickedLocationAnim]);
 
   // WebView 메시지 핸들러
@@ -631,48 +158,34 @@ export default function CustMapScreen() {
           setIsLoading(false);
         }, 100);
       } else if (data.type === 'storeSelected') {
-        setSelectedStore(data.store);
-      } else if (data.type === 'mapClicked') {
-        // 새 위치 클릭 시 기존 상점 목록 닫기
+        // 목록이 열려있으면 먼저 닫기
         if (showStoreList) {
-          // 상점 목록을 애니메이션으로 내려보내기
-          Animated.timing(storeListAnim, {
-            toValue: 600,
-            duration: 300,
-            useNativeDriver: false,
-          }).start(() => {
+          slideDown(storeListAnim, 300, 300, () => {
+            setShowStoreList(false);
+          });
+          // 목록이 닫힐 때까지 대기한 후 상세정보 표시
+          setTimeout(() => {
+            setSelectedStore(data.store);
+          }, 350);
+        } else {
+          setSelectedStore(data.store);
+        }
+      } else if (data.type === 'mapClicked') {
+        // 새 위치 클릭 시 기존 패널들 닫기 (하나씩)
+        if (showStoreList) {
+          slideDown(storeListAnim, 600, 300, () => {
             setShowStoreList(false);
           });
         } else if (selectedStore) {
-          // 가맹점 상세보기를 애니메이션으로 내려보내기
-          Animated.timing(slideAnim, {
-            toValue: 300,
-            duration: 300,
-            useNativeDriver: false,
-          }).start(() => {
+          slideDown(slideAnim, 300, 300, () => {
             setSelectedStore(null);
           });
         }
-        reverseGeocode(data.latitude, data.longitude);
+        handleReverseGeocode(data.latitude, data.longitude);
       }
     } catch (error) {
     }
-  }, [reverseGeocode, showStoreList, storeListAnim, selectedStore, slideAnim]);
-
-  const handleAddressSearchMessage = useCallback((event: any) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-
-      if (data.type === 'addressSelected') {
-        setShowAddressSearch(false);
-
-        setTimeout(() => {
-          geocodeAddress(data.roadAddress || data.address);
-        }, 300);
-      }
-    } catch (error) {
-    }
-  }, [geocodeAddress]);
+  }, [handleReverseGeocode, showStoreList, storeListAnim, selectedStore, slideAnim]);
 
   const handleWebViewLoadEnd = useCallback(() => {
     // WebView가 완전히 준비될 때까지 대기
@@ -703,13 +216,18 @@ export default function CustMapScreen() {
   const handleCenterToUser = useCallback(async () => {
     // 클릭한 위치 패널 닫기
     if (clickedLocation) {
-      Animated.timing(clickedLocationAnim, {
-        toValue: 500,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => {
+      slideDown(clickedLocationAnim, 500, 300, () => {
         setClickedLocation(null);
       });
+    }
+    
+    // 가맹점 상세정보 패널이 열려있으면 먼저 닫기
+    if (selectedStore) {
+      slideDown(slideAnim, 300, 300, () => {
+        setSelectedStore(null);
+      });
+      // 패널이 닫힐 때까지 대기
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
     
     // WebView에서 모든 마커 제거 (클릭 마커 + 가맹점 마커)
@@ -725,18 +243,83 @@ export default function CustMapScreen() {
     } else {
       await getUserLocation();
     }
-  }, [userLocation, handleLocationSelection, getUserLocation, clickedLocation, clickedLocationAnim, sendMessageToWebView]);
+  }, [userLocation, handleLocationSelection, getUserLocation, clickedLocation, clickedLocationAnim, sendMessageToWebView, selectedStore, slideAnim]);
+
+  /**
+   * 모든 패널을 닫습니다
+   */
+  const closeAllPanels = useCallback(async () => {
+    const closePromises = [];
+
+    // 1. 클릭한 위치 패널 닫기
+    if (clickedLocation) {
+      closePromises.push(
+        new Promise<void>(resolve => {
+          slideDown(clickedLocationAnim, 500, 300, () => {
+            setClickedLocation(null);
+            resolve();
+          });
+        })
+      );
+    }
+
+    // 2. 가맹점 목록 패널 닫기
+    if (showStoreList) {
+      closePromises.push(
+        new Promise<void>(resolve => {
+          slideDown(storeListAnim, 300, 300, () => {
+            setShowStoreList(false);
+            resolve();
+          });
+        })
+      );
+    }
+
+    // 3. 가맹점 상세정보 패널 닫기
+    if (selectedStore) {
+      closePromises.push(
+        new Promise<void>(resolve => {
+          slideDown(slideAnim, 300, 300, () => {
+            setSelectedStore(null);
+            resolve();
+          });
+        })
+      );
+    }
+
+    // 모든 패널이 닫힐 때까지 대기
+    if (closePromises.length > 0) {
+      await Promise.all(closePromises);
+    }
+  }, [clickedLocation, clickedLocationAnim, showStoreList, storeListAnim, selectedStore, slideAnim]);
 
   // 가맹점 정보 닫기
   const handleCloseStoreInfo = useCallback(() => {
-    Animated.timing(slideAnim, {
-      toValue: 300,
-      duration: 300,
-      useNativeDriver: false,
-    }).start(() => {
+    slideDown(slideAnim, 300, 300, () => {
       setSelectedStore(null);
     });
   }, [slideAnim]);
+
+  
+  // 가맹점 목록에서 가맹점 클릭 (목록 먼저 닫고 상세정보 표시)
+  const handleSelectStoreFromList = useCallback(async (store: Store) => {
+    // 다른 패널이 열려있으면 먼저 닫기
+    if (clickedLocation) {
+      slideDown(clickedLocationAnim, 500, 300, () => {
+        setClickedLocation(null);
+      });
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+    
+    // 목록 패널 닫기
+    slideDown(storeListAnim, 300, 300, () => {
+      setShowStoreList(false);
+    });
+    
+    // 목록이 완전히 닫힌 후 상세정보 표시
+    await new Promise(resolve => setTimeout(resolve, 350));
+    setSelectedStore(store);
+  }, [storeListAnim, clickedLocation, clickedLocationAnim]);
 
   // 클릭한 위치 근처 가맹점 검색
   const handleSearchNearbyStores = useCallback(async () => {
@@ -745,37 +328,32 @@ export default function CustMapScreen() {
       await handleMapNavigation(clickedLocation.latitude, clickedLocation.longitude, 4);
       
       // 2. 가맹점 조회
-      await fetchNearbyStores(clickedLocation.latitude, clickedLocation.longitude);
+      await handleFetchNearbyStores(clickedLocation.latitude, clickedLocation.longitude);
       
-      // 3. 검색 후 패널 닫기 및 가맹점 목록 표시
-      Animated.timing(clickedLocationAnim, {
-        toValue: 200,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => {
+      // 3. 다른 패널들이 열려있으면 먼저 닫기
+      if (selectedStore) {
+        slideDown(slideAnim, 300, 300, () => {
+          setSelectedStore(null);
+        });
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      // 4. 클릭 위치 패널 닫기
+      slideDown(clickedLocationAnim, 200, 300, () => {
         setClickedLocation(null);
       });
       
-      // 4. 가맹점 목록 표시 (약간의 딜레이 후)
+      // 5. 가맹점 목록 표시 (약간의 딜레이 후)
       setTimeout(() => {
         setShowStoreList(true);
-        storeListAnim.setValue(300);
-        Animated.timing(storeListAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: false,
-        }).start();
+        slideUp(storeListAnim, 400);
       }, 300);
     }
-  }, [clickedLocation, handleMapNavigation, fetchNearbyStores, clickedLocationAnim, storeListAnim]);
+  }, [clickedLocation, handleMapNavigation, handleFetchNearbyStores, clickedLocationAnim, storeListAnim, selectedStore, slideAnim]);
 
   // 클릭 패널 닫기
   const handleCloseClickedLocation = useCallback(() => {
-    Animated.timing(clickedLocationAnim, {
-      toValue: 500,
-      duration: 300,
-      useNativeDriver: false,
-    }).start(() => {
+    slideDown(clickedLocationAnim, 500, 300, () => {
       setClickedLocation(null);
     });
   }, [clickedLocationAnim]);
@@ -798,25 +376,13 @@ export default function CustMapScreen() {
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy > 150) {
-          Animated.timing(slideAnim, {
-            toValue: 300,
-            duration: 300,
-            useNativeDriver: false,
-          }).start(() => {
+          slideDown(slideAnim, 300, 300, () => {
             setSelectedStore(null);
           });
         } else if (gestureState.dy < -50) {
-          Animated.timing(slideAnim, {
-            toValue: -200,
-            duration: 200,
-            useNativeDriver: false,
-          }).start();
+          expandPanel(slideAnim, -200, 200);
         } else {
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: false,
-          }).start();
+          resetPanel(slideAnim, 200);
         }
       },
     });
@@ -839,27 +405,15 @@ export default function CustMapScreen() {
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy > 80) {
           // 아래로 드래그 → 목록 닫기
-          Animated.timing(storeListAnim, {
-            toValue: 300,
-            duration: 300,
-            useNativeDriver: false,
-          }).start(() => {
+          slideDown(storeListAnim, 300, 300, () => {
             setShowStoreList(false);
           });
         } else if (gestureState.dy < -50) {
           // 위로 드래그 → 전체 확대
-          Animated.timing(storeListAnim, {
-            toValue: -300,
-            duration: 200,
-            useNativeDriver: false,
-          }).start();
+          expandPanel(storeListAnim, -300, 200);
         } else {
           // 중간 → 기본 위치
-          Animated.timing(storeListAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: false,
-          }).start();
+          resetPanel(storeListAnim, 200);
         }
       },
     });
@@ -903,12 +457,7 @@ export default function CustMapScreen() {
     });
 
     if (selectedStore) {
-      slideAnim.setValue(300);
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      slideUp(slideAnim, 300);
     }
   }, [selectedStore, navigation, slideAnim]);
 
@@ -985,15 +534,13 @@ export default function CustMapScreen() {
           <Postcode
             style={styles.postcodeStyle}
             onSelected={(data) => {
-              handleAddressSearchMessage({
-                nativeEvent: {
-                  data: JSON.stringify({
-                    type: 'addressSelected',
-                    address: data.roadAddress || data.address,
-                  })
-                }
-              });
+              const address = data.roadAddress || data.address;
               setShowAddressSearch(false);
+              
+              // 주소 검색 후 지도 이동 및 가맹점 조회
+              setTimeout(() => {
+                handleGeocodeAddress(address);
+              }, 300);
             }}
             onError={(error) => {
               Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.");
@@ -1098,13 +645,13 @@ export default function CustMapScreen() {
             ]}
           />
           <Animated.View
+            {...storeListPanResponder.panHandlers}
             style={[
               styles.storeListContainer,
               { transform: [{ translateY: storeListAnim }] }
             ]}
           >
             <View 
-              {...storeListPanResponder.panHandlers}
               style={styles.storeListDragHandle}
             >
               <View style={styles.storeListDragBar} />
@@ -1118,8 +665,7 @@ export default function CustMapScreen() {
                 <TouchableOpacity
                   style={styles.storeListItem}
                   onPress={() => {
-                    setSelectedStore(item);
-                    setShowStoreList(false);
+                    handleSelectStoreFromList(item);
                   }}
                 >
                   <Text style={styles.storeListItemName}>{item.name}</Text>

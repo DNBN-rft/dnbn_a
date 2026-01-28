@@ -3,26 +3,56 @@ import { FlatList, Image, Pressable, Text, TouchableOpacity, View } from "react-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./category.styles";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Constants from "expo-constants";
+
+interface FileInfo {
+    originalName: string;
+    fileUrl: string;
+    order: number;
+}
+
+interface CategoryResponse {
+    categoryIdx: number;
+    categoryNm: string;
+    fileMasterResponse: {
+        files: FileInfo[];
+    };
+}
 
 export default function CategoryScreen() {
     const insets = useSafeAreaInsets();
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+    const [categories, setCategories] = useState<CategoryResponse[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const categories = [
-        { id: "1", uri: require('@/assets/images/qr.png'), name: "소매/잡화" },
-        { id: "2", uri: require('@/assets/images/qr.png'), name: "음식/카페" },
-        { id: "3", uri: require('@/assets/images/qr.png'), name: "뷰티/헬스" },
-        { id: "4", uri: require('@/assets/images/qr.png'), name: "생활서비스" },
-        { id: "5", uri: require('@/assets/images/qr.png'), name: "의료/건강" },
-        { id: "6", uri: require('@/assets/images/qr.png'), name: "교육/취미" },
-        { id: "7", uri: require('@/assets/images/qr.png'), name: "숙박/랜탈" },
-        { id: "8", uri: require('@/assets/images/qr.png'), name: "서비스/전문" },
-        { id: "9", uri: require('@/assets/images/qr.png'), name: "오락/스포츠" },
-        { id: "10", uri: require('@/assets/images/qr.png'), name: "기타" },
-    ]
+    const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://fallback-url:8080';
 
-    const toggleCategory = (id: string) => {
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_URL}/api/category`);
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            const data: CategoryResponse[] = await response.json();
+            setCategories(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '카테고리 로드 실패');
+            console.error('카테고리 로드 오류:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleCategory = (id: number) => {
         if (selectedCategories.includes(id)) {
             setSelectedCategories(selectedCategories.filter(cat => cat !== id));
         } else {
@@ -49,29 +79,39 @@ export default function CategoryScreen() {
             </View>
 
             <View style={styles.categoryContainer}>
-                <FlatList
-                    data={categories}
-                    keyExtractor={(item) => item.id}
-                    numColumns={3}
-                    scrollEnabled={true}
-                    renderItem={({ item: category }) => (
-                        <Pressable
-                            style={[
-                                styles.categoryItem,
-                                selectedCategories.includes(category.id) && styles.categoryItemSelected
-                            ]}
-                            onPress={() => toggleCategory(category.id)}
-                        >
-                            <Image source={category.uri} style={styles.categoryImage} resizeMode="contain" />
-                            <Text style={[
-                                styles.categoryText,
-                                selectedCategories.includes(category.id) && styles.categoryTextSelected
-                            ]}>
-                                {category.name}
-                            </Text>
-                        </Pressable>
-                    )}
-                />
+                {loading && <Text style={{ textAlign: 'center', marginTop: 20 }}>로딩 중...</Text>}
+                {error && <Text style={{ textAlign: 'center', marginTop: 20, color: 'red' }}>{error}</Text>}
+                {!loading && !error && (
+                    <FlatList
+                        data={categories}
+                        keyExtractor={(item) => item.categoryIdx.toString()}
+                        numColumns={3}
+                        scrollEnabled={true}
+                        renderItem={({ item: category }) => (
+                            <Pressable
+                                style={[
+                                    styles.categoryItem,
+                                    selectedCategories.includes(category.categoryIdx) && styles.categoryItemSelected
+                                ]}
+                                onPress={() => toggleCategory(category.categoryIdx)}
+                            >
+                                <Image
+                                    source={{
+                                        uri: `${API_URL}${category.fileMasterResponse?.files?.[0]?.fileUrl || ''}`
+                                    }}
+                                    style={styles.categoryImage}
+                                    resizeMode="contain"
+                                />
+                                <Text style={[
+                                    styles.categoryText,
+                                    selectedCategories.includes(category.categoryIdx) && styles.categoryTextSelected
+                                ]}>
+                                    {category.categoryNm}
+                                </Text>
+                            </Pressable>
+                        )}
+                    />
+                )}
             </View>
 
             <TouchableOpacity
