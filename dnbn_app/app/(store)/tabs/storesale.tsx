@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, Image, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./storesale.styles";
+import { styles } from "../styles/storesale.styles";
 
 export default function StoreSale() {
   const insets = useSafeAreaInsets();

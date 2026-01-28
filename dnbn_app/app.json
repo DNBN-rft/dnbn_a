@@ -22,14 +22,12 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.anonymous.dnbn_app"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -60,7 +58,11 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiUrl": "http://192.168.0.67:8080"
+      "apiUrl": "http://192.168.0.67:8080",
+      "router": {},
+      "eas": {
+        "projectId": "10941f6f-ada4-447e-943b-e5d8a8d86589"
+      }
     }
   }
 }

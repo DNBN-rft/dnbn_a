@@ -7,7 +7,7 @@ import { ActivityIndicator, Alert, Animated, FlatList, Modal, PanResponder, Text
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { generateMapHTML } from "./mapHtml";
-import { styles } from "./map.styles";
+import { styles } from "../styles/map.styles";
 import {
   getUserLocation as getLocation,
   DEFAULT_LOCATION,

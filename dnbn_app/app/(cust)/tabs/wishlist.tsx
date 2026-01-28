@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./wishlist.styles";
+import { styles } from "../styles/wishlist.styles";
 
 export default function WishlistScreen() {
   const insets = useSafeAreaInsets();

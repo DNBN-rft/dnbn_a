@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, Image, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./storeproducts.styles";
+import { styles } from "../styles/storeproducts.styles";
 export default function StoreProducts() {
   const insets = useSafeAreaInsets();
   const [detailModal, setDetailModal] = useState(false);
