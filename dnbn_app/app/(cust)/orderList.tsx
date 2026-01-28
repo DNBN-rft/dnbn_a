@@ -54,7 +54,7 @@ export default function PurchaseScreen() {
       date: "2026.01.05",
       items: [
         {
-          id: "1-1",
+          id: "1-1", // 지우고 구현
           storeName: "가게이름1",
           status: "구매확정",
           productName: "맛있는 두쫀쿠",
