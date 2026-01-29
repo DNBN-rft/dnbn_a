@@ -18,26 +18,33 @@ import { styles } from "./orderlist.styles";
 export default function PurchaseScreen() {
   const insets = useSafeAreaInsets();
 
-  const [activeTab, setActiveTab] = useState<"UNUSED" | "USED">("UNUSED");
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const [status, setStatus] = useState<"ALL" | "CANCEL" | "USED">("ALL");
-  const [period, setPeriod] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">("1Y");
+  const [status, setStatus] = useState<
+    "ALL" | "PURCHASE" | "CANCEL" | "REFUND"
+  >("ALL");
+  const [period, setPeriod] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">(
+    "ALL",
+  );
+  const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [purchaseList, setPurchaseList] = useState<Order[]>([]);
 
   // 모달 내에서 임시로 상태를 관리
-  const [tempStatus, setTempStatus] = useState<"ALL" | "CANCEL" | "USED">(
-    "ALL",
-  );
-  const [tempPeriod, setTempPeriod] = useState<"1M" | "3M" | "6M" | "1Y">("1M");
+  const [tempStatus, setTempStatus] = useState<
+    "ALL" | "PURCHASE" | "CANCEL" | "REFUND"
+  >("ALL");
+  const [tempPeriod, setTempPeriod] = useState<
+    "1M" | "3M" | "6M" | "1Y" | "ALL"
+  >("1M");
 
   const listRef = useRef<FlatList>(null);
 
   type OrderItem = {
+    orderCode: string;
     storeName: string;
     status: string;
     productName: string;
@@ -73,6 +80,58 @@ export default function PurchaseScreen() {
     }
   };
 
+  // 필터 적용된 구매내역 조회
+  const fetchPurchaseHistoryWithFilter = async (
+    filterStatus?: "ALL" | "PURCHASE" | "CANCEL" | "REFUND",
+    filterPeriod?: "1M" | "3M" | "6M" | "1Y" | "ALL",
+    filterKeyword?: string,
+  ) => {
+    try {
+      setLoading(true);
+      const custCode = "CUST_001";
+
+      // 파라미터가 있으면 사용, 없으면 상태값 사용
+      const currentStatus = filterStatus !== undefined ? filterStatus : status;
+      const currentPeriod = filterPeriod !== undefined ? filterPeriod : period;
+      const currentKeyword =
+        filterKeyword !== undefined ? filterKeyword : keyword;
+
+      // status 매핑: ALL -> "", PURCHASE -> "구매", CANCEL -> "취소", REFUND -> "환불"
+      const statusMap: Record<string, string> = {
+        ALL: "",
+        PURCHASE: "구매",
+        CANCEL: "취소",
+        REFUND: "환불",
+      };
+      const mappedStatus = statusMap[currentStatus] || "";
+
+      // dateRange 매핑: 1M -> "1month", 3M -> "3months", etc.
+      const dateRangeMap: Record<string, string> = {
+        "1M": "1month",
+        "3M": "3months",
+        "6M": "6months",
+        "1Y": "1year",
+        ALL: "",
+      };
+      const mappedDateRange = dateRangeMap[currentPeriod] || "";
+
+      const response = await apiGet(
+        `/cust/order/purchase-history/filter?custCode=${custCode}&status=${mappedStatus}&keyword=${encodeURIComponent(currentKeyword)}&dateRange=${mappedDateRange}`,
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setPurchaseList(data.purchaseList || []);
+      } else {
+        console.error("필터 구매내역 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("필터 구매내역 조회 에러:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 컴포넌트 마운트 시 데이터 로드
   useEffect(() => {
     fetchPurchaseHistory();
@@ -84,7 +143,7 @@ export default function PurchaseScreen() {
 
   const handleOpenFilterModal = () => {
     setTempStatus(status);
-    setTempPeriod(period === "ALL" ? "1M" : period);
+    setTempPeriod(period);
     setIsOverlayVisible(true);
     setTimeout(() => {
       setFilterModalOpen(true);
@@ -105,6 +164,8 @@ export default function PurchaseScreen() {
     setTimeout(() => {
       setIsOverlayVisible(false);
     }, 300);
+    // 필터 적용하여 검색 (tempStatus와 tempPeriod를 직접 전달)
+    fetchPurchaseHistoryWithFilter(tempStatus, tempPeriod, keyword);
   };
 
   return (
@@ -125,13 +186,15 @@ export default function PurchaseScreen() {
 
       <View style={styles.searchTopContainer}>
         <TextInput
-          placeholder="구매한 상품/스토어를 검색해보세요"
+          placeholder="구매한 상품을 검색해보세요"
           style={[styles.searchText, searchFocused && styles.searchTextFocused]}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
+          value={keyword}
+          onChangeText={setKeyword}
         />
         <Pressable
-          onPress={() => router.push("/(cust)/tabs/custhome")}
+          onPress={() => fetchPurchaseHistoryWithFilter()}
           style={styles.searchButton}
         >
           <Text style={styles.searchButtonText}>검색</Text>
@@ -143,8 +206,9 @@ export default function PurchaseScreen() {
         <Pressable style={styles.selectBox} onPress={handleOpenFilterModal}>
           <Text style={styles.selectBoxText}>
             {status === "ALL" && "전체"}
+            {status === "PURCHASE" && "구매"}
             {status === "CANCEL" && "취소"}
-            {status === "USED" && "사용완료"}
+            {status === "REFUND" && "환불"}
           </Text>
           <Ionicons
             name="chevron-down"
@@ -204,7 +268,12 @@ export default function PurchaseScreen() {
                         <Text style={styles.orderState}>{item.status}</Text>
                         <Pressable
                           style={styles.orderDetailButton}
-                          onPress={() => router.navigate("/(cust)/orderDetail")}
+                          onPress={() =>
+                            router.navigate({
+                              pathname: "/(cust)/orderDetail",
+                              params: { orderCode: item.orderCode },
+                            })
+                          }
                         >
                           <Text style={styles.orderDetailButtonText}>
                             주문상세
@@ -283,6 +352,16 @@ export default function PurchaseScreen() {
                 <Pressable
                   style={[
                     styles.filterOptionButton,
+                    tempStatus === "PURCHASE" &&
+                      styles.filterOptionButtonActive,
+                  ]}
+                  onPress={() => setTempStatus("PURCHASE")}
+                >
+                  <Text style={styles.filterOptionButtonText}>구매</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.filterOptionButton,
                     tempStatus === "CANCEL" && styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("CANCEL")}
@@ -292,11 +371,11 @@ export default function PurchaseScreen() {
                 <Pressable
                   style={[
                     styles.filterOptionButton,
-                    tempStatus === "USED" && styles.filterOptionButtonActive,
+                    tempStatus === "REFUND" && styles.filterOptionButtonActive,
                   ]}
-                  onPress={() => setTempStatus("USED")}
+                  onPress={() => setTempStatus("REFUND")}
                 >
-                  <Text style={styles.filterOptionButtonText}>사용완료</Text>
+                  <Text style={styles.filterOptionButtonText}>환불</Text>
                 </Pressable>
               </View>
             </View>
@@ -340,6 +419,15 @@ export default function PurchaseScreen() {
                   onPress={() => setTempPeriod("1Y")}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 1년</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.filterDateButton,
+                    tempPeriod === "ALL" && styles.filterDateButtonActive,
+                  ]}
+                  onPress={() => setTempPeriod("ALL")}
+                >
+                  <Text style={styles.filterOptionButtonText}>모든 기간</Text>
                 </Pressable>
               </View>
             </View>

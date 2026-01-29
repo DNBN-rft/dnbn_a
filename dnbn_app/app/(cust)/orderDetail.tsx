@@ -1,6 +1,6 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -44,6 +44,7 @@ type OrderDetail = {
 
 export default function OrderDetailScreen() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ orderCode: string }>();
 
   const [loading, setLoading] = useState(false);
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
@@ -52,7 +53,7 @@ export default function OrderDetailScreen() {
   const fetchOrderDetail = async () => {
     try {
       setLoading(true);
-      const orderCode = "ORD_005";
+      const orderCode = params.orderCode || "ORD_005";
       const response = await apiGet(
         `/cust/order/purchase-detail?orderCode=${orderCode}`,
       );
