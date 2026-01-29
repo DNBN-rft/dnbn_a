@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Modal,
   Pressable,
   Text,
@@ -47,6 +48,7 @@ export default function PurchaseScreen() {
     orderCode: string;
     storeName: string;
     status: string;
+    imageUrl: string;
     productName: string;
     quantity: number;
     price: number;
@@ -261,7 +263,13 @@ export default function PurchaseScreen() {
                   style={styles.orderItemContainer}
                 >
                   <View style={styles.orderProductInfoContainer}>
-                    <View style={styles.orderProductImgContainer} />
+                    <View style={styles.orderProductImgContainer}>
+                      <Image
+                        source={{ uri: item.imageUrl }}
+                        style={styles.orderProductImg}
+                        resizeMode="cover"
+                      />
+                    </View>
 
                     <View style={styles.orderProductDetailContainer}>
                       <View style={styles.topInfoRow}>
