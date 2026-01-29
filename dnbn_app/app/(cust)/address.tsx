@@ -1,11 +1,11 @@
-import Postcode from "@actbase/react-daum-postcode";
+import { apiDelete, apiGet, apiPut } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
-  Modal,
+  Platform,
   Pressable,
   Text,
   TouchableOpacity,
@@ -14,88 +14,172 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./address.styles";
 
+interface AddressData {
+  locationIdx: number;
+  label: string;
+  address: string;
+  isSelected: boolean;
+}
+
 export default function AddressScreen() {
   const insets = useSafeAreaInsets();
 
-  const [showAddressSearch, setShowAddressSearch] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
-    null
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    null,
   );
 
-  const [addr, setAddr] = useState([
-    {
-      id: "1",
-      label: "집",
-      details: "경기도 수원시 영통구 월드컵로 123",
-      recipient: "홍길동",
-      phone: "010-1234-5678",
-      isDefault: true,
-    },
-    {
-      id: "2",
-      label: "회사",
-      details: "경기도 성남시 분당구 판교로 456",
-      recipient: "김철수",
-      phone: "010-8765-4321",
-      isDefault: false,
-    },
-    {
-      id: "3",
-      label: "부모님 댁",
-      details: "경기도 성남시 분당구 판교로 456",
-      recipient: "김철수",
-      phone: "010-8765-4321",
-      isDefault: false,
-    },
-  ]);
+  const [addr, setAddr] = useState<AddressData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 주소 검색 모달 열기
-  const handleOpenAddressSearch = useCallback(() => {
-    setShowAddressSearch(true);
-  }, []);
+  // 주소 정보 불러오기
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const custCode = "CUST_001";
+        setIsLoading(true);
+        const response = await apiGet(`/cust/location?custCode=${custCode}`);
 
-  // 주소 선택 처리
-  const handleAddressSelect = useCallback((data: any) => {
-    const address = data.roadAddress || data.address;
-    setShowAddressSearch(false);
-    // 여기서 추가적인 처리 (예: 주소를 서버에 저장)
-    console.log("선택된 주소:", address);
-  }, []);
-
-  // 기본 주소지 변경 확인 모달 열기
-  const handleOpenConfirmModal = useCallback(
-    (selectedId: string) => {
-      const selectedAddress = addr.find((item) => item.id === selectedId);
-      if (selectedAddress?.isDefault) {
-        // 이미 기본 주소지인 경우 모달 열지 않음
-        return;
+        if (response.ok) {
+          const data: AddressData[] = await response.json();
+          setAddr(data);
+        } else {
+          console.error("주소 정보를 불러오는데 실패했습니다.");
+        }
+      } catch (error) {
+        console.error("주소 정보 불러오기 오류:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setSelectedAddressId(selectedId);
-      setShowConfirmModal(true);
-    },
-    [addr]
-  );
+    };
 
-  // 기본 주소지 설정
-  const handleSetDefaultAddress = useCallback(() => {
-    if (selectedAddressId) {
-      setAddr((prevAddr) =>
-        prevAddr.map((item) => ({
-          ...item,
-          isDefault: item.id === selectedAddressId,
-        }))
-      );
-    }
-    setShowConfirmModal(false);
-    setSelectedAddressId(null);
-  }, [selectedAddressId]);
-
-  // 모달 취소
-  const handleCancelModal = useCallback(() => {
-    setShowConfirmModal(false);
-    setSelectedAddressId(null);
+    fetchAddresses();
   }, []);
+
+  // 새 주소 추가 페이지로 이동
+  const handleAddNewAddress = useCallback(() => {
+    router.push("/(cust)/address-select");
+  }, []);
+
+  const handleSelectAddress = useCallback((selectedId: number) => {
+    setSelectedAddressId(selectedId);
+  }, []);
+
+  // 주소 수정 페이지로 이동
+  const handleEditAddress = useCallback((addressData: AddressData) => {
+    router.push({
+      pathname: "/(cust)/address-select",
+      params: {
+        locationIdx: addressData.locationIdx.toString(),
+        label: addressData.label,
+        address: addressData.address,
+        isSelected: addressData.isSelected.toString(),
+      },
+    });
+  }, []);
+
+  // 주소 삭제
+  const handleDeleteAddress = useCallback(async (locationIdx: number) => {
+    const confirmDelete = () => {
+      return new Promise<boolean>((resolve) => {
+        if (Platform.OS === "web") {
+          resolve(window.confirm("이 주소를 삭제하시겠습니까?"));
+        } else {
+          Alert.alert("주소 삭제", "이 주소를 삭제하시겠습니까?", [
+            {
+              text: "취소",
+              onPress: () => resolve(false),
+              style: "cancel",
+            },
+            {
+              text: "삭제",
+              onPress: () => resolve(true),
+              style: "destructive",
+            },
+          ]);
+        }
+      });
+    };
+
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
+
+    try {
+      const response = await apiDelete(
+        `/cust/location/del?locationIdx=${locationIdx}`,
+      );
+
+      if (response.ok) {
+        // 삭제 성공 시 목록에서 제거
+        setAddr((prevAddr) =>
+          prevAddr.filter((item) => item.locationIdx !== locationIdx),
+        );
+
+        if (Platform.OS === "web") {
+          window.alert("주소가 삭제되었습니다.");
+        } else {
+          Alert.alert("성공", "주소가 삭제되었습니다.");
+        }
+      } else {
+        const errorData = await response.json();
+        if (Platform.OS === "web") {
+          window.alert(errorData.message || "주소 삭제에 실패했습니다.");
+        } else {
+          Alert.alert("오류", errorData.message || "주소 삭제에 실패했습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("주소 삭제 오류:", error);
+      if (Platform.OS === "web") {
+        window.alert("주소 삭제 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "주소 삭제 중 오류가 발생했습니다.");
+      }
+    }
+  }, []);
+
+  const handleSetDefaultAddress = useCallback(async () => {
+    if (selectedAddressId) {
+      try {
+        const response = await apiPut(
+          `/cust/location/change?locationIdx=${selectedAddressId}`,
+        );
+
+        if (response.ok) {
+          // 성공 시 로컬 상태 업데이트
+          setAddr((prevAddr) =>
+            prevAddr.map((item) => ({
+              ...item,
+              isSelected: item.locationIdx === selectedAddressId,
+            })),
+          );
+          setSelectedAddressId(null);
+
+          if (Platform.OS === "web") {
+            window.alert("기본 주소로 설정되었습니다.");
+          } else {
+            Alert.alert("성공", "기본 주소로 설정되었습니다.");
+          }
+        } else {
+          const errorData = await response.json();
+          if (Platform.OS === "web") {
+            window.alert(errorData.message || "기본 주소 설정에 실패했습니다.");
+          } else {
+            Alert.alert(
+              "오류",
+              errorData.message || "기본 주소 설정에 실패했습니다.",
+            );
+          }
+        }
+      } catch (error) {
+        console.error("기본 주소 설정 오류:", error);
+        if (Platform.OS === "web") {
+          window.alert("기본 주소 설정 중 오류가 발생했습니다.");
+        } else {
+          Alert.alert("오류", "기본 주소 설정 중 오류가 발생했습니다.");
+        }
+      }
+    }
+  }, [selectedAddressId]);
 
   return (
     <View style={styles.container}>
@@ -140,141 +224,94 @@ export default function AddressScreen() {
 
         <FlatList
           data={[...addr].sort(
-            (a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0)
+            (a, b) => (b.isSelected ? 1 : 0) - (a.isSelected ? 1 : 0),
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.locationIdx.toString()}
           renderItem={({ item }) => (
-            <View
+            <Pressable
               style={[
                 styles.listItem,
-                item.isDefault && { borderColor: "#EF7810", borderWidth: 1 },
+                selectedAddressId === item.locationIdx &&
+                  styles.listItemSelected,
               ]}
+              onPress={() => handleSelectAddress(item.locationIdx)}
             >
               <View style={styles.contentContainer}>
                 <View style={styles.itemHeader}>
                   <View style={styles.itemTitleContainer}>
                     <Text style={styles.itemText}>{item.label}</Text>
 
-                    {item.isDefault && (
+                    {item.isSelected && (
                       <View style={styles.defaultAddressContainer}>
                         <Text style={styles.defaultAddress}>기본 주소지</Text>
                       </View>
                     )}
                   </View>
-
-                  <Pressable
-                    style={
-                      item.isDefault ? styles.selectButton : styles.unSelectButton}
-                    onPress={() => handleOpenConfirmModal(item.id)}>
-                    <Text
-                      style={
-                        item.isDefault ? styles.selectText : styles.unselectText
-                      }
-                    >
-                      {item.isDefault === true ? "선택됨" : "선택"}
-                    </Text>
-                  </Pressable>
                 </View>
 
                 <View>
-                  <Text style={styles.itemDetailText}>{item.details}</Text>
+                  <Text style={styles.itemDetailText}>{item.address}</Text>
                 </View>
 
                 <View style={styles.itemRecipientContainer}>
-                  <Text style={styles.itemDetailText}>
-                    {item.recipient} {item.phone}
-                  </Text>
-
+                  <View style={{ flex: 1 }} />
                   <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.editButton}>
+                    <Pressable
+                      style={styles.editButton}
+                      onPress={() => handleEditAddress(item)}
+                    >
                       <Text style={styles.editButtonText}>수정</Text>
-                    </TouchableOpacity>
+                    </Pressable>
 
-                    <TouchableOpacity style={styles.removeButton}>
+                    <Pressable
+                      style={styles.removeButton}
+                      onPress={() => handleDeleteAddress(item.locationIdx)}
+                    >
                       <Text style={styles.removeButtonText}>삭제</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 </View>
               </View>
-            </View>
+            </Pressable>
           )}
         />
-
-        <TouchableOpacity
-          style={[styles.addButton, addr.length >= 3 && { display: "none" }]}
-          onPress={handleOpenAddressSearch}
-        >
-          <Ionicons name="add" size={24} color="#EF7810" />
-          <Text style={styles.addButtonText}>새 주소 추가</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* 주소 검색 모달 */}
-      <Modal
-        visible={showAddressSearch}
-        animationType="slide"
-        onRequestClose={() => setShowAddressSearch(false)}
-      >
-        {insets.top > 0 && (
-          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-        )}
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowAddressSearch(false)}
-            >
-              <Ionicons name="close" size={28} color="#000" />
-            </TouchableOpacity>
-
-            <Text style={styles.modalTitle}>주소 검색</Text>
-
-            <View style={styles.modalEmptyView} />
-          </View>
-
-          <Postcode
-            style={styles.postcodeStyle}
-            onSelected={handleAddressSelect}
-            onError={(error) => {
-              Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.");
-            }}
+      <View style={styles.bottomButtonContainer}>
+        <Pressable
+          style={[
+            styles.addButton,
+            addr.length >= 3 && styles.addButtonDisabled,
+          ]}
+          onPress={handleAddNewAddress}
+          disabled={addr.length >= 3}
+        >
+          <Ionicons
+            name="add"
+            size={24}
+            color={addr.length >= 3 ? "#ccc" : "#EF7810"}
           />
-        </View>
-      </Modal>
+          <Text
+            style={[
+              styles.addButtonText,
+              addr.length >= 3 && { color: "#ccc" },
+            ]}
+          >
+            새 주소 추가
+          </Text>
+        </Pressable>
 
-      {/* 기본 주소지 변경 확인 모달 */}
-      <Modal
-        visible={showConfirmModal}
-        transparent={true} 
-        animationType="fade"
-        onRequestClose={handleCancelModal}
-      >
-        <View style={styles.confirmModalOverlay}>
-          <View style={styles.confirmModalContainer}>
-            <Text style={styles.confirmModalTitle}>기본 주소지 변경</Text>
-            
-            <Text style={styles.confirmModalMessage}>
-              기본 주소지로 변경하시겠습니까?
-            </Text>
-            
-            <View style={styles.confirmModalButtons}>
-              <TouchableOpacity
-                style={[styles.confirmModalButton, styles.confirmButton]}
-                onPress={handleSetDefaultAddress}
-              >
-                <Text style={styles.confirmButtonText}>변경</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.confirmModalButton, styles.cancelButton]}
-                onPress={handleCancelModal}
-              >
-                <Text style={styles.cancelButtonText}>취소</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        <Pressable
+          style={[
+            styles.submitButton,
+            !selectedAddressId && styles.submitButtonDisabled,
+          ]}
+          onPress={handleSetDefaultAddress}
+          disabled={!selectedAddressId}
+        >
+          <Text style={styles.submitButtonText}>기본 주소로 설정</Text>
+        </Pressable>
+      </View>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
