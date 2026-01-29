@@ -21,13 +21,16 @@ export default function CustHomeScreen() {
   const insets = useSafeAreaInsets();
 
   const originalBanners = [
-    { id: "1", uri: require("@/assets/images/logo.png") },
+    { id: "1", uri: require("@/assets/images/normalproduct/bread.jpg") },
     { id: "2", uri: require("@/assets/images/favicon.png") },
     { id: "3", uri: require("@/assets/images/react-logo.png") },
     { id: "4", uri: require("@/assets/images/logo.png") },
   ];
 
-  const banners = [...originalBanners, originalBanners[0]];
+  const banners = [
+    ...originalBanners,
+    { ...originalBanners[0], id: "1-clone" },
+  ];
 
   const saleImages = [
     {
