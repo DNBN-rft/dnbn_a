@@ -19,6 +19,8 @@ export default function FaqListScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [selectedSubject, setSelectedSubject] = useState("전체");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
   const [faqData, setFaqData] = useState<
     {
       faqType: string;
@@ -56,6 +58,21 @@ export default function FaqListScreen() {
 
   const allSubjects = ["전체", ...faqData.map((faq) => faq.faqType)];
 
+  const handleSearchFilter = () => {
+    setSearchFilter(searchText);
+  };
+
+  const filteredFaqItems = currentFaqItems
+    .map((category) => ({
+      ...category,
+      faqList: category.faqList.filter(
+        (item) =>
+          item.faqTitle.includes(searchFilter) ||
+          item.faqContent.includes(searchFilter),
+      ),
+    }))
+    .filter((category) => category.faqList.length > 0);
+
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -82,9 +99,16 @@ export default function FaqListScreen() {
             <TextInput
               style={styles.faqSearchPlaceholderText}
               placeholder="검색어를 입력해 주세요."
+              value={searchText}
+              onChangeText={setSearchText}
             />
 
-            <Ionicons name="search" size={20} color="#CCCCCC" />
+            <Ionicons
+              onPress={() => handleSearchFilter()}
+              name="search"
+              size={20}
+              color="#CCCCCC"
+            />
           </View>
         </View>
 
@@ -119,7 +143,7 @@ export default function FaqListScreen() {
         />
 
         <View style={styles.faqListContainer}>
-          {currentFaqItems.map((faqCategory, categoryIndex) => (
+          {filteredFaqItems.map((faqCategory, categoryIndex) => (
             <View key={categoryIndex}>
               {faqCategory.faqList.map((item, index) => {
                 const itemKey = `${categoryIndex}-${index}`;
