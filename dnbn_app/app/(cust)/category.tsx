@@ -1,4 +1,3 @@
-import { CategoryResponse } from "@/types/category";
 import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -16,6 +15,23 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./category.styles";
+
+interface FileItem {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface FileMasterResponse {
+  files: FileItem[];
+}
+
+interface CategoryResponse {
+  categoryIdx: number;
+  categoryNm: string;
+  fileMasterResponse: FileMasterResponse;
+  isActive: boolean;
+}
 
 export default function CategoryScreen() {
   const insets = useSafeAreaInsets();

@@ -77,4 +77,18 @@ export const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: '#ffffff',
   },
+  submitButton: {
+    borderWidth: 1,
+    borderColor: '#EF7810',
+    backgroundColor: '#fff',
+    padding: 15,
+    margin: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#EF7810',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 })
