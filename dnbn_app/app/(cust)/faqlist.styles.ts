@@ -62,9 +62,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     gap: 8,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
   },
   faqSubjectButton: {
     paddingVertical: 10,
@@ -96,8 +93,7 @@ export const styles = StyleSheet.create({
   faqSubjectButtonTextUnselected: {
     color: "#666666",
   },
-  faqListContainer: {
-  },
+  faqListContainer: {},
   faqItemWrapper: {
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,

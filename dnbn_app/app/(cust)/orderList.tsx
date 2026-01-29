@@ -1,7 +1,9 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -16,24 +18,33 @@ import { styles } from "./orderlist.styles";
 export default function PurchaseScreen() {
   const insets = useSafeAreaInsets();
 
-  const [activeTab, setActiveTab] = useState<"UNUSED" | "USED">("UNUSED");
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const [status, setStatus] = useState<"ALL" | "CANCEL" | "USED">("ALL");
-  const [period, setPeriod] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">("1Y");
+  const [status, setStatus] = useState<
+    "ALL" | "PURCHASE" | "CANCEL" | "REFUND"
+  >("ALL");
+  const [period, setPeriod] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">(
+    "ALL",
+  );
+  const [keyword, setKeyword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [purchaseList, setPurchaseList] = useState<Order[]>([]);
 
   // 모달 내에서 임시로 상태를 관리
-  const [tempStatus, setTempStatus] = useState<"ALL" | "CANCEL" | "USED">(
-    "ALL"
-  );
-  const [tempPeriod, setTempPeriod] = useState<"1M" | "3M" | "6M" | "1Y">("1M");
+  const [tempStatus, setTempStatus] = useState<
+    "ALL" | "PURCHASE" | "CANCEL" | "REFUND"
+  >("ALL");
+  const [tempPeriod, setTempPeriod] = useState<
+    "1M" | "3M" | "6M" | "1Y" | "ALL"
+  >("1M");
 
   const listRef = useRef<FlatList>(null);
 
   type OrderItem = {
-    id: string;
+    orderCode: string;
     storeName: string;
     status: string;
     productName: string;
@@ -43,115 +54,88 @@ export default function PurchaseScreen() {
   };
 
   type Order = {
-    id: string;
     date: string;
     items: OrderItem[];
   };
 
-  const purchaseList: Order[] = [
-    {
-      id: "1",
-      date: "2026.01.05",
-      items: [
-        {
-          id: "1-1",
-          storeName: "가게이름1",
-          status: "구매확정",
-          productName: "맛있는 두쫀쿠",
-          quantity: 1,
-          price: 5500,
-          datetime: "2026.01.05 14:30",
-        },
-        {
-          id: "1-2",
-          storeName: "가게이름2",
-          status: "구매확정",
-          productName: "맛있는 케이크",
-          quantity: 2,
-          price: 8000,
-          datetime: "2026.01.05 15:20",
-        },
-      ],
-    },
-    {
-      id: "2",
-      date: "2026.01.04",
-      items: [
-        {
-          id: "2-1",
-          storeName: "가게이름",
-          status: "구매확정",
-          productName: "맛있는 두쫀쿠",
-          quantity: 1,
-          price: 5500,
-          datetime: "2026.01.04 10:15",
-        },
-      ],
-    },
-    {
-      id: "3",
-      date: "2026.01.03",
-      items: [
-        {
-          id: "3-1",
-          storeName: "가게이름1",
-          status: "구매확정",
-          productName: "맛있는 두쫀쿠",
-          quantity: 1,
-          price: 5500,
-          datetime: "2026.01.03 12:45",
-        },
-        {
-          id: "3-2",
-          storeName: "가게이름3",
-          status: "구매확정",
-          productName: "맛있는 빵",
-          quantity: 3,
-          price: 3000,
-          datetime: "2026.01.03 16:30",
-        },
-      ],
-    },
-    {
-      id: "4",
-      date: "2026.01.02",
-      items: [
-        {
-          id: "4-1",
-          storeName: "가게이름",
-          status: "구매확정",
-          productName: "맛있는 두쫀쿠",
-          quantity: 1,
-          price: 5500,
-          datetime: "2026.01.02 09:00",
-        },
-      ],
-    },
-    {
-      id: "5",
-      date: "2026.01.01",
-      items: [
-        {
-          id: "5-1",
-          storeName: "가게이름1",
-          status: "구매확정",
-          productName: "맛있는 두쫀쿠",
-          quantity: 1,
-          price: 5500,
-          datetime: "2026.01.01 11:20",
-        },
-        {
-          id: "5-2",
-          storeName: "가게이름2",
-          status: "구매확정",
-          productName: "맛있는 케이크",
-          quantity: 2,
-          price: 8000,
-          datetime: "2026.01.01 13:40",
-        },
-      ],
-    },
-  ];
+  // API로 구매내역 조회
+  const fetchPurchaseHistory = async () => {
+    try {
+      setLoading(true);
+      const custCode = "CUST_001";
+      const response = await apiGet(
+        `/cust/order/purchase-history?custCode=${custCode}`,
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setPurchaseList(data.purchaseList || []);
+      } else {
+        console.error("구매내역 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("구매내역 조회 에러:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 필터 적용된 구매내역 조회
+  const fetchPurchaseHistoryWithFilter = async (
+    filterStatus?: "ALL" | "PURCHASE" | "CANCEL" | "REFUND",
+    filterPeriod?: "1M" | "3M" | "6M" | "1Y" | "ALL",
+    filterKeyword?: string,
+  ) => {
+    try {
+      setLoading(true);
+      const custCode = "CUST_001";
+
+      // 파라미터가 있으면 사용, 없으면 상태값 사용
+      const currentStatus = filterStatus !== undefined ? filterStatus : status;
+      const currentPeriod = filterPeriod !== undefined ? filterPeriod : period;
+      const currentKeyword =
+        filterKeyword !== undefined ? filterKeyword : keyword;
+
+      // status 매핑: ALL -> "", PURCHASE -> "구매", CANCEL -> "취소", REFUND -> "환불"
+      const statusMap: Record<string, string> = {
+        ALL: "",
+        PURCHASE: "구매",
+        CANCEL: "취소",
+        REFUND: "환불",
+      };
+      const mappedStatus = statusMap[currentStatus] || "";
+
+      // dateRange 매핑: 1M -> "1month", 3M -> "3months", etc.
+      const dateRangeMap: Record<string, string> = {
+        "1M": "1month",
+        "3M": "3months",
+        "6M": "6months",
+        "1Y": "1year",
+        ALL: "",
+      };
+      const mappedDateRange = dateRangeMap[currentPeriod] || "";
+
+      const response = await apiGet(
+        `/cust/order/purchase-history/filter?custCode=${custCode}&status=${mappedStatus}&keyword=${encodeURIComponent(currentKeyword)}&dateRange=${mappedDateRange}`,
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setPurchaseList(data.purchaseList || []);
+      } else {
+        console.error("필터 구매내역 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("필터 구매내역 조회 에러:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    fetchPurchaseHistory();
+  }, []);
 
   const scrollToTop = () => {
     listRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -159,7 +143,7 @@ export default function PurchaseScreen() {
 
   const handleOpenFilterModal = () => {
     setTempStatus(status);
-    setTempPeriod(period === "ALL" ? "1M" : period);
+    setTempPeriod(period);
     setIsOverlayVisible(true);
     setTimeout(() => {
       setFilterModalOpen(true);
@@ -180,6 +164,8 @@ export default function PurchaseScreen() {
     setTimeout(() => {
       setIsOverlayVisible(false);
     }, 300);
+    // 필터 적용하여 검색 (tempStatus와 tempPeriod를 직접 전달)
+    fetchPurchaseHistoryWithFilter(tempStatus, tempPeriod, keyword);
   };
 
   return (
@@ -200,13 +186,15 @@ export default function PurchaseScreen() {
 
       <View style={styles.searchTopContainer}>
         <TextInput
-          placeholder="구매한 상품/스토어를 검색해보세요"
+          placeholder="구매한 상품을 검색해보세요"
           style={[styles.searchText, searchFocused && styles.searchTextFocused]}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
+          value={keyword}
+          onChangeText={setKeyword}
         />
         <Pressable
-          onPress={() => router.push("/(cust)/tabs/custhome")}
+          onPress={() => fetchPurchaseHistoryWithFilter()}
           style={styles.searchButton}
         >
           <Text style={styles.searchButtonText}>검색</Text>
@@ -218,8 +206,9 @@ export default function PurchaseScreen() {
         <Pressable style={styles.selectBox} onPress={handleOpenFilterModal}>
           <Text style={styles.selectBoxText}>
             {status === "ALL" && "전체"}
+            {status === "PURCHASE" && "구매"}
             {status === "CANCEL" && "취소"}
-            {status === "USED" && "사용완료"}
+            {status === "REFUND" && "환불"}
           </Text>
           <Ionicons
             name="chevron-down"
@@ -247,57 +236,73 @@ export default function PurchaseScreen() {
         </Pressable>
       </View>
 
-      <FlatList
-        ref={listRef}
-        data={purchaseList}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-        style={{ flex: 1 }}
-        renderItem={({ item: order }) => (
-          <View style={styles.orderContainer}>
-            <View style={styles.orderDateContainer}>
-              <Text style={styles.orderDate}>{order.date}</Text>
-            </View>
-            {order.items.map((item: OrderItem) => (
-              <View key={item.id} style={styles.orderItemContainer}>
-                <View style={styles.orderProductInfoContainer}>
-                  <View style={styles.orderProductImgContainer} />
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      ) : (
+        <FlatList
+          ref={listRef}
+          data={purchaseList}
+          keyExtractor={(item) => item.date}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+          style={{ flex: 1 }}
+          renderItem={({ item: order }) => (
+            <View style={styles.orderContainer}>
+              <View style={styles.orderDateContainer}>
+                <Text style={styles.orderDate}>{order.date}</Text>
+              </View>
+              {order.items.map((item: OrderItem, index: number) => (
+                <View
+                  key={`${order.date}-${index}`}
+                  style={styles.orderItemContainer}
+                >
+                  <View style={styles.orderProductInfoContainer}>
+                    <View style={styles.orderProductImgContainer} />
 
-                  <View style={styles.orderProductDetailContainer}>
-                    <View style={styles.topInfoRow}>
-                      <Text style={styles.orderState}>{item.status}</Text>
-                      <Pressable
-                        style={styles.orderDetailButton}
-                        onPress={() => router.navigate("/(cust)/orderDetail")}
-                      >
-                        <Text style={styles.orderDetailButtonText}>
-                          주문상세
+                    <View style={styles.orderProductDetailContainer}>
+                      <View style={styles.topInfoRow}>
+                        <Text style={styles.orderState}>{item.status}</Text>
+                        <Pressable
+                          style={styles.orderDetailButton}
+                          onPress={() =>
+                            router.navigate({
+                              pathname: "/(cust)/orderDetail",
+                              params: { orderCode: item.orderCode },
+                            })
+                          }
+                        >
+                          <Text style={styles.orderDetailButtonText}>
+                            주문상세
+                          </Text>
+                          <Ionicons
+                            name="chevron-forward"
+                            size={18}
+                            color="#666"
+                          />
+                        </Pressable>
+                      </View>
+
+                      <Text style={styles.productName}>{item.productName}</Text>
+
+                      <View style={styles.bottomInfoRow}>
+                        <Text style={styles.productPrice}>
+                          {item.price.toLocaleString()}원
                         </Text>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={18}
-                          color="#666"
-                        />
-                      </Pressable>
-                    </View>
-
-                    <Text style={styles.productName}>{item.productName}</Text>
-
-                    <View style={styles.bottomInfoRow}>
-                      <Text style={styles.productPrice}>
-                        {item.price.toLocaleString()}원
-                      </Text>
-                      <Text style={styles.separator}> | </Text>
-                      <Text style={styles.productDate}>{item.datetime}</Text>
+                        <Text style={styles.separator}> | </Text>
+                        <Text style={styles.productDate}>{item.datetime}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
-      />
+              ))}
+            </View>
+          )}
+        />
+      )}
 
       {/* FloatingButton - 최상단 이동 */}
       <Pressable
@@ -322,7 +327,13 @@ export default function PurchaseScreen() {
           <View style={styles.filterModalContent}>
             {/* 주문 상태 선택 */}
             <View style={styles.filterSection}>
-              <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Text style={styles.filterSectionTitle}>주문 상태</Text>
                 <Pressable onPress={closeFilterModal}>
                   <Ionicons name="close" size={24} color="#666" />
@@ -341,6 +352,16 @@ export default function PurchaseScreen() {
                 <Pressable
                   style={[
                     styles.filterOptionButton,
+                    tempStatus === "PURCHASE" &&
+                      styles.filterOptionButtonActive,
+                  ]}
+                  onPress={() => setTempStatus("PURCHASE")}
+                >
+                  <Text style={styles.filterOptionButtonText}>구매</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.filterOptionButton,
                     tempStatus === "CANCEL" && styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("CANCEL")}
@@ -350,11 +371,11 @@ export default function PurchaseScreen() {
                 <Pressable
                   style={[
                     styles.filterOptionButton,
-                    tempStatus === "USED" && styles.filterOptionButtonActive,
+                    tempStatus === "REFUND" && styles.filterOptionButtonActive,
                   ]}
-                  onPress={() => setTempStatus("USED")}
+                  onPress={() => setTempStatus("REFUND")}
                 >
-                  <Text style={styles.filterOptionButtonText}>사용완료</Text>
+                  <Text style={styles.filterOptionButtonText}>환불</Text>
                 </Pressable>
               </View>
             </View>
@@ -398,6 +419,15 @@ export default function PurchaseScreen() {
                   onPress={() => setTempPeriod("1Y")}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 1년</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.filterDateButton,
+                    tempPeriod === "ALL" && styles.filterDateButtonActive,
+                  ]}
+                  onPress={() => setTempPeriod("ALL")}
+                >
+                  <Text style={styles.filterOptionButtonText}>모든 기간</Text>
                 </Pressable>
               </View>
             </View>
