@@ -27,11 +27,11 @@ export default function NegoListScreen() {
     const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
 
     const negoProducts = [
-        { id: '1', uri: require('@/assets/images/lunch.jpg'), productName: '점심식사', storeName: '쿠우쿠우', price: 8000, originalPrice: 10000, distance: 0.5, rating: 4.5, reviewCount: 45, timeLimitSeconds: 12 * 3600 },
-        { id: '2', uri: require('@/assets/images/pizza.jpg'), productName: '고구마피자', storeName: '피자리아', price: 12000, originalPrice: 15000, distance: 1.2, rating: 4.7, reviewCount: 82, timeLimitSeconds: 8 * 3600 },
-        { id: '3', uri: require('@/assets/images/dak.jpg'), productName: '닭갈비', storeName: '춘천닭갈비가게', price: 5000, originalPrice: 6500, distance: 0.8, rating: 4.3, reviewCount: 30, timeLimitSeconds: 24 * 3600 },
-        { id: '4', uri: require('@/assets/images/fish.jpg'), productName: '맛있는 방어회', storeName: '바다수산', price: 6000, originalPrice: 7500, distance: 0.5, rating: 4.6, reviewCount: 56, timeLimitSeconds: 6 * 3600 },
-        { id: '5', uri: require('@/assets/images/lobster.jpg'), productName: '랍스터 조개', storeName: 'LOBSTER KING', price: 15000, originalPrice: 18000, distance: 1.2, rating: 4.8, reviewCount: 120, timeLimitSeconds: 18 * 3600 },
+        { id: '1', uri: require('@/assets/images/products_soyun/lunch.jpg'), productName: '점심식사', storeName: '쿠우쿠우', price: 8000, originalPrice: 10000, distance: 0.5, rating: 4.5, reviewCount: 45, timeLimitSeconds: 12 * 3600 },
+        { id: '2', uri: require('@/assets/images/products_soyun/pizza.jpg'), productName: '고구마피자', storeName: '피자리아', price: 12000, originalPrice: 15000, distance: 1.2, rating: 4.7, reviewCount: 82, timeLimitSeconds: 8 * 3600 },
+        { id: '3', uri: require('@/assets/images/products_soyun/dak.jpg'), productName: '닭갈비', storeName: '춘천닭갈비가게', price: 5000, originalPrice: 6500, distance: 0.8, rating: 4.3, reviewCount: 30, timeLimitSeconds: 24 * 3600 },
+        { id: '4', uri: require('@/assets/images/products_soyun/fish.jpg'), productName: '맛있는 방어회', storeName: '바다수산', price: 6000, originalPrice: 7500, distance: 0.5, rating: 4.6, reviewCount: 56, timeLimitSeconds: 6 * 3600 },
+        { id: '5', uri: require('@/assets/images/products_soyun/lobster.jpg'), productName: '랍스터 조개', storeName: 'LOBSTER KING', price: 15000, originalPrice: 18000, distance: 1.2, rating: 4.8, reviewCount: 120, timeLimitSeconds: 18 * 3600 },
     ]
 
     // 초기 timeLeft 설정 및 카운트다운

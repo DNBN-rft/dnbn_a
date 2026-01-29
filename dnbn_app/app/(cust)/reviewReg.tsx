@@ -1,17 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert, KeyboardAvoidingView, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./reviewreg.styles";
+import { apiPostFormData } from "@/utils/api";
 
 export default function ReviewRegScreen() {
     const insets = useSafeAreaInsets();
+    const { orderDetailIdx, storeNm, productName, productImage } = useLocalSearchParams();
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState('');
     const [images, setImages] = useState<string[]>([]);
     const [permission, requestPermission] = ImagePicker.useCameraPermissions();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         requestPermission();
@@ -45,33 +48,96 @@ export default function ReviewRegScreen() {
         setImages(images.filter((_, i) => i !== index));
     };
 
-    return (
-        <View style={styles.container}>
-            {insets.top > 0 && (
-                <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-            )}
+    const handleSubmitReview = async () => {
+        if (!orderDetailIdx || !rating || !reviewText.trim()) {
+            Alert.alert("오류", "모든 필수 항목을 입력해주세요.");
+            return;
+        }
 
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="chevron-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.title}>리뷰쓰기</Text>
-                <View style={styles.placeholder} />
-            </View>
+        setIsSubmitting(true);
+        try {
+            const custCode = "CUST001";
+
+            // FormData 생성
+            const formData = new FormData();
+            formData.append('orderDetailIdx', orderDetailIdx as string);
+            formData.append('reviewRate', String(rating));
+            formData.append('reviewContent', reviewText);
+
+            // 이미지 추가 (Blob으로 변환)
+            for (let i = 0; i < images.length; i++) {
+                const imageUri = images[i];
+                const response = await fetch(imageUri);
+                const blob = await response.blob();
+                formData.append('reviewImgs', blob as any, `review_${i}.jpg`);
+            }
+
+            // API 호출
+            const response = await apiPostFormData(
+                `/cust/review?custCode=${custCode}`,
+                formData
+            );
+
+            if (response.ok) {
+                Alert.alert("성공", "리뷰가 등록되었습니다.", [
+                    {
+                        text: "확인",
+                        onPress: () => router.replace("/(cust)/review"),
+                    }
+                ]);
+            } else {
+                const errorText = await response.text();
+                Alert.alert("오류", errorText || "리뷰 등록에 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("Review submission error:", error);
+            Alert.alert("오류", "리뷰 등록 중 오류가 발생했습니다.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <KeyboardAvoidingView 
+            style={styles.container}
+            behavior="padding"
+            enabled={true}
+        >
+            <ScrollView 
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+            >
+                {insets.top > 0 && (
+                    <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+                )}
+
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons name="chevron-back" size={24} color="#000" />
+                    </TouchableOpacity>
+                    <Text style={styles.title}>리뷰쓰기</Text>
+                    <View style={styles.placeholder} />
+                </View>
 
             <View style={styles.productContainer}>
-                <Image
-                    source={require("@/assets/images/qr.png")}
-                    style={styles.productImage}
-                    resizeMode="contain"
-                />
+                {productImage ? (
+                    <Image
+                        source={{ uri: productImage as string }}
+                        style={styles.productImage}
+                        resizeMode="contain"
+                    />
+                ) : (
+                    <View style={[styles.productImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ color: '#999' }}>이미지</Text>
+                    </View>
+                )}
                 <View style={styles.productInfoBox}>
-                    <Text style={styles.storeNameSmall}>과일가게</Text>
+                    <Text style={styles.storeNameSmall}>{storeNm || "상점명"}</Text>
                     <Text style={styles.productNameBold} numberOfLines={1}>
-                        상품이름asdasdasdasdasdasdasdasdasdasA
+                        {productName || "상품이름"}
                     </Text>
                 </View>
             </View>
@@ -160,25 +226,28 @@ export default function ReviewRegScreen() {
                         <TouchableOpacity
                             style={[
                                 styles.submitButton,
-                                reviewText.trim().length === 0 && styles.submitButtonDisabled
+                                (reviewText.trim().length === 0 || isSubmitting) && styles.submitButtonDisabled
                             ]}
-                            onPress={() => {
-                                // 리뷰 제출 로직
-                            }}
-                            disabled={reviewText.trim().length === 0}
+                            onPress={handleSubmitReview}
+                            disabled={reviewText.trim().length === 0 || isSubmitting}
                         >
-                            <Text style={[
-                                styles.submitButtonText,
-                                reviewText.trim().length === 0 && styles.submitButtonTextDisabled
-                            ]}>리뷰 등록</Text>
+                            {isSubmitting ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={[
+                                    styles.submitButtonText,
+                                    (reviewText.trim().length === 0 || isSubmitting) && styles.submitButtonTextDisabled
+                                ]}>리뷰 등록</Text>
+                            )}
                         </TouchableOpacity>
                     </>
                 )}
             </View>
+            </ScrollView>
 
             {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+                <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
             )}
-        </View>
+        </KeyboardAvoidingView>
     );
 }

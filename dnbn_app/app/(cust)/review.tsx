@@ -1,110 +1,99 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
-  Modal,
   Text,
   TouchableOpacity,
-  View
+  View,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./review.styles";
+import { apiGet } from "@/utils/api";
 
 interface WrittenReview {
-  id: string;
-  uri: any;
-  productName: string;
-  orderDate: string;
+  reviewIdx: number;
+  productImage?: {
+    fileUrl: string;
+  };
+  productNm: string;
+  orderDateTime: string;
   orderCode: string;
-  storeName: string;
-  rating: number;
-  comment: string;
-  reviewDate: string;
+  storeNm: string;
+  reviewRate: number;
+  reviewContent: string;
+  reviewImages: {
+    files: any[];
+  };
+}
+
+interface FileResponse {
+  originalName: string;
+  fileUrl: string;
+  order: number;
 }
 
 interface UnwrittenReview {
-  id: string;
-  uri: any;
-  productName: string;
-  orderDate: string;
+  orderDetailIdx: number;
+  productImg?: FileResponse;
+  orderDateTime: string;
   orderCode: string;
-  storeName: string;
-  status: string;
+  storeNm: string;
+  productNm: string;
 }
 
 export default function CustReviewListScreen() {
   const [selectedTab, setSelectedTab] = React.useState<"written" | "unwritten">(
     "unwritten"
   );
-  const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
-  const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(null);
+  const [writtenReviews, setWrittenReviews] = useState<WrittenReview[]>([]);
+  const [unwrittenReviews, setUnwrittenReviews] = useState<UnwrittenReview[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
+  const custCode = "CUST001"; // TODO: 실제 로그인한 사용자의 custCode 가져오기
 
-  const handleDeletePress = (reviewId: string) => {
-    setSelectedReviewId(reviewId);
-    setDeleteModalVisible(true);
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      setIsLoading(true);
+      
+      // 미작성 리뷰 조회
+      const unwrittenResponse = await apiGet(`/cust/review?reviewType=UNWRITTEN&custCode=${custCode}`);
+      const unwrittenData = await unwrittenResponse.json();
+      // 작성한 리뷰 조회
+      const writtenResponse = await apiGet(`/cust/review?reviewType=WRITTEN&custCode=${custCode}`);
+      const writtenData = await writtenResponse.json();
+      
+      if (unwrittenResponse.ok) {
+        setUnwrittenReviews(unwrittenData);
+      }
+      
+      if (writtenResponse.ok) {
+        setWrittenReviews(writtenData);
+      }
+      
+      setError(null);
+    } catch (err) {
+      setError('리뷰를 불러올 수 없습니다');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: 실제 삭제 로직 구현
-    console.log('리뷰 삭제:', selectedReviewId);
-    setDeleteModalVisible(false);
-    setSelectedReviewId(null);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR');
   };
 
-  const handleCancelDelete = () => {
-    setDeleteModalVisible(false);
-    setSelectedReviewId(null);
-  };
 
-  const writtenReviews: WrittenReview[] = [
-    {
-      id: "1",
-      uri: require("@/assets/images/logo.png"),
-      productName: "상품이름asdasdasdasdasdasdasdasdasdasA",
-      orderDate: "2024-06-05",
-      orderCode: "ORD-2024-001",
-      storeName: "백암점",
-      rating: 5,
-      comment: "정말 맛있었어요! 강추합니다. 백암에서 제일로 맛있는 무언가",
-      reviewDate: "2024-06-07",
-    },
-    {
-      id: "2",
-      uri: require("@/assets/images/image1.jpg"),
-      productName: "상품이름B",
-      orderDate: "2024-06-08",
-      orderCode: "ORD-2024-002",
-      storeName: "용인점",
-      rating: 4,
-      comment: "서비스가 좋았어요.",
-      reviewDate: "2024-06-09",
-    },
-  ];
-
-  const unwrittenReviews: UnwrittenReview[] = [
-    {
-      id: "3",
-      uri: require("@/assets/images/logo.png"),
-      productName: "상품 C",
-      orderDate: "2024-06-10",
-      orderCode: "ORD-2024-001",
-      storeName: "백암점",
-      status: "사용완료"
-    },
-    {
-      id: "4",
-      uri: require("@/assets/images/logo.png"),
-      productName: "상품 D",
-      orderDate: "2024-06-12",
-      orderCode: "ORD-2024-002",
-      storeName: "용인점",
-      status: "미사용"
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -146,175 +135,176 @@ export default function CustReviewListScreen() {
         </TouchableOpacity>
       </View>
       {selectedTab === "written" ? (
-          <FlatList
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
-            data={writtenReviews}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.reviewItemContainer}>
-                {/* 주문일자 + 주문코드 + 화살표 버튼 */}
+          isLoading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#FF5722" />
+            </View>
+          ) : error ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 }}>
+              <Text style={{ color: '#666', textAlign: 'center', marginBottom: 16 }}>
+                {error}
+              </Text>
+              <TouchableOpacity
+                style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#FF5722', borderRadius: 4 }}
+                onPress={fetchReviews}
+              >
+                <Text style={{ color: '#fff' }}>다시 시도</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+              data={writtenReviews}
+              keyExtractor={(item) => item.reviewIdx.toString()}
+              renderItem={({ item }) => (
                 <TouchableOpacity 
-                  style={styles.orderHeader}
-                  onPress={() => router.push("/(cust)/orderDetail")}
+                  style={styles.reviewItemContainer}
+                  onPress={() => router.push({
+                    pathname: "/(cust)/reviewDetail",
+                    params: { 
+                      reviewIdx: item.reviewIdx,
+                      productImage: item.productImage?.fileUrl || "",
+                      storeNm: item.storeNm,
+                      productName: item.productNm,
+                      reviewRate: item.reviewRate?.toString() || "0",
+                      reviewContent: item.reviewContent,
+                      reviewImages: item.reviewImages ? JSON.stringify(item.reviewImages) : JSON.stringify({ files: [] })
+                    }
+                  })}
                 >
-                  <Text style={styles.orderHeaderText}>
-                    {item.orderDate} ({item.orderCode})
-                  </Text>
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                  {/* 주문일자 + 주문코드 */}
+                  <View style={styles.orderInfo}>
+                    <Text style={styles.orderText}>
+                      {formatDate(item.orderDateTime)} ({item.orderCode})
+                    </Text>
+                  </View>
+
+                  {/* 이미지 + 정보 Row */}
+                  <View style={[styles.writtenReviewRow, { alignItems: 'center' }]}>
+                    {item.productImage ? (
+                      <Image
+                        source={{ uri: item.productImage.fileUrl }}
+                        style={styles.productImage}
+                        resizeMode="stretch"
+                      />
+                    ) : (
+                      <View style={[styles.reviewImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ color: '#999' }}>이미지</Text>
+                      </View>
+                    )}
+                    <View style={[styles.writtenReviewContent, { flex: 1 }]}>
+                      <Text
+                        style={styles.writtenStoreName}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {item.storeNm}
+                      </Text>
+                      <Text
+                        style={styles.writtenProductName}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {item.productNm}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#ccc" style={{ marginLeft: 8 }} />
+                  </View>
                 </TouchableOpacity>
-                
-                {/* 이미지 + 정보 Row */}
-                <View style={styles.writtenReviewRow}>
-                  <TouchableOpacity onPress={() => router.push("/(cust)/productDetail")}>
-                    <Image
-                      source={item.uri}
-                      style={styles.reviewImage}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                  <View style={styles.writtenReviewContent}>
-                    <Text
-                      style={styles.writtenStoreName}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {item.storeName}
-                    </Text>
-                    <Text
-                      style={styles.writtenProductName}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {item.productName}
-                    </Text>
-                  </View>
-                </View>
-                
-                {/* 리뷰 정보 영역 */}
-                <View style={styles.reviewInfoSection}>
-                  {/* 별점 + 수정/삭제 */}
-                  <View style={styles.reviewActionRow}>
-                    <View style={styles.ratingRow}>
-                      <Ionicons name="star" size={16} color="#FFD700" />
-                      <Text style={styles.ratingScore}>{item.rating}점</Text>
-                    </View>
-                    <View style={styles.actionButtons}>
-                      <TouchableOpacity onPress={() => router.push("/(cust)/reviewReg")}>
-                        <Text style={styles.actionText}>수정</Text>
-                      </TouchableOpacity>
-                      <Text style={styles.actionDivider}>|</Text>
-                      <TouchableOpacity onPress={() => handleDeletePress(item.id)}>
-                        <Text style={styles.actionText}>삭제</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                  {/* 리뷰 내용 */}
-                  <TouchableOpacity onPress={() => router.push("/(cust)/reviewDetail")}>
-                    <Text
-                      style={styles.reviewCommentText}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {item.comment}
-                    </Text>
-                  </TouchableOpacity>
-                  {/* 리뷰 작성일 */}
-                  <Text style={styles.reviewDateText}>{item.reviewDate}</Text>
-                </View>
-              </View>
-            )}
-          />
+              )}
+            />
+          )
         ) : (
-          <FlatList
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
-            data={unwrittenReviews}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.reviewItemContainer}>
-                {/* 주문일자 + 주문코드 + 화살표 버튼 */}
-                <TouchableOpacity 
-                  style={styles.orderHeader}
-                  onPress={() => router.push("/(cust)/orderDetail")}
-                >
-                  <Text style={styles.orderHeaderText}>
-                    {item.orderDate} ({item.orderCode})
-                  </Text>
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
-                </TouchableOpacity>
-                
-                {/* 이미지 + 정보 Row */}
-                <View style={styles.unwrittenReviewRow}>
-                  <Image
-                    source={item.uri}
-                    style={styles.reviewImage}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.unwrittenReviewContent}>
-                    <Text
-                      style={styles.unwrittenStoreName}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {item.storeName}
+          isLoading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#FF5722" />
+            </View>
+          ) : error ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 }}>
+              <Text style={{ color: '#666', textAlign: 'center', marginBottom: 16 }}>
+                {error}
+              </Text>
+              <TouchableOpacity
+                style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#FF5722', borderRadius: 4 }}
+                onPress={fetchReviews}
+              >
+                <Text style={{ color: '#fff' }}>다시 시도</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+              data={unwrittenReviews}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.reviewItemContainer}>
+                  {/* 주문일자 + 주문코드 + 화살표 버튼 */}
+                  <TouchableOpacity 
+                    style={styles.orderHeader}
+                    onPress={() => router.push("/(cust)/orderDetail")}
+                  >
+                    <Text style={styles.orderHeaderText}>
+                      {formatDate(item.orderDateTime)} ({item.orderCode})
                     </Text>
-                    <Text
-                      style={styles.unwrittenProductName}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {item.productName}
-                    </Text>
-                    <Text style={styles.unwrittenStatus}>
-                      {item.status}
-                    </Text>
+                    <Ionicons name="chevron-forward" size={20} color="#666" />
+                  </TouchableOpacity>
+                  
+                  {/* 이미지 + 정보 Row */}
+                  <View style={styles.unwrittenReviewRow}>
+                    {item.productImg?.fileUrl ? (
+                      <Image
+                        source={{ uri: item.productImg.fileUrl }}
+                        style={styles.reviewImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={[styles.reviewImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text style={{ color: '#999' }}>이미지</Text>
+                      </View>
+                    )}
+                    <View style={styles.unwrittenReviewContent}>
+                      <Text
+                        style={styles.unwrittenStoreName}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {item.storeNm}
+                      </Text>
+                      <Text
+                        style={styles.unwrittenProductName}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {item.productNm}
+                      </Text>
+                    </View>
                   </View>
+                  
+                  {/* 리뷰작성 버튼 */}
+                  <TouchableOpacity
+                    style={styles.reviewWriteButton}
+                    onPress={() => router.push({
+                      pathname: "/(cust)/reviewReg",
+                      params: { 
+                        orderDetailIdx: item.orderDetailIdx,
+                        storeNm: item.storeNm,
+                        productName: item.productNm,
+                        productImage: item.productImg?.fileUrl || ""
+                      }
+                    })}
+                  >
+                    <Text style={styles.reviewWriteButtonText}>리뷰 작성</Text>
+                  </TouchableOpacity>
                 </View>
-                
-                {/* 리뷰작성 버튼 */}
-                <TouchableOpacity
-                  style={styles.reviewWriteButton}
-                  onPress={() => router.push("/(cust)/reviewReg")}
-                >
-                  <Text style={styles.reviewWriteButtonText}>리뷰 작성</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
+              )}
+            />
+          )
         )}
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
-      
-      {/* 삭제 확인 모달 */}
-      <Modal
-        visible={deleteModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleCancelDelete}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>리뷰 삭제</Text>
-            <Text style={styles.modalMessage}>정말로 삭제하시겠습니까?</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.confirmButton]}
-                onPress={handleConfirmDelete}
-              >
-                <Text style={styles.confirmButtonText}>확인</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={handleCancelDelete}
-              >
-                <Text style={styles.cancelButtonText}>취소</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

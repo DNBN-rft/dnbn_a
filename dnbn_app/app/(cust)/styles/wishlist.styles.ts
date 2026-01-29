@@ -48,6 +48,10 @@ export const styles = StyleSheet.create({
     listContainer: {
         paddingVertical: 8,
     },
+    // 가맹점 아이템 래퍼 (찜 버튼 포함)
+    storeItemWrapper: {
+        position: 'relative',
+    },
     // 가맹점 아이템 컨테이너
     storeItemContainer: {
         flexDirection: 'row',
@@ -66,6 +70,26 @@ export const styles = StyleSheet.create({
         elevation: 3,
         borderWidth: 1,
         borderColor: '#f0f0f0',
+    },
+    // 찜 버튼
+    wishButton: {
+        position: 'absolute',
+        top: 50,
+        right: 30,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 4,
     },
     // 가게 이미지
     storeImage: {

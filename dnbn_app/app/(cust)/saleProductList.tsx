@@ -27,11 +27,11 @@ export default function SaleProductListScreen() {
     const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
 
     const saleProducts = [
-        { id: '1', uri: require('@/assets/images/bread.jpg'), productName: '붕어빵 슈크림', storeName: '최강잉어빵', discount: 20, price: 1000, originalPrice: 1200, distance: 0.5, rating: 4.5, reviewCount: 128, category: '신선식품', timeLimitSeconds: 86400 + 14 * 60 + 34 },
-        { id: '2', uri: require('@/assets/images/chicken.jpg'), productName: '치킨', storeName: '처갓집', discount: 15, price: 12000, originalPrice: 14000, distance: 1.2, rating: 4.8, reviewCount: 256, category: '과일', timeLimitSeconds: 65 * 3600 },
-        { id: '3', uri: require('@/assets/images/dak.jpg'), productName: '닭갈비', storeName: '춘천닭갈비', discount: 10, price: 5000, originalPrice: 6000, distance: 0.8, rating: 4.3, reviewCount: 89, category: '과일', timeLimitSeconds: 35 * 3600 },
-        { id: '4', uri: require('@/assets/images/fish.jpg'), productName: '방어회', storeName: '우리수산', discount: 25, price: 6000, originalPrice: 8000, distance: 0.5, rating: 4.7, reviewCount: 142, category: '신선식품', timeLimitSeconds: 2 * 3600 },
-        { id: '5', uri: require('@/assets/images/lobster.jpg'), productName: '랍스터', storeName: '랍스터최강', discount: 30, price: 15000, originalPrice: 20000, distance: 1.2, rating: 4.6, reviewCount: 203, category: '과일', timeLimitSeconds: 14 * 3600 },
+        { id: '1', uri: require('@/assets/images/products_soyun/bread.jpg'), productName: '붕어빵 슈크림', storeName: '최강잉어빵', discount: 20, price: 1000, originalPrice: 1200, distance: 0.5, rating: 4.5, reviewCount: 128, category: '신선식품', timeLimitSeconds: 86400 + 14 * 60 + 34 },
+        { id: '2', uri: require('@/assets/images/products_soyun/chicken.jpg'), productName: '치킨', storeName: '처갓집', discount: 15, price: 12000, originalPrice: 14000, distance: 1.2, rating: 4.8, reviewCount: 256, category: '과일', timeLimitSeconds: 65 * 3600 },
+        { id: '3', uri: require('@/assets/images/products_soyun/dak.jpg'), productName: '닭갈비', storeName: '춘천닭갈비', discount: 10, price: 5000, originalPrice: 6000, distance: 0.8, rating: 4.3, reviewCount: 89, category: '과일', timeLimitSeconds: 35 * 3600 },
+        { id: '4', uri: require('@/assets/images/products_soyun/fish.jpg'), productName: '방어회', storeName: '우리수산', discount: 25, price: 6000, originalPrice: 8000, distance: 0.5, rating: 4.7, reviewCount: 142, category: '신선식품', timeLimitSeconds: 2 * 3600 },
+        { id: '5', uri: require('@/assets/images/products_soyun/lobster.jpg'), productName: '랍스터', storeName: '랍스터최강', discount: 30, price: 15000, originalPrice: 20000, distance: 1.2, rating: 4.6, reviewCount: 203, category: '과일', timeLimitSeconds: 14 * 3600 },
     ];
 
     // 초기 timeLeft 설정 및 카운트다운

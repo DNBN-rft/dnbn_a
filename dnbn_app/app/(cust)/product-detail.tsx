@@ -25,8 +25,8 @@ export default function ProductDetailScreen() {
     rating: 4.5,
     reviewCount: 200,
     images: [
-      require("@/assets/images/image1.jpg"),
-      require("@/assets/images/image1.jpg"),
+      require("@/assets/images/products_soyun/cow.png"),
+      require("@/assets/images/products_soyun/cow.png"),
     ],
     description:
       "신선한 한우를 저렴한 가격에 만나보세요. 1등급 한우 등심, 안심, 갈비살이 포함된 프리미엄 세트입니다. 냉장 배송으로 신선함을 그대로 전달합니다.",
