@@ -65,13 +65,6 @@ interface StoreItem {
 
 export default function WishlistScreen() {
   const insets = useSafeAreaInsets();
-  const [wishList, setWishList] = useState<{ [key: string]: boolean }>({
-    "1": true,
-    "2": true,
-    "3": true,
-    "4": true,
-    "5": true,
-  });
 
   const unwishSet = useRef<Set<string>>(new Set());
 
