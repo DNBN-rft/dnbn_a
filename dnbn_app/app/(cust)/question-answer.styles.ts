@@ -75,6 +75,9 @@ export const styles = StyleSheet.create({
   },
   qaHeaderInfo: {
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   statusBadge: {
     alignSelf: "flex-start",
@@ -91,6 +94,12 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#EF7810",
   },
+
+  editRemoveButtonContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
   statusTextPending: {
     color: "#999999",
   },
@@ -118,5 +127,42 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999999",
   },
-});
 
+  questionImageContainer: {
+    flexDirection: "row",
+    gap: 25,
+    borderTopColor: "#E5E5E5",
+    paddingTop: 15,
+  },
+  questionImage: {
+    borderRadius: 8,
+    height: 200,
+    width: 200,
+  },
+  editButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#FFFFFF",
+  },
+  editButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#EF7810",
+  },
+  removeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#999999",
+    backgroundColor: "#FFFFFF",
+  },
+  removeButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#999999",
+  },
+});

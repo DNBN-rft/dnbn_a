@@ -1,8 +1,8 @@
-import { apiPostFormDataWithImage } from "@/utils/api";
+import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -17,12 +17,55 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./questionreg.styles";
+import { styles } from "./question-answer-edit.styles";
 
 type QuestionType = "QR" | "PAYMENT" | "REFUND" | "MOD_REQUEST" | "ETC";
 
-export default function NoticeDetailScreen() {
+interface QuestionImage {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface QuestionDetailResponse {
+  questionTitle: string;
+  questionRequestType: string;
+  questionRegDateTime: string;
+  questionContent: string;
+  isAnswered: boolean;
+  answerContent: string | null;
+  answerRegNm: string | null;
+  answerDateTime: string | null;
+  questionModTime: string | null;
+  answerModNm: string | null;
+  answerModTime: string | null;
+  imgs: {
+    files: QuestionImage[];
+  };
+}
+
+// 문의유형 매핑 (enum → 한글)
+const questionTypeMap: { [key: string]: string } = {
+  QR: "QR 문의",
+  PAYMENT: "결제 문의",
+  REFUND: "환불 문의",
+  MOD_REQUEST: "개인정보 수정 요청",
+  ETC: "기타",
+};
+
+// // 한글 → enum 역매핑
+// const reverseQuestionTypeMap: { [key: string]: QuestionType } = {
+//   "QR 문의": "QR",
+//   "결제 문의": "PAYMENT",
+//   "환불 문의": "REFUND",
+//   "개인정보 수정 요청": "MOD_REQUEST",
+//   기타: "ETC",
+// };
+
+export default function QuestionAnswerEdit() {
   const insets = useSafeAreaInsets();
+  const { questionId } = useLocalSearchParams();
+  const [loading, setLoading] = useState(true);
   const [questionTypeModalVisible, setQuestionTypeModalVisible] =
     useState(false);
   const [selectedQuestionType, setSelectedQuestionType] =
@@ -32,6 +75,63 @@ export default function NoticeDetailScreen() {
   const [questionTitle, setQuestionTitle] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
   const [questionFiles, setQuestionFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (questionId) {
+      fetchQuestionDetail();
+    }
+  }, [questionId]);
+
+  const fetchQuestionDetail = async () => {
+    try {
+      const response = await apiGet(`/cust/question/detail/${questionId}`);
+
+      if (response.ok) {
+        const data: QuestionDetailResponse = await response.json();
+
+        console.log(
+          "백엔드에서 받은 questionRequestType:",
+          data.questionRequestType,
+        );
+
+        // 받아온 데이터로 state 초기화
+        // 백엔드가 한글로 보낼 수도 있으니 역매핑 시도
+        let enumValue: QuestionType;
+        // if (reverseQuestionTypeMap[data.questionRequestType]) {
+        //   // 한글로 온 경우
+        //   enumValue = reverseQuestionTypeMap[data.questionRequestType];
+        // } else {
+        // enum으로 온 경우
+        enumValue = data.questionRequestType as QuestionType;
+        // }
+
+        setSelectedQuestionTypeValue(enumValue);
+        setSelectedQuestionType(
+          questionTypeMap[enumValue] || data.questionRequestType,
+        );
+        setQuestionTitle(data.questionTitle);
+        setQuestionContent(data.questionContent);
+
+        // 이미지가 있으면 URL 배열로 설정
+        if (data.imgs?.files && data.imgs.files.length > 0) {
+          const imageUrls = data.imgs.files
+            .sort((a, b) => a.order - b.order)
+            .map((img) => img.fileUrl);
+          setQuestionFiles(imageUrls);
+        }
+      } else {
+        console.error("문의 상세 조회 실패:", response.status);
+        Alert.alert("오류", "문의 정보를 불러오는데 실패했습니다.");
+        router.back();
+      }
+    } catch (error) {
+      console.error("문의 상세 조회 에러:", error);
+      Alert.alert("오류", "문의 정보를 불러오는데 실패했습니다.");
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 이미지 선택 함수
   const pickImage = async () => {
@@ -68,7 +168,7 @@ export default function NoticeDetailScreen() {
     setQuestionFiles(questionFiles.filter((_, i) => i !== index));
   };
 
-  // 문의 등록 및 이미지 업로드 함수
+  // 문의 수정 및 이미지 업로드 함수
   const submitQuestion = async () => {
     // 유효성 검사
     if (!selectedQuestionTypeValue) {
@@ -93,7 +193,7 @@ export default function NoticeDetailScreen() {
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
 
-      // 이미지 파일들 추가
+      // 이미지 파일들 추가 (모든 이미지 전송)
       for (let i = 0; i < questionFiles.length; i++) {
         const imageUri = questionFiles[i];
 
@@ -117,7 +217,7 @@ export default function NoticeDetailScreen() {
 
         // 웹과 네이티브 환경에 따라 다르게 처리
         if (Platform.OS === "web") {
-          // 웹: Blob으로 변환하여 전송
+          // 웹: Blob으로 변환하여 전송 (URL이든 로컬이든 동일)
           const response = await fetch(imageUri);
           const blob = await response.blob();
           const typedBlob = new Blob([blob], { type: mimeType });
@@ -132,22 +232,22 @@ export default function NoticeDetailScreen() {
         }
       }
 
-      const response = await apiPostFormDataWithImage(
-        "/cust/question",
+      const response = await apiPutFormDataWithImage(
+        `/cust/question/detail/${questionId}`,
         formData,
       );
 
       if (response.ok) {
         // 웹 환경에서는 window.alert 사용
         if (Platform.OS === "web") {
-          window.alert("문의가 성공적으로 등록되었습니다.");
-          router.navigate("/(cust)/question");
+          window.alert("문의가 성공적으로 수정되었습니다.");
+          router.back();
         } else {
           // 네이티브 환경에서는 Alert.alert 사용
-          Alert.alert("성공", "문의가 성공적으로 등록되었습니다.", [
+          Alert.alert("성공", "문의가 성공적으로 수정되었습니다.", [
             {
               text: "확인",
-              onPress: () => router.navigate("/(cust)/question"),
+              onPress: () => router.back(),
             },
           ]);
         }
@@ -156,26 +256,51 @@ export default function NoticeDetailScreen() {
           const error = await response.json();
 
           if (Platform.OS === "web") {
-            window.alert(error.message || "문의 등록에 실패했습니다.");
+            window.alert(error.message || "문의 수정에 실패했습니다.");
           } else {
-            Alert.alert("실패", error.message || "문의 등록에 실패했습니다.");
+            Alert.alert("실패", error.message || "문의 수정에 실패했습니다.");
           }
         } catch (e) {
           if (Platform.OS === "web") {
-            window.alert("문의 등록에 실패했습니다.");
+            window.alert("문의 수정에 실패했습니다.");
           } else {
-            Alert.alert("실패", "문의 등록에 실패했습니다.");
+            Alert.alert("실패", "문의 수정에 실패했습니다.");
           }
         }
       }
     } catch (error) {
       if (Platform.OS === "web") {
-        window.alert("문의 등록 중 오류가 발생했습니다.");
+        window.alert("문의 수정 중 오류가 발생했습니다.");
       } else {
-        Alert.alert("실패", "문의 등록 중 오류가 발생했습니다.");
+        Alert.alert("실패", "문의 수정 중 오류가 발생했습니다.");
       }
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+        )}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.title}>문의 수정</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text>로딩중...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -189,7 +314,7 @@ export default function NoticeDetailScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.title}>문의하기</Text>
+        <Text style={styles.title}>문의 수정</Text>
         <View style={styles.placeholder} />
       </View>
       <ScrollView
@@ -276,10 +401,10 @@ export default function NoticeDetailScreen() {
 
         <View style={styles.submitButtonContainer}>
           <Pressable style={styles.submitButton} onPress={submitQuestion}>
-            <Text style={styles.submitButtonText}>문의하기</Text>
+            <Text style={styles.submitButtonText}>수정하기</Text>
           </Pressable>
           <Pressable style={styles.cancelButton} onPress={() => router.back()}>
-            <Text style={styles.cancelButtonText}>취소하기</Text>
+            <Text style={styles.cancelButtonText}>취소</Text>
           </Pressable>
         </View>
       </ScrollView>

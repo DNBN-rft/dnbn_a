@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE_URL = "http://192.168.0.67:8080/api";
+const API_BASE_URL = "http://192.168.0.136:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -146,7 +146,29 @@ export const apiPost = async (
   });
 };
 
-export const apiPostFormData = async (
+export const apiPut = async (
+  endpoint: string,
+  data: any = null,
+  options: RequestInit = {},
+): Promise<Response> => {
+  return apiCall(endpoint, {
+    ...options,
+    method: "PUT",
+    body: data ? JSON.stringify(data) : undefined,
+  });
+};
+
+export const apiDelete = async (
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<Response> => {
+  return apiCall(endpoint, {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const apiPostFormDataWithImage = async (
   endpoint: string,
   formData: FormData,
   options: RequestInit = {},
@@ -171,7 +193,7 @@ export const apiPostFormData = async (
   }
 };
 
-export const apiPutFormData = async (
+export const apiPutFormDataWithImage = async (
   endpoint: string,
   formData: FormData,
   options: RequestInit = {},
@@ -196,33 +218,13 @@ export const apiPutFormData = async (
   }
 };
 
-export const apiPut = async (
-  endpoint: string,
-  data: any = null,
-  options: RequestInit = {},
-): Promise<Response> => {
-  return apiCall(endpoint, {
-    ...options,
-    method: "PUT",
-    body: data ? JSON.stringify(data) : undefined,
-  });
-};
-
-export const apiDelete = async (
-  endpoint: string,
-  options: RequestInit = {},
-): Promise<Response> => {
-  return apiCall(endpoint, {
-    ...options,
-    method: "DELETE",
-  });
-};
-
 const apiClient = {
   apiGet,
   apiPost,
   apiPut,
   apiDelete,
+  apiPostFormDataWithImage,
+  apiPutFormDataWithImage,
   API_BASE_URL,
 };
 
