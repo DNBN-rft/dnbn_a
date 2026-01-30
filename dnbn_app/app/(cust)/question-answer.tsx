@@ -183,7 +183,7 @@ export default function QuestionAnswer() {
                   <TouchableOpacity
                     style={styles.editButton}
                     onPress={() =>
-                      router.push({
+                      router.navigate({
                         pathname: "/(cust)/question-answer-edit",
                         params: { questionId: questionId },
                       })

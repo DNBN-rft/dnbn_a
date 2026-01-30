@@ -10,6 +10,7 @@ interface Question {
   id: string;
   title: string;
   date: string;
+  dateRaw: string; // 정렬용 원본 ISO 날짜
   status: "답변대기" | "답변완료";
 }
 
@@ -43,6 +44,7 @@ export default function NoticeDetailScreen() {
           id: item.questionId.toString(),
           title: item.questionTitle,
           date: formatDate(item.questionRegDateTime),
+          dateRaw: item.questionRegDateTime, // 원본 ISO 날짜 저장
           status: item.isAnswered ? "답변완료" : "답변대기",
         }));
 
@@ -70,7 +72,7 @@ export default function NoticeDetailScreen() {
 
   // 날짜 최신순으로 정렬 (가장 최신이 위로)
   const sortedQuestionList = [...questionList].sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
+    return new Date(b.dateRaw).getTime() - new Date(a.dateRaw).getTime();
   });
 
   return (
