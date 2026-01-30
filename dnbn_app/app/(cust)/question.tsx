@@ -68,13 +68,8 @@ export default function NoticeDetailScreen() {
     return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
-  // 답변대기를 위로, 답변완료를 아래로 정렬하고, 각 그룹 내에서 날짜 최신순으로 정렬
+  // 날짜 최신순으로 정렬 (가장 최신이 위로)
   const sortedQuestionList = [...questionList].sort((a, b) => {
-    // 먼저 상태별로 정렬 (답변대기가 먼저)
-    if (a.status !== b.status) {
-      return a.status === "답변대기" ? -1 : 1;
-    }
-    // 같은 상태 내에서는 날짜 최신순 정렬
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 

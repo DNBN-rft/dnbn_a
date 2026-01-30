@@ -75,6 +75,9 @@ export const styles = StyleSheet.create({
   },
   qaHeaderInfo: {
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   statusBadge: {
     alignSelf: "flex-start",

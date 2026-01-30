@@ -129,6 +129,10 @@ export default function QuestionAnswer() {
                   {questionData.isAnswered ? "답변완료" : "답변대기"}
                 </Text>
               </View>
+              
+              <View>
+                <TouchableOpacity>수정</TouchableOpacity>
+              </View>
             </View>
           </View>
 
