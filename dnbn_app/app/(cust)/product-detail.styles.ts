@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#FF4444",
+    borderColor: "rgb(239, 120, 16)",
     backgroundColor: "#fff",
     width: 35,
     height: 22,
@@ -112,7 +112,7 @@ export const styles = StyleSheet.create({
   },
   adultTagText: {
     fontSize: 12,
-    color: "#FF4444",
+    color: "rgb(239, 120, 16)",
     fontWeight: "500",
   },
   serviceTag: {

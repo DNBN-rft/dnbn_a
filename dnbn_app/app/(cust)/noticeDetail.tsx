@@ -3,10 +3,52 @@ import { router } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './noticedetail.styles';
+import { useEffect, useState } from 'react';
+import { apiGet } from '@/utils/api';
+import { useLocalSearchParams } from 'expo-router';
+
+interface NoticeDetail {
+    title: string;
+    content: string;
+    isPinned: boolean;
+    regDateTime: string;
+    modDateTime: string;
+}
 
 export default function NoticeDetailScreen() {
     const insets = useSafeAreaInsets();
-    const isPinned = true; // 실제로는 route params나 state로 전달받아야 함
+    const [noticeDetail, setNoticeDetail] = useState<NoticeDetail>();
+    const { noticeIdx } = useLocalSearchParams();
+
+    useEffect(() => {
+        fetchNoticeDetail();
+    }, []);
+
+    const fetchNoticeDetail = async () => {
+        try {
+            const response = await apiGet(`/cust/notice/${noticeIdx}`);
+            const data = await response.json();
+            if (response.ok) {
+                setNoticeDetail(data);
+            } else {
+                console.error('공지사항 상세 정보를 불러올 수 없습니다');
+            }
+        } catch (error) {
+            console.error('공지사항 상세 정보를 불러오는 중 오류가 발생했습니다', error);
+        }
+    };
+
+    const formatDateTime = (dateString: string) => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
     return (
         <View style={styles.container}>
@@ -27,18 +69,19 @@ export default function NoticeDetailScreen() {
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.noticeDetailHeaderContainer}>
-                    {isPinned && (
+                    {noticeDetail?.isPinned && (
                         <View style={styles.pinnedBadge}>
                             <Ionicons name="pin" size={12} color="#FFFFFF" />
                             <Text style={styles.pinnedBadgeText}>고정</Text>
                         </View>
                     )}
-                    <Text style={styles.noticeDetailTitleText}>공지사항 제목이 들어갑니다</Text>
-                    <Text style={styles.noticeDetailDateText}>2024.06.01</Text>
+                    <Text style={styles.noticeDetailTitleText}>{noticeDetail?.title}</Text>
+                    <Text style={styles.noticeDetailDateText}>등록일: {formatDateTime(noticeDetail?.regDateTime)}</Text>
+                    <Text style={styles.noticeDetailDateText}>수정일: {noticeDetail?.modDateTime ? formatDateTime(noticeDetail?.modDateTime) : '-'}</Text>
                 </View>
                 <View style={styles.noticeDetailContentContainer}>
-                    <Text style={styles.noticeDetailContentText}>공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.공지사항 내용이 들어갑니다.</Text>
-                    <View style={styles.noticeDetailImageContainer}>
+                    <Text style={styles.noticeDetailContentText}>{noticeDetail?.content}    </Text>
+                    {/* <View style={styles.noticeDetailImageContainer}>
                         <Text>공지사항 이미지</Text>
                     </View>
                     <View style={styles.noticeDetailFileContainer}>
@@ -49,12 +92,12 @@ export default function NoticeDetailScreen() {
                         <TouchableOpacity style={styles.downloadIcon}>
                             <Ionicons name="download-outline" size={22} color="#EF7810" />
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </View>
             </ScrollView>
             {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
+                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+            )}
         </View>
     );
 };  

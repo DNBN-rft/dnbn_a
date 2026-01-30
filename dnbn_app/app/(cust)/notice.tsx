@@ -1,35 +1,59 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useRef } from 'react';
-import { FlatList, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { FlatList, Pressable, ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './notice.styles';
+import { apiGet } from '@/utils/api';
 
 interface Notice {
-    id: string;
+    noticeIdx: number;
     title: string;
-    date: string;
+    regDateTime: string;
     isPinned: boolean;
 }
 
-const noticeList: Notice[] = [
-    { id: "1", title: "[필독] 중요 공지사항입니다", date: "2024-06-15", isPinned: true },
-    { id: "2", title: "서비스 점검 안내", date: "2024-06-14", isPinned: true },
-    { id: "3", title: "공지사항 제목 3", date: "2024-06-13", isPinned: false },
-    { id: "4", title: "공지사항 제목 4", date: "2024-06-12", isPinned: false },
-    { id: "5", title: "공지사항 제목 5", date: "2024-06-11", isPinned: false },
-    { id: "6", title: "공지사항 제목 6", date: "2024-06-10", isPinned: false },
-    { id: "7", title: "공지사항 제목 7", date: "2024-06-09", isPinned: false },
-    { id: "8", title: "공지사항 제목 8", date: "2024-06-08", isPinned: false },
-    { id: "9", title: "공지사항 제목 9", date: "2024-06-07", isPinned: false },
-    { id: "10", title: "공지사항 제목 10", date: "2024-06-06", isPinned: false },
-    { id: "11", title: "공지사항 제목 11", date: "2024-06-05", isPinned: false },
-    { id: "12", title: "공지사항 제목 12", date: "2024-06-04", isPinned: false },
-];
-
 export default function NoticeScreen() {
     const insets = useSafeAreaInsets();
-    const scrollViewRef = useRef<ScrollView>(null);
+    const [noticeList, setNoticeList] = useState<Notice[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchNotices();
+    }, []);
+
+    const fetchNotices = async () => {
+        try {
+            setIsLoading(true);
+            const response = await apiGet('/cust/notice');
+            const data = await response.json();
+            
+            if (response.ok) {
+                // isPinned인 항목을 먼저, 그 다음 최근순으로 정렬
+                const sorted = data.sort((a: Notice, b: Notice) => {
+                    if (a.isPinned === b.isPinned) {
+                        return new Date(b.regDateTime).getTime() - new Date(a.regDateTime).getTime();
+                    }
+                    return a.isPinned ? -1 : 1;
+                });
+                setNoticeList(sorted);
+                setError(null);
+            } else {
+                setError('공지사항을 불러올 수 없습니다');
+            }
+        } catch (err) {
+            setError('공지사항 로드 중 오류가 발생했습니다');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ko-KR');
+    };
 
     return (
         <View style={styles.container}>
@@ -49,37 +73,58 @@ export default function NoticeScreen() {
                 <View style={styles.placeholder} />
             </View>
 
-            <FlatList
-                data={noticeList}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingTop: 12, paddingBottom: 20 }}
-                renderItem={({ item }) => (
-                    <Pressable 
-                        style={({ pressed }) => [
-                            styles.noticeItemContainer,
-                            item.isPinned && styles.pinnedNoticeContainer,
-                            { opacity: pressed ? 0.7 : 1 }
-                        ]}
-                        onPress={() => router.push(`/(cust)/noticeDetail`)}>
-                        <View style={styles.noticeItemDetailContainer}>
-                            {item.isPinned && (
-                                <View style={styles.pinnedBadge}>
-                                    <Ionicons name="pin" size={11} color="#FFFFFF" style={styles.pinnedIcon} />
-                                    <Text style={styles.pinnedBadgeText}>고정</Text>
-                                </View>
-                            )}
-                            <Text style={styles.noticeItemTitleText}>{item.title}</Text>
-                            <Text style={styles.noticeItemDateText}>{item.date}</Text>
-                        </View>
-                        <Ionicons 
-                            name="chevron-forward" 
-                            size={20} 
-                            color={item.isPinned ? "#EF7810" : "#C7C7CC"} 
-                            style={styles.chevronIcon} 
-                        />
-                    </Pressable>
-                )}
-            />
+            {isLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#FF5722" />
+                </View>
+            ) : error ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 }}>
+                    <Text style={{ color: '#666', textAlign: 'center', marginBottom: 16 }}>
+                        {error}
+                    </Text>
+                    <TouchableOpacity
+                        style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: '#FF5722', borderRadius: 4 }}
+                        onPress={fetchNotices}
+                    >
+                        <Text style={{ color: '#fff' }}>다시 시도</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={noticeList}
+                    keyExtractor={(item) => item.noticeIdx.toString()}
+                    contentContainerStyle={{ paddingTop: 12, paddingBottom: 20 }}
+                    renderItem={({ item }) => (
+                        <Pressable 
+                            style={({ pressed }) => [
+                                styles.noticeItemContainer,
+                                item.isPinned && styles.pinnedNoticeContainer,
+                                { opacity: pressed ? 0.7 : 1 }
+                            ]}
+                            onPress={() => router.push({
+                                pathname: '/(cust)/noticeDetail',
+                                params: { noticeIdx: item.noticeIdx }
+                            })}>
+                            <View style={styles.noticeItemDetailContainer}>
+                                {item.isPinned && (
+                                    <View style={styles.pinnedBadge}>
+                                        <Ionicons name="pin" size={11} color="#FFFFFF" style={styles.pinnedIcon} />
+                                        <Text style={styles.pinnedBadgeText}>고정</Text>
+                                    </View>
+                                )}
+                                <Text style={styles.noticeItemTitleText}>{item.title}</Text>
+                                <Text style={styles.noticeItemDateText}>{formatDate(item.regDateTime)}</Text>
+                            </View>
+                            <Ionicons 
+                                name="chevron-forward" 
+                                size={20} 
+                                color={item.isPinned ? "#EF7810" : "#C7C7CC"} 
+                                style={styles.chevronIcon} 
+                            />
+                        </Pressable>
+                    )}
+                />
+            )}
             {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000"}} />
       )}
