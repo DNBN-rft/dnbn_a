@@ -6,15 +6,15 @@ import { useState } from "react";
 import {
   Alert,
   Image,
-  Keyboard,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./questionreg.styles";
@@ -93,7 +93,7 @@ export default function NoticeDetailScreen() {
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
 
-      // 이미지 파일들 추가 - Blob으로 변환하여 전송
+      // 이미지 파일들 추가
       for (let i = 0; i < questionFiles.length; i++) {
         const imageUri = questionFiles[i];
 
@@ -115,15 +115,21 @@ export default function NoticeDetailScreen() {
           mimeType = "image/jpeg";
         }
 
-        // URI에서 실제 이미지 데이터를 Blob으로 가져오기
-        const response = await fetch(imageUri);
-        const blob = await response.blob();
-
-        // Blob 타입을 명시적으로 설정한 새 Blob 생성
-        const typedBlob = new Blob([blob], { type: mimeType });
-
-        // FormData에 추가
-        formData.append("questionFiles", typedBlob as any, filename);
+        // 웹과 네이티브 환경에 따라 다르게 처리
+        if (Platform.OS === "web") {
+          // 웹: Blob으로 변환하여 전송
+          const response = await fetch(imageUri);
+          const blob = await response.blob();
+          const typedBlob = new Blob([blob], { type: mimeType });
+          formData.append("questionFiles", typedBlob as any, filename);
+        } else {
+          // 네이티브: URI를 직접 FormData에 추가
+          formData.append("questionFiles", {
+            uri: imageUri,
+            type: mimeType,
+            name: filename,
+          } as any);
+        }
       }
 
       // apiPostFormData 사용
@@ -170,186 +176,183 @@ export default function NoticeDetailScreen() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        {insets.top > 0 && (
-          <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
-        )}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>문의하기</Text>
-          <View style={styles.placeholder} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <View style={styles.questionItemContainer}>
-            <Text style={styles.questionItemTitleText}>문의유형 *</Text>
-            <Pressable
-              style={styles.questionTypeSelector}
-              onPress={() => setQuestionTypeModalVisible(true)}
-            >
-              <Text style={styles.questionTypeSelectorText}>
-                {selectedQuestionType}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
-            </Pressable>
-          </View>
-
-          <View style={styles.questionItemContainer}>
-            <Text style={styles.questionItemTitleText}>제목 *</Text>
-            <TextInput
-              style={styles.questionTitleInput}
-              placeholder="제목을 입력해주세요."
-              onChangeText={setQuestionTitle}
-              value={questionTitle}
-            />
-          </View>
-
-          <View style={styles.questionItemContainer}>
-            <Text style={styles.questionItemContentText}>내용 *</Text>
-            <TextInput
-              style={styles.questionContentInput}
-              placeholder="내용을 입력해주세요."
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-              onChangeText={setQuestionContent}
-              value={questionContent}
-            />
-          </View>
-
-          <View style={styles.questionItemContainer}>
-            <Text style={styles.questionItemTitleText}>
-              첨부파일 ({questionFiles.length}/3)
-            </Text>
-          </View>
-
-          <View style={styles.questionImageContainer}>
-            {[0, 1, 2].map((index) => (
-              <View key={index} style={styles.photoSlot}>
-                {questionFiles[index] ? (
-                  <View style={styles.photoWrapper}>
-                    <Image
-                      style={styles.questionImage}
-                      source={{ uri: questionFiles[index] }}
-                      resizeMode="cover"
-                    />
-
-                    <Pressable
-                      style={styles.removePhotoButton}
-                      onPress={() => removeImage(index)}
-                    >
-                      <Ionicons name="close-circle" size={24} color="#FF6B35" />
-                    </Pressable>
-                  </View>
-                ) : (
-                  <Pressable
-                    style={styles.photoUploadButton}
-                    onPress={pickImage}
-                    disabled={questionFiles.length >= 3}
-                  >
-                    <Ionicons
-                      name="camera"
-                      size={32}
-                      color={questionFiles.length >= 3 ? "#ccc" : "#888"}
-                    />
-                  </Pressable>
-                )}
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.submitButtonContainer}>
-            <Pressable style={styles.submitButton} onPress={submitQuestion}>
-              <Text style={styles.submitButtonText}>문의하기</Text>
-            </Pressable>
-            <Pressable
-              style={styles.cancelButton}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.cancelButtonText}>취소하기</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <Modal
-          visible={questionTypeModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setQuestionTypeModalVisible(false)}
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+      )}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          <TouchableWithoutFeedback
-            onPress={() => setQuestionTypeModalVisible(false)}
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.title}>문의하기</Text>
+        <View style={styles.placeholder} />
+      </View>
+      <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View style={styles.questionItemContainer}>
+          <Text style={styles.questionItemTitleText}>문의유형 *</Text>
+          <Pressable
+            style={styles.questionTypeSelector}
+            onPress={() => setQuestionTypeModalVisible(true)}
           >
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>문의유형 선택</Text>
+            <Text style={styles.questionTypeSelectorText}>
+              {selectedQuestionType}
+            </Text>
+            <Ionicons name="chevron-down" size={20} color="#666" />
+          </Pressable>
+        </View>
+
+        <View style={styles.questionItemContainer}>
+          <Text style={styles.questionItemTitleText}>제목 *</Text>
+          <TextInput
+            style={styles.questionTitleInput}
+            placeholder="제목을 입력해주세요."
+            onChangeText={setQuestionTitle}
+            value={questionTitle}
+          />
+        </View>
+
+        <View style={styles.questionItemContainer}>
+          <Text style={styles.questionItemContentText}>내용 *</Text>
+          <TextInput
+            style={styles.questionContentInput}
+            placeholder="내용을 입력해주세요."
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+            onChangeText={setQuestionContent}
+            value={questionContent}
+          />
+        </View>
+
+        <View style={styles.questionItemContainer}>
+          <Text style={styles.questionItemTitleText}>
+            첨부파일 ({questionFiles.length}/3)
+          </Text>
+        </View>
+
+        <View style={styles.questionImageContainer}>
+          {[0, 1, 2].map((index) => (
+            <View key={index} style={styles.photoSlot}>
+              {questionFiles[index] ? (
+                <View style={styles.photoWrapper}>
+                  <Image
+                    style={styles.questionImage}
+                    source={{ uri: questionFiles[index] }}
+                    resizeMode="cover"
+                  />
+
                   <Pressable
-                    style={styles.modalOption}
-                    onPress={() => {
-                      setSelectedQuestionType("QR 관련");
-                      setSelectedQuestionTypeValue("QR");
-                      setQuestionTypeModalVisible(false);
-                    }}
+                    style={styles.removePhotoButton}
+                    onPress={() => removeImage(index)}
                   >
-                    <Text style={styles.modalOptionText}>QR 관련</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.modalOption}
-                    onPress={() => {
-                      setSelectedQuestionType("결제 관련");
-                      setSelectedQuestionTypeValue("PAYMENT");
-                      setQuestionTypeModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.modalOptionText}>결제 관련</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.modalOption}
-                    onPress={() => {
-                      setSelectedQuestionType("환불/교환 관련");
-                      setSelectedQuestionTypeValue("REFUND");
-                      setQuestionTypeModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.modalOptionText}>환불/교환 관련</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.modalOption}
-                    onPress={() => {
-                      setSelectedQuestionType("개인정보 수정 요청");
-                      setSelectedQuestionTypeValue("MOD_REQUEST");
-                      setQuestionTypeModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.modalOptionText}>
-                      개인정보 수정 요청
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.modalOption}
-                    onPress={() => {
-                      setSelectedQuestionType("기타");
-                      setSelectedQuestionTypeValue("ETC");
-                      setQuestionTypeModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.modalOptionText}>기타</Text>
+                    <Ionicons name="close-circle" size={24} color="#FF6B35" />
                   </Pressable>
                 </View>
-              </TouchableWithoutFeedback>
+              ) : (
+                <Pressable
+                  style={styles.photoUploadButton}
+                  onPress={pickImage}
+                  disabled={questionFiles.length >= 3}
+                >
+                  <Ionicons
+                    name="camera"
+                    size={32}
+                    color={questionFiles.length >= 3 ? "#ccc" : "#888"}
+                  />
+                </Pressable>
+              )}
             </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        {insets.bottom > 0 && (
-          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+          ))}
+        </View>
+
+        <View style={styles.submitButtonContainer}>
+          <Pressable style={styles.submitButton} onPress={submitQuestion}>
+            <Text style={styles.submitButtonText}>문의하기</Text>
+          </Pressable>
+          <Pressable style={styles.cancelButton} onPress={() => router.back()}>
+            <Text style={styles.cancelButtonText}>취소하기</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+
+      <Modal
+        visible={questionTypeModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setQuestionTypeModalVisible(false)}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => setQuestionTypeModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>문의유형 선택</Text>
+                <Pressable
+                  style={styles.modalOption}
+                  onPress={() => {
+                    setSelectedQuestionType("QR 관련");
+                    setSelectedQuestionTypeValue("QR");
+                    setQuestionTypeModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalOptionText}>QR 관련</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalOption}
+                  onPress={() => {
+                    setSelectedQuestionType("결제 관련");
+                    setSelectedQuestionTypeValue("PAYMENT");
+                    setQuestionTypeModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalOptionText}>결제 관련</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalOption}
+                  onPress={() => {
+                    setSelectedQuestionType("환불/교환 관련");
+                    setSelectedQuestionTypeValue("REFUND");
+                    setQuestionTypeModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalOptionText}>환불/교환 관련</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalOption}
+                  onPress={() => {
+                    setSelectedQuestionType("개인정보 수정 요청");
+                    setSelectedQuestionTypeValue("MOD_REQUEST");
+                    setQuestionTypeModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalOptionText}>개인정보 수정 요청</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.modalOption}
+                  onPress={() => {
+                    setSelectedQuestionType("기타");
+                    setSelectedQuestionTypeValue("ETC");
+                    setQuestionTypeModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.modalOptionText}>기타</Text>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
+    </View>
   );
 }
