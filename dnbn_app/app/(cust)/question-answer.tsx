@@ -1,9 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet } from "../../utils/api";
+import { apiDelete, apiGet } from "../../utils/api";
 import { styles } from "./question-answer.styles";
 
 interface QuestionImage {
@@ -73,6 +80,45 @@ export default function QuestionAnswer() {
     return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
+  const handleDelete = async () => {
+    Alert.alert(
+      "문의 삭제",
+      "문의를 삭제하시겠습니까?",
+      [
+        {
+          text: "취소",
+          style: "cancel",
+        },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await apiDelete(
+                `/cust/question/${questionId}/delete`,
+              );
+
+              if (response.ok) {
+                Alert.alert("성공", "문의가 삭제되었습니다.", [
+                  {
+                    text: "확인",
+                    onPress: () => router.navigate("/(cust)/question"),
+                  },
+                ]);
+              } else {
+                Alert.alert("실패", "문의 삭제에 실패했습니다.");
+              }
+            } catch (error) {
+              console.error("문의 삭제 에러:", error);
+              Alert.alert("오류", "문의 삭제 중 오류가 발생했습니다.");
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   if (loading || !questionData) {
     return (
       <View style={styles.container}>
@@ -132,19 +178,28 @@ export default function QuestionAnswer() {
                 </Text>
               </View>
 
-              {!questionData.isAnswered && (
+              <View style={styles.editRemoveButtonContainer}>
+                {!questionData.isAnswered && (
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(cust)/question-answer-edit",
+                        params: { questionId: questionId },
+                      })
+                    }
+                  >
+                    <Text style={styles.editButtonText}>수정</Text>
+                  </TouchableOpacity>
+                )}
+
                 <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(cust)/question-answer-edit",
-                      params: { questionId: questionId },
-                    })
-                  }
+                  style={styles.removeButton}
+                  onPress={handleDelete}
                 >
-                  <Text style={styles.editButtonText}>수정</Text>
+                  <Text style={styles.removeButtonText}>삭제</Text>
                 </TouchableOpacity>
-              )}
+              </View>
             </View>
           </View>
 
