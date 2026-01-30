@@ -151,6 +151,9 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: "center",
   },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
