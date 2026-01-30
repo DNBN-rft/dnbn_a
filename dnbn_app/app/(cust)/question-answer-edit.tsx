@@ -1,4 +1,4 @@
-import { apiGet, apiPutFormData } from "@/utils/api";
+import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -53,14 +53,14 @@ const questionTypeMap: { [key: string]: string } = {
   ETC: "기타",
 };
 
-// 한글 → enum 역매핑
-const reverseQuestionTypeMap: { [key: string]: QuestionType } = {
-  "QR 문의": "QR",
-  "결제 문의": "PAYMENT",
-  "환불 문의": "REFUND",
-  "개인정보 수정 요청": "MOD_REQUEST",
-  기타: "ETC",
-};
+// // 한글 → enum 역매핑
+// const reverseQuestionTypeMap: { [key: string]: QuestionType } = {
+//   "QR 문의": "QR",
+//   "결제 문의": "PAYMENT",
+//   "환불 문의": "REFUND",
+//   "개인정보 수정 요청": "MOD_REQUEST",
+//   기타: "ETC",
+// };
 
 export default function QuestionAnswerEdit() {
   const insets = useSafeAreaInsets();
@@ -97,13 +97,13 @@ export default function QuestionAnswerEdit() {
         // 받아온 데이터로 state 초기화
         // 백엔드가 한글로 보낼 수도 있으니 역매핑 시도
         let enumValue: QuestionType;
-        if (reverseQuestionTypeMap[data.questionRequestType]) {
-          // 한글로 온 경우
-          enumValue = reverseQuestionTypeMap[data.questionRequestType];
-        } else {
-          // enum으로 온 경우
-          enumValue = data.questionRequestType as QuestionType;
-        }
+        // if (reverseQuestionTypeMap[data.questionRequestType]) {
+        //   // 한글로 온 경우
+        //   enumValue = reverseQuestionTypeMap[data.questionRequestType];
+        // } else {
+        // enum으로 온 경우
+        enumValue = data.questionRequestType as QuestionType;
+        // }
 
         setSelectedQuestionTypeValue(enumValue);
         setSelectedQuestionType(
@@ -232,8 +232,7 @@ export default function QuestionAnswerEdit() {
         }
       }
 
-      // apiPutFormData 사용
-      const response = await apiPutFormData(
+      const response = await apiPutFormDataWithImage(
         `/cust/question/detail/${questionId}`,
         formData,
       );

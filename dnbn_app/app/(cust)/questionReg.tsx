@@ -1,4 +1,4 @@
-import { apiPostFormData } from "@/utils/api";
+import { apiPostFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -132,8 +132,10 @@ export default function NoticeDetailScreen() {
         }
       }
 
-      // apiPostFormData 사용
-      const response = await apiPostFormData("/cust/question", formData);
+      const response = await apiPostFormDataWithImage(
+        "/cust/question",
+        formData,
+      );
 
       if (response.ok) {
         // 웹 환경에서는 window.alert 사용
