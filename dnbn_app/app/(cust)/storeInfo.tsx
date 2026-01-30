@@ -1,26 +1,180 @@
-
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { styles } from './storeInfo.styles';
+import { apiGet, apiPost } from "@/utils/api";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ProductCard } from "./components/ProductCard";
+import { ReviewCard } from "./components/ReviewCard";
+import { StoreHeader } from "./components/StoreHeader";
+import { styles } from "./storeInfo.styles";
+import type {
+  Product,
+  ProductsPageResponse,
+  Review,
+  ReviewsPageResponse,
+  StoreInfoResponse,
+} from "./types/storeInfo.types";
 
 export default function StoreInfo() {
   const [activeTab, setActiveTab] = useState<"product" | "review">("product");
   const insets = useSafeAreaInsets();
+  const { storeCode } = useLocalSearchParams();
 
-  const productList = [
-    { id: '1', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
-    { id: '2', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
-    { id: '3', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
-    { id: '4', uri: require('@/assets/images/qr.png'), name: '맛있는 두쫀쿠', discount: 20, price: 70000, originalPrice: 87500, rating: '4.8(1,250)' },
-  ];
+  const productListRef = useRef<FlatList>(null);
+  const reviewListRef = useRef<FlatList>(null);
 
-  const reviewList = [
-    { id: '1', name: '사용자 이름', date: '2026.01.05', rating: '5.0', content: '맛있는 빵이에요! 추천합니다.', images: [require('@/assets/images/qr.png'), require('@/assets/images/qr.png')] },
-    { id: '2', name: '또다른 사용자', date: '2026.01.04', rating: '4.5', content: '가격도 저렴하고 맛있습니다!', images: [require('@/assets/images/qr.png')] },
-  ];
+  const [storeInfo, setStoreInfo] = useState<StoreInfoResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isWishStore, setIsWishStore] = useState(false);
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productPage, setProductPage] = useState(0);
+  const [hasMoreProducts, setHasMoreProducts] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewPage, setReviewPage] = useState(0);
+  const [hasMoreReviews, setHasMoreReviews] = useState(false);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  const fetchStoreInfo = useCallback(async () => {
+    if (!storeCode) {
+      setError("매장 정보를 찾을 수 없습니다.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const custCode = "CUST_001";
+      const response = await apiGet(
+        `/cust/storeinfo?storeCode=${storeCode}&custCode=${custCode}`,
+      );
+      if (!response.ok) throw new Error("매장 정보를 불러오는데 실패했습니다.");
+
+      const data: StoreInfoResponse = await response.json();
+      setStoreInfo(data);
+      setIsWishStore(data.isWishStore);
+      setProducts(Array.isArray(data.products) ? data.products : []);
+      setHasMoreProducts(data.hasMoreProducts || false);
+      setProductPage(0);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [storeCode]);
+
+  const fetchMoreProducts = useCallback(async () => {
+    if (!storeCode || loadingProducts || !hasMoreProducts) return;
+
+    try {
+      setLoadingProducts(true);
+      const nextPage = productPage + 1;
+      const response = await apiGet(
+        `/cust/storeinfo/products?storeCode=${storeCode}&page=${nextPage}`,
+      );
+      if (!response.ok) throw new Error("상품 목록을 불러오는데 실패했습니다.");
+
+      const data: ProductsPageResponse = await response.json();
+      const newProducts = Array.isArray(data.content) ? data.content : [];
+      setProducts((prev) => [...prev, ...newProducts]);
+      setHasMoreProducts(!data.last);
+      setProductPage(nextPage);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, [storeCode, productPage, hasMoreProducts, loadingProducts]);
+
+  const fetchReviews = useCallback(async () => {
+    if (!storeCode || loadingReviews) return;
+
+    try {
+      setLoadingReviews(true);
+      const response = await apiGet(
+        `/cust/storeinfo/reviews?storeCode=${storeCode}&page=0`,
+      );
+      if (!response.ok) throw new Error("리뷰 목록을 불러오는데 실패했습니다.");
+
+      const data: ReviewsPageResponse = await response.json();
+      setReviews(Array.isArray(data.content) ? data.content : []);
+      setHasMoreReviews(!data.last);
+      setReviewPage(0);
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [storeCode, loadingReviews]);
+
+  const fetchMoreReviews = useCallback(async () => {
+    if (!storeCode || loadingReviews || !hasMoreReviews) return;
+
+    try {
+      setLoadingReviews(true);
+      const nextPage = reviewPage + 1;
+      const response = await apiGet(
+        `/cust/storeinfo/reviews?storeCode=${storeCode}&page=${nextPage}`,
+      );
+      if (!response.ok) throw new Error("리뷰 목록을 불러오는데 실패했습니다.");
+
+      const data: ReviewsPageResponse = await response.json();
+      setReviews((prev) => [
+        ...prev,
+        ...(Array.isArray(data.content) ? data.content : []),
+      ]);
+      setHasMoreReviews(!data.last);
+      setReviewPage(nextPage);
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [storeCode, reviewPage, hasMoreReviews, loadingReviews]);
+
+  const handleTabChange = useCallback(
+    (tab: "product" | "review") => {
+      setActiveTab(tab);
+      if (tab === "review" && reviews.length === 0) {
+        fetchReviews();
+      }
+    },
+    [reviews.length, fetchReviews],
+  );
+
+  const handleWishClick = async () => {
+    const newWishState = !isWishStore;
+    setIsWishStore(newWishState);
+
+    if (!storeCode) return;
+    const custCode = "CUST_001";
+
+    try {
+      await apiPost(`/cust/wish?custCode=${custCode}`, {
+        storeCodes: [storeCode],
+      });
+    } catch (err) {
+      console.error("치하기 API 실패:", err);
+      // API 실패 시 상태 되돌리기
+      setIsWishStore(!newWishState);
+    }
+  };
+
+  const scrollToTop = () => {
+    const ref = activeTab === "product" ? productListRef : reviewListRef;
+    ref.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  useEffect(() => {
+    fetchStoreInfo();
+  }, [fetchStoreInfo]);
 
   return (
     <View style={styles.container}>
@@ -35,159 +189,109 @@ export default function StoreInfo() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          가맹점이름들어가기
+          {loading ? "로딩중..." : storeInfo?.storeNm || "가맹점 정보"}
         </Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}>
-        {/* 가게 이미지 */}
-        <View style={styles.storeImgContainer}>
-          <Text>가게 이미지</Text>
+      {loading && (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#FF6B6B" />
+          <Text style={styles.loadingText}>로딩 중...</Text>
         </View>
+      )}
 
-        {/* 기능 버튼들 */}
-        <View style={styles.actionButtonsRow}>
-          <Pressable style={styles.actionButton}>
-            <Ionicons name="share-social-outline" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>공유</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionButton}>
-            <Ionicons name="heart-outline" size={24} color="#EF7810" />
-            <Text style={styles.actionButtonText}>찜</Text>
-          </Pressable>
-
-          <Pressable style={styles.actionButton}>
-            <Ionicons name="call-outline" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>전화</Text>
-          </Pressable>
-          
-          <Pressable style={styles.actionButton}>
-            <Ionicons name="flag-outline" size={24} color="#666" />
-            <Text style={styles.actionButtonText}>신고</Text>
-          </Pressable>
+      {!loading && error && (
+        <View style={styles.centerContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color="#999" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchStoreInfo}>
+            <Text style={styles.retryButtonText}>다시 시도</Text>
+          </TouchableOpacity>
         </View>
+      )}
 
-        {/* 가게 정보 영역 */}
-        <View style={styles.storeInfoContainer}>
-          {/* 가맹점 이름과 별점 */}
-          <View style={styles.storeNameRatingRow}>
-            <Text style={styles.storeNameText}>우리동네빵집점</Text>
-            <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={16} color="#FFD700" />
-              <Text style={styles.storeRatingText}>3.8(10)</Text>
-            </View>
-          </View>
-
-          {/* 가게 설명 */}
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionText}>
-              대전관광은 맛있는 빵집~ 우리동네빵집은 정품입니다 도네빵집! 맛있는 도우!
-            </Text>
-          </View>
-
-          {/* 가게 주소 */}
-          <Pressable style={styles.addressRow}>
-            <Ionicons name="location-outline" size={16} color="#666" />
-            <Text style={styles.addressText}>대전 서구 문주로 12</Text>
-            <Ionicons name="chevron-forward" size={16} color="#999" />
-          </Pressable>
-        </View>
-
-        {/* 상품/리뷰 탭 */}
-        <View style={styles.tabContainer}>
-          <Pressable
-            style={[
-              styles.tabButton,
-              activeTab === "product" && styles.tabButtonActive,
-            ]}
-            onPress={() => setActiveTab("product")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "product" && styles.tabTextActive,
-              ]}
-            >
-              상품(4)
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.tabButton,
-              activeTab === "review" && styles.tabButtonActive,
-            ]}
-            onPress={() => setActiveTab("review")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "review" && styles.tabTextActive,
-              ]}
-            >
-              리뷰(2)
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* 상품 탭 콘텐츠 */}
-        {activeTab === "product" && (
-          <View style={styles.storeProductContainer}>
-            <View style={styles.productGridContainer}>
-              {productList.map((item) => (
-                <Pressable 
-                  key={item.id}
-                  style={styles.storeProductItemContainer}
-                  onPress={() => router.push('/(cust)/productDetail')}
-                >
-                  <Image resizeMode='contain' source={item.uri} style={styles.storeProductImgContainer} />
-                  <Text style={styles.storeProductNmText}>{item.name}</Text>
-                  <Text style={styles.originalPriceText}>{item.originalPrice.toLocaleString()}원</Text>
-                  <Text style={styles.priceText}>{item.price.toLocaleString()}원</Text>
-                  <Text style={styles.productRatingText}><Ionicons name="star" size={13} color="#FFD700" /> {item.rating}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        )}
-
-
-        {/* 리뷰 탭 콘텐츠 */}
-        {activeTab === "review" && (
-          <View style={styles.storeReviewContainer}>
-            {reviewList.map((item) => (
-              <View key={item.id} style={styles.reviewItemContainer}>
-                <View style={styles.reviewHeaderRow}>
-                  <View style={styles.reviewUserRatingContainer}>
-                    <Text style={styles.reviewRegNmText}>{item.name}</Text>
-                    <View style={styles.reviewRatingBox}>
-                      <Ionicons name="star" size={14} color="#FFD700" />
-                      <Text style={styles.reviewRateText}>{item.rating}</Text>
-                    </View>
+      {!loading && !error && storeInfo && (
+        <>
+          {activeTab === "product" && (
+            <FlatList
+              ref={productListRef}
+              data={products}
+              numColumns={2}
+              keyExtractor={(item) => item.productCode}
+              columnWrapperStyle={styles.productGridContainer}
+              contentContainerStyle={styles.storeProductContainer}
+              onEndReached={fetchMoreProducts}
+              onEndReachedThreshold={0.5}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <StoreHeader
+                  storeInfo={storeInfo}
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                  onWishClick={handleWishClick}
+                  isWishStore={isWishStore}
+                />
+              }
+              ListFooterComponent={
+                loadingProducts ? (
+                  <View style={styles.loadingFooter}>
+                    <ActivityIndicator size="small" color="#FF6B6B" />
                   </View>
-                  <Text style={styles.reviewRegDateText}>{item.date}</Text>
-                </View>
-                
-                <View style={styles.reviewContentContainer}>
-                  <Text style={styles.reviewContentText}>
-                    {item.content}
-                  </Text>
-                </View>
+                ) : null
+              }
+              renderItem={({ item }) => <ProductCard item={item} />}
+            />
+          )}
 
-                {item.images && item.images.length > 0 && (
-                  <View style={styles.reviewImgGallery}>
-                    {item.images.map((img, index) => (
-                      <Image key={index} source={img} style={styles.reviewImgThumbnail} resizeMode="cover" />
-                    ))}
+          {activeTab === "review" && (
+            <FlatList
+              ref={reviewListRef}
+              data={reviews}
+              keyExtractor={(item, index) =>
+                `${item.reviewProductCode}-${index}`
+              }
+              contentContainerStyle={styles.storeReviewContainer}
+              onEndReached={fetchMoreReviews}
+              onEndReachedThreshold={0.5}
+              showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <StoreHeader
+                  storeInfo={storeInfo}
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                  onWishClick={handleWishClick}
+                  isWishStore={isWishStore}
+                />
+              }
+              ListEmptyComponent={
+                !loadingReviews ? (
+                  <View style={styles.centerContainer}>
+                    <Ionicons name="chatbox-outline" size={48} color="#999" />
+                    <Text style={styles.emptyText}>작성된 리뷰가 없습니다</Text>
                   </View>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+                ) : null
+              }
+              ListFooterComponent={
+                loadingReviews ? (
+                  <View style={styles.loadingFooter}>
+                    <ActivityIndicator size="small" color="#FF6B6B" />
+                  </View>
+                ) : null
+              }
+              renderItem={({ item }) => <ReviewCard item={item} />}
+            />
+          )}
+
+          <TouchableOpacity
+            style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+            onPress={scrollToTop}
+          >
+            <Ionicons name="chevron-up" size={24} color="#ef7810" />
+          </TouchableOpacity>
+        </>
+      )}
+
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}

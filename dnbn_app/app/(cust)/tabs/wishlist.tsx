@@ -1,125 +1,307 @@
+import { apiDelete, apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useState } from "react";
 import { styles } from "../styles/wishlist.styles";
+
+const formatAddress = (fullAddress: string): string => {
+  if (!fullAddress) return "";
+
+  const parts = fullAddress.trim().split(" ");
+
+  if (parts[0]?.includes("특별시") || parts[0]?.includes("광역시")) {
+    return parts.slice(0, 2).join(" "); // 예: "서울특별시 강남구"
+  }
+
+  if (parts[0]?.includes("도")) {
+    return parts.slice(0, 3).join(" "); // 예: "경기도 성남시 분당구"
+  }
+
+  return parts.slice(0, 2).join(" ");
+};
+
+interface StoreImageFile {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface StoreImage {
+  files: StoreImageFile[];
+}
+
+interface WishStoreResponse {
+  storeCode: string;
+  storeNm: string;
+  bizType: string;
+  storeAddress: string;
+  storeImage: StoreImage;
+  productCount: number;
+  averageRating: number;
+  reviewCount: number;
+}
+
+interface StoreItem {
+  id: string;
+  storeCode: string;
+  storeName: string;
+  businessType: string;
+  address: string;
+  imageUrl: string | null;
+  totalProducts: number;
+  rating: number;
+  reviewCount: number;
+  isWished: boolean;
+}
 
 export default function WishlistScreen() {
   const insets = useSafeAreaInsets();
-  const [wishList, setWishList] = useState<{ [key: string]: boolean }>({
-    '1': true, '2': true, '3': true, '4': true, '5': true
-  });
 
-    const storeList = [
-        { id: '1', uri: require('@/assets/images/products_soyun/pig.png'), storeName: '족발집', rating: 4.8, reviewCount: 120, category: '음식점', businessType: '일반음식점', address: '서울시 강남구', totalProducts: 34 },
-        { id: '2', uri: require('@/assets/images/products_soyun/fruit.png'), storeName: '과일가게', rating: 4.5, reviewCount: 80, category: '과일', businessType: '소매업', address: '서울시 서초구', totalProducts: 12 },
-        { id: '3', uri: require('@/assets/images/products_soyun/mart.png'), storeName: '행복마트', rating: 4.7, reviewCount: 200, category: '마트', businessType: '대형마트', address: '서울시 송파구', totalProducts: 56 },
-        { id: '4', uri: require('@/assets/images/products_soyun/freshmarket.png'), storeName: '프레시마켓', rating: 4.6, reviewCount: 150, category: '신선식품', businessType: '식품유통', address: '서울시 강동구', totalProducts: 23 },
-        { id: '5', uri: require('@/assets/images/products_soyun/electronic.png'), storeName: 'A전자', rating: 4.9, reviewCount: 90, category: '가전제품', businessType: '전자제품 판매', address: '서울시 용산구', totalProducts: 45 },
-    ]
+  const unwishSet = useRef<Set<string>>(new Set());
 
-    const toggleWish = (storeId: string) => {
-        setWishList(prev => ({
-            ...prev,
-            [storeId]: !prev[storeId]
-        }));
+  const [storeList, setStoreList] = useState<StoreItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const custCode = "CUST_001";
+      const response = await apiGet(`/cust/wish?custCode=${custCode}`);
+
+      if (!response.ok) {
+        throw new Error("위시리스트를 불러오는데 실패했습니다.");
+      }
+
+      const data: WishStoreResponse[] = await response.json();
+
+      const transformedData: StoreItem[] = data.map((store, index) => {
+        return {
+          id: store.storeCode || `${index}`,
+          storeCode: store.storeCode,
+          storeName: store.storeNm,
+          businessType: store.bizType,
+          address: formatAddress(store.storeAddress),
+          imageUrl: store.storeImage?.files?.[0]?.fileUrl || null,
+          totalProducts: store.productCount,
+          rating: store.averageRating,
+          reviewCount: store.reviewCount,
+          isWished: true,
+        };
+      });
+
+      setStoreList(transformedData);
+    } catch (err) {
+      console.error("위시리스트 로딩 실패:", err);
+      setError(
+        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  // 페이지를 떠날 때 찜 해제 API 호출, 돌아올 때 데이터 갱신
+  useFocusEffect(
+    useCallback(() => {
+      // 페이지에 포커스가 올 때 데이터 다시 불러오기
+      fetchWishlist();
+
+      return () => {
+        const storeCodesToRemove = Array.from(unwishSet.current);
+
+        if (storeCodesToRemove.length === 0) {
+          return;
+        }
+
+        const custCode = "CUST_001";
+
+        (async () => {
+          try {
+            const response = await apiDelete(
+              `/cust/wish?custCode=${custCode}`,
+              {
+                body: JSON.stringify({ storeCodes: storeCodesToRemove }),
+              },
+            );
+
+            if (response.ok) {
+              unwishSet.current.clear(); // 성공 시 Set 초기화
+            }
+          } catch (error) {
+            console.error("찜 해제 API 오류:", error);
+          }
+        })();
+      };
+    }, [fetchWishlist]),
+  );
+
+  // 찜 상태 토글 (UI만 즉시 업데이트, API는 페이지 벗어날 때)
+  const handleWishToggle = useCallback((storeCode: string) => {
+    if (!storeCode) {
+      console.error("storeCode가 없습니다!");
+      return;
     }
 
-    return (
-        <View style={styles.container}>
-            {insets.top > 0 && (
-                <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-            )}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="chevron-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.title}>
-                    관심 매장
-                </Text>
-                <View style={styles.placeholder} />
-            </View>
-            {/* 찜한 가맹점 총 개수 */}
-            <View style={styles.countContainer}>
-                <Text style={styles.countText}>총 {storeList.length}개의 가맹점</Text>
-            </View>
-
-            {/* 가맹점 리스트 */}
-            <FlatList
-                data={storeList}
-                showsVerticalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContainer}
-                renderItem={({ item }) => (
-                    <View style={styles.storeItemWrapper}>
-                        <TouchableOpacity 
-                            style={styles.storeItemContainer} 
-                            onPress={() => router.push("/(cust)/storeInfo")}
-                            activeOpacity={0.7}
-                        >
-                            {/* 가게 이미지 */}
-                            <Image 
-                                resizeMode="stretch" 
-                                source={item.uri} 
-                                style={styles.storeImage} 
-                            />
-                            
-                            {/* 가게 정보 */}
-                            <View style={styles.storeInfo}>
-                                {/* 가게 이름 및 주소 */}
-                                <View style={styles.nameAddressContainer}>
-                                    <Text style={styles.storeName} numberOfLines={1}>
-                                        {item.storeName}
-                                    </Text>
-                                    <Text style={styles.addressText} numberOfLines={1}>
-                                        {item.address}
-                                    </Text>
-                                </View>
-                                
-                                {/* 업종/업태 */}
-                                <Text style={styles.businessTypeText}>
-                                    {item.category} / {item.businessType}
-                                </Text>
-                                
-                                {/* 평균 별점 및 리뷰 수 */}
-                                <View style={styles.ratingContainer}>
-                                    <Ionicons name="star" size={16} color="#FFB800" />
-                                    <Text style={styles.ratingText}>
-                                        {item.rating.toFixed(1)}
-                                    </Text>
-                                    <Text style={styles.reviewCountText}>
-                                        ({item.reviewCount})
-                                    </Text>
-                                </View>
-                                
-                                {/* 등록 상품 수 */}
-                                <View style={styles.productCountContainer}>
-                                    <Ionicons name="pricetag-outline" size={14} color="#666" />
-                                    <Text style={styles.productCountText}>
-                                        등록 상품 {item.totalProducts}개
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* 찜 버튼 */}
-                        <TouchableOpacity 
-                            style={styles.wishButton}
-                            onPress={() => toggleWish(item.id)}
-                        >
-                            <Ionicons 
-                                name={wishList[item.id] ? "heart" : "heart-outline"} 
-                                size={24} 
-                                color={wishList[item.id] ? "#FF4458" : "#ccc"}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-        </View>
+    // 1. UI 즉시 업데이트
+    setStoreList((prev) =>
+      prev.map((store) =>
+        store.storeCode === storeCode
+          ? { ...store, isWished: !store.isWished }
+          : store,
+      ),
     );
+
+    // 2. Set에 토글 처리 (있으면 제거, 없으면 추가)
+    if (unwishSet.current.has(storeCode)) {
+      // 이미 찜 해제 목록에 있으면 제거 (원상복구)
+      unwishSet.current.delete(storeCode);
+    } else {
+      unwishSet.current.add(storeCode);
+    }
+  }, []);
+  return (
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.title}>관심 매장</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <View style={styles.countContainer}>
+        <Text style={styles.countText}>총 {storeList.length}개의 가맹점</Text>
+      </View>
+
+      {/* 로딩 상태 */}
+      {loading && (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#FF6B6B" />
+          <Text style={styles.loadingText}>로딩 중...</Text>
+        </View>
+      )}
+
+      {/* 에러 상태 */}
+      {!loading && error && (
+        <View style={styles.centerContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color="#999" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchWishlist}>
+            <Text style={styles.retryButtonText}>다시 시도</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* 빈 리스트 */}
+      {!loading && !error && storeList.length === 0 && (
+        <View style={styles.centerContainer}>
+          <Ionicons name="heart-outline" size={48} color="#999" />
+          <Text style={styles.emptyText}>관심 매장이 없습니다</Text>
+        </View>
+      )}
+
+      {/* 가맹점 리스트 */}
+      {!loading && !error && storeList.length > 0 && (
+        <FlatList
+          data={storeList}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.storeCode || item.id}
+          contentContainerStyle={styles.listContainer}
+          renderItem={({ item }) => (
+            <View style={styles.storeItemContainer} key={item.storeCode}>
+              <TouchableOpacity
+                style={styles.storeContentContainer}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(cust)/storeInfo",
+                    params: { storeCode: item.storeCode },
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                {item.imageUrl ? (
+                  <Image
+                    resizeMode="cover"
+                    source={{ uri: item.imageUrl }}
+                    style={styles.storeImage}
+                  />
+                ) : (
+                  <View style={[styles.storeImage, styles.placeholderImage]}>
+                    <Ionicons name="image-outline" size={40} color="#ccc" />
+                  </View>
+                )}
+
+                <View style={styles.storeInfo}>
+                  <View style={styles.nameAddressContainer}>
+                    <Text style={styles.storeName} numberOfLines={1}>
+                      {item.storeName}
+                    </Text>
+                    <Text style={styles.addressText} numberOfLines={1}>
+                      {item.address}
+                    </Text>
+                  </View>
+
+                  <Text style={styles.businessTypeText}>
+                    {item.businessType}
+                  </Text>
+
+                  <View style={styles.ratingContainer}>
+                    <Ionicons name="star" size={16} color="#FFB800" />
+                    <Text style={styles.ratingText}>
+                      {item.rating.toFixed(1)}
+                    </Text>
+                    <Text style={styles.reviewCountText}>
+                      ({item.reviewCount})
+                    </Text>
+                  </View>
+
+                  <View style={styles.productCountContainer}>
+                    <Ionicons name="pricetag-outline" size={14} color="#666" />
+                    <Text style={styles.productCountText}>
+                      등록 상품 {item.totalProducts}개
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.heartButton}
+                onPress={() => handleWishToggle(item.storeCode)}
+                activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons
+                  name={item.isWished ? "heart" : "heart-outline"}
+                  size={24}
+                  color={item.isWished ? "#FF6B6B" : "#ff6b6b"}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
+    </View>
+  );
 }

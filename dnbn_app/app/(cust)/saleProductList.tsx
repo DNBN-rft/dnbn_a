@@ -4,13 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./saleproductlist.styles";
@@ -20,7 +20,7 @@ type SortType = "distance" | "price" | "rating" | "new";
 // 내 위치 하드코딩 (서울 강남역 좌표 예시)
 // 나중에는 내 위치 정보를 수정할 때마다 local storage에 저장된 값을 불러오도록 변경 필요
 const MY_LOCATION = {
-  latitude: 37.498095,
+  latitude: 37.288095,
   longitude: 127.02761,
 };
 
