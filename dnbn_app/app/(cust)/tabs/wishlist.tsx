@@ -65,6 +65,13 @@ interface StoreItem {
 
 export default function WishlistScreen() {
   const insets = useSafeAreaInsets();
+  const [wishList, setWishList] = useState<{ [key: string]: boolean }>({
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true,
+    "5": true,
+  });
 
   const unwishSet = useRef<Set<string>>(new Set());
 
@@ -233,10 +240,12 @@ export default function WishlistScreen() {
             <View style={styles.storeItemContainer} key={item.storeCode}>
               <TouchableOpacity
                 style={styles.storeContentContainer}
-                onPress={() => router.push({
-                  pathname: "/(cust)/storeInfo",
-                  params: { storeCode: item.storeCode }
-                })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(cust)/storeInfo",
+                    params: { storeCode: item.storeCode },
+                  })
+                }
                 activeOpacity={0.7}
               >
                 {item.imageUrl ? (

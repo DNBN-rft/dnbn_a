@@ -1,61 +1,78 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./question.styles";
 
 interface Question {
   id: string;
   title: string;
   date: string;
+  dateRaw: string; // 정렬용 원본 ISO 날짜
   status: "답변대기" | "답변완료";
 }
 
-const questionList: Question[] = [
-  {
-    id: "1",
-    title: "배송 기간이 얼마나 걸리나요?",
-    date: "2024.06.15 00:00",
-    status: "답변완료",
-  },
-  {
-    id: "2",
-    title: "환불 정책은 어떻게 되나요?",
-    date: "2024.06.14 00:00",
-    status: "답변완료",
-  },
-  {
-    id: "3",
-    title: "상품 A의 재고가 있나요?",
-    date: "2024.06.13 00:00",
-    status: "답변대기",
-  },
-  {
-    id: "4",
-    title: "결제 방법은 어떤 것들이 가능한가요?",
-    date: "2024.06.12 00:00",
-    status: "답변완료",
-  },
-  {
-    id: "5",
-    title: "회원 가입 후 혜택이 무엇인가요?",
-    date: "2024.06.11 00:00",
-    status: "답변대기",
-  },
-];
+interface QuestionResponse {
+  questionId: number;
+  questionTitle: string;
+  questionRegDateTime: string;
+  isAnswered: boolean;
+}
 
 export default function NoticeDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [questionList, setQuestionList] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 답변대기를 위로, 답변완료를 아래로 정렬하고, 각 그룹 내에서 날짜 최신순으로 정렬
-  const sortedQuestionList = [...questionList].sort((a, b) => {
-    // 먼저 상태별로 정렬 (답변대기가 먼저)
-    if (a.status !== b.status) {
-      return a.status === "답변대기" ? -1 : 1;
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      const custCode = "CUST_001";
+      const response = await apiGet(`/cust/question/${custCode}`);
+
+      if (response.ok) {
+        const data: QuestionResponse[] = await response.json();
+
+        // 백엔드 데이터를 UI 형식으로 변환
+        const formattedQuestions: Question[] = data.map((item) => ({
+          id: item.questionId.toString(),
+          title: item.questionTitle,
+          date: formatDate(item.questionRegDateTime),
+          dateRaw: item.questionRegDateTime, // 원본 ISO 날짜 저장
+          status: item.isAnswered ? "답변완료" : "답변대기",
+        }));
+
+        setQuestionList(formattedQuestions);
+      } else {
+        console.error("문의사항 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("문의사항 조회 에러:", error);
+    } finally {
+      setLoading(false);
     }
-    // 같은 상태 내에서는 날짜 최신순 정렬
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  };
+
+  const formatDate = (dateTimeString: string): string => {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}.${month}.${day} ${hours}:${minutes}`;
+  };
+
+  // 날짜 최신순으로 정렬 (가장 최신이 위로)
+  const sortedQuestionList = [...questionList].sort((a, b) => {
+    return new Date(b.dateRaw).getTime() - new Date(a.dateRaw).getTime();
   });
 
   return (
@@ -83,7 +100,12 @@ export default function NoticeDetailScreen() {
             <TouchableOpacity
               style={styles.questionItemContainer}
               activeOpacity={0.7}
-              onPress={() => router.navigate("/(cust)/question-answer")}
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(cust)/question-answer",
+                  params: { questionId: item.id },
+                })
+              }
             >
               <View style={styles.questionItemLeftSection}>
                 <View

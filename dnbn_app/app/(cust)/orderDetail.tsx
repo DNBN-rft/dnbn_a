@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./orderdetail.styles";
 
 type ProductItem = {
+  imageUrl: string;
   productName: string;
   quantity: number;
   unitPrice: number;
@@ -153,9 +154,9 @@ export default function OrderDetailScreen() {
                       <View style={styles.productRow}>
                         <View style={styles.productImageContainer}>
                           <Image
-                            source={require("@/assets/images/logo.png")}
+                            source={{ uri: product.imageUrl }}
                             style={styles.productImage}
-                            resizeMode="contain"
+                            resizeMode="cover"
                           />
                         </View>
 

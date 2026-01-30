@@ -61,18 +61,25 @@ export const styles = StyleSheet.create({
     safeAreaBottom: {
         backgroundColor: '#000',
     },
+    orderInfo: {
+        marginBottom: 15
+    },
+    orderText: {
+        fontSize: 14,
+        color: '#666'
+    },
     reviewItemContainer: {
-        padding: 15,
+        paddingVertical: 15,
+        paddingHorizontal: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
     writtenReviewRow: {
         flexDirection: 'row',
-        marginBottom: 12,
     },
     writtenReviewContent: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
     },
     writtenStoreName: {
         fontSize: 12,
@@ -128,11 +135,21 @@ export const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999',
     },
-    reviewImage: {
-        width: 60,
-        height: 60,
+    productImage: {
+        width: 100,
+        height: 100,
         borderRadius: 8,
         marginRight: 15,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    reviewImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+        marginRight: 15,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     reviewContent: {
         flex: 1,
@@ -171,7 +188,6 @@ export const styles = StyleSheet.create({
     },
     unwrittenReviewRow: {
         flexDirection: 'row',
-        marginBottom: 12,
     },
     unwrittenReviewContent: {
         flex: 1,
@@ -181,12 +197,6 @@ export const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '700',
         color: '#999',
-        marginBottom: 4,
-    },
-    unwrittenProductName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#000',
         marginBottom: 4,
     },
     unwrittenStatus: {
@@ -211,11 +221,6 @@ export const styles = StyleSheet.create({
     },
     inactiveTabText: {
         color: '#555',
-    },
-    unwrittenStatus: {
-        fontSize: 16,
-        color: '#555',
-        marginTop: 5,
     },
     reviewWriteButton: {
         flex: 1,
