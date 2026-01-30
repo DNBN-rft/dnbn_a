@@ -15,18 +15,18 @@ import { apiGet } from "@/utils/api";
 
 interface WrittenReview {
   reviewIdx: number;
-  productImage?: {
-    fileUrl: string;
-  };
+  productImages: FileMasterResponse | null;
   productNm: string;
   orderDateTime: string;
   orderCode: string;
   storeNm: string;
   reviewRate: number;
   reviewContent: string;
-  reviewImages: {
-    files: any[];
-  };
+  reviewImages: FileMasterResponse | null;
+}
+
+interface FileMasterResponse {
+  files: FileResponse[];
 }
 
 interface FileResponse {
@@ -66,13 +66,13 @@ export default function CustReviewListScreen() {
       
       // 미작성 리뷰 조회
       const unwrittenResponse = await apiGet(`/cust/review?reviewType=UNWRITTEN&custCode=${custCode}`);
-      const unwrittenData = await unwrittenResponse.json();
+      const unWrittenData: UnwrittenReview[] = await unwrittenResponse.json();
       // 작성한 리뷰 조회
       const writtenResponse = await apiGet(`/cust/review?reviewType=WRITTEN&custCode=${custCode}`);
-      const writtenData = await writtenResponse.json();
+      const writtenData: WrittenReview[] = await writtenResponse.json();
       
       if (unwrittenResponse.ok) {
-        setUnwrittenReviews(unwrittenData);
+        setUnwrittenReviews(unWrittenData);
       }
       
       if (writtenResponse.ok) {
@@ -164,12 +164,12 @@ export default function CustReviewListScreen() {
                     pathname: "/(cust)/reviewDetail",
                     params: { 
                       reviewIdx: item.reviewIdx,
-                      productImage: item.productImage?.fileUrl || "",
+                      productImage: item.productImages?.files?.[0]?.fileUrl || "",
                       storeNm: item.storeNm,
                       productName: item.productNm,
                       reviewRate: item.reviewRate?.toString() || "0",
                       reviewContent: item.reviewContent,
-                      reviewImages: item.reviewImages ? JSON.stringify(item.reviewImages) : JSON.stringify({ files: [] })
+                      reviewImages: item.reviewImages ? JSON.stringify(item.reviewImages.files || []) : JSON.stringify([])
                     }
                   })}
                 >
@@ -182,9 +182,9 @@ export default function CustReviewListScreen() {
 
                   {/* 이미지 + 정보 Row */}
                   <View style={[styles.writtenReviewRow, { alignItems: 'center' }]}>
-                    {item.productImage ? (
+                    {item.productImages?.files?.[0]?.fileUrl ? (
                       <Image
-                        source={{ uri: item.productImage.fileUrl }}
+                        source={{ uri: item.productImages.files[0].fileUrl }}
                         style={styles.productImage}
                         resizeMode="stretch"
                       />
@@ -303,7 +303,7 @@ export default function CustReviewListScreen() {
           )
         )}
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
       )}
     </View>
   );

@@ -2,26 +2,56 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert, KeyboardAvoidingView, ScrollView } from "react-native";
+import { Image, Pressable, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./reviewreg.styles";
-import { apiPostFormData } from "@/utils/api";
+import { apiPostFormData, apiPutFormData } from "@/utils/api";
+
+interface ReviewImageFile {
+  fileUrl: string;
+  order?: number;
+  originalName?: string;
+}
 
 export default function ReviewRegScreen() {
     const insets = useSafeAreaInsets();
-    const { orderDetailIdx, storeNm, productName, productImage } = useLocalSearchParams();
-    const [rating, setRating] = useState(0);
-    const [reviewText, setReviewText] = useState('');
+    const { 
+        reviewIdx, 
+        orderDetailIdx, 
+        storeNm, 
+        productName, 
+        productImage,
+        reviewRate: initialRate,
+        reviewContent: initialContent,
+        reviewImages: initialReviewImages
+    } = useLocalSearchParams();
+    
+    const isEditMode = !!reviewIdx;
+    
+    const [rating, setRating] = useState(isEditMode ? parseInt(initialRate as string) || 0 : 0);
+    const [reviewText, setReviewText] = useState(isEditMode ? (initialContent as string) || '' : '');
     const [images, setImages] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<ReviewImageFile[]>([]);
     const [permission, requestPermission] = ImagePicker.useCameraPermissions();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         requestPermission();
+        
+        // 수정 모드일 때 기존 이미지 파싱
+        if (isEditMode && initialReviewImages) {
+            try {
+                const parsed = JSON.parse(initialReviewImages as string);
+                setExistingImages(Array.isArray(parsed) ? parsed : []);
+            } catch (error) {
+                setExistingImages([]);
+            }
+        }
     }, [requestPermission]);
 
     const pickImage = async () => {
-        if (images.length >= 3) return;
+        const totalImages = existingImages.length + images.length;
+        if (totalImages >= 3) return;
 
         if (!permission?.granted) {
             const result = await requestPermission();
@@ -31,7 +61,7 @@ export default function ReviewRegScreen() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
-            selectionLimit: 3,
+            selectionLimit: 3 - totalImages,
             quality: 1,
         });
 
@@ -39,7 +69,7 @@ export default function ReviewRegScreen() {
             const newUris = result.assets.map(asset => asset.uri);
 
             setImages(prev =>
-                [...prev, ...newUris].slice(0, 3)
+                [...prev, ...newUris].slice(0, 3 - totalImages)
             );
         }
     };
@@ -48,9 +78,18 @@ export default function ReviewRegScreen() {
         setImages(images.filter((_, i) => i !== index));
     };
 
+    const removeExistingImage = (index: number) => {
+        setExistingImages(existingImages.filter((_, i) => i !== index));
+    };
+
     const handleSubmitReview = async () => {
-        if (!orderDetailIdx || !rating || !reviewText.trim()) {
+        if (!rating || !reviewText.trim()) {
             Alert.alert("오류", "모든 필수 항목을 입력해주세요.");
+            return;
+        }
+
+        if (!isEditMode && !orderDetailIdx) {
+            Alert.alert("오류", "주문 정보가 없습니다.");
             return;
         }
 
@@ -60,26 +99,50 @@ export default function ReviewRegScreen() {
 
             // FormData 생성
             const formData = new FormData();
-            formData.append('orderDetailIdx', orderDetailIdx as string);
-            formData.append('reviewRate', String(rating));
-            formData.append('reviewContent', reviewText);
+            
+            if (!isEditMode) {
+                // 새로 작성 모드
+                formData.append('orderDetailIdx', orderDetailIdx as string);
+                formData.append('reviewRate', String(rating));
+                formData.append('reviewContent', reviewText);
+            } else {
+                // 수정 모드 - 백엔드 필드명에 맞게 (content, rating)
+                formData.append('content', reviewText);
+                formData.append('rating', String(rating));
+            }
 
-            // 이미지 추가 (Blob으로 변환)
+            // 이미지 추가 (플랫폼별로 다르게 처리)
             for (let i = 0; i < images.length; i++) {
                 const imageUri = images[i];
-                const response = await fetch(imageUri);
-                const blob = await response.blob();
-                formData.append('reviewImgs', blob as any, `review_${i}.jpg`);
+                
+                if (Platform.OS === "web") {
+                    // 웹: Blob으로 변환하여 전송
+                    const response = await fetch(imageUri);
+                    const blob = await response.blob();
+                    const typedBlob = new Blob([blob], { type: "image/jpeg" });
+                    formData.append("reviewImgs", typedBlob as any, `review_${i}.jpg`);
+                } else {
+                    // 네이티브: URI를 직접 FormData에 추가
+                    formData.append("reviewImgs", {
+                        uri: imageUri,
+                        type: "image/jpeg",
+                        name: `review_${i}.jpg`,
+                    } as any);
+                }
             }
 
             // API 호출
-            const response = await apiPostFormData(
-                `/cust/review?custCode=${custCode}`,
-                formData
-            );
+            const endpoint = isEditMode 
+                ? `/cust/review/${reviewIdx}?custCode=${custCode}`
+                : `/cust/review?custCode=${custCode}`;
+            
+            const response = isEditMode
+                ? await apiPutFormData(endpoint, formData)
+                : await apiPostFormData(endpoint, formData);
 
             if (response.ok) {
-                Alert.alert("성공", "리뷰가 등록되었습니다.", [
+                const message = isEditMode ? "리뷰가 수정되었습니다." : "리뷰가 등록되었습니다.";
+                Alert.alert("성공", message, [
                     {
                         text: "확인",
                         onPress: () => router.replace("/(cust)/review"),
@@ -87,11 +150,12 @@ export default function ReviewRegScreen() {
                 ]);
             } else {
                 const errorText = await response.text();
-                Alert.alert("오류", errorText || "리뷰 등록에 실패했습니다.");
+                const errorMessage = isEditMode ? "리뷰 수정에 실패했습니다." : "리뷰 등록에 실패했습니다.";
+                Alert.alert("오류", errorText || errorMessage);
             }
         } catch (error) {
             console.error("Review submission error:", error);
-            Alert.alert("오류", "리뷰 등록 중 오류가 발생했습니다.");
+            Alert.alert("오류", "리뷰 처리 중 오류가 발생했습니다.");
         } finally {
             setIsSubmitting(false);
         }
@@ -118,7 +182,7 @@ export default function ReviewRegScreen() {
                     >
                         <Ionicons name="chevron-back" size={24} color="#000" />
                     </TouchableOpacity>
-                    <Text style={styles.title}>리뷰쓰기</Text>
+                    <Text style={styles.title}>{isEditMode ? "리뷰 수정" : "리뷰쓰기"}</Text>
                     <View style={styles.placeholder} />
                 </View>
 
@@ -181,43 +245,70 @@ export default function ReviewRegScreen() {
 
                         <View style={styles.photoContainer}>
                             <Text style={styles.photoLabel}>
-                                사진 첨부 ({images.length}/3)
+                                사진 첨부 ({(existingImages.length + images.length)}/3)
                             </Text>
 
                             <View style={styles.photoGridContainer}>
-                                {[0, 1, 2].map(index => (
-                                    <View key={index} style={styles.photoSlot}>
-                                        {images[index] ? (
-                                            <View style={styles.photoWrapper}>
-                                                <Image
-                                                    source={{ uri: images[index] }}
-                                                    style={styles.photoImage}
-                                                    resizeMode="contain"
-                                                />
-                                                <Pressable
-                                                    style={styles.removePhotoButton}
-                                                    onPress={() => removeImage(index)}
-                                                >
-                                                    <Ionicons
-                                                        name="close-circle"
-                                                        size={24}
-                                                        color="#FF6B35"
-                                                    />
-                                                </Pressable>
-                                            </View>
-                                        ) : (
+                                {/* 기존 이미지 표시 */}
+                                {existingImages.map((image, index) => (
+                                    <View key={`existing-${index}`} style={styles.photoSlot}>
+                                        <View style={styles.photoWrapper}>
+                                            <Image
+                                                source={{ uri: image.fileUrl }}
+                                                style={styles.photoImage}
+                                                resizeMode="contain"
+                                            />
                                             <Pressable
-                                                style={styles.photoUploadButton}
-                                                onPress={pickImage}
-                                                disabled={images.length >= 3}
+                                                style={styles.removePhotoButton}
+                                                onPress={() => removeExistingImage(index)}
                                             >
                                                 <Ionicons
-                                                    name="camera"
-                                                    size={32}
-                                                    color={images.length >= 3 ? "#ccc" : "#888"}
+                                                    name="close-circle"
+                                                    size={24}
+                                                    color="#FF6B35"
                                                 />
                                             </Pressable>
-                                        )}
+                                        </View>
+                                    </View>
+                                ))}
+
+                                {/* 새로운 이미지 표시 */}
+                                {images.map((imageUri, index) => (
+                                    <View key={`new-${index}`} style={styles.photoSlot}>
+                                        <View style={styles.photoWrapper}>
+                                            <Image
+                                                source={{ uri: imageUri }}
+                                                style={styles.photoImage}
+                                                resizeMode="contain"
+                                            />
+                                            <Pressable
+                                                style={styles.removePhotoButton}
+                                                onPress={() => removeImage(index)}
+                                            >
+                                                <Ionicons
+                                                    name="close-circle"
+                                                    size={24}
+                                                    color="#FF6B35"
+                                                />
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                ))}
+
+                                {/* 빈 슬롯 (최대 3개까지) */}
+                                {Array.from({ length: 3 - existingImages.length - images.length }).map((_, index) => (
+                                    <View key={`empty-${index}`} style={styles.photoSlot}>
+                                        <Pressable
+                                            style={styles.photoUploadButton}
+                                            onPress={pickImage}
+                                            disabled={existingImages.length + images.length >= 3}
+                                        >
+                                            <Ionicons
+                                                name="camera"
+                                                size={32}
+                                                color={existingImages.length + images.length >= 3 ? "#ccc" : "#888"}
+                                            />
+                                        </Pressable>
                                     </View>
                                 ))}
                             </View>
@@ -237,7 +328,7 @@ export default function ReviewRegScreen() {
                                 <Text style={[
                                     styles.submitButtonText,
                                     (reviewText.trim().length === 0 || isSubmitting) && styles.submitButtonTextDisabled
-                                ]}>리뷰 등록</Text>
+                                ]}>{isEditMode ? "리뷰 수정" : "리뷰 등록"}</Text>
                             )}
                         </TouchableOpacity>
                     </>

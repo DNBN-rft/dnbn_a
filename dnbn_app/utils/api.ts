@@ -171,6 +171,31 @@ export const apiPostFormData = async (
   }
 };
 
+export const apiPutFormData = async (
+  endpoint: string,
+  formData: FormData,
+  options: RequestInit = {},
+): Promise<Response> => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const defaultOptions: RequestInit = {
+    ...options,
+    method: "PUT",
+    body: formData,
+    headers: {
+      // FormData 사용 시 Content-Type을 명시하지 않음 (자동으로 multipart/form-data 설정)
+      ...options.headers,
+    },
+  };
+
+  try {
+    const response = await fetch(url, defaultOptions);
+    return response;
+  } catch (error) {
+    console.error("API 요청 실패:", error);
+    throw error;
+  }
+};
+
 export const apiPut = async (
   endpoint: string,
   data: any = null,

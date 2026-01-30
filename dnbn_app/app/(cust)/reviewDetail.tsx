@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View, ScrollView, FlatList, Modal } from "react-native";
+import { Image, Text, TouchableOpacity, View, ScrollView, FlatList, Modal, ActivityIndicator, Alert } from "react-native";
 import { styles } from "./reviewdetail.styles";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React, { useState } from "react";
+import { apiDelete } from "@/utils/api";
 
 interface ReviewImageFile {
   fileUrl: string;
@@ -27,15 +28,17 @@ export default function ReviewDetailScreen() {
   } = useLocalSearchParams();
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  let images: ReviewImages = { files: [] };
+  let images: ReviewImageFile[] = [];
   try {
     if (reviewImages && typeof reviewImages === 'string') {
-      images = JSON.parse(reviewImages) as ReviewImages;
+      const parsed = JSON.parse(reviewImages);
+      // 배열로 바로 받을 수도, { files: [] } 형식으로 받을 수도 있음
+      images = Array.isArray(parsed) ? parsed : parsed.files || [];
     }
   } catch (error) {
-    console.error('Failed to parse reviewImages:', error);
-    images = { files: [] };
+    images = [];
   }
 
   const renderStarRating = (rating: number) => {
@@ -58,11 +61,33 @@ export default function ReviewDetailScreen() {
     setDeleteModalVisible(true);
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: 실제 삭제 로직 구현
-    console.log('리뷰 삭제:', reviewIdx);
-    setDeleteModalVisible(false);
-    router.back();
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const custCode = "CUST001";
+      
+      const response = await apiDelete(
+        `/cust/review/${reviewIdx}?custCode=${custCode}`
+      );
+
+      if (response.ok) {
+        setDeleteModalVisible(false);
+        Alert.alert("성공", "리뷰가 삭제되었습니다.", [
+          {
+            text: "확인",
+            onPress: () => router.replace("/(cust)/review"),
+          }
+        ]);
+      } else {
+        const errorText = await response.text();
+        Alert.alert("오류", errorText || "리뷰 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("Review deletion error:", error);
+      Alert.alert("오류", "리뷰 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -113,15 +138,15 @@ export default function ReviewDetailScreen() {
         </View>
 
         {/* 리뷰 이미지 영역 */}
-        {images.files && images.files.length > 0 && (
+        {images && images.length > 0 && (
           <View style={styles.reviewImagesSection}>
             <FlatList
               horizontal
               showsHorizontalScrollIndicator={false}
-              data={images.files}
+              data={images}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.reviewImagesContentContainer}
-              scrollEnabled={images.files.length > 1}
+              scrollEnabled={images.length > 1}
               renderItem={({ item }) => (
                 <Image
                   source={{ uri: item.fileUrl }}
@@ -150,7 +175,18 @@ export default function ReviewDetailScreen() {
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             style={styles.editButton}
-            onPress={() => router.push("/(cust)/reviewReg")}
+            onPress={() => router.push({
+              pathname: "/(cust)/reviewReg",
+              params: {
+                reviewIdx: reviewIdx,
+                storeNm: storeNm,
+                productName: productName,
+                productImage: productImage,
+                reviewRate: reviewRate,
+                reviewContent: reviewContent,
+                reviewImages: reviewImages
+              }
+            })}
           >
             <Text style={styles.editButtonText}>수정</Text>
           </TouchableOpacity>
@@ -180,14 +216,20 @@ export default function ReviewDetailScreen() {
             <Text style={styles.modalMessage}>정말로 삭제하시겠습니까?</Text>
             <View style={styles.modalButtonsContainer}>
               <TouchableOpacity
-                style={styles.modalConfirmButton}
+                style={[styles.modalConfirmButton, isDeleting && { opacity: 0.6 }]}
                 onPress={handleConfirmDelete}
+                disabled={isDeleting}
               >
-                <Text style={styles.modalConfirmButtonText}>확인</Text>
+                {isDeleting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.modalConfirmButtonText}>확인</Text>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={handleCancelDelete}
+                disabled={isDeleting}
               >
                 <Text style={styles.modalCancelButtonText}>취소</Text>
               </TouchableOpacity>
