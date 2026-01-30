@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE_URL = "http://192.168.0.136:8080/api";
+const API_BASE_URL = "http://192.168.0.67:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -144,6 +144,56 @@ export const apiPost = async (
     method: "POST",
     body: data ? JSON.stringify(data) : undefined,
   });
+};
+
+export const apiPostFormData = async (
+  endpoint: string,
+  formData: FormData,
+  options: RequestInit = {},
+): Promise<Response> => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const defaultOptions: RequestInit = {
+    ...options,
+    method: "POST",
+    body: formData,
+    headers: {
+      // FormData 사용 시 Content-Type을 명시하지 않음 (자동으로 multipart/form-data 설정)
+      ...options.headers,
+    },
+  };
+
+  try {
+    const response = await fetch(url, defaultOptions);
+    return response;
+  } catch (error) {
+    console.error("API 요청 실패:", error);
+    throw error;
+  }
+};
+
+export const apiPutFormData = async (
+  endpoint: string,
+  formData: FormData,
+  options: RequestInit = {},
+): Promise<Response> => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const defaultOptions: RequestInit = {
+    ...options,
+    method: "PUT",
+    body: formData,
+    headers: {
+      // FormData 사용 시 Content-Type을 명시하지 않음 (자동으로 multipart/form-data 설정)
+      ...options.headers,
+    },
+  };
+
+  try {
+    const response = await fetch(url, defaultOptions);
+    return response;
+  } catch (error) {
+    console.error("API 요청 실패:", error);
+    throw error;
+  }
 };
 
 export const apiPut = async (

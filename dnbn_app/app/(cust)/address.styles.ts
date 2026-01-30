@@ -37,6 +37,13 @@ export const styles = StyleSheet.create({
     backgroundColor: "white",
   },
 
+  bottomButtonContainer: {
+    flexDirection: "column",
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+
   addButton: {
     backgroundColor: "#ffffff",
     height: 50,
@@ -47,14 +54,18 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#EF7810",
     borderWidth: 1,
-    margin: 20,
+  },
+  addButtonDisabled: {
+    backgroundColor: "#f5f5f5",
+    borderColor: "#ddd",
+    opacity: 0.6,
   },
   addButtonText: {
     color: "#EF7810",
     fontSize: 16,
     fontWeight: "600",
   },
-  
+
   infoBox: {
     margin: 10,
     flexDirection: "row",
@@ -62,7 +73,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  
+
   list: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -78,12 +89,18 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     boxShadow: "0 0 10px rgba(0,0,0,0.12)",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  listItemSelected: {
+    borderColor: "#EF7810",
+    borderWidth: 1,
   },
   contentContainer: {
     flex: 1,
     gap: 3,
   },
-  
+
   titleContainer: {
     flexDirection: "row",
     gap: 8,
@@ -93,30 +110,6 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  selectButton: {
-    borderWidth: 1,
-    borderColor: "#EF7810",
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: "#ef7810",
-  },
-  unSelectButton: {
-    borderWidth: 1,
-    borderColor: "#EF7810",
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: "white",
-  },
-  selectText: {
-    fontSize: 12,
-    color: "white",
-  },
-  unselectText: {
-    fontSize: 12,
-    color: "#ef7810",
   },
   itemRecipientContainer: {
     flexDirection: "row",
@@ -137,7 +130,7 @@ export const styles = StyleSheet.create({
     color: "#555",
     marginTop: 5,
   },
-  
+
   defaultAddressContainer: {
     width: 70,
     height: 20,
@@ -150,9 +143,9 @@ export const styles = StyleSheet.create({
   defaultAddress: {
     color: "#EF7810",
     fontSize: 12,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
-  
+
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -189,7 +182,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 40,
   },
-  
+
   // 주소 검색 모달 스타일
   modalContent: {
     flex: 1,
@@ -217,7 +210,7 @@ export const styles = StyleSheet.create({
   postcodeStyle: {
     flex: 1,
   },
-  
+
   // 확인 모달 스타일
   confirmModalOverlay: {
     flex: 1,
@@ -271,5 +264,24 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#fff",
+  },
+  submitButton: {
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    height: 50,
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    borderColor: "#ddd",
+    opacity: 0.5,
+  },
+  submitButtonText: {
+    color: "#EF7810",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

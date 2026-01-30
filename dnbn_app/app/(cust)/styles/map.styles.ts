@@ -181,6 +181,7 @@ export const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
+        zIndex: 30,
     },
     clickedLocationContainer: {
         position: 'absolute',
@@ -191,6 +192,7 @@ export const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingHorizontal: 16,
+        zIndex: 20,
     },
     clickedLocationContent: {
         gap: 12,
@@ -238,12 +240,15 @@ export const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: '30%',
+        zIndex: 10,
+        pointerEvents: 'auto',
     },
     storeListContainer: {
         flex: 1,
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
+        pointerEvents: 'auto',
     },
     storeListDragHandle: {
         height: 32,
@@ -285,6 +290,6 @@ export const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: '#fff',
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
     },
 });
