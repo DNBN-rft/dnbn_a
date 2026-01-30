@@ -133,4 +133,17 @@ export const styles = StyleSheet.create({
     height: 200,
     width: 200,
   },
+  editButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#FFFFFF",
+  },
+  editButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#EF7810",
+  },
 });

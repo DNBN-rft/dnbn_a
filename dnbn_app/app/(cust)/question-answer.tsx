@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,6 +35,8 @@ export default function QuestionAnswer() {
   const [questionData, setQuestionData] =
     useState<QuestionDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (questionId) {
@@ -129,10 +131,20 @@ export default function QuestionAnswer() {
                   {questionData.isAnswered ? "답변완료" : "답변대기"}
                 </Text>
               </View>
-              
-              <View>
-                <TouchableOpacity>수정</TouchableOpacity>
-              </View>
+
+              {!questionData.isAnswered && (
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(cust)/question-answer-edit",
+                      params: { questionId: questionId },
+                    })
+                  }
+                >
+                  <Text style={styles.editButtonText}>수정</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
