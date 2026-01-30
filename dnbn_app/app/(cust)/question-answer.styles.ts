@@ -118,5 +118,16 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999999",
   },
-});
 
+  questionImageContainer: {
+    flexDirection: "row",
+    gap: 25,
+    borderTopColor: "#E5E5E5",
+    paddingTop: 15,
+  },
+  questionImage: {
+    borderRadius: 8,
+    height: 200,
+    width: 200,
+  },
+});
