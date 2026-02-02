@@ -11,6 +11,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fff",
+    zIndex: 10,
   },
   backButton: {
     width: 44,
@@ -218,11 +219,7 @@ export const styles = StyleSheet.create({
   },
   // 빈 상태
   emptyContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,

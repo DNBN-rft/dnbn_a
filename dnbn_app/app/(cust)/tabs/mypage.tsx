@@ -33,9 +33,7 @@ export default function Mypage() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.title}>
-          마이페이지
-        </Text>
+        <Text style={styles.title}>마이페이지</Text>
         {userType === "store" && (
           <TouchableOpacity
             style={styles.storeButton}
@@ -120,7 +118,7 @@ export default function Mypage() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/report")}
+              onPress={() => router.navigate("/(cust)/reportList")}
             >
               <Text style={styles.menuText}>신고 이력</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
@@ -132,7 +130,7 @@ export default function Mypage() {
               style={styles.menuItem}
               onPress={() => router.navigate("/(auth)/login")}
             >
-              <Text style={{color: "#FF3B30", fontSize: 16}}>로그아웃</Text>
+              <Text style={{ color: "#FF3B30", fontSize: 16 }}>로그아웃</Text>
               <Ionicons name="chevron-forward" size={24} color="#FF3B30" />
             </TouchableOpacity>
           </View>

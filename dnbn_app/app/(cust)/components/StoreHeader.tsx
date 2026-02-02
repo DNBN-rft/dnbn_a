@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Image, Linking, Pressable, Text, View } from "react-native";
 import { styles } from "../storeInfo.styles";
 import type { StoreInfoResponse } from "../types/storeInfo.types";
@@ -9,6 +10,7 @@ interface StoreHeaderProps {
   onTabChange: (tab: "product" | "review") => void;
   onWishClick: () => void;
   isWishStore: boolean;
+  storeCode?: string;
 }
 
 export function StoreHeader({
@@ -17,6 +19,7 @@ export function StoreHeader({
   onTabChange,
   onWishClick,
   isWishStore,
+  storeCode,
 }: StoreHeaderProps) {
   return (
     <>
@@ -61,7 +64,12 @@ export function StoreHeader({
           <Text style={styles.actionButtonText}>전화</Text>
         </Pressable>
 
-        <Pressable style={styles.actionButton}>
+        <Pressable
+          style={styles.actionButton}
+          onPress={() =>
+            router.push(`/(cust)/report?storeCode=${storeCode}&type=STORE`)
+          }
+        >
           <Ionicons name="flag-outline" size={24} color="#666" />
           <Text style={styles.actionButtonText}>신고</Text>
         </Pressable>
