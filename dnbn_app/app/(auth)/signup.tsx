@@ -33,7 +33,10 @@ export default function PracticeView() {
   const [residentNumberFront, setResidentNumberFront] = useState("");
   const [residentNumberBack, setResidentNumberBack] = useState("");
   const [custNickNm, setCustNickNm] = useState("");
+  const [isNickNmChecked, setIsNickNmChecked] = useState(false);
+  const [isNickNmAvailable, setIsNickNmAvailable] = useState(false);
   const [custTelNo, setCustTelNo] = useState("");
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
   useEffect(() => {
     // 약관 페이지에서 전달받은 마케팅 동의 상태 설정
@@ -64,11 +67,13 @@ export default function PracticeView() {
   const handlePhoneNumberChange = (text: string) => {
     const formatted = formatPhoneNumber(text);
     setCustTelNo(formatted);
+    setIsPhoneVerified(false); // 전화번호 변경 시 인증 상태 초기화
   };
 
   // 아이디 입력 핸들러 (아이디 변경 시 중복 체크 상태 초기화)
   const handleLoginIdChange = (text: string) => {
-    setLoginId(text);
+    const trimmedText = text.replace(/\s/g, ""); // 모든 공백 제거
+    setLoginId(trimmedText);
     setIsIdChecked(false);
     setIsIdAvailable(false);
   };
@@ -102,6 +107,58 @@ export default function PracticeView() {
       console.error("아이디 중복 체크 에러:", error);
       Alert.alert("오류", "중복 체크 중 오류가 발생했습니다.");
     }
+  };
+
+  // 닉네임 입력 핸들러 (닉네임 변경 시 중복 체크 상태 초기화)
+  const handleNickNmChange = (text: string) => {
+    const trimmedText = text.replace(/\s/g, ""); // 모든 공백 제거
+    setCustNickNm(trimmedText);
+    setIsNickNmChecked(false);
+    setIsNickNmAvailable(false);
+  };
+
+  // 닉네임 중복 체크
+  const handleCheckDuplicateNickNm = async () => {
+    if (!custNickNm.trim()) {
+      Alert.alert("알림", "닉네임을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await apiGet(`/cust/check-nickname/${custNickNm}`);
+
+      if (response.ok) {
+        const message = await response.text();
+
+        if (message === "사용가능한 닉네임입니다.") {
+          setIsNickNmChecked(true);
+          setIsNickNmAvailable(true);
+          Alert.alert("성공", message);
+        } else {
+          setIsNickNmChecked(true);
+          setIsNickNmAvailable(false);
+          Alert.alert("알림", message);
+        }
+      } else {
+        Alert.alert("오류", "중복 체크에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("닉네임 중복 체크 에러:", error);
+      Alert.alert("오류", "중복 체크 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 전화번호 본인 인증
+  const handlePhoneVerification = async () => {
+    if (!custTelNo.trim()) {
+      Alert.alert("알림", "전화번호를 입력해주세요.");
+      return;
+    }
+
+    // TODO: 실제 API 연동 시 여기서 인증 요청
+    // 임시로 true로 설정
+    setIsPhoneVerified(true);
+    Alert.alert("성공", "본인 인증이 완료되었습니다.");
   };
 
   const handleSignup = async () => {
@@ -138,8 +195,16 @@ export default function PracticeView() {
       Alert.alert("알림", "닉네임을 입력해주세요.");
       return;
     }
+    if (!isNickNmChecked || !isNickNmAvailable) {
+      Alert.alert("알림", "닉네임 중복 체크를 해주세요.");
+      return;
+    }
     if (!custTelNo) {
       Alert.alert("알림", "전화번호를 입력해주세요.");
+      return;
+    }
+    if (!isPhoneVerified) {
+      Alert.alert("알림", "전화번호 본인 인증을 해주세요.");
       return;
     }
 
@@ -213,7 +278,7 @@ export default function PracticeView() {
               placeholder="example123"
               placeholderTextColor={"#ccc"}
               value={emailLocal}
-              onChangeText={setEmailLocal}
+              onChangeText={(text) => setEmailLocal(text.replace(/\s/g, ""))}
             />
             <Text>@</Text>
             <TextInput
@@ -221,7 +286,7 @@ export default function PracticeView() {
               placeholder="example.com"
               placeholderTextColor={"#ccc"}
               value={emailDomain}
-              onChangeText={setEmailDomain}
+              onChangeText={(text) => setEmailDomain(text.replace(/\s/g, ""))}
             />
           </View>
         </View>
@@ -258,7 +323,7 @@ export default function PracticeView() {
               placeholderTextColor={"#ccc"}
               secureTextEntry
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => setPassword(text.replace(/\s/g, ""))}
             />
           </View>
           <Text style={styles.descriptionStyle}>
@@ -276,7 +341,9 @@ export default function PracticeView() {
               placeholderTextColor={"#ccc"}
               secureTextEntry
               value={passwordConfirm}
-              onChangeText={setPasswordConfirm}
+              onChangeText={(text) =>
+                setPasswordConfirm(text.replace(/\s/g, ""))
+              }
             />
           </View>
         </View>
@@ -289,7 +356,7 @@ export default function PracticeView() {
               placeholder="이름 입력"
               placeholderTextColor={"#ccc"}
               value={custNm}
-              onChangeText={setCustNm}
+              onChangeText={(text) => setCustNm(text.replace(/\s/g, ""))}
             />
           </View>
         </View>
@@ -328,8 +395,14 @@ export default function PracticeView() {
               placeholder="닉네임 입력"
               placeholderTextColor={"#ccc"}
               value={custNickNm}
-              onChangeText={setCustNickNm}
+              onChangeText={handleNickNmChange}
             />
+            <Pressable
+              style={styles.pressableStyle}
+              onPress={handleCheckDuplicateNickNm}
+            >
+              <Text style={styles.pressableTextStyle}>중복 체크</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -345,7 +418,10 @@ export default function PracticeView() {
               onChangeText={handlePhoneNumberChange}
               maxLength={13}
             />
-            <Pressable style={styles.pressableStyle}>
+            <Pressable
+              style={styles.pressableStyle}
+              onPress={handlePhoneVerification}
+            >
               <Text style={styles.pressableTextStyle}>본인 인증</Text>
             </Pressable>
           </View>
