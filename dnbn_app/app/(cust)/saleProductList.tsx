@@ -37,6 +37,7 @@ interface FileMasterResponse {
 type SaleType = "할인률" | "할인가";
 
 interface CustSaleListResponse {
+  productCode: string;
   images: FileMasterResponse;
   originalPrice: number;
   discountPrice: number;
@@ -54,6 +55,7 @@ interface CustSaleListResponse {
 
 interface SaleProduct {
   id: string;
+  productCode: string;
   uri: any;
   productName: string;
   storeName: string;
@@ -136,6 +138,7 @@ export default function SaleProductListScreen() {
 
         return {
           id: index.toString(),
+          productCode: item.productCode,
           uri: firstImage?.fileUrl
             ? { uri: firstImage.fileUrl }
             : require("@/assets/images/logo.png"), // 기본 이미지
@@ -277,7 +280,12 @@ export default function SaleProductListScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.productItemContainer}
-              onPress={() => router.push("/(cust)/product-detail")}
+              onPress={() => {
+                router.push({
+                  pathname: "/(cust)/sale-product-detail",
+                  params: { productCode: item.productCode },
+                });
+              }}
               activeOpacity={0.7}
             >
               {/* 시간 제한 배너 */}

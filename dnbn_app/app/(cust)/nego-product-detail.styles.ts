@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
@@ -36,10 +36,72 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  imageSliderContainer: {
+    position: "relative",
+  },
   productImage: {
     width: "100%",
     height: 350,
     backgroundColor: "#f8f8f8",
+  },
+  paginationContainer: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  },
+  paginationDotActive: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#fff",
+  },
+  imageModalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageModalCloseButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    padding: 8,
+  },
+  imageModalSlide: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageModalImage: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+  },
+  imageModalCounter: {
+    position: "absolute",
+    bottom: 40,
+    alignSelf: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  imageModalCounterText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   productDetailInfoContainer: {
     padding: 20,
@@ -301,6 +363,50 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#666",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#999",
+    textAlign: "center",
+  },
+  errorButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: "#FF6B00",
+    borderRadius: 8,
+  },
+  errorButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  noReviewsContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noReviewsText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#999",
   },
   modalOverlay: {
     flex: 1,
