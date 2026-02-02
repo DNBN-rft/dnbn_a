@@ -19,8 +19,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./question-answer-edit.styles";
 
-type QuestionType = "QR" | "PAYMENT" | "REFUND" | "MOD_REQUEST" | "ETC";
-
 interface QuestionImage {
   originalName: string;
   fileUrl: string;
@@ -44,23 +42,14 @@ interface QuestionDetailResponse {
   };
 }
 
-// 문의유형 매핑 (enum → 한글)
+// 백엔드 응답은 한글 label, 요청은 enum 코드 필요
 const questionTypeMap: { [key: string]: string } = {
-  QR: "QR 문의",
-  PAYMENT: "결제 문의",
-  REFUND: "환불 문의",
-  MOD_REQUEST: "개인정보 수정 요청",
-  ETC: "기타",
+  "QR 관련": "QR",
+  "결제 관련": "PAYMENT",
+  "환불/교환 관련": "REFUND",
+  "개인정보 수정 요청": "MOD_REQUEST",
+  기타: "ETC",
 };
-
-// // 한글 → enum 역매핑
-// const reverseQuestionTypeMap: { [key: string]: QuestionType } = {
-//   "QR 문의": "QR",
-//   "결제 문의": "PAYMENT",
-//   "환불 문의": "REFUND",
-//   "개인정보 수정 요청": "MOD_REQUEST",
-//   기타: "ETC",
-// };
 
 export default function QuestionAnswerEdit() {
   const insets = useSafeAreaInsets();
@@ -70,8 +59,6 @@ export default function QuestionAnswerEdit() {
     useState(false);
   const [selectedQuestionType, setSelectedQuestionType] =
     useState<string>("문의유형 선택");
-  const [selectedQuestionTypeValue, setSelectedQuestionTypeValue] =
-    useState<QuestionType | null>(null);
   const [questionTitle, setQuestionTitle] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
   const [questionFiles, setQuestionFiles] = useState<string[]>([]);
@@ -94,21 +81,8 @@ export default function QuestionAnswerEdit() {
           data.questionRequestType,
         );
 
-        // 받아온 데이터로 state 초기화
-        // 백엔드가 한글로 보낼 수도 있으니 역매핑 시도
-        let enumValue: QuestionType;
-        // if (reverseQuestionTypeMap[data.questionRequestType]) {
-        //   // 한글로 온 경우
-        //   enumValue = reverseQuestionTypeMap[data.questionRequestType];
-        // } else {
-        // enum으로 온 경우
-        enumValue = data.questionRequestType as QuestionType;
-        // }
-
-        setSelectedQuestionTypeValue(enumValue);
-        setSelectedQuestionType(
-          questionTypeMap[enumValue] || data.questionRequestType,
-        );
+        // 백엔드에서 한글 label로 오므로 그대로 사용
+        setSelectedQuestionType(data.questionRequestType);
         setQuestionTitle(data.questionTitle);
         setQuestionContent(data.questionContent);
 
@@ -171,7 +145,7 @@ export default function QuestionAnswerEdit() {
   // 문의 수정 및 이미지 업로드 함수
   const submitQuestion = async () => {
     // 유효성 검사
-    if (!selectedQuestionTypeValue) {
+    if (selectedQuestionType === "문의유형 선택") {
       Alert.alert("알림", "문의유형을 선택해주세요.");
       return;
     }
@@ -189,7 +163,9 @@ export default function QuestionAnswerEdit() {
 
       // 문의 정보 추가
       formData.append("custCode", "CUST_001");
-      formData.append("questionRequestType", selectedQuestionTypeValue);
+      // 백엔드 deserialize를 위해 enum 코드 전송
+      const enumCode = questionTypeMap[selectedQuestionType];
+      formData.append("questionRequestType", enumCode);
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
 
@@ -426,7 +402,6 @@ export default function QuestionAnswerEdit() {
                   style={styles.modalOption}
                   onPress={() => {
                     setSelectedQuestionType("QR 관련");
-                    setSelectedQuestionTypeValue("QR");
                     setQuestionTypeModalVisible(false);
                   }}
                 >
@@ -436,7 +411,6 @@ export default function QuestionAnswerEdit() {
                   style={styles.modalOption}
                   onPress={() => {
                     setSelectedQuestionType("결제 관련");
-                    setSelectedQuestionTypeValue("PAYMENT");
                     setQuestionTypeModalVisible(false);
                   }}
                 >
@@ -446,7 +420,6 @@ export default function QuestionAnswerEdit() {
                   style={styles.modalOption}
                   onPress={() => {
                     setSelectedQuestionType("환불/교환 관련");
-                    setSelectedQuestionTypeValue("REFUND");
                     setQuestionTypeModalVisible(false);
                   }}
                 >
@@ -456,7 +429,6 @@ export default function QuestionAnswerEdit() {
                   style={styles.modalOption}
                   onPress={() => {
                     setSelectedQuestionType("개인정보 수정 요청");
-                    setSelectedQuestionTypeValue("MOD_REQUEST");
                     setQuestionTypeModalVisible(false);
                   }}
                 >
@@ -466,7 +438,6 @@ export default function QuestionAnswerEdit() {
                   style={styles.modalOption}
                   onPress={() => {
                     setSelectedQuestionType("기타");
-                    setSelectedQuestionTypeValue("ETC");
                     setQuestionTypeModalVisible(false);
                   }}
                 >
