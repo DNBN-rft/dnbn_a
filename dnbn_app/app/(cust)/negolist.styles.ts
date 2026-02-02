@@ -33,6 +33,7 @@ export const styles = StyleSheet.create({
     },
     // 정렬 옵션
     sortContainer: {
+        height: 50,
         paddingBottom: 12,
         backgroundColor: "#fff",
         borderBottomColor: "#f0f0f0",
@@ -41,7 +42,6 @@ export const styles = StyleSheet.create({
     sortContentContainer: {
         paddingHorizontal: 12,
         alignItems: "center",
-        height: 50,
     },
     sortButton: {
         paddingHorizontal: 14,

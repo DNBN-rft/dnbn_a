@@ -1,72 +1,131 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./nego-product-detail.styles";
+import { apiGet, apiPost } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface ProductDetailResponse {
+  productCode: string;
+  productNm: string;
+  storeCode: string;
+  storeNm: string;
+  description: string;
+  price: number;
+  stockQuantity: number;
+  rating: number;
+  reviewCnt: number;
+  images: {
+    files: Array<{
+      fileUrl: string;
+      originalName: string;
+      order: number;
+    }>;
+  };
+  details?: {
+    origin?: string;
+    weight?: string;
+    expiryDate?: string;
+    storage?: string;
+    manufacturer?: string;
+  };
+}
+
+interface Review {
+  reviewCode: string;
+  custNm: string;
+  rate: number;
+  regDt: string;
+  content: string;
+}
+
+interface NegoProductDetailResponse {
+  isNego: boolean;
+  response: ProductDetailResponse & {
+    reviews?: Review[];
+  };
+}
 
 export default function ProductDetailScreen() {
+  const { productCode } = useLocalSearchParams<{ productCode: string }>();
+  const { custCode } = useAuth();
   const [tab, setTab] = useState<"description" | "reviews" | "details">(
     "description"
   );
   const [negoModalVisible, setNegoModalVisible] = useState(false);
   const [negoAmount, setNegoAmount] = useState("");
+  const [productDetail, setProductDetail] = useState<NegoProductDetailResponse | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
   const insets = useSafeAreaInsets();
 
-  // Mock 데이터
+  // 백엔드에서 상품 상세 정보 조회
+  useEffect(() => {
+    if (!productCode) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchProductDetail = async () => {
+      try {
+        setLoading(true);
+        const response = await apiGet(`/cust/nego/${productCode}`);
+        const data: NegoProductDetailResponse = await response.json();
+        setProductDetail(data);
+        if (data.response.reviews) {
+          setReviews(data.response.reviews);
+        }
+      } catch (error) {
+        console.error("상품 상세 조회 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
+  }, [productCode]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (!productDetail) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ fontSize: 16, color: '#999' }}>상품 정보를 불러올 수 없습니다.</Text>
+      </View>
+    );
+  }
+
   const mockProduct = {
-    id: "1",
-    name: "프리미엄 한우 세트",
-    storeName: "정육점 한우마을",
-    category: "식품 > 육류",
-    originalPrice: 50000,
-    discountPrice: 40000,
-    discountRate: 20,
-    remainingStock: 15,
-    isAdult: true,
-    rating: 4.5,
-    reviewCount: 200,
-    images: [
-      require("@/assets/images/products_soyun/cow.png"),
-      require("@/assets/images/products_soyun/cow.png"),
-    ],
-    description:
-      "신선한 한우를 저렴한 가격에 만나보세요. 1등급 한우 등심, 안심, 갈비살이 포함된 프리미엄 세트입니다. 냉장 배송으로 신선함을 그대로 전달합니다.",
-    details: {
-      origin: "국내산 한우",
-      weight: "1.5kg",
-      expiryDate: "제조일로부터 5일",
-      storage: "냉장보관 (0~10℃)",
-      manufacturer: "한우마을 정육점",
+    id: productDetail.response.productCode,
+    name: productDetail.response.productNm,
+    storeName: productDetail.response.storeNm,
+    category: "식품",
+    originalPrice: productDetail.response.price,
+    discountPrice: productDetail.response.price,
+    discountRate: 0,
+    remainingStock: productDetail.response.stockQuantity || 0,
+    isAdult: false,
+    rating: productDetail.response.rating || 0,
+    reviewCount: productDetail.response.reviewCnt || 0,
+    images: productDetail.response.images?.files?.map(img => ({ uri: img.fileUrl })) || [],
+    description: productDetail.response.description || "상품 설명이 없습니다.",
+    details: productDetail.response.details || {
+      origin: "정보 없음",
+      weight: "정보 없음",
+      expiryDate: "정보 없음",
+      storage: "정보 없음",
+      manufacturer: "정보 없음",
     },
   };
-
-  const mockReviews = [
-    {
-      id: "1",
-      userName: "김**",
-      rating: 5,
-      date: "2024.01.10",
-      content: "고기가 정말 신선하고 맛있어요! 가족들이 모두 만족했습니다.",
-      images: [],
-    },
-    {
-      id: "2",
-      userName: "이**",
-      rating: 4,
-      date: "2024.01.08",
-      content: "품질 좋고 가격도 합리적입니다. 다음에도 구매할 예정이에요.",
-      images: [],
-    },
-    {
-      id: "3",
-      userName: "박**",
-      rating: 5,
-      date: "2024.01.05",
-      content: "배송도 빠르고 포장도 꼼꼼해요. 재구매 의사 100%!",
-      images: [],
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -90,7 +149,11 @@ export default function ProductDetailScreen() {
 
       <ScrollView style={styles.productDetailContainer}>
         <Image
-          source={mockProduct.images[0]}
+          source={
+            mockProduct.images[0]
+              ? { uri: typeof mockProduct.images[0] === 'object' ? mockProduct.images[0].uri : mockProduct.images[0] }
+              : require("@/assets/images/products_soyun/cow.png")
+          }
           style={styles.productImage}
           resizeMode="cover"
         />
@@ -197,29 +260,35 @@ export default function ProductDetailScreen() {
 
             <View style={styles.tabContentContainer}>
               <View style={styles.reviewsContent}>
-                {mockReviews.map((review) => (
-                  <View key={review.id} style={styles.reviewItem}>
-                    <View style={styles.reviewHeader}>
-                      <Text style={styles.reviewUserName}>
-                        {review.userName}
-                      </Text>
-                      <View style={styles.reviewRating}>
-                        {[...Array(5)].map((_, index) => (
-                          <Ionicons
-                            key={index}
-                            name={
-                              index < review.rating ? "star" : "star-outline"
-                            }
-                            size={14}
-                            color="#FFD700"
-                          />
-                        ))}
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <View key={review.reviewCode} style={styles.reviewItem}>
+                      <View style={styles.reviewHeader}>
+                        <Text style={styles.reviewUserName}>
+                          {review.custNm}
+                        </Text>
+                        <View style={styles.reviewRating}>
+                          {[...Array(5)].map((_, index) => (
+                            <Ionicons
+                              key={`star-${review.reviewCode}-${index}`}
+                              name={
+                                index < review.rate ? "star" : "star-outline"
+                              }
+                              size={14}
+                              color="#FFD700"
+                            />
+                          ))}
+                        </View>
                       </View>
+                      <Text style={styles.reviewDate}>
+                        {new Date(review.regDt).toLocaleDateString('ko-KR')}
+                      </Text>
+                      <Text style={styles.reviewContent}>{review.content}</Text>
                     </View>
-                    <Text style={styles.reviewDate}>{review.date}</Text>
-                    <Text style={styles.reviewContent}>{review.content}</Text>
-                  </View>
-                ))}
+                  ))
+                ) : (
+                  <Text style={{ textAlign: 'center', color: '#999', marginTop: 20 }}>리뷰가 없습니다.</Text>
+                )}
               </View>
             </View>
           </View>
@@ -316,7 +385,6 @@ export default function ProductDetailScreen() {
               keyboardType="numeric"
               value={negoAmount}
               onChangeText={(text) => {
-                // 숫자만 입력 가능하도록 처리
                 const numericText = text.replace(/[^0-9]/g, '');
                 setNegoAmount(numericText);
               }}
@@ -331,18 +399,44 @@ export default function ProductDetailScreen() {
             <View style={styles.negoModalButtons}>
               <TouchableOpacity
                 style={[styles.negoModalButton, styles.negoConfirmButton]}
-                onPress={() => {
-                  // TODO: 네고 요청 API 호출
-                  console.log('네고 금액:', negoAmount);
-                  setNegoModalVisible(false);
-                  setNegoAmount('');
+                disabled={requesting || !negoAmount}
+                onPress={async () => {
+                  if (!custCode || !productCode) {
+                    Alert.alert('오류', '필요한 정보가 없습니다.');
+                    return;
+                  }
+
+                  try {
+                    setRequesting(true);
+                    const response = await apiPost('/cust/nego', {
+                      custCode,
+                      productCode,
+                      negoPrice: parseInt(negoAmount),
+                    });
+
+                    if (response.ok) {
+                      Alert.alert('성공', '네고 요청이 완료되었습니다.');
+                      setNegoModalVisible(false);
+                      setNegoAmount('');
+                    } else {
+                      Alert.alert('오류', '네고 요청에 실패했습니다.');
+                    }
+                  } catch (error) {
+                    console.error('네고 요청 실패:', error);
+                    Alert.alert('오류', '네고 요청 중 오류가 발생했습니다.');
+                  } finally {
+                    setRequesting(false);
+                  }
                 }}
               >
-                <Text style={styles.negoConfirmButtonText}>요청</Text>
+                <Text style={styles.negoConfirmButtonText}>
+                  {requesting ? '처리 중...' : '요청'}
+                </Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.negoModalButton, styles.negoCancelButton]}
+                disabled={requesting}
                 onPress={() => {
                   setNegoModalVisible(false);
                   setNegoAmount('');
