@@ -3,30 +3,30 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffffff',
+    backgroundColor: "#ffffffff",
   },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   backButton: {
     width: 44,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    position: 'absolute',
+    fontWeight: "bold",
+    color: "#333",
+    position: "absolute",
     left: 0,
     right: 0,
-    textAlign: 'center',
-    pointerEvents: "none"
+    textAlign: "center",
+    pointerEvents: "none",
   },
   placeholder: {
     width: 40,
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     color: "#FF6F2B",
     marginBottom: 5,
     fontSize: 18,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   practiceView: {
     flex: 1,
@@ -44,48 +44,48 @@ export const styles = StyleSheet.create({
   viewMargin: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginVertical: 1,
   },
   inputContainer: {
-    margin: 20,
+    marginHorizontal: 10,
   },
   inputComponent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   inputStyle: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: "#f0f0f0",
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 18,
-    color: '#919191ff',
-    backgroundColor: '#fff',
+    color: "#919191ff",
+    backgroundColor: "#fff",
   },
   inputTitle: {
     fontSize: 20,
-    color: '#EF7810',
+    color: "#EF7810",
     marginBottom: 8,
   },
   pressableStyle: {
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: '#EF7810',
-    backgroundColor: '#fff',
+    borderColor: "#EF7810",
+    backgroundColor: "#fff",
     borderRadius: 6,
   },
   pressableTextStyle: {
     fontSize: 18,
-    color: '#EF7810',
+    color: "#EF7810",
   },
   descriptionStyle: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: 13,
+    color: "#999",
     marginTop: 6,
   },
   registButton: {
@@ -95,10 +95,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 5,
-    borderColor: "#FF6F2B"
+    borderColor: "#FF6F2B",
   },
   registButtonText: {
     fontSize: 20,
     color: "#FF6F2B",
-  }
+  },
 });
