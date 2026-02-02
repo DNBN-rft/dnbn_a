@@ -16,16 +16,18 @@ import type { Review } from "../types/storeInfo.types";
 
 interface ReviewCardProps {
   item: Review;
+  productCode?: string;
 }
 
-export function ReviewCard({ item }: ReviewCardProps) {
+export function ReviewCard({ item, productCode }: ReviewCardProps) {
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const code = productCode || item.reviewProductCode;
 
   const handleProductPress = () => {
     router.push({
       pathname: "/(cust)/product-detail",
-      params: { productCode: item.reviewProductCode },
+      params: { productCode: code },
     });
   };
 

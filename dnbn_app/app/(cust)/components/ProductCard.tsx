@@ -6,16 +6,19 @@ import type { Product } from "../types/storeInfo.types";
 
 interface ProductCardProps {
   item: Product;
+  productCode?: string;
 }
 
-export function ProductCard({ item }: ProductCardProps) {
+export function ProductCard({ item, productCode }: ProductCardProps) {
+  const code = productCode || item.productCode;
+  
   return (
     <Pressable
       style={styles.storeProductItemContainer}
       onPress={() =>
         router.push({
           pathname: "/(cust)/product-detail",
-          params: { productCode: item.productCode },
+          params: { productCode: code },
         })
       }
     >
