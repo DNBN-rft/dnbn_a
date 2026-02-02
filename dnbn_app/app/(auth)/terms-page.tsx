@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./terms-page.styles";
 
@@ -42,6 +42,28 @@ export default function TermsPage() {
   };
 
   const canProceed = ageAgreed && termsAgreed && privacyAgreed;
+
+  const handleStartButton = () => {
+    // 필수 약관 검증
+    if (!ageAgreed) {
+      Alert.alert("알림", "만 14세 이상 동의는 필수입니다.");
+      return;
+    }
+    if (!termsAgreed) {
+      Alert.alert("알림", "서비스 이용약관 동의는 필수입니다.");
+      return;
+    }
+    if (!privacyAgreed) {
+      Alert.alert("알림", "개인정보 처리방침 동의는 필수입니다.");
+      return;
+    }
+
+    // 마케팅 동의 상태를 query parameter로 전달하여 회원가입 페이지로 이동
+    router.push({
+      pathname: "/(auth)/signup",
+      params: { marketingAgreed: marketingAgreed.toString() },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -184,7 +206,7 @@ export default function TermsPage() {
             styles.startButton,
             !canProceed && styles.startButtonDisabled,
           ]}
-          onPress={() => canProceed && router.push("/(auth)/signup")}
+          onPress={handleStartButton}
           disabled={!canProceed}
           activeOpacity={0.8}
         >

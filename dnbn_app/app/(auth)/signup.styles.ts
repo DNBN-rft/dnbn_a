@@ -62,12 +62,12 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 18,
+    fontSize: 15,
     color: "#919191ff",
     backgroundColor: "#fff",
   },
   inputTitle: {
-    fontSize: 20,
+    fontSize: 15,
     color: "#EF7810",
     marginBottom: 8,
   },
@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
   },
   pressableTextStyle: {
-    fontSize: 18,
+    fontSize: 15,
     color: "#EF7810",
   },
   descriptionStyle: {
