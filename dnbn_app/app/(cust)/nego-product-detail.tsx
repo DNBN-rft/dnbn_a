@@ -1,85 +1,105 @@
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState, useEffect } from "react";
-import { Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View, ActivityIndicator, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./nego-product-detail.styles";
-import { apiGet, apiPost } from "@/utils/api";
-import { useAuth } from "@/contexts/AuthContext";
 
-interface ProductDetailResponse {
-  productCode: string;
-  productNm: string;
-  storeCode: string;
-  storeNm: string;
-  description: string;
-  price: number;
-  stockQuantity: number;
-  rating: number;
-  reviewCnt: number;
-  images: {
-    files: Array<{
-      fileUrl: string;
-      originalName: string;
-      order: number;
-    }>;
-  };
-  details?: {
-    origin?: string;
-    weight?: string;
-    expiryDate?: string;
-    storage?: string;
-    manufacturer?: string;
-  };
+interface ReviewItem {
+  regNm: string;
+  reviewContent: string;
+  reviewRegDate: string;
+  reviewRate: number;
+  reviewAnswerContent: string | null;
 }
 
-interface Review {
-  reviewCode: string;
-  custNm: string;
-  rate: number;
-  regDt: string;
-  content: string;
+interface ProductImageFile {
+  originalName: string;
+  fileUrl: string;
+  order: number;
 }
 
 interface NegoProductDetailResponse {
   isNego: boolean;
-  response: ProductDetailResponse & {
-    reviews?: Review[];
+  response: {
+    storeCode: string;
+    productCode: string;
+    storeNm: string;
+    productNm: string;
+    categoryNm: string;
+    price: number;
+    reviewRate: number;
+    reviewCnt: number;
+    productAmount: number;
+    isStock: boolean;
+    isAdult: boolean;
+    description: string;
+    reviewList: ReviewItem[];
+    productImgs: {
+      files: ProductImageFile[];
+    };
   };
 }
 
 export default function ProductDetailScreen() {
-  const { productCode } = useLocalSearchParams<{ productCode: string }>();
-  const { custCode } = useAuth();
+  const { productCode } = useLocalSearchParams();
   const [tab, setTab] = useState<"description" | "reviews" | "details">(
-    "description"
+    "description",
   );
   const [negoModalVisible, setNegoModalVisible] = useState(false);
   const [negoAmount, setNegoAmount] = useState("");
-  const [productDetail, setProductDetail] = useState<NegoProductDetailResponse | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [productData, setProductData] =
+    useState<NegoProductDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const insets = useSafeAreaInsets();
+
+  const screenWidth = Dimensions.get("window").width;
 
   // 백엔드에서 상품 상세 정보 조회
   useEffect(() => {
-    if (!productCode) {
-      setLoading(false);
-      return;
-    }
-
     const fetchProductDetail = async () => {
+      if (!productCode) {
+        setError("등록된 상품 정보가 없습니다.");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError(null);
         const response = await apiGet(`/cust/nego/${productCode}`);
-        const data: NegoProductDetailResponse = await response.json();
-        setProductDetail(data);
-        if (data.response.reviews) {
-          setReviews(data.response.reviews);
+
+        if (!response.ok) {
+          throw new Error("상품 정보를 불러오는데 실패했습니다.");
         }
-      } catch (error) {
-        console.error("상품 상세 조회 실패:", error);
+
+        const data: NegoProductDetailResponse = await response.json();
+        setProductData(data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "알 수 없는 오류가 발생했습니다.",
+        );
       } finally {
         setLoading(false);
       }
@@ -88,44 +108,10 @@ export default function ProductDetailScreen() {
     fetchProductDetail();
   }, [productCode]);
 
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
+  // API 데이터가 없으면 렌더링하지 않음
+  if (!productData) return null;
 
-  if (!productDetail) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ fontSize: 16, color: '#999' }}>상품 정보를 불러올 수 없습니다.</Text>
-      </View>
-    );
-  }
-
-  const mockProduct = {
-    id: productDetail.response.productCode,
-    name: productDetail.response.productNm,
-    storeName: productDetail.response.storeNm,
-    category: "식품",
-    originalPrice: productDetail.response.price,
-    discountPrice: productDetail.response.price,
-    discountRate: 0,
-    remainingStock: productDetail.response.stockQuantity || 0,
-    isAdult: false,
-    rating: productDetail.response.rating || 0,
-    reviewCount: productDetail.response.reviewCnt || 0,
-    images: productDetail.response.images?.files?.map(img => ({ uri: img.fileUrl })) || [],
-    description: productDetail.response.description || "상품 설명이 없습니다.",
-    details: productDetail.response.details || {
-      origin: "정보 없음",
-      weight: "정보 없음",
-      expiryDate: "정보 없음",
-      storage: "정보 없음",
-      manufacturer: "정보 없음",
-    },
-  };
+  const product = productData.response;
 
   return (
     <View style={styles.container}>
@@ -147,226 +133,357 @@ export default function ProductDetailScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.productDetailContainer}>
-        <Image
-          source={
-            mockProduct.images[0]
-              ? { uri: typeof mockProduct.images[0] === 'object' ? mockProduct.images[0].uri : mockProduct.images[0] }
-              : require("@/assets/images/products_soyun/cow.png")
-          }
-          style={styles.productImage}
-          resizeMode="cover"
-        />
-
-        <View style={styles.productDetailInfoContainer}>
-          <TouchableOpacity style={styles.storeNameContainer}>
-            <Text style={styles.storeName}>{mockProduct.storeName}</Text>
-            
-            <Ionicons name="home-outline" size={16} color="#999" />
-          </TouchableOpacity>
-
-          <View style={styles.nameContainer}>
-            <Text style={styles.categoryText}>{mockProduct.category}</Text>
-            
-            <Text style={styles.productName}>{mockProduct.name}</Text>
-
-            {mockProduct.isAdult && (
-              <View style={styles.adultTag}>
-                <Text style={styles.adultTagText}>성인</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.priceAndStockContainer}>
-            <View style={styles.priceContainer}>
-              <Text style={styles.discountPrice}>
-                {mockProduct.discountPrice.toLocaleString()}원
-              </Text>
-            </View>
-
-            <View style={styles.stockContainer}>
-              <Text style={styles.stockText}>
-                수량: {mockProduct.remainingStock}개
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={16} color="#FFD700" />
-            
-            <Text style={styles.ratingText}>
-              {mockProduct.rating} ({mockProduct.reviewCount})
-            </Text>
-          </View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B00" />
+          <Text style={styles.loadingText}>상품 정보를 불러오는 중...</Text>
         </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ccc" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.errorButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.errorButtonText}>돌아가기</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView style={styles.productDetailContainer}>
+          {/* 이미지 슬라이더 */}
+          <View style={styles.imageSliderContainer}>
+            <FlatList
+              data={product.productImgs?.files || []}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / screenWidth,
+                );
+                setCurrentImageIndex(index);
+              }}
+              scrollEventThrottle={16}
+              keyExtractor={(item, index) => `image-${index}`}
+              renderItem={({ item, index }) => (
+                <Pressable
+                  onPress={() => {
+                    setSelectedImageIndex(index);
+                    setImageModalVisible(true);
+                  }}
+                >
+                  <Image
+                    source={
+                      item.fileUrl
+                        ? { uri: item.fileUrl }
+                        : require("@/assets/images/logo.png")
+                    }
+                    style={[styles.productImage, { width: screenWidth }]}
+                    resizeMode="cover"
+                  />
+                </Pressable>
+              )}
+            />
 
-        {tab === "description" && (
-          <View style={styles.tabsContainer}>
-            <View style={styles.tabs}>
-              <TouchableOpacity
-                style={[styles.tab, styles.activeTab]}
-                onPress={() => setTab("description")}
-              >
-                <Text style={[styles.tabText, styles.activeTabText]}>설명</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("reviews")}
-              >
-                <Text style={styles.tabText}>리뷰</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("details")}
-              >
-                <Text style={styles.tabText}>상세정보</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.tabContentContainer}>
-              <View style={styles.descriptionContent}>
-                <Text style={styles.tabContent}>{mockProduct.description}</Text>
-              </View>
-            </View>
+            {/* 페이지네이션 인디케이터 */}
+            {product.productImgs?.files &&
+              product.productImgs.files.length > 1 && (
+                <View style={styles.paginationContainer}>
+                  {product.productImgs.files.map((_, index) => (
+                    <View
+                      key={`dot-${index}`}
+                      style={[
+                        styles.paginationDot,
+                        currentImageIndex === index &&
+                          styles.paginationDotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              )}
           </View>
-        )}
 
-        {tab === "reviews" && (
-          <View style={styles.tabsContainer}>
-            <View style={styles.tabs}>
+          {/* 이미지 확대 모달 */}
+          <Modal
+            visible={imageModalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setImageModalVisible(false)}
+          >
+            <View style={styles.imageModalContainer}>
               <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("description")}
+                style={styles.imageModalCloseButton}
+                onPress={() => setImageModalVisible(false)}
               >
-                <Text style={styles.tabText}>설명</Text>
+                <Ionicons name="close" size={32} color="#fff" />
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.tab, styles.activeTab]}
-                onPress={() => setTab("reviews")}
-              >
-                <Text style={[styles.tabText, styles.activeTabText]}>리뷰</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("details")}
-              >
-                <Text style={styles.tabText}>상세정보</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.tabContentContainer}>
-              <View style={styles.reviewsContent}>
-                {reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <View key={review.reviewCode} style={styles.reviewItem}>
-                      <View style={styles.reviewHeader}>
-                        <Text style={styles.reviewUserName}>
-                          {review.custNm}
-                        </Text>
-                        <View style={styles.reviewRating}>
-                          {[...Array(5)].map((_, index) => (
-                            <Ionicons
-                              key={`star-${review.reviewCode}-${index}`}
-                              name={
-                                index < review.rate ? "star" : "star-outline"
-                              }
-                              size={14}
-                              color="#FFD700"
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Text style={styles.reviewDate}>
-                        {new Date(review.regDt).toLocaleDateString('ko-KR')}
-                      </Text>
-                      <Text style={styles.reviewContent}>{review.content}</Text>
-                    </View>
-                  ))
-                ) : (
-                  <Text style={{ textAlign: 'center', color: '#999', marginTop: 20 }}>리뷰가 없습니다.</Text>
+              <FlatList
+                data={product.productImgs?.files || []}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                initialScrollIndex={selectedImageIndex}
+                onMomentumScrollEnd={(event) => {
+                  const index = Math.round(
+                    event.nativeEvent.contentOffset.x / screenWidth,
+                  );
+                  setSelectedImageIndex(index);
+                }}
+                getItemLayout={(data, index) => ({
+                  length: screenWidth,
+                  offset: screenWidth * index,
+                  index,
+                })}
+                keyExtractor={(item, index) => `modal-image-${index}`}
+                renderItem={({ item }) => (
+                  <View style={styles.imageModalSlide}>
+                    <Image
+                      source={
+                        item.fileUrl
+                          ? { uri: item.fileUrl }
+                          : require("@/assets/images/logo.png")
+                      }
+                      style={styles.imageModalImage}
+                      resizeMode="contain"
+                    />
+                  </View>
                 )}
-              </View>
-            </View>
-          </View>
-        )}
+              />
 
-        {tab === "details" && (
-          <View style={styles.tabsContainer}>
-            <View style={styles.tabs}>
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("description")}
-              >
-                <Text style={styles.tabText}>설명</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.tab}
-                onPress={() => setTab("reviews")}
-              >
-                <Text style={styles.tabText}>리뷰</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.tab, styles.activeTab]}
-                onPress={() => setTab("details")}
-              >
-                <Text style={[styles.tabText, styles.activeTabText]}>
-                  상세정보
+              <View style={styles.imageModalCounter}>
+                <Text style={styles.imageModalCounterText}>
+                  {selectedImageIndex + 1} /{" "}
+                  {product.productImgs?.files?.length || 0}
                 </Text>
-              </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          <View style={styles.productDetailInfoContainer}>
+            <Pressable
+              style={styles.storeNameContainer}
+              onPress={() => {
+                router.push({
+                  pathname: "/(cust)/storeInfo",
+                  params: { storeCode: product.storeCode },
+                });
+              }}
+            >
+              <Text style={styles.storeName}>{product.storeNm}</Text>
+
+              <Ionicons name="home-outline" size={16} color="#999" />
+            </Pressable>
+
+            <View style={styles.nameContainer}>
+              <Text style={styles.categoryText}>{product.categoryNm}</Text>
+
+              <Text style={styles.productName}>{product.productNm}</Text>
+
+              {product.isAdult && (
+                <View style={styles.adultTag}>
+                  <Text style={styles.adultTagText}>성인</Text>
+                </View>
+              )}
             </View>
 
-            <View style={styles.tabContentContainer}>
-              <View style={styles.detailsContent}>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>원산지</Text>
-                  <Text style={styles.detailValue}>
-                    {mockProduct.details.origin}
+            <View style={styles.priceAndStockContainer}>
+              <View style={styles.priceContainer}>
+                <Text style={styles.discountPrice}>
+                  {product.price.toLocaleString()}원
+                </Text>
+              </View>
+
+              <View style={styles.stockContainer}>
+                <Text style={styles.stockText}>
+                  재고: {product.productAmount}개
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={16} color="#FFD700" />
+
+              <Text style={styles.ratingText}>
+                {product.reviewRate.toFixed(1)} ({product.reviewCnt})
+              </Text>
+            </View>
+          </View>
+
+          {tab === "description" && (
+            <View style={styles.tabsContainer}>
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  style={[styles.tab, styles.activeTab]}
+                  onPress={() => setTab("description")}
+                >
+                  <Text style={[styles.tabText, styles.activeTabText]}>
+                    설명
                   </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>중량</Text>
-                  <Text style={styles.detailValue}>
-                    {mockProduct.details.weight}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>유통기한</Text>
-                  <Text style={styles.detailValue}>
-                    {mockProduct.details.expiryDate}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>보관방법</Text>
-                  <Text style={styles.detailValue}>
-                    {mockProduct.details.storage}
-                  </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>제조사</Text>
-                  <Text style={styles.detailValue}>
-                    {mockProduct.details.manufacturer}
-                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("reviews")}
+                >
+                  <Text style={styles.tabText}>리뷰</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("details")}
+                >
+                  <Text style={styles.tabText}>상세정보</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.tabContentContainer}>
+                <View style={styles.descriptionContent}>
+                  <Text style={styles.tabContent}>{product.description}</Text>
                 </View>
               </View>
             </View>
-          </View>
-        )}
-      </ScrollView>
+          )}
 
-      <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity 
-          style={styles.purchaseButton}
-          onPress={() => setNegoModalVisible(true)}
-        >
-          <Text style={styles.purchaseButtonText}>네고 요청하기</Text>
-        </TouchableOpacity>
-      </View>
+          {tab === "reviews" && (
+            <View style={styles.tabsContainer}>
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("description")}
+                >
+                  <Text style={styles.tabText}>설명</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.tab, styles.activeTab]}
+                  onPress={() => setTab("reviews")}
+                >
+                  <Text style={[styles.tabText, styles.activeTabText]}>
+                    리뷰
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("details")}
+                >
+                  <Text style={styles.tabText}>상세정보</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.tabContentContainer}>
+                <View style={styles.reviewsContent}>
+                  {product.reviewList && product.reviewList.length > 0 ? (
+                    product.reviewList.map((review, index) => (
+                      <View key={index} style={styles.reviewItem}>
+                        <View style={styles.reviewHeader}>
+                          <Text style={styles.reviewUserName}>
+                            {review.regNm}
+                          </Text>
+                          <View style={styles.reviewRating}>
+                            {[...Array(5)].map((_, starIndex) => (
+                              <Ionicons
+                                key={starIndex}
+                                name={
+                                  starIndex < review.reviewRate
+                                    ? "star"
+                                    : "star-outline"
+                                }
+                                size={14}
+                                color="#FFD700"
+                              />
+                            ))}
+                          </View>
+                        </View>
+                        <Text style={styles.reviewDate}>
+                          {review.reviewRegDate}
+                        </Text>
+                        <Text style={styles.reviewContent}>
+                          {review.reviewContent}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={styles.noReviewsContainer}>
+                      <Ionicons name="chatbox-outline" size={48} color="#ccc" />
+                      <Text style={styles.noReviewsText}>
+                        등록된 리뷰가 없습니다
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {tab === "details" && (
+            <View style={styles.tabsContainer}>
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("description")}
+                >
+                  <Text style={styles.tabText}>설명</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.tab}
+                  onPress={() => setTab("reviews")}
+                >
+                  <Text style={styles.tabText}>리뷰</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.tab, styles.activeTab]}
+                  onPress={() => setTab("details")}
+                >
+                  <Text style={[styles.tabText, styles.activeTabText]}>
+                    상세정보
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.tabContentContainer}>
+                <View style={styles.detailsContent}>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>상품고시정보</Text>
+                    <Ionicons name="chevron-down" size={20} color="#666" />
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>
+                      취소/환불 정책 및 방법
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#666" />
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>
+                      거래 조건에 관한 정보
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#666" />
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>구매 시 주의사항</Text>
+                    <Ionicons name="chevron-down" size={20} color="#666" />
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {!loading && !error && (
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity
+            style={styles.purchaseButton}
+            onPress={() => setNegoModalVisible(true)}
+          >
+            <Text style={styles.purchaseButtonText}>네고 요청하기</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <Modal
         visible={negoModalVisible}
@@ -377,7 +494,7 @@ export default function ProductDetailScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.negoModalContent}>
             <Text style={styles.negoModalTitle}>네고 요청</Text>
-            
+
             <Text style={styles.negoModalLabel}>희망 금액</Text>
             <TextInput
               style={styles.negoInput}
@@ -385,61 +502,60 @@ export default function ProductDetailScreen() {
               keyboardType="numeric"
               value={negoAmount}
               onChangeText={(text) => {
-                const numericText = text.replace(/[^0-9]/g, '');
+                const numericText = text.replace(/[^0-9]/g, "");
                 setNegoAmount(numericText);
               }}
             />
-            
+
             {negoAmount && (
               <Text style={styles.negoAmountDisplay}>
                 {parseInt(negoAmount).toLocaleString()}원
               </Text>
             )}
-            
+
             <View style={styles.negoModalButtons}>
               <TouchableOpacity
                 style={[styles.negoModalButton, styles.negoConfirmButton]}
                 disabled={requesting || !negoAmount}
                 onPress={async () => {
-                  if (!custCode || !productCode) {
-                    Alert.alert('오류', '필요한 정보가 없습니다.');
+                  if (!productCode) {
+                    Alert.alert("오류", "필요한 정보가 없습니다.");
                     return;
                   }
 
                   try {
                     setRequesting(true);
-                    const response = await apiPost('/cust/nego', {
-                      custCode,
+                    const response = await apiPost("/cust/nego", {
                       productCode,
                       negoPrice: parseInt(negoAmount),
                     });
 
                     if (response.ok) {
-                      Alert.alert('성공', '네고 요청이 완료되었습니다.');
+                      Alert.alert("성공", "네고 요청이 완료되었습니다.");
                       setNegoModalVisible(false);
-                      setNegoAmount('');
+                      setNegoAmount("");
                     } else {
-                      Alert.alert('오류', '네고 요청에 실패했습니다.');
+                      Alert.alert("오류", "네고 요청에 실패했습니다.");
                     }
                   } catch (error) {
-                    console.error('네고 요청 실패:', error);
-                    Alert.alert('오류', '네고 요청 중 오류가 발생했습니다.');
+                    console.error("네고 요청 실패:", error);
+                    Alert.alert("오류", "네고 요청 중 오류가 발생했습니다.");
                   } finally {
                     setRequesting(false);
                   }
                 }}
               >
                 <Text style={styles.negoConfirmButtonText}>
-                  {requesting ? '처리 중...' : '요청'}
+                  {requesting ? "처리 중..." : "요청"}
                 </Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.negoModalButton, styles.negoCancelButton]}
                 disabled={requesting}
                 onPress={() => {
                   setNegoModalVisible(false);
-                  setNegoAmount('');
+                  setNegoAmount("");
                 }}
               >
                 <Text style={styles.negoCancelButtonText}>취소</Text>
