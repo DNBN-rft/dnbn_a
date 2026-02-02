@@ -1,6 +1,6 @@
 import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -231,6 +231,7 @@ export default function StoreInfo() {
                   onTabChange={handleTabChange}
                   onWishClick={handleWishClick}
                   isWishStore={isWishStore}
+                  storeCode={String(storeCode)}
                 />
               }
               ListFooterComponent={
@@ -240,7 +241,9 @@ export default function StoreInfo() {
                   </View>
                 ) : null
               }
-              renderItem={({ item }) => <ProductCard item={item} />}
+              renderItem={({ item }) => (
+                <ProductCard item={item} productCode={item.productCode} />
+              )}
             />
           )}
 
@@ -262,6 +265,7 @@ export default function StoreInfo() {
                   onTabChange={handleTabChange}
                   onWishClick={handleWishClick}
                   isWishStore={isWishStore}
+                  storeCode={String(storeCode)}
                 />
               }
               ListEmptyComponent={
@@ -279,7 +283,12 @@ export default function StoreInfo() {
                   </View>
                 ) : null
               }
-              renderItem={({ item }) => <ReviewCard item={item} />}
+              renderItem={({ item }) => (
+                <ReviewCard
+                  item={item}
+                  productCode={item.reviewProductCode}
+                />
+              )}
             />
           )}
 
