@@ -1,4 +1,4 @@
-import { apiPost } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -25,6 +25,8 @@ export default function PracticeView() {
   const [emailLocal, setEmailLocal] = useState("");
   const [emailDomain, setEmailDomain] = useState("");
   const [loginId, setLoginId] = useState("");
+  const [isIdChecked, setIsIdChecked] = useState(false);
+  const [isIdAvailable, setIsIdAvailable] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [custNm, setCustNm] = useState("");
@@ -64,6 +66,44 @@ export default function PracticeView() {
     setCustTelNo(formatted);
   };
 
+  // 아이디 입력 핸들러 (아이디 변경 시 중복 체크 상태 초기화)
+  const handleLoginIdChange = (text: string) => {
+    setLoginId(text);
+    setIsIdChecked(false);
+    setIsIdAvailable(false);
+  };
+
+  // 아이디 중복 체크
+  const handleCheckDuplicateId = async () => {
+    if (!loginId.trim()) {
+      Alert.alert("알림", "아이디를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await apiGet(`/cust/check-loginId/${loginId}`);
+
+      if (response.ok) {
+        const message = await response.text();
+
+        if (message === "사용가능한 아이디입니다.") {
+          setIsIdChecked(true);
+          setIsIdAvailable(true);
+          Alert.alert("성공", message);
+        } else {
+          setIsIdChecked(true);
+          setIsIdAvailable(false);
+          Alert.alert("알림", message);
+        }
+      } else {
+        Alert.alert("오류", "중복 체크에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("아이디 중복 체크 에러:", error);
+      Alert.alert("오류", "중복 체크 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleSignup = async () => {
     // 유효성 검사
     if (!emailLocal || !emailDomain) {
@@ -72,6 +112,10 @@ export default function PracticeView() {
     }
     if (!loginId) {
       Alert.alert("알림", "아이디를 입력해주세요.");
+      return;
+    }
+    if (!isIdChecked || !isIdAvailable) {
+      Alert.alert("알림", "아이디 중복 체크를 해주세요.");
       return;
     }
     if (!password) {
@@ -190,9 +234,12 @@ export default function PracticeView() {
               placeholder="아이디 입력"
               placeholderTextColor={"#ccc"}
               value={loginId}
-              onChangeText={setLoginId}
+              onChangeText={handleLoginIdChange}
             />
-            <Pressable style={styles.pressableStyle}>
+            <Pressable
+              style={styles.pressableStyle}
+              onPress={handleCheckDuplicateId}
+            >
               <Text style={styles.pressableTextStyle}>중복 체크</Text>
             </Pressable>
           </View>
