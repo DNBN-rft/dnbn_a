@@ -1,6 +1,7 @@
 import { apiDelete, apiGet, apiPut } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -34,8 +35,17 @@ export default function AddressScreen() {
   // 주소 정보 불러오기
   useEffect(() => {
     const fetchAddresses = async () => {
+      let custCode = null;
+
+      if (Platform.OS === "web") {
+        custCode = localStorage.getItem("custCode");
+      } else {
+        custCode = await SecureStore.getItemAsync("custCode");
+      }
+
+      console.log("고객 코드:", custCode);
+
       try {
-        const custCode = "CUST_001";
         setIsLoading(true);
         const response = await apiGet(`/cust/location?custCode=${custCode}`);
 

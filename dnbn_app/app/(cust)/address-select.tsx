@@ -2,18 +2,19 @@ import { apiPost, apiPut } from "@/utils/api";
 import Postcode from "@actbase/react-daum-postcode";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./address-select.styles";
@@ -33,6 +34,22 @@ export default function AddressSelectScreen() {
   const [selectedAddress, setSelectedAddress] = useState("");
   const [addressLabel, setAddressLabel] = useState("");
   const [isSelected, setIsSelected] = useState(false);
+  const [custCode, setCustCode] = useState("");
+
+  useEffect(() => {
+    const fetchCustCode = async () => {
+      let code = "";
+      if (Platform.OS === "web") {
+        code = localStorage.getItem("custCode") || "";
+      } else {
+        code = (await SecureStore.getItemAsync("custCode")) || "";
+      }
+      setCustCode(code);
+      console.log("고객 코드:", code);
+    };
+
+    fetchCustCode();
+  }, []);
 
   // 수정 모드일 경우 기존 데이터로 초기화
   useEffect(() => {
@@ -76,7 +93,7 @@ export default function AddressSelectScreen() {
 
     try {
       const addressData = {
-        custCode: "CUST_001",
+        custCode: custCode,
         label: addressLabel,
         address: selectedAddress,
         isSelected: isSelected,
@@ -133,6 +150,7 @@ export default function AddressSelectScreen() {
       }
     }
   }, [
+    custCode,
     selectedAddress,
     addressLabel,
     isSelected,
