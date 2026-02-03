@@ -80,6 +80,12 @@ export const styles = StyleSheet.create({
     color: "#000000",
     backgroundColor: "#FFFFFF",
   },
+  errorText: {
+    fontSize: 12,
+    color: "#FF0000",
+    marginTop: 4,
+    marginLeft: 4,
+  },
   submitButton: {
     backgroundColor: "#ef7810",
     height: 50,
@@ -89,6 +95,40 @@ export const styles = StyleSheet.create({
     marginTop: 30,
   },
   submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 24,
+    width: "80%",
+    maxWidth: 320,
+    alignItems: "center",
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "#333333",
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  modalButton: {
+    backgroundColor: "#ef7810",
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
