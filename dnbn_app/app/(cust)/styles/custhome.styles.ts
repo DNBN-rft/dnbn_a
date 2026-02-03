@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from "react-native";
-  
-const screenWidth = Dimensions.get('window').width;
+
+const screenWidth = Dimensions.get("window").width;
 
 export const styles = StyleSheet.create({
   container: {
@@ -22,6 +22,8 @@ export const styles = StyleSheet.create({
   },
   addr: {
     paddingVertical: 6,
+    flexDirection: "row",
+    gap: 30,
   },
   addrText: {
     fontSize: 16,
@@ -41,7 +43,7 @@ export const styles = StyleSheet.create({
   bannerSlide: {
     width: screenWidth,
     height: 200,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   bannerImage: {
     width: screenWidth,
@@ -49,6 +51,13 @@ export const styles = StyleSheet.create({
   },
   contentSection: {
     marginBottom: 20,
+  },
+  productListWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  productList: {
+    flex: 1,
   },
   sectionHeader: {
     width: "100%",
@@ -77,11 +86,11 @@ export const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   productImage: {
-    width: '100%',
+    width: "100%",
     height: 150,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   productInfo: {
     paddingTop: 8,
@@ -89,27 +98,27 @@ export const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   storeName: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   discount: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#ff4444',
+    fontWeight: "700",
+    color: "#ff4444",
   },
   price: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   contentProduct: {
     height: 150,
@@ -117,5 +126,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.2)",
     marginBottom: 30,
+  },
+  moreButton: {
+    width: 50,
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 16,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
   },
 });
