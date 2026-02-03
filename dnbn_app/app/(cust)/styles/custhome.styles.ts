@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet } from "react-native";
-  
-const screenWidth = Dimensions.get('window').width;
+
+const screenWidth = Dimensions.get("window").width;
 
 export const styles = StyleSheet.create({
   container: {
@@ -22,6 +22,8 @@ export const styles = StyleSheet.create({
   },
   addr: {
     paddingVertical: 6,
+    flexDirection: "row",
+    gap: 30,
   },
   addrText: {
     fontSize: 16,
@@ -31,9 +33,6 @@ export const styles = StyleSheet.create({
   headerButton: {
     padding: 6,
   },
-  iconText: {
-    fontSize: 20,
-  },
   bannerContainer: {
     height: 200,
     marginBottom: 30,
@@ -41,7 +40,7 @@ export const styles = StyleSheet.create({
   bannerSlide: {
     width: screenWidth,
     height: 200,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   bannerImage: {
     width: screenWidth,
@@ -49,6 +48,20 @@ export const styles = StyleSheet.create({
   },
   contentSection: {
     marginBottom: 20,
+  },
+  productListWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  arrowButton: {
+    width: 50,
+    height: 210,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
   },
   sectionHeader: {
     width: "100%",
@@ -77,11 +90,11 @@ export const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   productImage: {
-    width: '100%',
+    width: "100%",
     height: 150,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   productInfo: {
     paddingTop: 8,
@@ -89,33 +102,39 @@ export const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   storeName: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   discount: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#ff4444',
+    fontWeight: "700",
+    color: "#ff4444",
   },
   price: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
-  contentProduct: {
-    height: 150,
+  emptyProductContainer: {
+    height: 210,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    marginBottom: 30,
+    marginHorizontal: 16,
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 12,
   },
 });

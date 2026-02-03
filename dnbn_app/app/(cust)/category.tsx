@@ -38,6 +38,7 @@ export default function CategoryScreen() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -46,6 +47,7 @@ export default function CategoryScreen() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
+      setError(false);
       const response = await apiGet("/category/cust?custCode=CUST_001");
 
       if (response.ok) {
@@ -56,8 +58,11 @@ export default function CategoryScreen() {
           .filter((cat) => cat.isActive)
           .map((cat) => cat.categoryIdx.toString());
         setSelectedCategories(activeCategories);
+      } else {
+        setError(true);
       }
     } catch (error) {
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -139,6 +144,23 @@ export default function CategoryScreen() {
       {loading ? (
         <View style={styles.categoryContainer}>
           <ActivityIndicator size="large" color="#000" />
+        </View>
+      ) : error ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="alert-circle-outline" size={60} color="#999" />
+          <Text style={styles.emptyText}>서버 오류가 발생했습니다</Text>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={fetchCategories}
+          >
+            <Ionicons name="refresh" size={20} color="#EF7810" />
+            <Text style={styles.refreshButtonText}>새로고침</Text>
+          </TouchableOpacity>
+        </View>
+      ) : categories.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="grid-outline" size={60} color="#999" />
+          <Text style={styles.emptyText}>불러올 카테고리 정보가 없습니다</Text>
         </View>
       ) : (
         <View style={styles.categoryContainer}>

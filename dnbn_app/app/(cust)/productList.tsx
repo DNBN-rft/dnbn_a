@@ -39,7 +39,6 @@ export default function ProductListScreen() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("일반상품 목록:", data);
           setProductList(data);
         } else {
           console.error("API 요청 실패:", response.status, response.statusText);
