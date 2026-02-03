@@ -4,13 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./negolist.styles";
@@ -138,11 +138,9 @@ export default function NegoListScreen() {
     const fetchNegoProducts = async () => {
       try {
         setLoading(true);
-        const custCode = "CUST_001";
+        const custCode = "CUST001";
         const response = await apiGet(`/cust/nego?custCode=${custCode}`);
         const data = await response.json();
-
-        console.log("협상 상품 목록 조회 성공:", data);
 
         setNegoProducts(data);
 

@@ -109,7 +109,7 @@ export default function ReviewRegScreen() {
 
     setIsSubmitting(true);
     try {
-      const custCode = "CUST001";
+      const custCode = "CUST_001";
 
       // FormData 생성
       const formData = new FormData();

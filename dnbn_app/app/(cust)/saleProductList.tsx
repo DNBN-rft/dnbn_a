@@ -181,10 +181,13 @@ export default function SaleProductListScreen() {
       setTimeLeft((prev) => {
         const updated: { [key: string]: number } = {};
         saleProducts.forEach((product) => {
-          updated[product.id] = Math.max(
-            0,
-            (prev[product.id] || product.timeLimitSeconds) - 1,
-          );
+          const currentTime = prev[product.id] ?? product.timeLimitSeconds;
+          // 0이 되면 카운트 중단 (0 유지)
+          if (currentTime <= 0) {
+            updated[product.id] = 0;
+          } else {
+            updated[product.id] = currentTime - 1;
+          }
         });
         return updated;
       });
@@ -277,9 +280,15 @@ export default function SaleProductListScreen() {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingVertical: 8 }}
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const isExpired = timeLeft[item.id] !== undefined && timeLeft[item.id] <= 0;
+            
+            return (
             <TouchableOpacity
-              style={styles.productItemContainer}
+              style={[
+                styles.productItemContainer,
+                isExpired && styles.productItemExpired
+              ]}
               onPress={() => {
                 router.push({
                   pathname: "/(cust)/sale-product-detail",
@@ -287,18 +296,27 @@ export default function SaleProductListScreen() {
                 });
               }}
               activeOpacity={0.7}
+              disabled={isExpired}
             >
               {/* 시간 제한 배너 */}
-              {item.timeLimitSeconds &&
-                timeLeft[item.id] !== undefined &&
-                timeLeft[item.id] > 0 && (
-                  <View style={styles.timeLimitBanner}>
-                    <Ionicons name="time" size={16} color="rgb(239, 120, 16)" />
-                    <Text style={styles.timeLimitBannerText}>
-                      남은 시간: {formatCountdown(timeLeft[item.id])}
-                    </Text>
-                  </View>
-                )}
+              {item.timeLimitSeconds && timeLeft[item.id] !== undefined && (
+                <View style={[
+                  styles.timeLimitBanner,
+                  isExpired && styles.timeLimitBannerExpired
+                ]}>
+                  <Ionicons 
+                    name={isExpired ? "close-circle" : "time"} 
+                    size={16} 
+                    color={isExpired ? "#999" : "rgb(239, 120, 16)"} 
+                  />
+                  <Text style={[
+                    styles.timeLimitBannerText,
+                    isExpired && styles.timeLimitBannerTextExpired
+                  ]}>
+                    {isExpired ? "등록 시간 만료" : `남은 시간: ${formatCountdown(timeLeft[item.id])}`}
+                  </Text>
+                </View>
+              )}
 
               {/* 이미지와 정보 */}
               <View style={styles.productContentRow}>
@@ -307,10 +325,16 @@ export default function SaleProductListScreen() {
                   <Image
                     resizeMode="stretch"
                     source={item.uri}
-                    style={styles.productImage}
+                    style={[
+                      styles.productImage,
+                      isExpired && styles.productImageExpired
+                    ]}
                   />
                   {/* 할인 배지 */}
-                  <View style={styles.discountBadge}>
+                  <View style={[
+                    styles.discountBadge,
+                    isExpired && styles.discountBadgeExpired
+                  ]}>
                     <Text style={styles.discountBadgeText}>
                       {item.saleType === "할인률"
                         ? `${item.discount}%`
@@ -350,7 +374,8 @@ export default function SaleProductListScreen() {
                 </View>
               </View>
             </TouchableOpacity>
-          )}
+          );
+          }}
         ></FlatList>
       )}
 

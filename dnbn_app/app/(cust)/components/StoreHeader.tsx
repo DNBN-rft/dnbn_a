@@ -88,7 +88,15 @@ export function StoreHeader({
           </View>
         </View>
 
-        <Pressable style={styles.addressRow}>
+        <Pressable
+          style={styles.addressRow}
+          onPress={() => {
+            router.push({
+              pathname: "/(cust)/tabs/map",
+              params: { searchAddress: storeInfo.storeAddress },
+            });
+          }}
+        >
           <Ionicons name="location-outline" size={16} color="#666" />
           <Text style={styles.addressText}>{storeInfo.storeAddress}</Text>
           <Ionicons name="chevron-forward" size={16} color="#999" />
