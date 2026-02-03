@@ -1,7 +1,17 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { apiPost } from "@/utils/api";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
 
@@ -10,15 +20,57 @@ export default function LoginScreen() {
   const { login } = useAuth();
   const [userType, setUserType] = useState<"cust" | "store">("cust");
   const insets = useSafeAreaInsets();
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = (type: "cust" | "store") => {
-    // AuthContext에 로그인 상태 저장
-    login(type);
+  const handleLogin = async (type: "cust" | "store") => {
+    if (!loginId.trim() || !password.trim()) {
+      if (Platform.OS === "web") {
+        window.alert("아이디와 비밀번호를 입력해주세요.");
+      } else {
+        Alert.alert("알림", "아이디와 비밀번호를 입력해주세요.");
+      }
+      return;
+    }
 
-    if (type === "cust") {
-      router.replace("/(cust)/tabs/custhome");
-    } else {
-      router.replace("/(store)/tabs/storehome");
+    try {
+      const response = await apiPost("/cust/login/signin", {
+        loginId: loginId.trim(),
+        password: password.trim(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // custCode를 저장 (웹: localStorage, 앱: SecureStore)
+        if (Platform.OS === "web") {
+          localStorage.setItem("custCode", data.custCode);
+        } else {
+          await SecureStore.setItemAsync("custCode", data.custCode);
+        }
+
+        // AuthContext에 로그인 상태 저장
+        login(type);
+
+        if (type === "cust") {
+          router.replace("/(cust)/tabs/custhome");
+        } else {
+          router.replace("/(store)/tabs/storehome");
+        }
+      } else {
+        if (Platform.OS === "web") {
+          window.alert("로그인에 실패했습니다.");
+        } else {
+          Alert.alert("실패", "로그인에 실패했습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("로그인 오류:", error);
+      if (Platform.OS === "web") {
+        window.alert("로그인 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "로그인 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -82,12 +134,18 @@ export default function LoginScreen() {
             style={styles.input}
             placeholder="아이디"
             placeholderTextColor="#999"
+            value={loginId}
+            onChangeText={setLoginId}
+            autoCapitalize="none"
           />
           <TextInput
             style={styles.input}
             placeholder="비밀번호"
             placeholderTextColor="#999"
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            autoCapitalize="none"
           />
         </View>
 
