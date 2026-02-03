@@ -56,7 +56,7 @@ export default function CustReviewListScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
-  const custCode = "CUST001"; // TODO: 실제 로그인한 사용자의 custCode 가져오기
+  const custCode = "CUST_001"; // TODO: 실제 로그인한 사용자의 custCode 가져오기
 
   useEffect(() => {
     fetchReviews();

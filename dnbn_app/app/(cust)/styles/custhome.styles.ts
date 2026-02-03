@@ -33,9 +33,6 @@ export const styles = StyleSheet.create({
   headerButton: {
     padding: 6,
   },
-  iconText: {
-    fontSize: 20,
-  },
   bannerContainer: {
     height: 200,
     marginBottom: 30,
@@ -56,8 +53,15 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  productList: {
-    flex: 1,
+  arrowButton: {
+    width: 50,
+    height: 210,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
   },
   sectionHeader: {
     width: "100%",
@@ -120,27 +124,17 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
-  contentProduct: {
-    height: 150,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    marginBottom: 30,
-  },
-  moreButton: {
-    width: 50,
-    height: 150,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyContainer: {
-    height: 150,
+  emptyProductContainer: {
+    height: 210,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 16,
+    backgroundColor: "#fafafa",
+    borderRadius: 8,
   },
   emptyText: {
     fontSize: 14,
     color: "#999",
+    marginTop: 12,
   },
 });
