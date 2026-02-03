@@ -17,14 +17,26 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ReviewCard } from "./components/ReviewCard";
 import { styles } from "./nego-product-detail.styles";
+import type { Review } from "./types/storeInfo.types";
 
-interface ReviewItem {
+// 백엔드에서 받는 리뷰 아이템 타입
+interface BackendReviewItem {
   regNm: string;
   reviewContent: string;
   reviewRegDate: string;
   reviewRate: number;
   reviewAnswerContent: string | null;
+  reviewImgs: {
+    files: ProductImageFile[];
+  };
+}
+
+// ReviewCard에서 사용하는 타입으로 확장
+interface ReviewItem extends Review {
+  reviewAnswerContent: string | null;
+  reviewRegDate: string;
 }
 
 interface ProductImageFile {
@@ -48,7 +60,7 @@ interface NegoProductDetailResponse {
     isStock: boolean;
     isAdult: boolean;
     description: string;
-    reviewList: ReviewItem[];
+    reviewList: BackendReviewItem[];
     productImgs: {
       files: ProductImageFile[];
     };
@@ -112,6 +124,19 @@ export default function ProductDetailScreen() {
   if (!productData) return null;
 
   const product = productData.response;
+
+  // reviewImgs를 reviewImage로 변환
+  const transformedReviews: ReviewItem[] = product.reviewList.map(review => ({
+    custNick: review.regNm,
+    reviewProductCode: product.productCode,
+    reviewContent: review.reviewContent,
+    reviewRate: review.reviewRate,
+    regDateTime: review.reviewRegDate,
+    reviewImage: review.reviewImgs,
+    reviewAnswerContent: review.reviewAnswerContent,
+    reviewRegDate: review.reviewRegDate,
+    productNm: product.productNm,
+  }));
 
   return (
     <View style={styles.container}>
@@ -375,35 +400,9 @@ export default function ProductDetailScreen() {
 
               <View style={styles.tabContentContainer}>
                 <View style={styles.reviewsContent}>
-                  {product.reviewList && product.reviewList.length > 0 ? (
-                    product.reviewList.map((review, index) => (
-                      <View key={index} style={styles.reviewItem}>
-                        <View style={styles.reviewHeader}>
-                          <Text style={styles.reviewUserName}>
-                            {review.regNm}
-                          </Text>
-                          <View style={styles.reviewRating}>
-                            {[...Array(5)].map((_, starIndex) => (
-                              <Ionicons
-                                key={starIndex}
-                                name={
-                                  starIndex < review.reviewRate
-                                    ? "star"
-                                    : "star-outline"
-                                }
-                                size={14}
-                                color="#FFD700"
-                              />
-                            ))}
-                          </View>
-                        </View>
-                        <Text style={styles.reviewDate}>
-                          {review.reviewRegDate}
-                        </Text>
-                        <Text style={styles.reviewContent}>
-                          {review.reviewContent}
-                        </Text>
-                      </View>
+                  {transformedReviews && transformedReviews.length > 0 ? (
+                    transformedReviews.map((review, index) => (
+                      <ReviewCard key={index} item={review} productCode={product.productCode} />
                     ))
                   ) : (
                     <View style={styles.noReviewsContainer}>
