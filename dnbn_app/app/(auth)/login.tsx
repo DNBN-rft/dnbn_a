@@ -1,4 +1,3 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { apiPost } from "@/utils/api";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -17,7 +16,6 @@ import { styles } from "./login.styles";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
   const [userType, setUserType] = useState<"cust" | "store">("cust");
   const insets = useSafeAreaInsets();
   const [loginId, setLoginId] = useState("");
@@ -49,9 +47,6 @@ export default function LoginScreen() {
           await SecureStore.setItemAsync("custCode", data.custCode);
         }
 
-        // AuthContext에 로그인 상태 저장
-        login(type);
-
         if (type === "cust") {
           router.replace("/(cust)/tabs/custhome");
         } else {
@@ -78,7 +73,6 @@ export default function LoginScreen() {
     // SNS 로그인 처리 (나중에 구현)
     console.log(`${provider} 로그인`);
     // SNS 로그인은 cust로 처리
-    login("cust");
     router.replace("/(cust)/tabs/custhome");
   };
 
