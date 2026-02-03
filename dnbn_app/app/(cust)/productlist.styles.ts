@@ -110,19 +110,23 @@ export const styles = StyleSheet.create({
   },
   productInfo: {
     marginLeft: 12,
+    marginRight: 12,
     flex: 1,
     justifyContent: "center",
     alignSelf: "flex-start",
+    width: "100%",
   },
   productName: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 10,
+    width: "100%",
   },
   storeName: {
     fontSize: 14,
     color: "#666",
+    width: "100%",
   },
   priceContainer: {
     flexDirection: "row",
