@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
@@ -36,10 +36,72 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  imageSliderContainer: {
+    position: "relative",
+  },
   productImage: {
     width: "100%",
     height: 350,
     backgroundColor: "#f8f8f8",
+  },
+  paginationContainer: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+  },
+  paginationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  },
+  paginationDotActive: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#fff",
+  },
+  imageModalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageModalCloseButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    padding: 8,
+  },
+  imageModalSlide: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imageModalImage: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+  },
+  imageModalCounter: {
+    position: "absolute",
+    bottom: 40,
+    alignSelf: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  imageModalCounterText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   productDetailInfoContainer: {
     padding: 20,
@@ -173,7 +235,7 @@ export const styles = StyleSheet.create({
     color: "#EF7810",
   },
   stockContainer: {
-    justifyContent: "center"
+    justifyContent: "center",
   },
   stockText: {
     fontSize: 14,
@@ -226,11 +288,11 @@ export const styles = StyleSheet.create({
   tabContentContainer: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fafafa",
+    backgroundColor: "#fff",
   },
   tabContent: {
     fontSize: 14,
-    color: "#333",
+    color: "#000",
     lineHeight: 24,
   },
   descriptionContent: {
@@ -256,7 +318,7 @@ export const styles = StyleSheet.create({
   reviewUserName: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: "#000",
   },
   reviewRating: {
     flexDirection: "row",
@@ -269,7 +331,7 @@ export const styles = StyleSheet.create({
   },
   reviewContent: {
     fontSize: 14,
-    color: "#555",
+    color: "#000",
     lineHeight: 20,
   },
   detailRow: {
@@ -287,7 +349,7 @@ export const styles = StyleSheet.create({
   detailValue: {
     flex: 1,
     fontSize: 14,
-    color: "#333",
+    color: "#000",
   },
   actionButtonsContainer: {
     flexDirection: "row",
