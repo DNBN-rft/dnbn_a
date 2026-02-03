@@ -148,7 +148,7 @@ export default function MyInfoScreen() {
           <View style={styles.sectionCard}>
             <Pressable
               style={styles.sectionHeaderPressable}
-              onPress={() => router.push("/(cust)/gift-box")}
+              onPress={() => router.push("/(cust)/purchase-box")}
             >
               <View style={styles.sectionTitleContainer}>
                 <Ionicons name="cube" size={22} color="#EF7810" />

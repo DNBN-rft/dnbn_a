@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  giftBoxContainer: {
+  purchaseBoxContainer: {
     flex: 1,
   },
   notUsedAndUsedTab: {
@@ -77,17 +77,17 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   products: {
-    width: '45%',
+    width: "45%",
     marginBottom: 10,
   },
   productImageContainer: {
     height: 160,
     marginBottom: 3,
-    position: 'relative',
+    position: "relative",
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
     borderRadius: 5,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   productImage: {
     backgroundColor: "white",
@@ -98,44 +98,44 @@ export const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   statusOverlayBg: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
   bgUsed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
   bgCanceled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
   statusStamp: {
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     right: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderWidth: 3,
     borderRadius: 6,
-    transform: [{ rotate: '15deg' }],
+    transform: [{ rotate: "15deg" }],
   },
   stampUsed: {
-    borderColor: '#ffb366',
+    borderColor: "#ffb366",
   },
   stampCanceled: {
-    borderColor: '#ff8888',
+    borderColor: "#ff8888",
   },
   statusText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 1,
   },
   textUsed: {
-    color: '#ffb366',
+    color: "#ffb366",
   },
   textCanceled: {
-    color: '#ff8888',
+    color: "#ff8888",
   },
   productInfoContainer: {
     gap: 2,
