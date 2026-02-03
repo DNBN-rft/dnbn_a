@@ -1,58 +1,56 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./productlist.styles";
 
 type FilterType = "distance" | "price" | "rating" | null;
 
+// API 응답 타입 정의
+interface ProductImage {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface Product {
+  storeNm: string;
+  productCode: string;
+  productNm: string;
+  price: number;
+  rate: number;
+  reviewCnt: number;
+  productImg: ProductImage;
+}
+
 export default function ProductListScreen() {
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
+  const [productList, setProductList] = useState<Product[]>([]);
 
-  const productList = [
-    {
-      id: "1",
-      uri: require("@/assets/images/normalproduct/bread.jpg"),
-      productName: "슈크림 붕어빵",
-      storeName: "황금잉어빵",
-      price: 8000,
-      review: "4.8(120)",
-    },
-    {
-      id: "2",
-      uri: require("@/assets/images/normalproduct/gogi.jpg"),
-      productName: "고기",
-      storeName: "행복마트",
-      price: 12000,
-      review: "4.5(80)",
-    },
-    {
-      id: "3",
-      uri: require("@/assets/images/normalproduct/gogi2.jpg"),
-      productName: "삼겹살",
-      storeName: "프레시마켓",
-      price: 5000,
-      review: "4.7(200)",
-    },
-    {
-      id: "4",
-      uri: require("@/assets/images/normalproduct/gogi3.jpg"),
-      productName: "가정식",
-      storeName: "맛있는 집",
-      price: 6000,
-      review: "4.6(150)",
-    },
-    {
-      id: "5",
-      uri: require("@/assets/images/normalproduct/pizza.jpg"),
-      productName: "피자",
-      storeName: "행복마트",
-      price: 15000,
-      review: "4.9(90)",
-    },
-  ];
+  // API 호출: 일반상품 목록 불러오기
+  useEffect(() => {
+    const fetchProductList = async () => {
+      try {
+        const custCode = "CUST_001"; // 하드코딩된 고객 코드
+        const response = await apiGet(`/cust/regular?custCode=${custCode}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("일반상품 목록:", data);
+          setProductList(data);
+        } else {
+          console.error("API 요청 실패:", response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error("일반상품 목록 불러오기 실패:", error);
+      }
+    };
+
+    fetchProductList();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -134,7 +132,7 @@ export default function ProductListScreen() {
       <FlatList
         data={productList}
         showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.productCode}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
@@ -142,16 +140,33 @@ export default function ProductListScreen() {
           <View style={styles.listItemWrapper}>
             <TouchableOpacity
               style={styles.productItemContainer}
-              onPress={() => router.push("/(cust)/product-detail")}
+              onPress={() =>
+                router.push({
+                  pathname: "/(cust)/product-detail",
+                  params: { productCode: item.productCode },
+                })
+              }
             >
               <Image
                 resizeMode="stretch"
-                source={item.uri}
+                source={{ uri: item.productImg.fileUrl }}
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>
-                <Text style={styles.storeName}>{item.storeName}</Text>
-                <Text style={styles.productName}>{item.productName}</Text>
+                <Text
+                  style={styles.storeName}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.storeNm}
+                </Text>
+                <Text
+                  style={styles.productName}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.productNm}
+                </Text>
                 <View style={styles.priceContainer}>
                   <Text style={styles.priceText}>
                     {item.price.toLocaleString()}원
@@ -159,7 +174,7 @@ export default function ProductListScreen() {
                 </View>
                 <Text style={styles.reviewText}>
                   <Ionicons name="star" size={16} color="#FFD700" />
-                  {item.review}
+                  {item.rate.toFixed(1)}({item.reviewCnt})
                 </Text>
               </View>
             </TouchableOpacity>

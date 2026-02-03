@@ -76,6 +76,10 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
   },
+  productItemExpired: {
+    opacity: 0.6,
+    backgroundColor: "#f5f5f5",
+  },
 
   productContentRow: {
     flexDirection: "row",
@@ -98,6 +102,9 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  productImageExpired: {
+    opacity: 0.5,
+  },
   discountBadge: {
     position: "absolute",
     top: 8,
@@ -107,6 +114,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
     zIndex: 10,
+  },
+  discountBadgeExpired: {
+    backgroundColor: "#999",
   },
   discountBadgeText: {
     fontSize: 14,
@@ -128,10 +138,17 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
+  timeLimitBannerExpired: {
+    backgroundColor: "#f5f5f5",
+    borderColor: "#999",
+  },
   timeLimitBannerText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "rgb(239, 120, 16)",
+  },
+  timeLimitBannerTextExpired: {
+    color: "#999",
   },
   productInfo: {
     marginLeft: 12,
