@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/custhome.styles";
+import { apiGet } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -19,6 +21,9 @@ export default function CustHomeScreen() {
   const bannerRef = useRef<FlatList>(null);
   const currentIndex = useRef(0);
   const insets = useSafeAreaInsets();
+
+  const [negoProducts, setNegoProducts] = useState<any[]>([]);
+  const [isLoadingNego, setIsLoadingNego] = useState(true);
 
   const originalBanners = [
     { id: "1", uri: require("@/assets/images/normalproduct/bread.jpg") },
@@ -75,37 +80,38 @@ export default function CustHomeScreen() {
     },
   ];
 
-  const negoImages = [
-    {
-      id: "1",
-      uri: require("@/assets/images/image1.jpg"),
-      productName: "콘푸로스트",
-      storeName: "A마트",
-      price: 10000,
-    },
-    {
-      id: "2",
-      uri: require("@/assets/images/image1.jpg"),
-      productName: "미니건조기",
-      storeName: "B가전",
-      price: 20000,
-    },
-    {
-      id: "3",
-      uri: require("@/assets/images/image1.jpg"),
-      productName: "컴퓨터",
-      storeName: "C상가",
-      price: 300000,
-    },
-    {
-      id: "4",
-      uri: require("@/assets/images/image1.jpg"),
-      productName: "강철텀블러",
-      storeName: "D주조",
-      price: 5842210,
-    },
-  ];
+  // API 호출하여 네고 상품 데이터 가져오기
+  useEffect(() => {
+    const fetchNegoProducts = async () => {
+      try {
+        setIsLoadingNego(true);
+        const custCode = "CUST001";
+        const response = await apiGet(`/cust/nego/home?custCode=${custCode}`);
+        const data = await response.json();
+        if (response.ok && Array.isArray(data)) {
+          setNegoProducts(data);
+        } else {
+          console.error("네고 상품 로드 실패:", data);
+        }
+      } catch (error) {
+        console.error("네고 상품 API 호출 실패:", error);
+      } finally {
+        setIsLoadingNego(false);
+      }
+    };
 
+    fetchNegoProducts();
+  }, []);
+
+  const transformedNegoProducts = negoProducts.map((item) => ({
+    id: item.productCode,
+    uri: item.images?.files?.[0]?.fileUrl 
+      ? { uri: item.images.files[0].fileUrl }
+      : { uri: "https://via.placeholder.com/150" },
+    productName: item.productNm,
+    storeName: item.storeNm,
+    price: item.price,
+  }));
   const commonImages = [
     {
       id: "1",
@@ -296,16 +302,16 @@ export default function CustHomeScreen() {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={negoImages}
+            data={transformedNegoProducts}
             keyExtractor={(item) => item.id}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.productCard}
-                onPress={() => router.push("/(cust)/nego-product-detail")}
+                onPress={() => router.push(`/(cust)/nego-product-detail?productCode=${item.id}`)}
               >
-                <Image source={item.uri} style={styles.productImage} />
+                <Image source={typeof item.uri === 'string' ? { uri: item.uri } : item.uri} style={styles.productImage} />
                 <View style={styles.productInfo}>
                   <Text style={styles.productName} numberOfLines={1}>
                     {item.productName}
