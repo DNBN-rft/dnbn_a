@@ -484,7 +484,15 @@ export default function ProductDetailScreen() {
           <Ionicons name="cart-outline" size={24} color="#EF7810" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.purchaseButton}>
+        <TouchableOpacity 
+          style={styles.purchaseButton}
+          onPress={() => {
+            router.push({
+              pathname: "/(cust)/orderPage",
+              params: { productCode },
+            });
+          }}
+        >
           <Text style={styles.purchaseButtonText}>구매하기</Text>
         </TouchableOpacity>
       </View>

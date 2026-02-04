@@ -1,6 +1,6 @@
 import { apiPost } from "@/utils/api";
+import { setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
   Alert,
@@ -41,21 +41,11 @@ export default function LoginScreen() {
         const data = await response.json();
 
         // custCode를 저장 (웹: localStorage, 앱: SecureStore)
-        if (Platform.OS === "web") {
-          localStorage.setItem("custCode", data.custCode);
-          localStorage.setItem("hasLocation", data.isExistLocation);
-          localStorage.setItem("hasActCategory", data.isSetActiveCategory);
-        } else {
-          await SecureStore.setItemAsync("custCode", data.custCode);
-          await SecureStore.setItemAsync(
-            "hasLocation",
-            String(data.isExistLocation),
-          );
-          await SecureStore.setItemAsync(
-            "hasActCategory",
-            String(data.isSetActiveCategory),
-          );
-        }
+        await setMultipleItems({
+          custCode: data.custCode,
+          hasLocation: data.isExistLocation,
+          hasActCategory: data.isSetActiveCategory,
+        });
 
         // 주소 정보가 없으면 주소 설정 페이지로 이동
         if (data.isExistLocation === false) {

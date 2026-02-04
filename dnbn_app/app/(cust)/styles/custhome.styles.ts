@@ -32,6 +32,16 @@ export const styles = StyleSheet.create({
   },
   headerButton: {
     padding: 6,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF6B6B",
   },
   bannerContainer: {
     height: 250,

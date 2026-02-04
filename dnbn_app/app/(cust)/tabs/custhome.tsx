@@ -1,8 +1,15 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useCallback, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BannerCarousel from "../components/BannerCarousel";
 import NegoProductSection from "../components/NegoProductSection";
@@ -17,12 +24,37 @@ export default function CustHomeScreen() {
   const [saleProducts, setSaleProducts] = useState<any[]>([]);
   const [regularProducts, setRegularProducts] = useState<any[]>([]);
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
+  const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
+
+  // 읽지 않은 알림 확인 함수
+  const checkUnreadAlarm = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
+
+      if (!custCode) return;
+
+      const response = await apiGet(`/cust/alarm/unread?custCode=${custCode}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setHasUnreadAlarm(data === true);
+      }
+    } catch (error) {
+      console.error("읽지 않은 알림 확인 중 오류:", error);
+    }
+  };
 
   // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
         const custCode = "CUST_001";
+
+        // 읽지 않은 알림 상태 확인
+        checkUnreadAlarm();
 
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
@@ -86,7 +118,7 @@ export default function CustHomeScreen() {
       };
 
       fetchAllProducts();
-    }, [])
+    }, []),
   );
 
   // 상품 데이터 변환
@@ -227,6 +259,7 @@ export default function CustHomeScreen() {
             onPress={() => router.push("/(cust)/notifications")}
           >
             <Ionicons name="notifications-outline" size={24} color="#000" />
+            {hasUnreadAlarm && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}

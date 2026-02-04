@@ -174,8 +174,10 @@ const bannerStyles = StyleSheet.create({
   },
   discountBadge: {
     backgroundColor: "#EF7810",
-    width: 70,
-    paddingHorizontal: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 70,
+    paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 4,
   },
@@ -183,6 +185,7 @@ const bannerStyles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "700",
+    textAlign: "center",
   },
   priceWrapper: {
     flexDirection: "column",
