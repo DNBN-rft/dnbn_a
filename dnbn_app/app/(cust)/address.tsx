@@ -43,8 +43,6 @@ export default function AddressScreen() {
         custCode = await SecureStore.getItemAsync("custCode");
       }
 
-      console.log("고객 코드:", custCode);
-
       try {
         setIsLoading(true);
         const response = await apiGet(`/cust/location?custCode=${custCode}`);

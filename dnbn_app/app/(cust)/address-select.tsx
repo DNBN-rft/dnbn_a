@@ -47,7 +47,6 @@ export default function AddressSelectScreen() {
         code = (await SecureStore.getItemAsync("custCode")) || "";
       }
       setCustCode(code);
-      console.log("고객 코드:", code);
     };
 
     fetchCustCode();

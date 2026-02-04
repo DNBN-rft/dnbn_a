@@ -292,8 +292,6 @@ export default function EditMyInfoScreen() {
         custCode = await SecureStore.getItemAsync("custCode");
       }
 
-      console.log("고객 코드:", custCode);
-
       if (custCode) {
         const response = await apiPost("/cust/info/edit", { custCode });
 
