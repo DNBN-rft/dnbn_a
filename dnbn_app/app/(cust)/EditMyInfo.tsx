@@ -165,15 +165,58 @@ export default function EditMyInfoScreen() {
     setWithdrawPasswordModalVisible(true);
   };
 
-  const handleWithdrawPasswordSubmit = () => {
+  const handleWithdrawPasswordSubmit = async () => {
     if (!withdrawPassword.trim()) {
-      Alert.alert("입력 오류", "비밀번호를 입력해주세요.");
+      if (Platform.OS === "web") {
+        alert("비밀번호를 입력해주세요.");
+      } else {
+        Alert.alert("입력 오류", "비밀번호를 입력해주세요.");
+      }
       return;
     }
-    // TODO: API를 통해 비밀번호 검증
-    setWithdrawPasswordModalVisible(false);
-    setWithdrawPassword("");
-    router.push("/(cust)/Withdraw");
+
+    try {
+      let custCode = null;
+
+      if (Platform.OS === "web") {
+        custCode = localStorage.getItem("custCode");
+      } else {
+        custCode = await SecureStore.getItemAsync("custCode");
+      }
+
+      if (!custCode) {
+        if (Platform.OS === "web") {
+          alert("고객 정보를 찾을 수 없습니다.");
+        } else {
+          Alert.alert("오류", "고객 정보를 찾을 수 없습니다.");
+        }
+        return;
+      }
+
+      const response = await apiPost("/cust/password/check", {
+        custCode,
+        custCurrentPassword: withdrawPassword,
+      });
+
+      if (response.ok) {
+        setWithdrawPasswordModalVisible(false);
+        setWithdrawPassword("");
+        router.push("/(cust)/Withdraw");
+      } else {
+        if (Platform.OS === "web") {
+          alert("비밀번호가 일치하지 않습니다.");
+        } else {
+          Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("비밀번호 확인 에러:", error);
+      if (Platform.OS === "web") {
+        alert("비밀번호 확인 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "비밀번호 확인 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   const handleUpdate = async () => {
