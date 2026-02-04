@@ -1,8 +1,15 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useCallback, useState } from "react";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BannerCarousel from "../components/BannerCarousel";
 import NegoProductSection from "../components/NegoProductSection";
@@ -17,75 +24,125 @@ export default function CustHomeScreen() {
   const [saleProducts, setSaleProducts] = useState<any[]>([]);
   const [regularProducts, setRegularProducts] = useState<any[]>([]);
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
+  const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
-  // 모든 상품 데이터를 동시에 가져오기
-  useEffect(() => {
-    const fetchAllProducts = async () => {
-      const custCode = "CUST_001";
+  // 읽지 않은 알림 확인 함수
+  const checkUnreadAlarm = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
 
-      try {
-        const [negoResponse, saleResponse, regularResponse, bannerResponse] =
-          await Promise.all([
-            apiGet(`/cust/nego/home?custCode=${custCode}`),
-            apiGet(`/cust/sales/home?custCode=${custCode}`),
-            apiGet(`/cust/regular/home?custCode=${custCode}`),
-            apiGet(`/cust/sales/banner?custCode=${custCode}`), // 배너용 할인율 높은 상품
-          ]);
+      if (!custCode) return;
 
-        // 네고 상품 처리
-        try {
-          const negoData = await negoResponse.json();
-          if (negoResponse.ok && Array.isArray(negoData)) {
-            setNegoProducts(negoData);
-          } else {
-            console.error("네고 상품 로드 실패:", negoData);
-          }
-        } catch (error) {
-          console.error("네고 상품 데이터 파싱 실패:", error);
-        }
+      const response = await apiGet(`/cust/alarm/unread?custCode=${custCode}`);
 
-        // 할인 상품 처리
-        try {
-          const saleData = await saleResponse.json();
-          if (saleResponse.ok && Array.isArray(saleData)) {
-            setSaleProducts(saleData);
-          } else {
-            console.error("할인 상품 로드 실패:", saleData);
-          }
-        } catch (error) {
-          console.error("할인 상품 데이터 파싱 실패:", error);
-        }
-
-        // 일반 상품 처리
-        try {
-          const regularData = await regularResponse.json();
-          if (regularResponse.ok && Array.isArray(regularData)) {
-            setRegularProducts(regularData);
-          } else {
-            console.error("일반 상품 로드 실패:", regularData);
-          }
-        } catch (error) {
-          console.error("일반 상품 데이터 파싱 실패:", error);
-        }
-
-        // 배너 상품 처리
-        try {
-          const bannerData = await bannerResponse.json();
-          if (bannerResponse.ok && Array.isArray(bannerData)) {
-            setBannerProducts(bannerData);
-          } else {
-            console.error("배너 상품 로드 실패:", bannerData);
-          }
-        } catch (error) {
-          console.error("배너 상품 데이터 파싱 실패:", error);
-        }
-      } catch (error) {
-        console.error("상품 API 호출 실패:", error);
+      if (response.ok) {
+        const data = await response.json();
+        setHasUnreadAlarm(data === true);
       }
-    };
+    } catch (error) {
+      console.error("읽지 않은 알림 확인 중 오류:", error);
+    }
+  };
 
-    fetchAllProducts();
-  }, []);
+  // 장바구니 아이템 개수 조회 함수
+  const fetchCartItemCount = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
+
+      if (!custCode) return;
+
+      const response = await apiGet(`/cust/cart/cnt?custCode=${custCode}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setCartItemCount(data.totalCount);
+      }
+    } catch (error) {
+      console.error("장바구니 개수 조회 중 오류:", error);
+    }
+  };
+
+  // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAllProducts = async () => {
+        const custCode = "CUST_001";
+
+        // 읽지 않은 알림 상태 및 장바구니 개수 확인
+        checkUnreadAlarm();
+        fetchCartItemCount();
+
+        try {
+          const [negoResponse, saleResponse, regularResponse, bannerResponse] =
+            await Promise.all([
+              apiGet(`/cust/nego/home?custCode=${custCode}`),
+              apiGet(`/cust/sales/home?custCode=${custCode}`),
+              apiGet(`/cust/regular/home?custCode=${custCode}`),
+              apiGet(`/cust/sales/banner?custCode=${custCode}`), // 배너용 할인율 높은 상품
+            ]);
+
+          // 네고 상품 처리
+          try {
+            const negoData = await negoResponse.json();
+            if (negoResponse.ok && Array.isArray(negoData)) {
+              setNegoProducts(negoData);
+            } else {
+              console.error("네고 상품 로드 실패:", negoData);
+            }
+          } catch (error) {
+            console.error("네고 상품 데이터 파싱 실패:", error);
+          }
+
+          // 할인 상품 처리
+          try {
+            const saleData = await saleResponse.json();
+            if (saleResponse.ok && Array.isArray(saleData)) {
+              setSaleProducts(saleData);
+            } else {
+              console.error("할인 상품 로드 실패:", saleData);
+            }
+          } catch (error) {
+            console.error("할인 상품 데이터 파싱 실패:", error);
+          }
+
+          // 일반 상품 처리
+          try {
+            const regularData = await regularResponse.json();
+            if (regularResponse.ok && Array.isArray(regularData)) {
+              setRegularProducts(regularData);
+            } else {
+              console.error("일반 상품 로드 실패:", regularData);
+            }
+          } catch (error) {
+            console.error("일반 상품 데이터 파싱 실패:", error);
+          }
+
+          // 배너 상품 처리
+          try {
+            const bannerData = await bannerResponse.json();
+            if (bannerResponse.ok && Array.isArray(bannerData)) {
+              setBannerProducts(bannerData);
+            } else {
+              console.error("배너 상품 로드 실패:", bannerData);
+            }
+          } catch (error) {
+            console.error("배너 상품 데이터 파싱 실패:", error);
+          }
+        } catch (error) {
+          console.error("상품 API 호출 실패:", error);
+        }
+      };
+
+      fetchAllProducts();
+    }, []),
+  );
 
   // 상품 데이터 변환
   const transformedNegoProducts = negoProducts.map((item) => ({
@@ -149,6 +206,7 @@ export default function CustHomeScreen() {
         price: item.discountedPrice,
         originalPrice: item.originalPrice,
         productCode: item.productCode,
+        saleType: item.saleType,
       };
     });
 
@@ -224,12 +282,20 @@ export default function CustHomeScreen() {
             onPress={() => router.push("/(cust)/notifications")}
           >
             <Ionicons name="notifications-outline" size={24} color="#000" />
+            {hasUnreadAlarm && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => router.push("/(cust)/cart")}
           >
             <Ionicons name="cart-outline" size={24} color="#000" />
+            {cartItemCount > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>
+                  {cartItemCount > 9 ? "9+" : cartItemCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>

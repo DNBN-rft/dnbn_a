@@ -68,8 +68,6 @@ export default function MyInfoScreen() {
         custCode = await SecureStore.getItemAsync("custCode");
       }
 
-      console.log("고객 코드:", custCode);
-
       if (custCode) {
         const response = await apiPost("/cust/info", { custCode });
 

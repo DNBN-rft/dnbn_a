@@ -1,4 +1,4 @@
-import { StyleSheet, Platform } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
@@ -57,11 +57,11 @@ export const styles = StyleSheet.create({
   },
   inputStyle: {
     flex: 1,
+    height: 50,
     borderWidth: 1,
     borderColor: "#f0f0f0",
     borderRadius: 6,
     paddingHorizontal: 12,
-    paddingVertical: 10,
     fontSize: 15,
     color: "#919191ff",
     backgroundColor: "#fff",
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
         height: 200,
       },
       android: {
-        height: 45,
+        height: 55,
       },
     }),
     borderWidth: 1,
@@ -132,8 +132,62 @@ export const styles = StyleSheet.create({
     height: "100%",
   },
   pickerItem: {
+    fontSize: 16,
+    height: 216,
+    color: "#333",
+  },
+  pickerButton: {
+    marginTop: 8,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+  },
+  pickerButtonText: {
     fontSize: 15,
-    height: 200,
+    color: "#919191ff",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  modalDoneButton: {
+    fontSize: 16,
+    color: "#EF7810",
+    fontWeight: "600",
+  },
+  iosModalPicker: {
+    width: "100%",
+    height: 216,
+    backgroundColor: "#fff",
   },
   buttonDisabled: {
     opacity: 0.5,

@@ -24,6 +24,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -66,6 +67,7 @@ export default function PracticeView() {
   const [isSignupLoading, setIsSignupLoading] = useState(false);
   const [isIdCheckLoading, setIsIdCheckLoading] = useState(false);
   const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
+  const [showEmailDomainPicker, setShowEmailDomainPicker] = useState(false);
 
   useEffect(() => {
     // 약관 페이지에서 전달받은 마케팅 동의 상태 설정
@@ -220,7 +222,7 @@ export default function PracticeView() {
                 style={[
                   styles.pressableStyle,
                   (isIdCheckLoading || (isIdChecked && isIdAvailable)) &&
-                  styles.buttonDisabled,
+                    styles.buttonDisabled,
                 ]}
                 onPress={handleCheckDuplicateId}
                 disabled={isIdCheckLoading || (isIdChecked && isIdAvailable)}
@@ -340,7 +342,7 @@ export default function PracticeView() {
                   styles.pressableStyle,
                   (isNickNmCheckLoading ||
                     (isNickNmChecked && isNickNmAvailable)) &&
-                  styles.buttonDisabled,
+                    styles.buttonDisabled,
                 ]}
                 onPress={handleCheckDuplicateNickNm}
                 disabled={
@@ -373,7 +375,7 @@ export default function PracticeView() {
                 style={[
                   styles.inputStyle,
                   selectedEmailDomain !== "direct" &&
-                  styles.emailDomainDisabled,
+                    styles.emailDomainDisabled,
                 ]}
                 placeholder="example.com"
                 placeholderTextColor={"#ccc"}
@@ -382,28 +384,98 @@ export default function PracticeView() {
                 editable={selectedEmailDomain === "direct"}
               />
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={selectedEmailDomain}
-                onValueChange={(domain) =>
-                  handleEmailDomainSelectUtil(
-                    domain,
-                    setSelectedEmailDomain,
-                    setEmailDomain,
-                  )
-                }
-              >
-                <Picker.Item label="직접 입력" value="direct" />
-                <Picker.Item label="네이버" value="naver.com" />
-                <Picker.Item label="지메일" value="gmail.com" />
-                <Picker.Item label="다음" value="daum.net" />
-                <Picker.Item label="카카오" value="kakao.com" />
-                <Picker.Item label="네이트" value="nate.com" />
-                <Picker.Item label="한메일" value="hanmail.net" />
-              </Picker>
-            </View>
+            {Platform.OS === "ios" ? (
+              <>
+                <Pressable
+                  style={styles.pickerButton}
+                  onPress={() => setShowEmailDomainPicker(true)}
+                >
+                  <Text style={styles.pickerButtonText}>
+                    {selectedEmailDomain === "direct"
+                      ? "직접 입력"
+                      : selectedEmailDomain === "naver.com"
+                        ? "네이버"
+                        : selectedEmailDomain === "gmail.com"
+                          ? "지메일"
+                          : selectedEmailDomain === "daum.net"
+                            ? "다음"
+                            : selectedEmailDomain === "kakao.com"
+                              ? "카카오"
+                              : selectedEmailDomain === "nate.com"
+                                ? "네이트"
+                                : "한메일"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#666" />
+                </Pressable>
+
+                <Modal
+                  visible={showEmailDomainPicker}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setShowEmailDomainPicker(false)}
+                >
+                  <View style={styles.modalOverlay}>
+                    <Pressable
+                      style={styles.modalBackdrop}
+                      onPress={() => setShowEmailDomainPicker(false)}
+                    />
+                    <View style={styles.modalContent}>
+                      <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>이메일 선택</Text>
+                        <TouchableOpacity
+                          onPress={() => setShowEmailDomainPicker(false)}
+                        >
+                          <Text style={styles.modalDoneButton}>완료</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Picker
+                        selectedValue={selectedEmailDomain}
+                        onValueChange={(domain) => {
+                          handleEmailDomainSelectUtil(
+                            domain,
+                            setSelectedEmailDomain,
+                            setEmailDomain,
+                          );
+                        }}
+                        style={styles.iosModalPicker}
+                        itemStyle={styles.pickerItem}
+                      >
+                        <Picker.Item label="직접 입력" value="direct" />
+                        <Picker.Item label="네이버" value="naver.com" />
+                        <Picker.Item label="지메일" value="gmail.com" />
+                        <Picker.Item label="다음" value="daum.net" />
+                        <Picker.Item label="카카오" value="kakao.com" />
+                        <Picker.Item label="네이트" value="nate.com" />
+                        <Picker.Item label="한메일" value="hanmail.net" />
+                      </Picker>
+                    </View>
+                  </View>
+                </Modal>
+              </>
+            ) : (
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={selectedEmailDomain}
+                  onValueChange={(domain) =>
+                    handleEmailDomainSelectUtil(
+                      domain,
+                      setSelectedEmailDomain,
+                      setEmailDomain,
+                    )
+                  }
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  <Picker.Item label="직접 입력" value="direct" />
+                  <Picker.Item label="네이버" value="naver.com" />
+                  <Picker.Item label="지메일" value="gmail.com" />
+                  <Picker.Item label="다음" value="daum.net" />
+                  <Picker.Item label="카카오" value="kakao.com" />
+                  <Picker.Item label="네이트" value="nate.com" />
+                  <Picker.Item label="한메일" value="hanmail.net" />
+                </Picker>
+              </View>
+            )}
           </View>
 
           <View style={styles.viewMargin}>
