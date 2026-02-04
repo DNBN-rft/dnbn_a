@@ -26,7 +26,7 @@ export default function EditMyInfoScreen() {
   const insets = useSafeAreaInsets();
   const [accountId, setAccountId] = useState("cust");
   const [phoneNumber, setPhoneNumber] = useState("02-123-4567");
-  const [gender, setGender] = useState("male");
+  const [gender, setGender] = useState("M");
   const [loading, setLoading] = useState(true);
 
   // 비밀번호 변경 모달
@@ -252,7 +252,7 @@ export default function EditMyInfoScreen() {
       const response = await apiPut("/cust/personal-data/edit", {
         custCode,
         custTelNo: phoneNumber.replace(/-/g, ""),
-        custGender: gender === "male" ? "M" : "F",
+        custGender: gender,
       });
 
       if (response.ok) {
@@ -303,13 +303,7 @@ export default function EditMyInfoScreen() {
           setPhoneNumber(
             data.custTelNo ? formatPhoneNumber(data.custTelNo) : "",
           );
-          setGender(
-            data.custGender === "M"
-              ? "male"
-              : data.custGender === "F"
-                ? "female"
-                : "male",
-          );
+          setGender(data.custGender || "M");
         } else {
           console.error("고객 정보 조회 실패:", response.status);
         }
@@ -390,15 +384,15 @@ export default function EditMyInfoScreen() {
             <View style={styles.genderContainer}>
               <TouchableOpacity
                 style={styles.genderButton}
-                onPress={() => setGender("male")}
+                onPress={() => setGender("M")}
               >
                 <View
                   style={[
                     styles.genderRadioButton,
-                    gender === "male" && styles.genderRadioButtonActive,
+                    gender === "M" && styles.genderRadioButtonActive,
                   ]}
                 >
-                  {gender === "male" && (
+                  {gender === "M" && (
                     <View style={styles.genderRadioButtonInner} />
                   )}
                 </View>
@@ -406,15 +400,15 @@ export default function EditMyInfoScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.genderButton}
-                onPress={() => setGender("female")}
+                onPress={() => setGender("F")}
               >
                 <View
                   style={[
                     styles.genderRadioButton,
-                    gender === "female" && styles.genderRadioButtonActive,
+                    gender === "F" && styles.genderRadioButtonActive,
                   ]}
                 >
-                  {gender === "female" && (
+                  {gender === "F" && (
                     <View style={styles.genderRadioButtonInner} />
                   )}
                 </View>
