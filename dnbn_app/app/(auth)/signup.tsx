@@ -177,8 +177,8 @@ export default function PracticeView() {
   };
 
   const radioButtons = [
-    { id: "1", label: "남", value: "male" },
-    { id: "2", label: "여", value: "female" },
+    { id: "1", label: "남", value: "M" },
+    { id: "2", label: "여", value: "F" },
   ];
 
   return (
