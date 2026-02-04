@@ -35,7 +35,7 @@ export default function LoginScreen() {
 
     try {
       // 모바일은 /store/app/login, 웹은 /store/login
-      const endpoint = type === "cust" ? "/cust/login/signin" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
+      const endpoint = type === "cust" ? "/cust/login" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
       const requestBody = type === "cust" 
         ? { loginId: loginId.trim(), password: password.trim() }
         : { username: loginId.trim(), password: password.trim() };
