@@ -1,5 +1,8 @@
 import { apiPost } from "@/utils/api";
-import { setMultipleItems } from "@/utils/storageUtil";
+import {
+  setMultipleItems,
+  setStorageItem,
+} from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -73,68 +76,22 @@ export default function LoginScreen() {
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
           // cust: custCode만 저장
-          if (Platform.OS === "web") {
-            if (data.custCode)
-              localStorage.setItem("custCode", String(data.custCode));
-          } else {
-            if (data.custCode) {
-              await SecureStore.setItemAsync("custCode", String(data.custCode));
-            }
+          if (data.custCode) {
+            await setStorageItem("custCode", String(data.custCode));
           }
           router.replace("/(cust)/tabs/custhome");
         } else {
           // store 로그인
-          if (Platform.OS === "web") {
-            // 웹: 쿠키로 token 처리
-            if (data.accessToken)
-              localStorage.setItem("accessToken", String(data.accessToken));
-            if (data.refreshToken)
-              localStorage.setItem("refreshToken", String(data.refreshToken));
-            if (data.accessTokenExpiresIn)
-              localStorage.setItem(
-                "accessTokenExpiresIn",
-                String(data.accessTokenExpiresIn),
-              );
-            if (data.refreshTokenExpiresIn)
-              localStorage.setItem(
-                "refreshTokenExpiresIn",
-                String(data.refreshTokenExpiresIn),
-              );
-            if (data.tokenType)
-              localStorage.setItem("tokenType", String(data.tokenType));
-          } else {
-            // 모바일: response에서 token 받아서 저장
-            if (data.accessToken) {
-              await SecureStore.setItemAsync(
-                "accessToken",
-                String(data.accessToken),
-              );
-            }
-            if (data.refreshToken) {
-              await SecureStore.setItemAsync(
-                "refreshToken",
-                String(data.refreshToken),
-              );
-            }
-            if (data.accessTokenExpiresIn) {
-              await SecureStore.setItemAsync(
-                "accessTokenExpiresIn",
-                String(data.accessTokenExpiresIn),
-              );
-            }
-            if (data.refreshTokenExpiresIn) {
-              await SecureStore.setItemAsync(
-                "refreshTokenExpiresIn",
-                String(data.refreshTokenExpiresIn),
-              );
-            }
-            if (data.tokenType) {
-              await SecureStore.setItemAsync(
-                "tokenType",
-                String(data.tokenType),
-              );
-            }
-          }
+          const storeTokens: Record<string, any> = {};
+          if (data.accessToken) storeTokens.accessToken = data.accessToken;
+          if (data.refreshToken) storeTokens.refreshToken = data.refreshToken;
+          if (data.accessTokenExpiresIn)
+            storeTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
+          if (data.refreshTokenExpiresIn)
+            storeTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
+          if (data.tokenType) storeTokens.tokenType = data.tokenType;
+
+          await setMultipleItems(storeTokens);
           router.replace("/(store)/tabs/storehome");
         }
       } else {
