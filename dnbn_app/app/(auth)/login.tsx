@@ -32,7 +32,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await apiPost("/cust/login/signin", {
+      const response = await apiPost("/cust/login", {
         loginId: loginId.trim(),
         password: password.trim(),
       });
