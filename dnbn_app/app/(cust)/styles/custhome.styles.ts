@@ -34,17 +34,17 @@ export const styles = StyleSheet.create({
     padding: 6,
   },
   bannerContainer: {
-    height: 200,
+    height: 250,
     marginBottom: 30,
   },
   bannerSlide: {
     width: screenWidth,
-    height: 200,
+    height: 250,
     overflow: "hidden",
   },
   bannerImage: {
     width: screenWidth,
-    height: 200,
+    height: 250,
   },
   contentSection: {
     marginBottom: 20,

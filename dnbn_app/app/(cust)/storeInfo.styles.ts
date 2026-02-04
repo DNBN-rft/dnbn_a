@@ -140,7 +140,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
   storeReviewContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 16,
   },
   reviewItemContainer: {
@@ -206,6 +206,7 @@ export const styles = StyleSheet.create({
   },
   storeProductContainer: {
     paddingHorizontal: 10,
+    paddingVertical: 16,
   },
   productGridContainer: {
     flexDirection: "row",

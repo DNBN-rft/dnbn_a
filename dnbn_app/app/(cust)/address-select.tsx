@@ -6,6 +6,7 @@ import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
+  BackHandler,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -35,6 +36,7 @@ export default function AddressSelectScreen() {
   const [addressLabel, setAddressLabel] = useState("");
   const [isSelected, setIsSelected] = useState(false);
   const [custCode, setCustCode] = useState("");
+  const [isInitialSetup, setIsInitialSetup] = useState(false);
 
   useEffect(() => {
     const fetchCustCode = async () => {
@@ -50,6 +52,50 @@ export default function AddressSelectScreen() {
 
     fetchCustCode();
   }, []);
+
+  // 최초 설정인지 확인 및 알림
+  useEffect(() => {
+    const checkInitialSetup = async () => {
+      if (!isEditMode) {
+        let hasLocation = false;
+        if (Platform.OS === "web") {
+          hasLocation = localStorage.getItem("hasLocation") === "true";
+        } else {
+          const value = await SecureStore.getItemAsync("hasLocation");
+          hasLocation = value === "true";
+        }
+
+        if (!hasLocation) {
+          setIsInitialSetup(true);
+          if (Platform.OS === "web") {
+            window.alert("주소 정보가 없어요 기본 주소지를 설정해주세요");
+          } else {
+            Alert.alert(
+              "알림",
+              "주소 정보가 없어요 기본 주소지를 설정해주세요",
+            );
+          }
+        }
+      }
+    };
+
+    checkInitialSetup();
+  }, [isEditMode]);
+
+  // 하드웨어 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (!isInitialSetup) return;
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        handleBack();
+        return true; // 기본 동작 방지
+      },
+    );
+
+    return () => backHandler.remove();
+  }, [isInitialSetup]);
 
   // 수정 모드일 경우 기존 데이터로 초기화
   useEffect(() => {
@@ -113,14 +159,35 @@ export default function AddressSelectScreen() {
             ? "주소 수정이 완료되었습니다."
             : "주소 저장이 완료되었습니다.";
 
+          // 로그인 후 첫 주소 등록인지 확인
+          let hasActCategory = false;
+          if (Platform.OS === "web") {
+            hasActCategory = localStorage.getItem("hasActCategory") === "true";
+          } else {
+            const value = await SecureStore.getItemAsync("hasActCategory");
+            hasActCategory = value === "true";
+          }
+
           if (Platform.OS === "web") {
             window.alert(successMessage);
-            router.push("/(cust)/address");
+            // 카테고리가 설정되지 않았으면 카테고리 설정 페이지로
+            if (!hasActCategory && !isEditMode) {
+              router.replace("/(cust)/category");
+            } else {
+              router.replace("/(cust)/address");
+            }
           } else {
             Alert.alert("성공", successMessage, [
               {
                 text: "확인",
-                onPress: () => router.push("/(cust)/address"),
+                onPress: () => {
+                  // 카테고리가 설정되지 않았으면 카테고리 설정 페이지로
+                  if (!hasActCategory && !isEditMode) {
+                    router.replace("/(cust)/category");
+                  } else {
+                    router.replace("/(cust)/address");
+                  }
+                },
               },
             ]);
           }
@@ -158,21 +225,52 @@ export default function AddressSelectScreen() {
     params.locationIdx,
   ]);
 
+  const handleBack = useCallback(() => {
+    if (isInitialSetup) {
+      // 최초 설정 중일 때 경고
+      if (Platform.OS === "web") {
+        const confirmLogout = window.confirm(
+          "기본 설정을 완료해야 서비스 이용이 가능합니다.\n\n로그아웃하시겠습니까?",
+        );
+        if (confirmLogout) {
+          // 로그아웃 처리
+          localStorage.removeItem("custCode");
+          localStorage.removeItem("hasLocation");
+          localStorage.removeItem("hasActCategory");
+          router.replace("/(auth)/login");
+        }
+      } else {
+        Alert.alert("알림", "기본 설정을 완료해야 서비스 이용이 가능합니다.", [
+          {
+            text: "계속",
+            style: "cancel",
+          },
+          {
+            text: "로그아웃",
+            onPress: async () => {
+              // 로그아웃 처리
+              await SecureStore.deleteItemAsync("custCode");
+              await SecureStore.deleteItemAsync("hasLocation");
+              await SecureStore.deleteItemAsync("hasActCategory");
+              router.replace("/(auth)/login");
+            },
+          },
+        ]);
+      }
+    } else {
+      router.back();
+    }
+  }, [isInitialSetup]);
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View style={styles.container}>
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
 
       {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
@@ -181,68 +279,79 @@ export default function AddressSelectScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* 주소 별칭 입력 */}
-        <View style={styles.section}>
-          <Text style={styles.label}>주소 별칭 *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="예: 집, 회사, 학교"
-            placeholderTextColor="#999"
-            value={addressLabel}
-            onChangeText={setAddressLabel}
-          />
-        </View>
-
-        {/* 주소 검색 */}
-        <View style={styles.section}>
-          <Text style={styles.label}>주소 *</Text>
-          <Pressable
-            style={styles.addressInputContainer}
-            onPress={handleOpenAddressSearch}
-          >
-            <Text
-              style={[
-                styles.addressInputText,
-                !selectedAddress && styles.addressInputPlaceholder,
-              ]}
-            >
-              {selectedAddress || "주소를 검색해주세요"}
-            </Text>
-            <Ionicons name="search" size={20} color="#666" />
-          </Pressable>
-        </View>
-
-        {/* 기본 배송지 설정 */}
-        <View style={styles.section}>
-          <Pressable
-            style={styles.checkboxContainer}
-            onPress={() => setIsSelected(!isSelected)}
-          >
-            <Ionicons
-              name={isSelected ? "checkbox" : "square-outline"}
-              size={24}
-              color={isSelected ? "#EF7810" : "#999"}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={-insets.bottom}
+      >
+        <ScrollView style={styles.content}>
+          {/* 주소 별칭 입력 */}
+          <View style={styles.section}>
+            <Text style={styles.label}>주소 별칭 *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="예: 집, 회사, 학교"
+              placeholderTextColor="#999"
+              value={addressLabel}
+              onChangeText={setAddressLabel}
             />
-            <Text style={styles.checkboxLabel}>기본 배송지로 설정</Text>
+          </View>
+
+          {/* 주소 검색 */}
+          <View style={styles.section}>
+            <Text style={styles.label}>주소 *</Text>
+            <Pressable
+              style={styles.addressInputContainer}
+              onPress={handleOpenAddressSearch}
+            >
+              <Text
+                style={[
+                  styles.addressInputText,
+                  !selectedAddress && styles.addressInputPlaceholder,
+                ]}
+              >
+                {selectedAddress || "주소를 검색해주세요"}
+              </Text>
+              <Ionicons name="search" size={20} color="#666" />
+            </Pressable>
+          </View>
+
+          {/* 기본 배송지 설정 */}
+          <View style={styles.section}>
+            <Pressable
+              style={styles.checkboxContainer}
+              onPress={() => setIsSelected(!isSelected)}
+            >
+              <Ionicons
+                name={isSelected ? "checkbox" : "square-outline"}
+                size={24}
+                color={isSelected ? "#EF7810" : "#999"}
+              />
+              <Text style={styles.checkboxLabel}>기본 주소지로 설정</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+
+        {/* 하단 버튼 */}
+        <View style={styles.bottomButtonContainer}>
+          {isInitialSetup && (
+            <Text style={styles.infoText}>
+              현재 주소가 기본 주소지로 설정됩니다
+            </Text>
+          )}
+          <Pressable
+            style={[
+              styles.saveButton,
+              (!selectedAddress || !addressLabel.trim()) &&
+                styles.saveButtonDisabled,
+            ]}
+            onPress={handleSaveAddress}
+            disabled={!selectedAddress || !addressLabel.trim()}
+          >
+            <Text style={styles.saveButtonText}>저장하기</Text>
           </Pressable>
         </View>
-      </ScrollView>
-
-      {/* 하단 버튼 */}
-      <View style={styles.bottomButtonContainer}>
-        <Pressable
-          style={[
-            styles.saveButton,
-            (!selectedAddress || !addressLabel.trim()) &&
-              styles.saveButtonDisabled,
-          ]}
-          onPress={handleSaveAddress}
-          disabled={!selectedAddress || !addressLabel.trim()}
-        >
-          <Text style={styles.saveButtonText}>저장하기</Text>
-        </Pressable>
-      </View>
+      </KeyboardAvoidingView>
 
       {/* 주소 검색 모달 */}
       <Modal
@@ -278,8 +387,8 @@ export default function AddressSelectScreen() {
       </Modal>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 }

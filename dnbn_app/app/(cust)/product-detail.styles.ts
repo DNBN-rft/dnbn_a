@@ -33,7 +33,6 @@ export const styles = StyleSheet.create({
   },
 
   productDetailContainer: {
-    flex: 1,
     backgroundColor: "#fff",
   },
   imageSliderContainer: {
@@ -251,7 +250,6 @@ export const styles = StyleSheet.create({
     marginLeft: 4,
   },
   tabsContainer: {
-    flex: 1,
     borderTopWidth: 8,
     borderTopColor: "#f5f5f5",
     backgroundColor: "#fff",
@@ -286,24 +284,18 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
   tabContentContainer: {
-    flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+    minHeight: 250,
   },
   tabContent: {
     fontSize: 14,
     color: "#000",
     lineHeight: 24,
   },
-  descriptionContent: {
-    flex: 1,
-  },
-  detailsContent: {
-    flex: 1,
-  },
-  reviewsContent: {
-    flex: 1,
-  },
+  descriptionContent: {},
+  detailsContent: {},
+  reviewsContent: {},
   reviewItem: {
     paddingVertical: 16,
     borderBottomWidth: 1,

@@ -26,6 +26,7 @@ export default function NoticeDetailScreen() {
   const router = useRouter();
   const [questionList, setQuestionList] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetchQuestions();
@@ -33,6 +34,8 @@ export default function NoticeDetailScreen() {
 
   const fetchQuestions = async () => {
     try {
+      setLoading(true);
+      setError(false);
       const custCode = "CUST_001";
       const response = await apiGet(`/cust/question/${custCode}`);
 
@@ -51,9 +54,11 @@ export default function NoticeDetailScreen() {
         setQuestionList(formattedQuestions);
       } else {
         console.error("문의사항 조회 실패:", response.status);
+        setError(true);
       }
     } catch (error) {
       console.error("문의사항 조회 에러:", error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -92,81 +97,113 @@ export default function NoticeDetailScreen() {
       </View>
 
       <View style={styles.questionListContainer}>
-        <FlatList
-          data={sortedQuestionList}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
+        {loading ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>로딩 중...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="alert-circle-outline" size={60} color="#999" />
+            <Text style={styles.emptyText}>서버 오류가 발생했습니다</Text>
             <TouchableOpacity
-              style={styles.questionItemContainer}
-              activeOpacity={0.7}
-              onPress={() =>
-                router.navigate({
-                  pathname: "/(cust)/question-answer",
-                  params: { questionId: item.id },
-                })
-              }
+              style={styles.refreshButton}
+              onPress={fetchQuestions}
             >
-              <View style={styles.questionItemLeftSection}>
-                <View
-                  style={[
-                    styles.questionIconContainer,
-                    item.status === "답변대기" &&
-                      styles.questionItemStatusPending,
-                  ]}
-                >
-                  {item.status === "답변대기" ? (
-                    <Ionicons
-                      name="chatbubble-ellipses-outline"
-                      size={24}
-                      color="#999999"
-                    />
-                  ) : (
-                    <Ionicons
-                      name="checkmark-circle-outline"
-                      size={24}
-                      color="#EF7810"
-                    />
-                  )}
-                </View>
+              <Ionicons name="refresh" size={20} color="#EF7810" />
+              <Text style={styles.refreshButtonText}>다시 시도</Text>
+            </TouchableOpacity>
+          </View>
+        ) : sortedQuestionList.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={60}
+              color="#999"
+            />
+            <Text style={styles.emptyText}>문의내역이 존재하지 않습니다</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={sortedQuestionList}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.questionItemContainer}
+                activeOpacity={0.7}
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/(cust)/question-answer",
+                    params: { questionId: item.id },
+                  })
+                }
+              >
+                <View style={styles.questionItemLeftSection}>
+                  <View
+                    style={[
+                      styles.questionIconContainer,
+                      item.status === "답변대기" &&
+                        styles.questionItemStatusPending,
+                    ]}
+                  >
+                    {item.status === "답변대기" ? (
+                      <Ionicons
+                        name="chatbubble-ellipses-outline"
+                        size={24}
+                        color="#999999"
+                      />
+                    ) : (
+                      <Ionicons
+                        name="checkmark-circle-outline"
+                        size={24}
+                        color="#EF7810"
+                      />
+                    )}
+                  </View>
 
-                <View style={styles.questionItemDetailContainer}>
-                  <View style={styles.questionItemRightSection}>
-                    <View
-                      style={[
-                        styles.questionItemStatusContainer,
-                        item.status === "답변대기" &&
-                          styles.questionItemStatusPending,
-                      ]}
-                    >
-                      <Text
+                  <View style={styles.questionItemDetailContainer}>
+                    <View style={styles.questionItemRightSection}>
+                      <View
                         style={[
-                          styles.questionItemStatusText,
+                          styles.questionItemStatusContainer,
                           item.status === "답변대기" &&
-                            styles.questionItemStatusTextPending,
+                            styles.questionItemStatusPending,
                         ]}
                       >
-                        {item.status}
+                        <Text
+                          style={[
+                            styles.questionItemStatusText,
+                            item.status === "답변대기" &&
+                              styles.questionItemStatusTextPending,
+                          ]}
+                        >
+                          {item.status}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text
+                      style={styles.questionItemTitleText}
+                      numberOfLines={2}
+                    >
+                      {item.title}
+                    </Text>
+
+                    <View style={styles.questionItemFooter}>
+                      <Ionicons name="time-outline" size={14} color="#999" />
+
+                      <Text style={styles.questionItemDateText}>
+                        {item.date}
                       </Text>
                     </View>
                   </View>
 
-                  <Text style={styles.questionItemTitleText} numberOfLines={2}>
-                    {item.title}
-                  </Text>
-
-                  <View style={styles.questionItemFooter}>
-                    <Ionicons name="time-outline" size={14} color="#999" />
-
-                    <Text style={styles.questionItemDateText}>{item.date}</Text>
-                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
                 </View>
-
-                <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

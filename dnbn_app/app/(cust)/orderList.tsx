@@ -33,6 +33,7 @@ export default function PurchaseScreen() {
 
   const [loading, setLoading] = useState(false);
   const [purchaseList, setPurchaseList] = useState<Order[]>([]);
+  const [error, setError] = useState(false);
 
   // 모달 내에서 임시로 상태를 관리
   const [tempStatus, setTempStatus] = useState<
@@ -64,6 +65,7 @@ export default function PurchaseScreen() {
   const fetchPurchaseHistory = async () => {
     try {
       setLoading(true);
+      setError(false);
       const custCode = "CUST_001";
       const response = await apiGet(
         `/cust/order/purchase-history?custCode=${custCode}`,
@@ -74,9 +76,11 @@ export default function PurchaseScreen() {
         setPurchaseList(data.purchaseList || []);
       } else {
         console.error("구매내역 조회 실패:", response.status);
+        setError(true);
       }
     } catch (error) {
       console.error("구매내역 조회 에러:", error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -90,6 +94,7 @@ export default function PurchaseScreen() {
   ) => {
     try {
       setLoading(true);
+      setError(false);
       const custCode = "CUST_001";
 
       // 파라미터가 있으면 사용, 없으면 상태값 사용
@@ -126,9 +131,11 @@ export default function PurchaseScreen() {
         setPurchaseList(data.purchaseList || []);
       } else {
         console.error("필터 구매내역 조회 실패:", response.status);
+        setError(true);
       }
     } catch (error) {
       console.error("필터 구매내역 조회 에러:", error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -243,6 +250,23 @@ export default function PurchaseScreen() {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color="#FF6B35" />
+        </View>
+      ) : error ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="alert-circle-outline" size={60} color="#999" />
+          <Text style={styles.emptyText}>서버 오류가 발생했습니다</Text>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={fetchPurchaseHistory}
+          >
+            <Ionicons name="refresh" size={20} color="#EF7810" />
+            <Text style={styles.refreshButtonText}>다시 시도</Text>
+          </TouchableOpacity>
+        </View>
+      ) : purchaseList.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="receipt-outline" size={60} color="#999" />
+          <Text style={styles.emptyText}>주문내역이 존재하지 않습니다</Text>
         </View>
       ) : (
         <FlatList
