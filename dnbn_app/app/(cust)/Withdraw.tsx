@@ -170,7 +170,9 @@ export default function WithdrawScreen() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
+        
         <Text style={styles.title}>회원 탈퇴</Text>
+        
         <View style={styles.placeholder} />
       </View>
 
@@ -178,10 +180,12 @@ export default function WithdrawScreen() {
         {/* 탈퇴 이유 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>탈퇴 이유</Text>
+          
           <Text style={styles.description}>
             서비스를 이용하지 않는 이유가 무엇인가요? 더 나은 서비스를 제공하기
             위해 의견을 듣고 싶습니다.
           </Text>
+          
           <View style={styles.reasonContainer}>
             {WITHDRAW_REASONS.map((reason) => (
               <TouchableOpacity
@@ -199,6 +203,7 @@ export default function WithdrawScreen() {
                     <View style={styles.radioButtonInner} />
                   )}
                 </View>
+                
                 <Text
                   style={[
                     styles.reasonLabel,
@@ -215,6 +220,7 @@ export default function WithdrawScreen() {
           {selectedReason === "5" && (
             <View style={styles.detailSection}>
               <Text style={styles.detailLabel}>상세 이유</Text>
+              
               <TextInput
                 style={styles.detailInput}
                 placeholder="탈퇴 이유를 입력해주세요"
@@ -232,12 +238,15 @@ export default function WithdrawScreen() {
         {/* 주의사항 */}
         <View style={styles.warningSection}>
           <Text style={styles.warningTitle}>⚠️ 주의사항</Text>
+          
           <Text style={styles.warningText}>
             • 탈퇴 후 계정은 복구할 수 없습니다.
           </Text>
+          
           <Text style={styles.warningText}>
             • 보유하신 포인트는 소멸됩니다.
           </Text>
+          
           <Text style={styles.warningText}>
             • 개인정보는 관련 법령에 따라 일정기간 보관 후 삭제됩니다.
           </Text>
@@ -257,6 +266,7 @@ export default function WithdrawScreen() {
             <Text style={styles.submitButtonText}>제출</Text>
           )}
         </TouchableOpacity>
+        
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => router.back()}
