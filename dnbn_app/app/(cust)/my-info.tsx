@@ -69,6 +69,7 @@ export default function MyInfoScreen() {
       }
 
       console.log("고객 코드:", custCode);
+      custCode = "CUST_001";
 
       if (custCode) {
         const response = await apiPost("/cust/info", { custCode });
@@ -223,26 +224,34 @@ export default function MyInfoScreen() {
               <View style={styles.sectionTitleContainer}>
                 <Ionicons name="cube" size={22} color="#EF7810" />
                 <Text style={styles.sectionTitle}>미수령 상품</Text>
+                <Text style={styles.notUsedCountBadge}>
+                  {loading
+                    ? "0"
+                    : custInfo
+                      ? custInfo.notUsedProductCount.toString()
+                      : "0"}
+                  개
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#EF7810" />
             </Pressable>
-            <View style={styles.giftinfoContainer}>
+            <View style={styles.purchaseInfoContainer}>
               {loading ? (
                 <Text style={styles.infoValue}>로딩 중...</Text>
               ) : custInfo?.notUsedProducts &&
                 custInfo.notUsedProducts.length > 0 ? (
                 custInfo.notUsedProducts.slice(0, 3).map((product, index) => (
-                  <View key={index} style={styles.giftBox}>
+                  <View key={index} style={styles.purchaseBox}>
                     {product.productImageUrl ? (
                       <Image
                         source={{ uri: product.productImageUrl }}
-                        style={styles.giftImage}
+                        style={styles.purchaseImage}
                         resizeMode="contain"
                       />
                     ) : (
                       <Image
                         source={require("@/assets/images/qr.png")}
-                        style={styles.giftImage}
+                        style={styles.purchaseImage}
                         resizeMode="contain"
                       />
                     )}
