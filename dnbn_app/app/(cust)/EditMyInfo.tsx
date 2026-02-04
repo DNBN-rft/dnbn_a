@@ -262,7 +262,7 @@ export default function EditMyInfoScreen() {
         } else {
           Alert.alert("성공", message);
         }
-        router.back();
+        router.replace("/(cust)/EditMyInfo");
       } else {
         const errorMessage = await response.text();
         if (Platform.OS === "web") {
@@ -300,7 +300,9 @@ export default function EditMyInfoScreen() {
         if (response.ok) {
           const data: CustInfoEditData = await response.json();
           setAccountId(data.id || "");
-          setPhoneNumber(data.custTelNo || "");
+          setPhoneNumber(
+            data.custTelNo ? formatPhoneNumber(data.custTelNo) : "",
+          );
           setGender(
             data.custGender === "M"
               ? "male"
