@@ -69,7 +69,6 @@ export default function MyInfoScreen() {
       }
 
       console.log("고객 코드:", custCode);
-      custCode = "CUST_001";
 
       if (custCode) {
         const response = await apiPost("/cust/info", { custCode });
