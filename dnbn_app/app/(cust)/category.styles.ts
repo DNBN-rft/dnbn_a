@@ -34,9 +34,28 @@ export const styles = StyleSheet.create({
   categoryContainer: {
     flex: 1,
   },
+  controlButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  controlButtonText: {
+    fontSize: 14,
+    color: "#aaa",
+  },
+  separator: {
+    fontSize: 14,
+    color: "#ddd",
+  },
+  listWrapper: {
+    flex: 1,
+    alignItems: "center",
+  },
   columnWrapper: {
     justifyContent: "flex-start",
-    paddingHorizontal: 20,
   },
   categoryItem: {
     paddingHorizontal: 30,
@@ -73,10 +92,26 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+  submitButtonDisabled: {
+    borderColor: "#ddd",
+    backgroundColor: "#f5f5f5",
+  },
   submitButtonText: {
     color: "#EF7810",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  submitButtonTextDisabled: {
+    color: "#999",
+  },
+  warningContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+  warningText: {
+    fontSize: 16,
+    color: "#ff3b30",
+    textAlign: "center",
   },
   emptyContainer: {
     flex: 1,

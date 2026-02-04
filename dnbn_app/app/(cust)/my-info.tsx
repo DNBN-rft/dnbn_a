@@ -1,3 +1,4 @@
+import { apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -16,23 +17,74 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./my-info.styles";
 
+interface NotUsedProduct {
+  productImageUrl: string;
+  orderDateTime: string;
+}
+
+interface CustInfoData {
+  custNm: string;
+  custTelNo: string;
+  custGender: string;
+  custPaymentType: string;
+  custPaymentDetail: string;
+  locationTitle: string;
+  locationAddr: string;
+  notUsedProductCount: number;
+  notUsedProducts: NotUsedProduct[];
+}
+
 export default function MyInfoScreen() {
   const [pwModalVisible, setPwModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [custInfo, setCustInfo] = useState<CustInfoData | null>(null);
+  const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  const fetchUserData = async () => {
-    let custCode = null;
+  // 전화번호 포맷팅 함수
+  const formatPhoneNumber = (text: string) => {
+    const numbers = text.replace(/[^0-9]/g, "");
+    const limitedNumbers = numbers.slice(0, 11);
 
-    if (Platform.OS === "web") {
-      custCode = localStorage.getItem("custCode");
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers;
+    } else if (limitedNumbers.length <= 7) {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
     } else {
-      custCode = await SecureStore.getItemAsync("custCode");
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3, 7)}-${limitedNumbers.slice(7)}`;
     }
+  };
 
-    console.log("고객 코드:", custCode);
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      let custCode = null;
+
+      if (Platform.OS === "web") {
+        custCode = localStorage.getItem("custCode");
+      } else {
+        custCode = await SecureStore.getItemAsync("custCode");
+      }
+
+      console.log("고객 코드:", custCode);
+
+      if (custCode) {
+        const response = await apiPost("/cust/info", { custCode });
+
+        if (response.ok) {
+          const data: CustInfoData = await response.json();
+          setCustInfo(data);
+        } else {
+          console.error("고객 정보 조회 실패:", response.status);
+        }
+      }
+    } catch (error) {
+      console.error("고객 정보 조회 에러:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -77,17 +129,33 @@ export default function MyInfoScreen() {
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>이름</Text>
-                <Text style={styles.infoValue}>김철수</Text>
+                <Text style={styles.infoValue}>
+                  {loading ? "로딩 중..." : custInfo?.custNm || "-"}
+                </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>전화번호</Text>
-                <Text style={styles.infoValue}>010-1234-5678</Text>
+                <Text style={styles.infoValue}>
+                  {loading
+                    ? "로딩 중..."
+                    : custInfo?.custTelNo
+                      ? formatPhoneNumber(custInfo.custTelNo)
+                      : "-"}
+                </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>성별</Text>
-                <Text style={styles.infoValue}>남성</Text>
+                <Text style={styles.infoValue}>
+                  {loading
+                    ? "로딩 중..."
+                    : custInfo?.custGender === "M"
+                      ? "남성"
+                      : custInfo?.custGender === "F"
+                        ? "여성"
+                        : "-"}
+                </Text>
               </View>
             </View>
           </View>
@@ -106,12 +174,16 @@ export default function MyInfoScreen() {
             </Pressable>
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>카드 종류</Text>
-                <Text style={styles.infoValue}>신용카드/신용카드/계좌이체</Text>
+                <Text style={styles.infoLabel}>결제 수단</Text>
+                <Text style={styles.infoValue}>
+                  {loading ? "로딩 중..." : custInfo?.custPaymentType || "-"}
+                </Text>
               </View>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>카드 번호</Text>
-                <Text style={styles.infoValue}>**** **** **** 1234</Text>
+                <Text style={styles.infoLabel}>결제 정보</Text>
+                <Text style={styles.infoValue}>
+                  {loading ? "로딩 중..." : custInfo?.custPaymentDetail || "-"}
+                </Text>
               </View>
             </View>
           </View>
@@ -130,15 +202,13 @@ export default function MyInfoScreen() {
             </Pressable>
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>위치 이름</Text>
-                <Text style={styles.infoValue}>
-                  서울특별시 중구 세종대로 110
+                <Text style={styles.infoLabel}>
+                  {loading
+                    ? "로딩 중..."
+                    : custInfo?.locationTitle || "위치 이름"}
                 </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>위치 이름</Text>
                 <Text style={styles.infoValue}>
-                  서울특별시 강남구 테헤란로 427
+                  {loading ? "로딩 중..." : custInfo?.locationAddr || "-"}
                 </Text>
               </View>
             </View>
@@ -153,26 +223,45 @@ export default function MyInfoScreen() {
               <View style={styles.sectionTitleContainer}>
                 <Ionicons name="cube" size={22} color="#EF7810" />
                 <Text style={styles.sectionTitle}>미수령 상품</Text>
+                <Text style={styles.notUsedCountBadge}>
+                  {loading
+                    ? "0"
+                    : custInfo
+                      ? custInfo.notUsedProductCount.toString()
+                      : "0"}
+                  개
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#EF7810" />
             </Pressable>
-            <View style={styles.giftinfoContainer}>
-              <View style={styles.giftBox}>
-                <Image
-                  source={require("@/assets/images/qr.png")}
-                  style={styles.giftImage}
-                  resizeMode="contain"
-                />
-                <Text style={styles.infoValue}>2024-05-15</Text>
-              </View>
-              <View style={styles.giftBox}>
-                <Image
-                  source={require("@/assets/images/image1.jpg")}
-                  style={styles.giftImage}
-                  resizeMode="contain"
-                />
-                <Text style={styles.infoValue}>2024-07-15</Text>
-              </View>
+            <View style={styles.purchaseInfoContainer}>
+              {loading ? (
+                <Text style={styles.infoValue}>로딩 중...</Text>
+              ) : custInfo?.notUsedProducts &&
+                custInfo.notUsedProducts.length > 0 ? (
+                custInfo.notUsedProducts.slice(0, 3).map((product, index) => (
+                  <View key={index} style={styles.purchaseBox}>
+                    {product.productImageUrl ? (
+                      <Image
+                        source={{ uri: product.productImageUrl }}
+                        style={styles.purchaseImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Image
+                        source={require("@/assets/images/qr.png")}
+                        style={styles.purchaseImage}
+                        resizeMode="contain"
+                      />
+                    )}
+                    <Text style={styles.infoValue}>
+                      {product.orderDateTime.split(" ")[0]}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.infoValue}>미수령 상품이 없습니다</Text>
+              )}
             </View>
           </View>
         </View>

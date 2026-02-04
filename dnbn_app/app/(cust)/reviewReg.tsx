@@ -98,12 +98,20 @@ export default function ReviewRegScreen() {
 
   const handleSubmitReview = async () => {
     if (!rating || !reviewText.trim()) {
-      Alert.alert("오류", "모든 필수 항목을 입력해주세요.");
+      if (Platform.OS === "web") {
+        window.alert("별점과 리뷰 내용을 모두 입력해주세요.");
+      } else {
+        Alert.alert("알림", "별점과 리뷰 내용을 모두 입력해주세요.");
+      }
       return;
     }
 
     if (!isEditMode && !orderDetailIdx) {
-      Alert.alert("오류", "주문 정보가 없습니다.");
+      if (Platform.OS === "web") {
+        window.alert("주문 정보를 찾을 수 없습니다.");
+      } else {
+        Alert.alert("알림", "주문 정보를 찾을 수 없습니다.");
+      }
       return;
     }
 
@@ -158,22 +166,36 @@ export default function ReviewRegScreen() {
         const message = isEditMode
           ? "리뷰가 수정되었습니다."
           : "리뷰가 등록되었습니다.";
-        Alert.alert("성공", message, [
-          {
-            text: "확인",
-            onPress: () => router.replace("/(cust)/review"),
-          },
-        ]);
+
+        if (Platform.OS === "web") {
+          window.alert(message);
+          router.replace("/(cust)/review");
+        } else {
+          Alert.alert(message, "", [
+            {
+              text: "확인",
+              onPress: () => router.replace("/(cust)/review"),
+            },
+          ]);
+        }
       } else {
-        const errorText = await response.text();
-        const errorMessage = isEditMode
-          ? "리뷰 수정에 실패했습니다."
-          : "리뷰 등록에 실패했습니다.";
-        Alert.alert("오류", errorText || errorMessage);
+        const message = isEditMode
+          ? "리뷰 수정에 실패했습니다. 잠시 후 다시 시도해주세요."
+          : "이미 리뷰 작성이 완료된 상품입니다.";
+
+        if (Platform.OS === "web") {
+          window.alert(message);
+        } else {
+          Alert.alert(message);
+        }
       }
     } catch (error) {
       console.error("Review submission error:", error);
-      Alert.alert("오류", "리뷰 처리 중 오류가 발생했습니다.");
+      if (Platform.OS === "web") {
+        window.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      } else {
+        Alert.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setIsSubmitting(false);
     }

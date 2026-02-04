@@ -34,6 +34,7 @@ export default function LoginScreen() {
     }
 
     try {
+<<<<<<< HEAD
       // 모바일은 /store/app/login, 웹은 /store/login
       const endpoint = type === "cust" ? "/cust/login/signin" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
       const requestBody = type === "cust" 
@@ -41,10 +42,49 @@ export default function LoginScreen() {
         : { username: loginId.trim(), password: password.trim() };
       
       const response = await apiPost(endpoint, requestBody);
+=======
+      const response = await apiPost("/cust/login", {
+        loginId: loginId.trim(),
+        password: password.trim(),
+      });
+>>>>>>> 8beb856abbe2dd8379ffef7b72a2842e449282c9
 
       if (response.ok) {
         const data = await response.json();
 
+<<<<<<< HEAD
+=======
+        // custCode를 저장 (웹: localStorage, 앱: SecureStore)
+        if (Platform.OS === "web") {
+          localStorage.setItem("custCode", data.custCode);
+          localStorage.setItem("hasLocation", data.isExistLocation);
+          localStorage.setItem("hasActCategory", data.isSetActiveCategory);
+        } else {
+          await SecureStore.setItemAsync("custCode", data.custCode);
+          await SecureStore.setItemAsync(
+            "hasLocation",
+            String(data.isExistLocation),
+          );
+          await SecureStore.setItemAsync(
+            "hasActCategory",
+            String(data.isSetActiveCategory),
+          );
+        }
+
+        // 주소 정보가 없으면 주소 설정 페이지로 이동
+        if (data.isExistLocation === false) {
+          router.replace("/(cust)/address-select");
+          return;
+        }
+
+        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+        if (data.isSetActiveCategory === false) {
+          router.replace("/(cust)/category");
+          return;
+        }
+
+        // 모든 설정이 완료된 경우에만 메인 페이지로 이동
+>>>>>>> 8beb856abbe2dd8379ffef7b72a2842e449282c9
         if (type === "cust") {
           // cust: custCode만 저장
           if (Platform.OS === "web") {
@@ -181,7 +221,6 @@ export default function LoginScreen() {
         <View style={styles.linkContainer}>
           <TouchableOpacity onPress={() => router.push("/(auth)/find-account")}>
             <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
-
           </TouchableOpacity>
           {userType === "cust" && (
             <>
