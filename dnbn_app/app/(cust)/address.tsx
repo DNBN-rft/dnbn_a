@@ -208,7 +208,18 @@ export default function AddressScreen() {
       </View>
 
       <View style={styles.locationSettingContainer}>
-        {addr.length < 3 ? (
+        {addr.length === 0 ? (
+          <View style={styles.infoBox}>
+            <Ionicons
+              name="information-circle-outline"
+              size={18}
+              color="#EF7810"
+            />
+            <Text style={{ color: "#ef7810" }}>
+              첫 주소는 기본 주소지로 설정됩니다.
+            </Text>
+          </View>
+        ) : addr.length < 3 ? (
           <View style={styles.infoBox}>
             <Ionicons
               name="information-circle-outline"

@@ -96,6 +96,13 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
   },
 
+  infoText: {
+    fontSize: 13,
+    color: "#ef1010",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
   saveButton: {
     backgroundColor: "#fff",
     borderWidth: 1,

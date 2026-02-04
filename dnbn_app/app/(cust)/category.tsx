@@ -1,10 +1,12 @@
 import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   FlatList,
   Image,
   Platform,
@@ -39,10 +41,64 @@ export default function CategoryScreen() {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isInitialSetup, setIsInitialSetup] = useState(false);
 
   useEffect(() => {
     fetchCategories();
+    checkInitialSetup();
   }, []);
+
+  // 최초 설정인지 확인 및 알림
+  useEffect(() => {
+    const showInitialSetupAlert = async () => {
+      let hasActCategory = false;
+      if (Platform.OS === "web") {
+        hasActCategory = localStorage.getItem("hasActCategory") === "true";
+      } else {
+        const value = await SecureStore.getItemAsync("hasActCategory");
+        hasActCategory = value === "true";
+      }
+
+      if (!hasActCategory) {
+        if (Platform.OS === "web") {
+          window.alert("카테고리 정보가 없어요 관심 카테고리를 설정해주세요");
+        } else {
+          Alert.alert(
+            "알림",
+            "카테고리 정보가 없어요 관심 카테고리를 설정해주세요",
+          );
+        }
+      }
+    };
+
+    showInitialSetupAlert();
+  }, []);
+
+  // 하드웨어 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (!isInitialSetup) return;
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        handleBack();
+        return true; // 기본 동작 방지
+      },
+    );
+
+    return () => backHandler.remove();
+  }, [isInitialSetup]);
+
+  const checkInitialSetup = async () => {
+    if (Platform.OS === "web") {
+      const hasActCategory = localStorage.getItem("hasActCategory");
+      // hasActCategory가 "false"면 최초 설정
+      setIsInitialSetup(hasActCategory === "false");
+    } else {
+      const hasActCategory = await SecureStore.getItemAsync("hasActCategory");
+      setIsInitialSetup(hasActCategory === "false");
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -76,7 +132,25 @@ export default function CategoryScreen() {
     }
   };
 
+  const handleSelectAll = () => {
+    const allCategoryIds = categories.map((cat) => cat.categoryIdx.toString());
+    setSelectedCategories(allCategoryIds);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedCategories([]);
+  };
+
   const handleSave = async () => {
+    if (selectedCategories.length === 0) {
+      if (Platform.OS === "web") {
+        window.alert("최소 1개 이상의 카테고리를 선택해주세요.");
+      } else {
+        Alert.alert("알림", "최소 1개 이상의 카테고리를 선택해주세요.");
+      }
+      return;
+    }
+
     try {
       const categoryIdxList = selectedCategories.map((id) => Number(id));
 
@@ -89,15 +163,32 @@ export default function CategoryScreen() {
         const responseData = await response.json();
 
         if (responseData.success) {
+          // 설정 완료 표시
+          if (Platform.OS === "web") {
+            localStorage.setItem("hasActCategory", "true");
+          } else {
+            await SecureStore.setItemAsync("hasActCategory", "true");
+          }
+
           if (Platform.OS === "web") {
             window.alert(responseData.message);
-            router.back();
+            // 최초 설정이면 custhome으로, 아니면 이전 페이지로
+            if (isInitialSetup) {
+              router.replace("/(cust)/tabs/custhome");
+            } else {
+              router.back();
+            }
           } else {
             Alert.alert("완료", responseData.message, [
               {
                 text: "확인",
                 onPress: () => {
-                  router.back();
+                  // 최초 설정이면 custhome으로, 아니면 이전 페이지로
+                  if (isInitialSetup) {
+                    router.replace("/(cust)/tabs/custhome");
+                  } else {
+                    router.back();
+                  }
                 },
               },
             ]);
@@ -125,16 +216,50 @@ export default function CategoryScreen() {
     }
   };
 
+  const handleBack = () => {
+    if (isInitialSetup) {
+      // 최초 설정 중일 때 경고
+      if (Platform.OS === "web") {
+        const confirmLogout = window.confirm(
+          "기본 설정을 완료해야 서비스 이용이 가능합니다.\n\n로그아웃하시겠습니까?",
+        );
+        if (confirmLogout) {
+          // 로그아웃 처리
+          localStorage.removeItem("custCode");
+          localStorage.removeItem("hasLocation");
+          localStorage.removeItem("hasActCategory");
+          router.replace("/(auth)/login");
+        }
+      } else {
+        Alert.alert("알림", "기본 설정을 완료해야 서비스 이용이 가능합니다.", [
+          {
+            text: "계속",
+            style: "cancel",
+          },
+          {
+            text: "로그아웃",
+            onPress: async () => {
+              // 로그아웃 처리
+              await SecureStore.deleteItemAsync("custCode");
+              await SecureStore.deleteItemAsync("hasLocation");
+              await SecureStore.deleteItemAsync("hasActCategory");
+              router.replace("/(auth)/login");
+            },
+          },
+        ]);
+      }
+    } else {
+      router.back();
+    }
+  };
+
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>관심 카테고리 설정</Text>
@@ -164,52 +289,87 @@ export default function CategoryScreen() {
         </View>
       ) : (
         <View style={styles.categoryContainer}>
-          <FlatList
-            data={categories}
-            keyExtractor={(item) => item.categoryIdx.toString()}
-            numColumns={3}
-            scrollEnabled={true}
-            columnWrapperStyle={styles.columnWrapper}
-            renderItem={({ item: category }) => (
-              <Pressable
-                style={[
-                  styles.categoryItem,
-                  selectedCategories.includes(
-                    category.categoryIdx.toString(),
-                  ) && styles.categoryItemSelected,
-                ]}
-                onPress={() => toggleCategory(category.categoryIdx.toString())}
-              >
-                {category.fileMasterResponse?.files &&
-                category.fileMasterResponse.files.length > 0 ? (
-                  <Image
-                    source={{
-                      uri: category.fileMasterResponse.files[0].fileUrl,
-                    }}
-                    style={styles.categoryImage}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <View style={styles.categoryImage} />
-                )}
-                <Text
+          <View style={styles.controlButtons}>
+            <Pressable onPress={handleSelectAll}>
+              <Text style={styles.controlButtonText}>전체선택</Text>
+            </Pressable>
+            <Text style={styles.separator}>|</Text>
+            <Pressable onPress={handleDeselectAll}>
+              <Text style={styles.controlButtonText}>전체해제</Text>
+            </Pressable>
+          </View>
+          <View style={styles.listWrapper}>
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.categoryIdx.toString()}
+              numColumns={3}
+              scrollEnabled={true}
+              columnWrapperStyle={styles.columnWrapper}
+              renderItem={({ item: category }) => (
+                <Pressable
                   style={[
-                    styles.categoryText,
+                    styles.categoryItem,
                     selectedCategories.includes(
                       category.categoryIdx.toString(),
-                    ) && styles.categoryTextSelected,
+                    ) && styles.categoryItemSelected,
                   ]}
+                  onPress={() =>
+                    toggleCategory(category.categoryIdx.toString())
+                  }
                 >
-                  {category.categoryNm}
-                </Text>
-              </Pressable>
-            )}
-          />
+                  {category.fileMasterResponse?.files &&
+                  category.fileMasterResponse.files.length > 0 ? (
+                    <Image
+                      source={{
+                        uri: category.fileMasterResponse.files[0].fileUrl,
+                      }}
+                      style={styles.categoryImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View style={styles.categoryImage} />
+                  )}
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategories.includes(
+                        category.categoryIdx.toString(),
+                      ) && styles.categoryTextSelected,
+                    ]}
+                  >
+                    {category.categoryNm}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </View>
         </View>
       )}
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSave}>
-        <Text style={styles.submitButtonText}>저장</Text>
+      {selectedCategories.length === 0 && (
+        <View style={styles.warningContainer}>
+          <Text style={styles.warningText}>
+            최소 1개 이상의 카테고리를 선택해 주세요.
+          </Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          selectedCategories.length === 0 && styles.submitButtonDisabled,
+        ]}
+        onPress={handleSave}
+        disabled={selectedCategories.length === 0}
+      >
+        <Text
+          style={[
+            styles.submitButtonText,
+            selectedCategories.length === 0 && styles.submitButtonTextDisabled,
+          ]}
+        >
+          저장
+        </Text>
       </TouchableOpacity>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

@@ -101,4 +101,25 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     color: "#FF6F2B",
   },
+  safeAreaTop: {
+    backgroundColor: "#FFFFFF",
+  },
+  safeAreaBottom: {
+    backgroundColor: "#000",
+  },
+  emailDomainDisabled: {
+    backgroundColor: "#f0f0f0",
+  },
+  pickerContainer: {
+    marginTop: 8,
+    height: 45,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
 });

@@ -43,10 +43,33 @@ export default function LoginScreen() {
         // custCode를 저장 (웹: localStorage, 앱: SecureStore)
         if (Platform.OS === "web") {
           localStorage.setItem("custCode", data.custCode);
+          localStorage.setItem("hasLocation", data.isExistLocation);
+          localStorage.setItem("hasActCategory", data.isSetActiveCategory);
         } else {
           await SecureStore.setItemAsync("custCode", data.custCode);
+          await SecureStore.setItemAsync(
+            "hasLocation",
+            String(data.isExistLocation),
+          );
+          await SecureStore.setItemAsync(
+            "hasActCategory",
+            String(data.isSetActiveCategory),
+          );
         }
 
+        // 주소 정보가 없으면 주소 설정 페이지로 이동
+        if (data.isExistLocation === false) {
+          router.replace("/(cust)/address-select");
+          return;
+        }
+
+        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+        if (data.isSetActiveCategory === false) {
+          router.replace("/(cust)/category");
+          return;
+        }
+
+        // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
           router.replace("/(cust)/tabs/custhome");
         } else {
@@ -153,7 +176,6 @@ export default function LoginScreen() {
         <View style={styles.linkContainer}>
           <TouchableOpacity onPress={() => router.push("/(auth)/find-account")}>
             <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
-
           </TouchableOpacity>
           {userType === "cust" && (
             <>
