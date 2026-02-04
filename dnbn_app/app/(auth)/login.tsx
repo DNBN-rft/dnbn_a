@@ -34,7 +34,6 @@ export default function LoginScreen() {
     }
 
     try {
-<<<<<<< HEAD
       // 모바일은 /store/app/login, 웹은 /store/login
       const endpoint = type === "cust" ? "/cust/login/signin" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
       const requestBody = type === "cust" 
@@ -42,18 +41,10 @@ export default function LoginScreen() {
         : { username: loginId.trim(), password: password.trim() };
       
       const response = await apiPost(endpoint, requestBody);
-=======
-      const response = await apiPost("/cust/login", {
-        loginId: loginId.trim(),
-        password: password.trim(),
-      });
->>>>>>> 8beb856abbe2dd8379ffef7b72a2842e449282c9
 
       if (response.ok) {
         const data = await response.json();
 
-<<<<<<< HEAD
-=======
         // custCode를 저장 (웹: localStorage, 앱: SecureStore)
         if (Platform.OS === "web") {
           localStorage.setItem("custCode", data.custCode);
@@ -84,7 +75,6 @@ export default function LoginScreen() {
         }
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
->>>>>>> 8beb856abbe2dd8379ffef7b72a2842e449282c9
         if (type === "cust") {
           // cust: custCode만 저장
           if (Platform.OS === "web") {
