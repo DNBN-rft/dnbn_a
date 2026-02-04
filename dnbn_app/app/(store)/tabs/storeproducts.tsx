@@ -75,11 +75,11 @@ export default function StoreProducts() {
     loadProducts();
   }, [currentPage, loadProducts]);
 
-  // 화면 포커스 시 상품 목록 새로고침
+  // 화면 포커스 시 새로고침
   useFocusEffect(
     useCallback(() => {
-      setCurrentPage(0); // 첫 페이지로 리셋
-    }, [])
+      loadProducts();
+    }, [loadProducts])
   );
 
   return (

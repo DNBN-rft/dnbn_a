@@ -47,19 +47,19 @@ export default function LoginScreen() {
 
         // custCode를 저장 (웹: localStorage, 앱: SecureStore)
         if (Platform.OS === "web") {
-          localStorage.setItem("custCode", data.custCode);
-          localStorage.setItem("hasLocation", data.isExistLocation);
-          localStorage.setItem("hasActCategory", data.isSetActiveCategory);
+          if (data.custCode) localStorage.setItem("custCode", String(data.custCode));
+          if (data.isExistLocation !== undefined) localStorage.setItem("hasLocation", String(data.isExistLocation));
+          if (data.isSetActiveCategory !== undefined) localStorage.setItem("hasActCategory", String(data.isSetActiveCategory));
         } else {
-          await SecureStore.setItemAsync("custCode", data.custCode);
-          await SecureStore.setItemAsync(
-            "hasLocation",
-            String(data.isExistLocation),
-          );
-          await SecureStore.setItemAsync(
-            "hasActCategory",
-            String(data.isSetActiveCategory),
-          );
+          if (data.custCode) {
+            await SecureStore.setItemAsync("custCode", String(data.custCode));
+          }
+          if (data.isExistLocation !== undefined) {
+            await SecureStore.setItemAsync("hasLocation", String(data.isExistLocation));
+          }
+          if (data.isSetActiveCategory !== undefined) {
+            await SecureStore.setItemAsync("hasActCategory", String(data.isSetActiveCategory));
+          }
         }
 
         // 주소 정보가 없으면 주소 설정 페이지로 이동
@@ -78,27 +78,38 @@ export default function LoginScreen() {
         if (type === "cust") {
           // cust: custCode만 저장
           if (Platform.OS === "web") {
-            localStorage.setItem("custCode", data.custCode);
+            if (data.custCode) localStorage.setItem("custCode", String(data.custCode));
           } else {
-            await SecureStore.setItemAsync("custCode", data.custCode);
+            if (data.custCode) {
+              await SecureStore.setItemAsync("custCode", String(data.custCode));
+            }
           }
           router.replace("/(cust)/tabs/custhome");
         } else {
           // store 로그인
           if (Platform.OS === "web") {
             // 웹: 쿠키로 token 처리
-            localStorage.setItem("storeCode", data.storeCode);
-            localStorage.setItem("memberNm", data.memberNm);
-            localStorage.setItem("memberId", data.memberId);
-            localStorage.setItem("subscriptionNm", data.subscriptionNm);
-            localStorage.setItem("authorities", JSON.stringify(data.authorities));
+            if (data.accessToken) localStorage.setItem("accessToken", String(data.accessToken));
+            if (data.refreshToken) localStorage.setItem("refreshToken", String(data.refreshToken));
+            if (data.accessTokenExpiresIn) localStorage.setItem("accessTokenExpiresIn", String(data.accessTokenExpiresIn));
+            if (data.refreshTokenExpiresIn) localStorage.setItem("refreshTokenExpiresIn", String(data.refreshTokenExpiresIn));
+            if (data.tokenType) localStorage.setItem("tokenType", String(data.tokenType));
           } else {
             // 모바일: response에서 token 받아서 저장
             if (data.accessToken) {
-              await SecureStore.setItemAsync("accessToken", data.accessToken);
+              await SecureStore.setItemAsync("accessToken", String(data.accessToken));
             }
             if (data.refreshToken) {
-              await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+              await SecureStore.setItemAsync("refreshToken", String(data.refreshToken));
+            }
+            if (data.accessTokenExpiresIn) {
+              await SecureStore.setItemAsync("accessTokenExpiresIn", String(data.accessTokenExpiresIn));
+            }
+            if (data.refreshTokenExpiresIn) {
+              await SecureStore.setItemAsync("refreshTokenExpiresIn", String(data.refreshTokenExpiresIn));
+            }
+            if (data.tokenType) {
+              await SecureStore.setItemAsync("tokenType", String(data.tokenType));
             }
           }
           router.replace("/(store)/tabs/storehome");
