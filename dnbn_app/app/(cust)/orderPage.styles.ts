@@ -70,7 +70,6 @@ export const styles = StyleSheet.create({
   },
   // 상품 정보
   productCard: {
-    backgroundColor: "#FAFAFA",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -120,12 +119,11 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFF8F0",
     borderRadius: 12,
     padding: 16,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: "#FFE5CC",
+    borderColor: "#E0E0E0",
   },
   totalLabel: {
     fontSize: 15,
@@ -232,7 +230,6 @@ export const styles = StyleSheet.create({
   },
   recommendedProductCard: {
     width: 120,
-    backgroundColor: "#FAFAFA",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E0E0E0",
@@ -251,6 +248,25 @@ export const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 4,
     height: 34,
+  },
+  recommendedProductPriceContainer: {
+    flexDirection: "row",
+    gap: 4,
+    marginBottom: 4,
+  },
+  badge: {
+    backgroundColor: "#EF7810",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  negoBadge: {
+    backgroundColor: "#4CAF50",
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#fff",
   },
   recommendedProductPrice: {
     fontSize: 14,

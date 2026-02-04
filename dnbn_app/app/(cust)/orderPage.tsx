@@ -1,14 +1,18 @@
+import { apiGet } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
+import PrivacyConsentModal from "@/components/modal/PrivacyConsentModal";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-    Image,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./orderPage.styles";
@@ -20,70 +24,52 @@ interface RecommendedProduct {
   productName: string;
   imageUrl: string;
   price: number;
+  isSale?: boolean;
+  isNego?: boolean;
 }
 
 export default function OrderPage() {
   const insets = useSafeAreaInsets();
-  const { productCode } = useLocalSearchParams();
+  const { productCode, orderQty } = useLocalSearchParams();
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [orderData, setOrderData] = useState<any>(null);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const purchaseButtonRef = useRef<View>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Mock 데이터 (나중에 API로 대체)
-  const buyerInfo = {
-    name: "홍길동",
-    phone: "010-1234-5678",
-    address: "서울시 강남구 테헤란로 123",
-  };
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      try {
+        setLoading(true);
+        const custCode = await getStorageItem("custCode");
 
-  const productInfo = {
-    storeName: "GS25 강남점",
-    productName: "카페라떼 1+1 행사 상품",
-    imageUrl: "https://via.placeholder.com/80",
-    quantity: 2,
-    unitPrice: 2500,
-  };
+        // API 호출
+        const response = await apiGet(
+          `/cust/order/info?custCode=${custCode}&productCode=${productCode}&orderQty=${Number(orderQty) || 1}`,
+        );
 
-  const totalPrice = productInfo.quantity * productInfo.unitPrice;
+        if (response.ok) {
+          const data = await response.json();
+          console.log("주문 데이터:", data);
+          setOrderData(data);
+        } else {
+          console.error("주문 데이터 조회 실패:", response.status);
+          const errorData = await response.json();
+          console.error("에러 상세:", errorData);
+        }
+      } catch (error) {
+        console.error("API 호출 에러:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 추천 상품 Mock 데이터 (최대 5개)
-  const recommendedProducts: RecommendedProduct[] = [
-    {
-      productCode: "P001",
-      productName: "삼각김밥 2+1",
-      imageUrl: "https://via.placeholder.com/100",
-      price: 3000,
-    },
-    {
-      productCode: "P002",
-      productName: "도시락 세트",
-      imageUrl: "https://via.placeholder.com/100",
-      price: 5500,
-    },
-    {
-      productCode: "P003",
-      productName: "과일 컵",
-      imageUrl: "https://via.placeholder.com/100",
-      price: 2800,
-    },
-    {
-      productCode: "P004",
-      productName: "샌드위치",
-      imageUrl: "https://via.placeholder.com/100",
-      price: 3500,
-    },
-  ];
-
-  const handlePrivacyInfo = () => {
-    // TODO: 개인정보 제공 동의 안내문 모달 표시
-    console.log("개인정보 제공 동의 안내문 표시");
-  };
-
-  const handleRecommendedProduct = (productCode: string) => {
-    // TODO: 추천 상품 클릭 시 해당 상품 상세로 이동
-    router.push(`/(cust)/product-detail?productCode=${productCode}`);
-  };
+    if (productCode) {
+      fetchOrderData();
+    }
+  }, [productCode, orderQty]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -93,6 +79,109 @@ export default function OrderPage() {
     // 스크롤이 하단 결제하기 버튼 근처에 있는지 확인
     const isNearBottom = scrollY + scrollViewHeight >= contentHeight - 100;
     setShowFloatingButton(!isNearBottom);
+  };
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#EF7810" />
+        <Text style={{ marginTop: 10, color: "#999" }}>
+          주문 정보를 불러오는 중...
+        </Text>
+      </View>
+    );
+  }
+
+  // 실제 데이터 또는 Mock 데이터 사용
+  const buyerInfo = orderData
+    ? {
+        name: orderData.custNm,
+        phone: orderData.custTelNo,
+        address: orderData.custAddr,
+      }
+    : {
+        name: "홍길동",
+        phone: "010-1234-5678",
+        address: "서울시 강남구 테헤란로 123",
+      };
+
+  const productInfo = orderData
+    ? {
+        storeName: orderData.storeNm,
+        productName: orderData.productNm,
+        imageUrl:
+          orderData.fileMasterResponse?.files?.[0]?.fileUrl ||
+          "https://via.placeholder.com/80",
+        quantity: orderData.orderQty,
+        unitPrice: orderData.productPrice,
+      }
+    : {
+        storeName: "GS25 강남점",
+        productName: "카페라떼 1+1 행사 상품",
+        imageUrl: "https://via.placeholder.com/80",
+        quantity: Number(orderQty) || 2,
+        unitPrice: 2500,
+      };
+
+  const totalPrice = productInfo.quantity * productInfo.unitPrice;
+
+  // 추천 상품 데이터 (최대 5개)
+  const recommendedProducts: RecommendedProduct[] = orderData?.storeOtherProduct
+    ? (Array.isArray(orderData.storeOtherProduct)
+        ? orderData.storeOtherProduct
+        : [orderData.storeOtherProduct]
+      )
+        .slice(0, 5)
+        .map((product: any, index: number) => ({
+          productCode: `OTHER_${index}`,
+          productName: product.productNm,
+          imageUrl:
+            product.fileMasterResponse?.files?.[0]?.fileUrl ||
+            "https://via.placeholder.com/100",
+          price: Number(product.productPrice) || 0,
+          isSale: product.isSale,
+          isNego: product.isNego,
+        }))
+    : [
+        {
+          productCode: "P001",
+          productName: "삼각김밥 2+1",
+          imageUrl: "https://via.placeholder.com/100",
+          price: 3000,
+        },
+        {
+          productCode: "P002",
+          productName: "도시락 세트",
+          imageUrl: "https://via.placeholder.com/100",
+          price: 5500,
+        },
+        {
+          productCode: "P003",
+          productName: "과일 컵",
+          imageUrl: "https://via.placeholder.com/100",
+          price: 2800,
+        },
+        {
+          productCode: "P004",
+          productName: "샌드위치",
+          imageUrl: "https://via.placeholder.com/100",
+          price: 3500,
+        },
+      ];
+
+  const handlePrivacyInfo = () => {
+    setPrivacyModalVisible(true);
+  };
+
+  const handleRecommendedProduct = (productCode: string) => {
+    // TODO: 추천 상품 클릭 시 해당 상품 상세로 이동
+    router.push(`/(cust)/product-detail?productCode=${productCode}`);
   };
 
   return (
@@ -183,7 +272,7 @@ export default function OrderPage() {
               showsHorizontalScrollIndicator={false}
               style={styles.recommendedProductsScroll}
             >
-              {recommendedProducts.slice(0, 5).map((product) => (
+              {recommendedProducts.map((product) => (
                 <TouchableOpacity
                   key={product.productCode}
                   style={styles.recommendedProductCard}
@@ -196,6 +285,18 @@ export default function OrderPage() {
                   <Text style={styles.recommendedProductName} numberOfLines={2}>
                     {product.productName}
                   </Text>
+                  <View style={styles.recommendedProductPriceContainer}>
+                    {product.isSale && (
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>할인</Text>
+                      </View>
+                    )}
+                    {product.isNego && (
+                      <View style={[styles.badge, styles.negoBadge]}>
+                        <Text style={styles.badgeText}>네고</Text>
+                      </View>
+                    )}
+                  </View>
                   <Text style={styles.recommendedProductPrice}>
                     {product.price.toLocaleString()}원
                   </Text>
@@ -328,6 +429,13 @@ export default function OrderPage() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* 개인정보 제공 동의 모달 */}
+      <PrivacyConsentModal
+        visible={privacyModalVisible}
+        storeName={productInfo.storeName}
+        onClose={() => setPrivacyModalVisible(false)}
+      />
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

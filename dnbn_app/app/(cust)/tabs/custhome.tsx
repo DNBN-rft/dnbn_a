@@ -25,6 +25,7 @@ export default function CustHomeScreen() {
   const [regularProducts, setRegularProducts] = useState<any[]>([]);
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
   const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
@@ -47,14 +48,36 @@ export default function CustHomeScreen() {
     }
   };
 
+  // 장바구니 아이템 개수 조회 함수
+  const fetchCartItemCount = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
+
+      if (!custCode) return;
+
+      const response = await apiGet(`/cust/cart/cnt?custCode=${custCode}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setCartItemCount(data.totalCount);
+      }
+    } catch (error) {
+      console.error("장바구니 개수 조회 중 오류:", error);
+    }
+  };
+
   // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
         const custCode = "CUST_001";
 
-        // 읽지 않은 알림 상태 확인
+        // 읽지 않은 알림 상태 및 장바구니 개수 확인
         checkUnreadAlarm();
+        fetchCartItemCount();
 
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
@@ -266,6 +289,13 @@ export default function CustHomeScreen() {
             onPress={() => router.push("/(cust)/cart")}
           >
             <Ionicons name="cart-outline" size={24} color="#000" />
+            {cartItemCount > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>
+                  {cartItemCount > 9 ? "9+" : cartItemCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
