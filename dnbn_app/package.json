@@ -16,6 +16,7 @@
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-kakao/core": "^2.2.7",
     "@react-native-kakao/map": "^2.2.7",
+    "@react-native-picker/picker": "2.11.1",
     "@react-native-seoul/kakao-login": "^5.4.2",
     "@react-native-seoul/naver-login": "^4.2.3",
     "@react-navigation/bottom-tabs": "^7.4.0",

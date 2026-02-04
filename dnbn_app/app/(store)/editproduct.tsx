@@ -1,51 +1,252 @@
 import CategorySelectModal from "@/components/modal/CategorySelectModal";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useEffect, useState } from "react";
+import { Alert, Image, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { styles } from "./editproduct.styles";
 
-const CATEGORIES = [
-  { id: 1, name: '베이커리' },
-  { id: 2, name: '음료' },
-  { id: 3, name: '디저트' },
-  { id: 4, name: '전자제품' },
-];
+interface Category {
+  categoryIdx: number;
+  categoryNm: string;
+  fileMasterResponse?: {
+    files: Array<{ fileUrl: string; originalName: string; order: number }>;
+  };
+}
+
+interface ProductDetailResponse {
+  productNm: string;
+  productCode: string;
+  categoryNm: string;
+  productPrice: number;
+  productAmount: number;
+  productState: string;
+  isSale: boolean;
+  isNego: boolean;
+  isStock: boolean;
+  isAdult: boolean;
+  productDetailDescription: string;
+  regNm: string;
+  regDateTime: string;
+  modNm: string;
+  modDateTime: string;
+  imgs: {
+    files: Array<{ fileUrl: string; originalName: string; order: number }>;
+  };
+}
+
+interface ImageFile {
+  uri: string;
+  name: string;
+  isNew?: boolean;
+}
 
 export default function EditProductPage() {
   const insets = useSafeAreaInsets();
-  
-  // 기존 상품 정보 (실제로는 props나 route params로 받아올 데이터)
-  const [productName, setProductName] = useState('고급 무선 이어폰');
-  const [price, setPrice] = useState('89000');
-  const [category, setCategory] = useState<typeof CATEGORIES[0] | null>(CATEGORIES[3]);
+  const { productCode } = useLocalSearchParams<{ productCode: string }>();
+
+  const [productName, setProductName] = useState('');
+  const [price, setPrice] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [category, setCategory] = useState<Category | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [productType, setProductType] = useState<'일반' | '성인'>('일반');
   const [serviceType, setServiceType] = useState<'일반' | '서비스'>('일반');
-  const [stock, setStock] = useState('15');
-  const [description, setDescription] = useState('고음질 사운드를 제공하는 프리미엄 무선 이어폰입니다.\n노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.');
-  const [images, setImages] = useState<string[]>([
-    'https://via.placeholder.com/300',
-    'https://via.placeholder.com/80',
-    'https://via.placeholder.com/80',
-    'https://via.placeholder.com/80',
-  ]);
+  const [stock, setStock] = useState('');
+  const [description, setDescription] = useState('');
+  const [images, setImages] = useState<ImageFile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [categoryLoading, setCategoryLoading] = useState(true);
 
-  const handleUpdate = () => {
-    console.log({
-      productName,
-      price,
-      category,
-      productType,
-      serviceType,
-      stock,
-      description,
-      images
+  // 상품 상세 조회
+  useEffect(() => {
+    const loadProductDetail = async () => {
+      if (!productCode) {
+        Alert.alert("알림", "상품 정보를 찾을 수 없습니다");
+        router.back();
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await apiGet(`/store/product/detail/${productCode}`);
+        if (response.ok) {
+          const data: ProductDetailResponse = await response.json();
+          setProductName(data.productNm);
+          setPrice(data.productPrice.toString());
+          setProductType(data.isAdult ? '성인' : '일반');
+          setServiceType(data.isStock ? '일반' : '서비스');
+          setStock(data.productAmount.toString());
+          setDescription(data.productDetailDescription);
+          
+          // 이미지 설정
+          const imageList = data.imgs?.files?.map(img => ({
+            uri: img.fileUrl,
+            name: img.originalName,
+            isNew: false
+          })) || [];
+          setImages(imageList);
+        } else {
+          Alert.alert("알림", "상품 정보를 불러올 수 없습니다");
+        }
+      } catch (error) {
+        console.error("상품 상세 조회 오류:", error);
+        Alert.alert("오류", "상품 정보 조회 중 오류가 발생했습니다");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProductDetail();
+  }, [productCode]);
+
+  // 카테고리 조회
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await apiGet('/category');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+          
+          // 상품 정보 로드 후 카테고리 선택
+          if (!isLoading && data.length > 0) {
+            const selectedCat = data.find(
+              (cat: Category) => cat.categoryNm === category?.categoryNm
+            );
+            if (selectedCat) setCategory(selectedCat);
+          }
+        }
+      } catch (error) {
+        console.error("카테고리 조회 오류:", error);
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  // 상품 상세 로드 후 카테고리 설정
+  useEffect(() => {
+    if (!isLoading && categories.length > 0 && !category) {
+      const loadProductDetail = async () => {
+        const response = await apiGet(`/store/product/detail/${productCode}`);
+        if (response.ok) {
+          const data: ProductDetailResponse = await response.json();
+          const selectedCat = categories.find(cat => cat.categoryNm === data.categoryNm);
+          if (selectedCat) setCategory(selectedCat);
+        }
+      };
+      loadProductDetail();
+    }
+  }, [categories, isLoading]);
+
+  const pickImage = async () => {
+    if (images.length >= 3) {
+      Alert.alert("알림", "이미지는 최대 3개까지만 등록할 수 있습니다");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    // 업데이트 로직 처리 후
-    router.back();
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setImages([...images, {
+        uri: asset.uri,
+        name: asset.uri.split('/').pop() || 'image.jpg',
+        isNew: true
+      }]);
+    }
   };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleUpdate = async () => {
+    // 유효성 검사
+    if (!productName.trim()) {
+      Alert.alert("알림", "상품명을 입력하세요");
+      return;
+    }
+    if (!price.trim() || parseInt(price) <= 0) {
+      Alert.alert("알림", "올바른 가격을 입력하세요");
+      return;
+    }
+    if (!category) {
+      Alert.alert("알림", "카테고리를 선택하세요");
+      return;
+    }
+    if (serviceType !== '서비스' && (!stock.trim() || parseInt(stock) < 0)) {
+      Alert.alert("알림", "올바른 재고를 입력하세요");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('categoryIdx', category.categoryIdx.toString());
+      formData.append('productNm', productName);
+      formData.append('productPrice', parseInt(price).toString());
+      formData.append('productState', 'ON_SALE');
+      formData.append('isAdult', productType === '성인' ? 'true' : 'false');
+      formData.append('isStock', serviceType === '일반' ? 'true' : 'false');
+      formData.append('productAmount', (serviceType === '서비스' ? 0 : parseInt(stock)).toString());
+      formData.append('productDetailDescription', description);
+
+      // 새로운 이미지만 추가 (isNew === true)
+      images.forEach((img) => {
+        if (img.isNew) {
+          formData.append('productImgs', {
+            uri: img.uri,
+            type: 'image/jpeg',
+            name: img.name,
+          } as any);
+        }
+      });
+
+      // API 요청
+      const response = await apiPutFormDataWithImage(`/store/product/${productCode}`, formData);
+
+      if (response.ok) {
+        Alert.alert("성공", "상품이 수정되었습니다", [
+          {
+            text: "확인",
+            onPress: () => router.back()
+          }
+        ]);
+      } else {
+        const errorText = await response.text();
+        console.error("상품 수정 실패:", errorText);
+        Alert.alert("실패", `상품 수정에 실패했습니다 (${response.status})`);
+      }
+    } catch (error) {
+      console.error("상품 수정 오류:", error);
+      Alert.alert("오류", "상품 수정 중 오류가 발생했습니다");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ flex: 1, textAlign: "center", marginTop: 20 }}>로딩 중...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -91,9 +292,10 @@ export default function EditProductPage() {
           <TouchableOpacity 
             style={styles.selectButton}
             onPress={() => setShowCategoryModal(true)}
+            disabled={categoryLoading}
           >
             <Text style={[styles.selectButtonText, !category && styles.selectButtonPlaceholder]}>
-              {category ? category.name : '카테고리를 선택하세요'}
+              {categoryLoading ? '로딩 중...' : (category ? category.categoryNm : '카테고리를 선택하세요')}
             </Text>
             <Ionicons name="chevron-down" size={20} color="#999" />
           </TouchableOpacity>
@@ -101,7 +303,7 @@ export default function EditProductPage() {
 
         <CategorySelectModal
           visible={showCategoryModal}
-          categories={CATEGORIES}
+          categories={categories}
           selectedCategory={category}
           onSelect={setCategory}
           onClose={() => setShowCategoryModal(false)}
@@ -174,25 +376,35 @@ export default function EditProductPage() {
             <View style={styles.imageGrid}>
               {images.map((img, index) => (
                 <View key={index} style={styles.imagePreview}>
-                  <Image source={{ uri: img }} style={styles.previewImage} />
+                  <Image source={{ uri: img.uri }} style={styles.previewImage} />
                   <TouchableOpacity 
                     style={styles.removeImageButton}
-                    onPress={() => setImages(images.filter((_, i) => i !== index))}
+                    onPress={() => removeImage(index)}
                   >
                     <Ionicons name="close-circle" size={24} color="#ff4444" />
                   </TouchableOpacity>
                 </View>
               ))}
-              <TouchableOpacity style={styles.addImageButton}>
-                <Ionicons name="add" size={32} color="#999" />
-                <Text style={styles.addImageText}>추가</Text>
+              <TouchableOpacity 
+                style={[styles.addImageButton, images.length >= 3 && styles.disabledButton]}
+                onPress={pickImage}
+                disabled={isSaving || images.length >= 3}
+              >
+                <Ionicons name="add" size={32} color={images.length >= 3 ? "#ccc" : "#999"} />
+                <Text style={[styles.addImageText, images.length >= 3 && styles.disabledText]}>
+                  {images.length >= 3 ? "완료" : "추가"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
-          <Text style={styles.submitButtonText}>수정 완료</Text>
+        <TouchableOpacity 
+          style={[styles.submitButton, isSaving && styles.submitButtonDisabled]} 
+          onPress={handleUpdate}
+          disabled={isSaving}
+        >
+          <Text style={styles.submitButtonText}>{isSaving ? '수정 중...' : '수정 완료'}</Text>
         </TouchableOpacity>
       </ScrollView>
 

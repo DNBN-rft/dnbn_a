@@ -5,7 +5,9 @@ import { useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -32,24 +34,43 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await apiPost("/cust/login/signin", {
-        loginId: loginId.trim(),
-        password: password.trim(),
-      });
+      // 모바일은 /store/app/login, 웹은 /store/login
+      const endpoint = type === "cust" ? "/cust/login/signin" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
+      const requestBody = type === "cust" 
+        ? { loginId: loginId.trim(), password: password.trim() }
+        : { username: loginId.trim(), password: password.trim() };
+      
+      const response = await apiPost(endpoint, requestBody);
 
       if (response.ok) {
         const data = await response.json();
 
-        // custCode를 저장 (웹: localStorage, 앱: SecureStore)
-        if (Platform.OS === "web") {
-          localStorage.setItem("custCode", data.custCode);
-        } else {
-          await SecureStore.setItemAsync("custCode", data.custCode);
-        }
-
         if (type === "cust") {
+          // cust: custCode만 저장
+          if (Platform.OS === "web") {
+            localStorage.setItem("custCode", data.custCode);
+          } else {
+            await SecureStore.setItemAsync("custCode", data.custCode);
+          }
           router.replace("/(cust)/tabs/custhome");
         } else {
+          // store 로그인
+          if (Platform.OS === "web") {
+            // 웹: 쿠키로 token 처리
+            localStorage.setItem("storeCode", data.storeCode);
+            localStorage.setItem("memberNm", data.memberNm);
+            localStorage.setItem("memberId", data.memberId);
+            localStorage.setItem("subscriptionNm", data.subscriptionNm);
+            localStorage.setItem("authorities", JSON.stringify(data.authorities));
+          } else {
+            // 모바일: response에서 token 받아서 저장
+            if (data.accessToken) {
+              await SecureStore.setItemAsync("accessToken", data.accessToken);
+            }
+            if (data.refreshToken) {
+              await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+            }
+          }
           router.replace("/(store)/tabs/storehome");
         }
       } else {
@@ -77,12 +98,19 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
 
-      <View style={styles.contentContainer}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.contentContainer}>
         <Image
           style={styles.logo}
           source={require("@/assets/images/logo.png")}
@@ -183,11 +211,11 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
-    </View>
+        </View>
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom }} />
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

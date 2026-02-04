@@ -1,10 +1,28 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Image, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "@/utils/api";
 import { styles } from "../styles/storeproducts.styles";
+
+interface ProductItem {
+  productCode: string;
+  productNm: string;
+  categoryNm: string;
+  productPrice: number;
+  productAmount: number;
+  productState: string;
+  isSale: boolean;
+  isNego: boolean;
+  isStock: boolean;
+  productRegDateTime: string;
+  images: {
+    files: Array<{ originalName: string; fileUrl: string; order: number }>;
+  };
+}
+
 export default function StoreProducts() {
   const insets = useSafeAreaInsets();
   const [detailModal, setDetailModal] = useState(false);
@@ -15,22 +33,55 @@ export default function StoreProducts() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [saleStartDate, setSaleStartDate] = useState(new Date());
-  const [discountType, setDiscountType] = useState<'rate' | 'price'>('rate'); // 할인률 또는 할인가
+  const [discountType, setDiscountType] = useState<'rate' | 'price'>('rate');
   const [discountValue, setDiscountValue] = useState('');
-  const [currentProductPrice, setCurrentProductPrice] = useState(10000); // 예시로 현재 상품 가격
-  const [discountDurationHours, setDiscountDurationHours] = useState(24); // DB에서 가져온 할인 기간(시간)
-  
+  const [currentProductPrice, setCurrentProductPrice] = useState(10000);
+  const [discountDurationHours, setDiscountDurationHours] = useState(24);
+
   // 네고 모달용 state
   const [showNegoDatePicker, setShowNegoDatePicker] = useState(false);
   const [showNegoTimePicker, setShowNegoTimePicker] = useState(false);
   const [negoStartDate, setNegoStartDate] = useState(new Date());
-  const [negoDurationHours, setNegoDurationHours] = useState(24); // DB에서 가져온 네고 기간(시간)
+  const [negoDurationHours, setNegoDurationHours] = useState(24);
 
-  const products = [
-    { id: "1", uri: require("@/assets/images/image1.jpg"), name: "상품 1", price: 10000, categoryName: "카테고리 1"},
-    { id: "2", uri: require("@/assets/images/image1.jpg"), name: "상품 2", price: 20000, categoryName: "카테고리 2"},
-    { id: "3", uri: require("@/assets/images/image1.jpg"), name: "상품 3", price: 30000, categoryName: "카테고리 3"},
-  ];
+  // API 연동용 state
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // 상품 목록 조회 함수
+  const loadProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiGet(`/store/product?page=${currentPage}&size=10`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("상품 목록 데이터:", data);
+        // Page 응답 처리
+        const productList = data.content || [];
+        setProducts(productList);
+      } else {
+        console.error("상품 목록 로드 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("상품 목록 로드 오류:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage]);
+
+  // 페이지 변경 시 상품 조회
+  useEffect(() => {
+    loadProducts();
+  }, [currentPage, loadProducts]);
+
+  // 화면 포커스 시 상품 목록 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      setCurrentPage(0); // 첫 페이지로 리셋
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -55,48 +106,52 @@ export default function StoreProducts() {
       </View>
       <FlatList
         data={products}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.productCode}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0,
           paddingHorizontal: 16,
           paddingTop: 8,
         }}
-        renderItem={({ item: products }) => (
+        renderItem={({ item: product }) => (
           <View style={styles.content}>
-            <TouchableOpacity style={styles.productTouchable}>
-              <View style={styles.productContainer}>
-                <View style={styles.productImageContainer}>
-                  <Image source={products.uri} style={styles.productImage} resizeMode="cover"/>
-                </View>
-                <View style={styles.productInfoContainer}>
-                  <View style={styles.categoryTag}>
-                    <Text style={styles.categoryName}>{products.categoryName}</Text>
-                  </View>
-                  <Text style={styles.productName} numberOfLines={2}>{products.name}</Text>
-                  <Text style={styles.price}>
-                    {products.price.toLocaleString()}원
-                  </Text>
-                </View>
+            <View style={styles.productContainer}>
+              <View style={styles.productImageContainer}>
+                <Image
+                  source={product.images?.files?.[0]?.fileUrl
+                    ? { uri: product.images.files[0].fileUrl }
+                    : { uri: "https://via.placeholder.com/150" }
+                  }
+                  style={styles.productImage}
+                  resizeMode="cover"
+                />
               </View>
-            </TouchableOpacity>
+              <View style={styles.productInfoContainer}>
+                <View style={styles.categoryTag}>
+                  <Text style={styles.categoryName}>{product.categoryNm}</Text>
+                </View>
+                <Text style={styles.productName} numberOfLines={2}>{product.productNm}</Text>
+                <Text style={styles.price}>
+                  {product.productPrice.toLocaleString()}원
+                </Text>
+              </View>
+            </View>
             <View style={styles.productButtonContainer}>
               <TouchableOpacity style={styles.saleButton}
-              onPress={() => setSaleModal(true)}>
+                onPress={() => setSaleModal(true)}>
                 <Ionicons name="pricetag-outline" size={16} color="#EF7810" />
                 <Text style={styles.saleButtonText}>할인 등록</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.negoButton}
-              onPress={() => setNegoModal(true)}>
+                onPress={() => setNegoModal(true)}>
                 <Ionicons name="chatbubble-outline" size={16} color="#4B5563" />
                 <Text style={styles.negoButtonText}>네고 등록</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.moreButton}
-              onPress={() => {
-                // products.id에서 products.productCode로 변경 필요함
-                setSelectedProductCode(products.id);
-                setDetailModal(true);
-              }}>
+                onPress={() => {
+                  setSelectedProductCode(product.productCode);
+                  setDetailModal(true);
+                }}>
                 <Ionicons name="ellipsis-horizontal" size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -110,7 +165,7 @@ export default function StoreProducts() {
         animationType="fade"
         onRequestClose={() => setDetailModal(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setDetailModal(false)}
@@ -122,7 +177,7 @@ export default function StoreProducts() {
                 setDetailModal(false);
                 router.push({
                   pathname: "/(store)/detailproduct",
-                  params: { productCode: selectedProductCode}
+                  params: { productCode: selectedProductCode }
                 });
               }}
             >
@@ -144,9 +199,9 @@ export default function StoreProducts() {
               <Ionicons name="create-outline" size={20} color="#333" />
               <Text style={styles.modalButtonText}>수정</Text>
             </TouchableOpacity>
-            
+
             <View style={styles.modalDivider} />
-            
+
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
@@ -173,7 +228,7 @@ export default function StoreProducts() {
             <Text style={styles.deleteModalMessage}>
               정말로 이 상품을 삭제하시겠습니까?{"\n"}삭제된 상품은 복구할 수 없습니다.
             </Text>
-            
+
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}
@@ -202,13 +257,13 @@ export default function StoreProducts() {
         animationType="fade"
         onRequestClose={() => setSaleModal(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setSaleModal(false)}
         >
           <View style={styles.saleModalWrapper}>
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={1}
               onPress={(e) => e.stopPropagation()}
               style={styles.saleModalContent}
@@ -220,7 +275,7 @@ export default function StoreProducts() {
               <View style={styles.saleOptionGroup}>
                 <Text style={styles.saleLabel}>할인 방식 선택</Text>
                 <View style={styles.saleRadioGroup}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.saleRadioOption}
                     onPress={() => {
                       setDiscountType('rate');
@@ -232,7 +287,7 @@ export default function StoreProducts() {
                     </View>
                     <Text style={styles.saleRadioText}>할인률 (%)</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.saleRadioOption}
                     onPress={() => {
                       setDiscountType('price');
@@ -249,7 +304,7 @@ export default function StoreProducts() {
 
               <View style={styles.saleInputGroup}>
                 <Text style={styles.saleLabel}>할인 값</Text>
-                <TextInput 
+                <TextInput
                   style={styles.saleInput}
                   placeholder="숫자를 입력하세요"
                   keyboardType="numeric"
@@ -276,7 +331,7 @@ export default function StoreProducts() {
 
               <View style={styles.saleInputGroup}>
                 <Text style={styles.saleLabel}>할인 시작 시간</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.saleDateButton}
                   onPress={() => setShowDatePicker(true)}
                 >
@@ -285,7 +340,7 @@ export default function StoreProducts() {
                     {saleStartDate.toLocaleDateString('ko-KR')} {saleStartDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </TouchableOpacity>
-                
+
                 {showDatePicker && (
                   <DateTimePicker
                     value={saleStartDate}
@@ -302,7 +357,7 @@ export default function StoreProducts() {
                     }}
                   />
                 )}
-                
+
                 {showTimePicker && (
                   <DateTimePicker
                     value={saleStartDate}
@@ -336,7 +391,7 @@ export default function StoreProducts() {
                 <TouchableOpacity style={styles.saleConfirmButton}>
                   <Text style={styles.saleConfirmButtonText}>등록</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.saleCancelButton}
                   onPress={() => setSaleModal(false)}
                 >
@@ -354,13 +409,13 @@ export default function StoreProducts() {
         animationType="fade"
         onRequestClose={() => setNegoModal(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setNegoModal(false)}
         >
           <View style={styles.saleModalWrapper}>
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={1}
               onPress={(e) => e.stopPropagation()}
               style={styles.saleModalContent}
@@ -371,7 +426,7 @@ export default function StoreProducts() {
 
               <View style={styles.saleInputGroup}>
                 <Text style={styles.saleLabel}>네고 시작 시간</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.saleDateButton}
                   onPress={() => setShowNegoDatePicker(true)}
                 >
@@ -380,7 +435,7 @@ export default function StoreProducts() {
                     {negoStartDate.toLocaleDateString('ko-KR')} {negoStartDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </TouchableOpacity>
-                
+
                 {showNegoDatePicker && (
                   <DateTimePicker
                     value={negoStartDate}
@@ -397,7 +452,7 @@ export default function StoreProducts() {
                     }}
                   />
                 )}
-                
+
                 {showNegoTimePicker && (
                   <DateTimePicker
                     value={negoStartDate}
@@ -431,7 +486,7 @@ export default function StoreProducts() {
                 <TouchableOpacity style={styles.saleConfirmButton}>
                   <Text style={styles.saleConfirmButtonText}>등록</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.saleCancelButton}
                   onPress={() => setNegoModal(false)}
                 >
