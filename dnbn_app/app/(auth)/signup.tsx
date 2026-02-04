@@ -220,7 +220,7 @@ export default function PracticeView() {
                 style={[
                   styles.pressableStyle,
                   (isIdCheckLoading || (isIdChecked && isIdAvailable)) &&
-                    styles.buttonDisabled,
+                  styles.buttonDisabled,
                 ]}
                 onPress={handleCheckDuplicateId}
                 disabled={isIdCheckLoading || (isIdChecked && isIdAvailable)}
@@ -340,7 +340,7 @@ export default function PracticeView() {
                   styles.pressableStyle,
                   (isNickNmCheckLoading ||
                     (isNickNmChecked && isNickNmAvailable)) &&
-                    styles.buttonDisabled,
+                  styles.buttonDisabled,
                 ]}
                 onPress={handleCheckDuplicateNickNm}
                 disabled={
@@ -373,7 +373,7 @@ export default function PracticeView() {
                 style={[
                   styles.inputStyle,
                   selectedEmailDomain !== "direct" &&
-                    styles.emailDomainDisabled,
+                  styles.emailDomainDisabled,
                 ]}
                 placeholder="example.com"
                 placeholderTextColor={"#ccc"}
@@ -384,6 +384,8 @@ export default function PracticeView() {
             </View>
             <View style={styles.pickerContainer}>
               <Picker
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
                 selectedValue={selectedEmailDomain}
                 onValueChange={(domain) =>
                   handleEmailDomainSelectUtil(

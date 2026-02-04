@@ -1,56 +1,123 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { apiGet, apiDelete, apiPut } from '@/utils/api';
 import { styles } from './cart.styles';
 
-interface Product {
-    id: string;
-    name: string;
-    salePrice: number;
-    originalPrice: number;
-    qty: number;
-    stock: number;
-    imageUrl?: string;
-    selected: boolean;
+interface CartItemImage {
+    originalName: string;
+    fileUrl: string;
+    order: number;
+}
+
+interface CartItem {
+    cartItemIdx: number;
+    productNm: string;
+    price: number;
+    discountPrice: number;
+    quantity: number;
+    productAmount: number;
+    itemImg: CartItemImage | null;
 }
 
 interface CartStore {
-    id: string;
-    storeId: string;
-    storeName: string;
-    selected: boolean;
-    products: Product[];
+    storeNm: string;
+    items: CartItem[];
+    selected?: boolean;
 }
 
-const initialCartItems: CartStore[] = [
-    {
-        id: '1',
-        storeId: 'store1',
-        storeName: '행복',
-        selected: false,
-        products: [
-            { id: 'prod1', name: '쫀쿠 치즈맛', salePrice: 9000, originalPrice: 10000, qty: 2, stock: 10, selected: false },
-            { id: 'prod2', name: '쫀쿠 초코맛', salePrice: 9000, originalPrice: 10000, qty: 1, stock: 5, selected: false },
-        ],
-    },
-    {
-        id: '2',
-        storeId: 'store2',
-        storeName: '즐거움',
-        selected: false,
-        products: [
-            { id: 'prod3', name: '쫀쿠 딸기맛', salePrice: 9500, originalPrice: 11000, qty: 1, stock: 8, selected: false },
-            { id: 'prod4', name: '쫀쿠 바나나맛', salePrice: 8500, originalPrice: 10000, qty: 3, stock: 15, selected: false },
-        ],
-    },
-];
-
 export default function CartScreen() {
-    const [cartItems, setCartItems] = useState<CartStore[]>(initialCartItems);
+    const [cartItems, setCartItems] = useState<CartStore[]>([]);
+    const [originalCartItems, setOriginalCartItems] = useState<CartStore[]>([]);
     const [selectAll, setSelectAll] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
     const insets = useSafeAreaInsets();
+
+    // 장바구니 데이터 조회
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            try {
+                setLoading(true);
+                // TODO: custCode를 실제 로그인 사용자 정보에서 가져오기
+                const custCode = "CUST_001"; // 임시값
+                
+                const response = await apiGet(`/cust/cart?custCode=${custCode}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // API 응답에 selected 속성 추가
+                    const itemsWithSelected = data.map((store: CartStore) => ({
+                        ...store,
+                        selected: false,
+                        items: store.items.map(item => ({
+                            ...item,
+                            selected: false,
+                        })),
+                    }));
+                    setCartItems(itemsWithSelected);
+                    setOriginalCartItems(JSON.parse(JSON.stringify(itemsWithSelected)));
+                } else {
+                    console.error("장바구니 조회 실패:", response.status);
+                }
+            } catch (error) {
+                console.error("장바구니 조회 에러:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCartItems();
+    }, []);
+
+    // 변경된 항목만 수집
+    const getChangedItems = () => {
+        const changed: { cartItemIdx: number; quantity: number }[] = [];
+        
+        cartItems.forEach((store) => {
+            store.items.forEach((item) => {
+                const originalItem = originalCartItems
+                    .find(s => s.storeNm === store.storeNm)
+                    ?.items.find(i => i.cartItemIdx === item.cartItemIdx);
+                
+                if (originalItem && originalItem.quantity !== item.quantity) {
+                    changed.push({
+                        cartItemIdx: item.cartItemIdx,
+                        quantity: item.quantity,
+                    });
+                }
+            });
+        });
+        
+        return changed;
+    };
+
+    // 수량 변경 저장
+    const saveQuantityChanges = async () => {
+        // originalCartItems가 설정되지 않았으면 저장하지 않음
+        if (originalCartItems.length === 0) return true;
+        
+        const changedItems = getChangedItems();
+        
+        if (changedItems.length === 0) return true;
+        
+        try {
+            const response = await apiPut(`/cust/cart`, changedItems);
+            
+            if (response.ok) {
+                setOriginalCartItems(JSON.parse(JSON.stringify(cartItems)));
+                return true;
+            } else {
+                console.error("수량 저장 실패:", response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error("수량 저장 오류:", error);
+            return false;
+        }
+    };
 
     // 포맷팅 함수
     const formatPrice = (price: number) => {
@@ -58,20 +125,21 @@ export default function CartScreen() {
     };
 
     // 총 금액 계산 (선택된 상품만)
-    const calculateStoreTotal = (products: Product[]) => {
-        return products
-            .filter(product => product.selected)
-            .reduce((sum, product) => sum + (product.salePrice * product.qty), 0);
+    const calculateStoreTotal = (items: CartItem[] | undefined) => {
+        if (!items || !Array.isArray(items)) return 0;
+        return items
+            .filter(item => (item as any).selected)
+            .reduce((sum, item) => sum + (item.price * item.quantity), 0);
     };
 
     const calculateSelectedTotal = () => {
         let totalAmount = 0;
         let totalCount = 0;
         cartItems.forEach(store => {
-            store.products.forEach(product => {
-                if (product.selected) {
-                    totalAmount += product.salePrice * product.qty;
-                    totalCount += 1; // 선택한 상품의 개수 (수량이 아님)
+            store.items.forEach(item => {
+                if ((item as any).selected) {
+                    totalAmount += item.price * item.quantity;
+                    totalCount += 1;
                 }
             });
         });
@@ -86,8 +154,8 @@ export default function CartScreen() {
             cartItems.map((store) => ({
                 ...store,
                 selected: newSelectAllState,
-                products: store.products.map((product) => ({
-                    ...product,
+                items: store.items.map((item) => ({
+                    ...item,
                     selected: newSelectAllState,
                 })),
             }))
@@ -95,16 +163,16 @@ export default function CartScreen() {
     };
 
     // 가맹점 선택/해제
-    const handleStoreSelect = (storeId: string) => {
+    const handleStoreSelect = (storeNm: string) => {
         setCartItems(prevItems => {
             const updatedItems = prevItems.map((store) => {
-                if (store.id === storeId) {
+                if (store.storeNm === storeNm) {
                     const newSelected = !store.selected;
                     return {
                         ...store,
                         selected: newSelected,
-                        products: store.products.map((product) => ({
-                            ...product,
+                        items: store.items.map((item) => ({
+                            ...item,
                             selected: newSelected,
                         })),
                     };
@@ -117,21 +185,21 @@ export default function CartScreen() {
     };
 
     // 상품 선택/해제
-    const handleProductSelect = (storeId: string, productId: string) => {
+    const handleItemSelect = (storeNm: string, cartItemIdx: number) => {
         setCartItems(prevItems => {
             const updatedItems = prevItems.map((store) => {
-                if (store.id === storeId) {
-                    const updatedProducts = store.products.map((product) => {
-                        if (product.id === productId) {
-                            return { ...product, selected: !product.selected };
+                if (store.storeNm === storeNm) {
+                    const updatedItems = store.items.map((item) => {
+                        if (item.cartItemIdx === cartItemIdx) {
+                            return { ...item, selected: !(item as any).selected };
                         }
-                        return product;
+                        return item;
                     });
-                    const allSelected = updatedProducts.every((p) => p.selected);
+                    const allSelected = updatedItems.every((i) => (i as any).selected);
                     return {
                         ...store,
                         selected: allSelected,
-                        products: updatedProducts,
+                        items: updatedItems,
                     };
                 }
                 return store;
@@ -142,17 +210,17 @@ export default function CartScreen() {
     };
 
     // 수량 증가
-    const handleIncreaseQty = (storeId: string, productId: string) => {
+    const handleIncreaseQty = (storeNm: string, cartItemIdx: number) => {
         setCartItems(prevItems =>
             prevItems.map((store) => {
-                if (store.id === storeId) {
+                if (store.storeNm === storeNm) {
                     return {
                         ...store,
-                        products: store.products.map((product) => {
-                            if (product.id === productId && product.qty < product.stock) {
-                                return { ...product, qty: product.qty + 1 };
+                        items: store.items.map((item) => {
+                            if (item.cartItemIdx === cartItemIdx && item.quantity < item.productAmount) {
+                                return { ...item, quantity: item.quantity + 1 };
                             }
-                            return product;
+                            return item;
                         }),
                     };
                 }
@@ -162,17 +230,17 @@ export default function CartScreen() {
     };
 
     // 수량 감소
-    const handleDecreaseQty = (storeId: string, productId: string) => {
+    const handleDecreaseQty = (storeNm: string, cartItemIdx: number) => {
         setCartItems(prevItems =>
             prevItems.map((store) => {
-                if (store.id === storeId) {
+                if (store.storeNm === storeNm) {
                     return {
                         ...store,
-                        products: store.products.map((product) => {
-                            if (product.id === productId && product.qty > 1) {
-                                return { ...product, qty: product.qty - 1 };
+                        items: store.items.map((item) => {
+                            if (item.cartItemIdx === cartItemIdx && item.quantity > 1) {
+                                return { ...item, quantity: item.quantity - 1 };
                             }
-                            return product;
+                            return item;
                         }),
                     };
                 }
@@ -182,89 +250,212 @@ export default function CartScreen() {
     };
 
     // 상품 삭제
-    const handleDeleteProduct = (storeId: string, productId: string) => {
-        setCartItems(prevItems => {
-            const updatedItems = prevItems.map((store) => {
-                if (store.id === storeId) {
-                    const updatedProducts = store.products.filter(product => product.id !== productId);
-                    return {
-                        ...store,
-                        products: updatedProducts,
-                    };
-                }
-                return store;
-            }).filter(store => store.products.length > 0); // 상품이 없는 가맹점 제거
-            updateSelectAllState(updatedItems);
-            return updatedItems;
-        });
+    const handleDeleteProduct = async (storeNm: string, cartItemIdx: number) => {
+        try {
+            setDeleting(true);
+            const response = await apiDelete(`/cust/cart/${cartItemIdx}`);
+
+            if (response.ok) {
+                setCartItems(prevItems => {
+                    const updatedItems = prevItems.map((store) => {
+                        if (store.storeNm === storeNm) {
+                            const updatedItems = store.items.filter(item => item.cartItemIdx !== cartItemIdx);
+                            return {
+                                ...store,
+                                items: updatedItems,
+                            };
+                        }
+                        return store;
+                    }).filter(store => store.items && store.items.length > 0);
+                    updateSelectAllState(updatedItems);
+                    return updatedItems;
+                });
+                Alert.alert("성공", "상품이 삭제되었습니다.");
+            } else {
+                Alert.alert("오류", "상품 삭제에 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("상품 삭제 오류:", error);
+            Alert.alert("오류", "상품 삭제 중 오류가 발생했습니다.");
+        } finally {
+            setDeleting(false);
+        }
     };
 
     // 선택 삭제
-    const handleDeleteSelected = () => {
-        setCartItems(prevItems =>
-            prevItems.map((store) => ({
-                ...store,
-                products: store.products.filter(product => !product.selected),
-            })).filter(store => store.products.length > 0)
-        );
-        setSelectAll(false);
+    const handleDeleteSelected = async () => {
+        try {
+            // 선택된 cartItemIdx 수집
+            const selectedIdxs: number[] = [];
+            cartItems.forEach(store => {
+                if (store.items && Array.isArray(store.items)) {
+                    store.items.forEach(item => {
+                        if ((item as any).selected) {
+                            selectedIdxs.push(item.cartItemIdx);
+                        }
+                    });
+                }
+            });
+
+            if (selectedIdxs.length === 0) {
+                Alert.alert("알림", "선택된 상품이 없습니다.");
+                return;
+            }
+
+            setDeleting(true);
+            const response = await apiDelete(`/cust/cart`, {
+                body: JSON.stringify({ cartItemIdxs: selectedIdxs }),
+            });
+
+            if (response.ok) {
+                setCartItems(prevItems =>
+                    prevItems.map((store) => ({
+                        ...store,
+                        items: (store.items || []).filter(item => !(item as any).selected),
+                    })).filter(store => store.items && store.items.length > 0)
+                );
+                setSelectAll(false);
+                Alert.alert("성공", "선택한 상품들이 삭제되었습니다.");
+            } else {
+                Alert.alert("오류", "상품 삭제에 실패했습니다.");
+            }
+        } catch (error) {
+            console.error("선택 삭제 오류:", error);
+            Alert.alert("오류", "상품 삭제 중 오류가 발생했습니다.");
+        } finally {
+            setDeleting(false);
+        }
     };
 
     // 전체 삭제
-    const handleDeleteAll = () => {
-        setCartItems([]);
-        setSelectAll(false);
+    const handleDeleteAll = async () => {
+        try {
+            // 모든 cartItemIdx 수집
+            const allIdxs: number[] = [];
+            cartItems.forEach(store => {
+                if (store.items && Array.isArray(store.items)) {
+                    store.items.forEach(item => {
+                        allIdxs.push(item.cartItemIdx);
+                    });
+                }
+            });
+
+            if (allIdxs.length === 0) {
+                Alert.alert("알림", "삭제할 상품이 없습니다.");
+                return;
+            }
+
+            Alert.alert(
+                "확인",
+                "모든 상품을 삭제하시겠습니까?",
+                [
+                    {
+                        text: "취소",
+                        onPress: () => {},
+                        style: "cancel",
+                    },
+                    {
+                        text: "삭제",
+                        onPress: async () => {
+                            try {
+                                setDeleting(true);
+                                const response = await apiDelete(`/cust/cart`, {
+                                    body: JSON.stringify({ cartItemIdxs: allIdxs }),
+                                });
+
+                                if (response.ok) {
+                                    setCartItems([]);
+                                    setSelectAll(false);
+                                    Alert.alert("성공", "모든 상품이 삭제되었습니다.");
+                                } else {
+                                    Alert.alert("오류", "상품 삭제에 실패했습니다.");
+                                }
+                            } catch (error) {
+                                console.error("전체 삭제 오류:", error);
+                                Alert.alert("오류", "상품 삭제 중 오류가 발생했습니다.");
+                            } finally {
+                                setDeleting(false);
+                            }
+                        },
+                        style: "destructive",
+                    },
+                ]
+            );
+        } catch (error) {
+            console.error("전체 삭제 오류:", error);
+            Alert.alert("오류", "상품 삭제 중 오류가 발생했습니다.");
+        }
     };
 
     // 전체선택 상태 업데이트
     const updateSelectAllState = (items: CartStore[]) => {
         const allSelected = items.every(store =>
-            store.products.every(product => product.selected)
+            store.items.every(item => (item as any).selected)
         );
-        setSelectAll(allSelected && items.length > 0 && items.some(store => store.products.length > 0));
+        setSelectAll(allSelected && items.length > 0 && items.some(store => store.items.length > 0));
     };
 
     const { totalAmount, totalCount } = calculateSelectedTotal();
 
+    // 로딩 상태
+    if (loading) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color="#EF7810" />
+                <Text style={{ marginTop: 10, color: '#999' }}>장바구니를 불러오는 중...</Text>
+            </View>
+        );
+    }
+
+    // 빈 장바구니
+    if (cartItems.length === 0) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Ionicons name="cart-outline" size={48} color="#ddd" />
+                <Text style={{ marginTop: 10, color: '#999', fontSize: 16 }}>장바구니가 비어있습니다.</Text>
+            </View>
+        );
+    }
+
     // 가맹점별 렌더링
     const renderStoreItem = ({ item: store }: { item: CartStore }) => (
-        <View key={store.id} style={styles.cartItemContainer}>
+        <View key={store.storeNm} style={styles.cartItemContainer}>
             {/* 가맹점 헤더 */}
             <View style={styles.cartStoreInfoContainer}>
                 <Pressable
                     style={styles.storeCheckboxArea}
-                    onPress={() => handleStoreSelect(store.id)}
+                    onPress={() => handleStoreSelect(store.storeNm)}
                 >
                     <Ionicons 
                         name={store.selected ? "checkbox" : "square-outline"} 
                         size={20} 
                         color={store.selected ? '#EF7810' : '#666'} 
                     />
-                    <Text style={styles.cartStoreNameText}>{store.storeName}</Text>
+                    <Text style={styles.cartStoreNameText}>{store.storeNm}</Text>
                 </Pressable>
             </View>
 
             {/* 상품 목록 */}
-            {store.products.map((product) => (
-                <View key={product.id} style={styles.productItemWrapper}>
+            {store.items && Array.isArray(store.items) && store.items.map((item) => (
+                <View key={item.cartItemIdx.toString()} style={styles.productItemWrapper}>
                     {/* 상품 정보 영역 */}
                     <View style={styles.productContentArea}>
                         {/* 체크박스 */}
                         <Pressable
                             style={styles.productCheckboxArea}
-                            onPress={() => handleProductSelect(store.id, product.id)}
+                            onPress={() => handleItemSelect(store.storeNm, item.cartItemIdx)}
                         >
                             <Ionicons 
-                                name={product.selected ? "checkbox" : "square-outline"} 
+                                name={(item as any).selected ? "checkbox" : "square-outline"} 
                                 size={20} 
-                                color={product.selected ? '#EF7810' : '#666'} 
+                                color={(item as any).selected ? '#EF7810' : '#666'} 
                             />
                         </Pressable>
 
                         {/* 상품 이미지 */}
                         <View style={styles.cartItemImgContainer}>
-                            {product.imageUrl ? (
-                                <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
+                            {item.itemImg?.fileUrl ? (
+                                <Image source={{ uri: item.itemImg.fileUrl }} style={styles.productImage} />
                             ) : (
                                 <Ionicons name="image-outline" size={40} color="#ccc" />
                             )}
@@ -272,43 +463,44 @@ export default function CartScreen() {
 
                         {/* 상품 정보 */}
                         <View style={styles.cartItemInfoContainer}>
-                            <Text style={styles.cartItemNmText} numberOfLines={2}>{product.name}</Text>
+                            <Text style={styles.cartItemNmText} numberOfLines={2}>{item.productNm}</Text>
                             <View style={styles.cartItemPriceContainer}>
-                                <Text style={styles.cartItemSalePriceText}>{formatPrice(product.salePrice)}</Text>
-                                <Text style={styles.cartItemOriginalPriceText}>{formatPrice(product.originalPrice)}</Text>
+                                <Text style={styles.cartItemSalePriceText}>{formatPrice(item.price)}</Text>
+                                <Text style={styles.cartItemOriginalPriceText}>{formatPrice(item.price + item.discountPrice)}</Text>
                             </View>
                             {/* 수량 조절 */}
                             <View style={styles.cartItemQtyContainer}>
                                 <Pressable 
                                     style={[
                                         styles.cartItemQtyButton,
-                                        product.qty <= 1 && styles.qtyButtonDisabled
+                                        item.quantity <= 1 && styles.qtyButtonDisabled
                                     ]}
-                                    onPress={() => handleDecreaseQty(store.id, product.id)}
-                                    disabled={product.qty <= 1}
+                                    onPress={() => handleDecreaseQty(store.storeNm, item.cartItemIdx)}
+                                    disabled={item.quantity <= 1}
                                 >
-                                    <Ionicons name="remove" size={16} color={product.qty <= 1 ? "#ccc" : "#666"} />
+                                    <Ionicons name="remove" size={16} color={item.quantity <= 1 ? "#ccc" : "#666"} />
                                 </Pressable>
-                                <Text style={styles.qtyText}>{product.qty}</Text>
+                                <Text style={styles.qtyText}>{item.quantity}</Text>
                                 <Pressable 
                                     style={[
                                         styles.cartItemQtyButton,
-                                        product.qty >= product.stock && styles.qtyButtonDisabled
+                                        item.quantity >= item.productAmount && styles.qtyButtonDisabled
                                     ]}
-                                    onPress={() => handleIncreaseQty(store.id, product.id)}
-                                    disabled={product.qty >= product.stock}
+                                    onPress={() => handleIncreaseQty(store.storeNm, item.cartItemIdx)}
+                                    disabled={item.quantity >= item.productAmount}
                                 >
-                                    <Ionicons name="add" size={16} color={product.qty >= product.stock ? "#ccc" : "#666"} />
+                                    <Ionicons name="add" size={16} color={item.quantity >= item.productAmount ? "#ccc" : "#666"} />
                                 </Pressable>
                             </View>
-                            <Text style={styles.stockText}>재고: {product.stock}개</Text>
+                            <Text style={styles.stockText}>재고: {item.productAmount}개</Text>
                         </View>
                     </View>
 
                     {/* 삭제 버튼 */}
                     <Pressable
-                        style={styles.cartItemDeleteButton}
-                        onPress={() => handleDeleteProduct(store.id, product.id)}
+                        style={[styles.cartItemDeleteButton, deleting && { opacity: 0.5 }]}
+                        onPress={() => handleDeleteProduct(store.storeNm, item.cartItemIdx)}
+                        disabled={deleting}
                     >
                         <Ionicons name="close" size={24} color="#999" />
                     </Pressable>
@@ -319,7 +511,7 @@ export default function CartScreen() {
             <View style={styles.cartItemDetailTotalContainer}>
                 <Text style={styles.cartItemTotalText}>총 금액</Text>
                 <Text style={styles.cartItemTotalSalePriceText}>
-                    {formatPrice(calculateStoreTotal(store.products))}
+                    {formatPrice(calculateStoreTotal(store.items))}
                 </Text>
             </View>
         </View>
@@ -335,7 +527,10 @@ export default function CartScreen() {
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => router.back()}
+                    onPress={async () => {
+                        await saveQuantityChanges();
+                        router.back();
+                    }}
                 >
                     <Ionicons name="chevron-back" size={24} color="#000" />
                 </TouchableOpacity>
@@ -353,7 +548,11 @@ export default function CartScreen() {
                     />
                     <Text style={styles.cartTopSelectAllText}>전체선택</Text>
                 </Pressable>
-                <Pressable style={styles.cartTopDeleteButton} onPress={handleDeleteSelected}>
+                <Pressable
+                    style={[styles.cartTopDeleteButton, deleting && { opacity: 0.5 }]}
+                    onPress={handleDeleteSelected}
+                    disabled={deleting}
+                >
                     <Text style={styles.cartTopDeleteButtonText}>선택삭제</Text>
                 </Pressable>
             </View>
@@ -362,7 +561,7 @@ export default function CartScreen() {
             <FlatList
                 data={cartItems}
                 renderItem={renderStoreItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.storeNm}
                 contentContainerStyle={styles.flatListContent}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
@@ -393,9 +592,12 @@ export default function CartScreen() {
                                 totalCount === 0 && styles.purchaseButtonDisabled
                             ]}
                             disabled={totalCount === 0}
-                            onPress={() => {
-                                // 주문 처리 로직
-                                console.log('주문하기');
+                            onPress={async () => {
+                                const success = await saveQuantityChanges();
+                                if (success) {
+                                    // 주문 처리 로직
+                                    console.log('주문하기');
+                                }
                             }}
                         >
                             <Text style={[

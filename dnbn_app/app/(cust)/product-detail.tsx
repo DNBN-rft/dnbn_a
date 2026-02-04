@@ -1,9 +1,11 @@
-import { apiGet } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
+import CartAddModal from "@/components/modal/CartAddModal";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -59,6 +61,7 @@ export default function ProductDetailScreen() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [cartModalVisible, setCartModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const { productCode } = useLocalSearchParams();
 
@@ -87,6 +90,51 @@ export default function ProductDetailScreen() {
       fetchProductData();
     }
   }, [productCode]);
+
+  // 장바구니 추가 핸들러
+  const handleAddToCart = async (quantity: number) => {
+    // TODO: custCode를 실제 로그인 사용자 정보에서 가져오기
+    const custCode = "CUST_001"; // 임시값
+    
+    if (!productData) {
+      Alert.alert("오류", "상품 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      const response = await apiPost(`/cust/cart?custCode=${custCode}`, {
+        productCode: productData.productCode,
+        storeCode: productData.storeCode,
+        quantity,
+        price: productData.price,
+        discountPrice: 0,
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          "성공",
+          "장바구니에 상품을 추가했습니다.",
+          [
+            {
+              text: "쇼핑 계속하기",
+              onPress: () => {},
+            },
+            {
+              text: "장바구니 가기",
+              onPress: () => router.push("/(cust)/cart"),
+            },
+          ],
+        );
+      } else {
+        const errorData = await response.json();
+        Alert.alert("오류", errorData.message || "장바구니 추가에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("장바구니 추가 오류:", error);
+      Alert.alert("오류", "장바구니 추가 중 오류가 발생했습니다.");
+      throw error;
+    }
+  };
 
   // 로딩 중일 때
   if (loading) {
@@ -480,7 +528,10 @@ export default function ProductDetailScreen() {
       </ScrollView>
 
       <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity style={styles.cartButton}>
+        <TouchableOpacity
+          style={styles.cartButton}
+          onPress={() => setCartModalVisible(true)}
+        >
           <Ionicons name="cart-outline" size={24} color="#EF7810" />
         </TouchableOpacity>
 
@@ -488,6 +539,20 @@ export default function ProductDetailScreen() {
           <Text style={styles.purchaseButtonText}>구매하기</Text>
         </TouchableOpacity>
       </View>
+
+      {/* 장바구니 추가 모달 */}
+      {productData && (
+        <CartAddModal
+          visible={cartModalVisible}
+          productName={productData.productNm}
+          productCode={productData.productCode}
+          storeCode={productData.storeCode}
+          price={productData.price}
+          stock={productData.productAmount}
+          onClose={() => setCartModalVisible(false)}
+          onAddToCart={handleAddToCart}
+        />
+      )}
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
