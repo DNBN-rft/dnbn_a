@@ -51,7 +51,7 @@ export default function WithdrawScreen() {
     // 최종 확인 Alert
     if (Platform.OS === "web") {
       const confirmed = window.confirm(
-        "정말 탈퇴하시겠어요?\n탈퇴 후 계정은 복구할 수 없습니다.",
+        "정말 탈퇴하시겠어요?",
       );
       if (confirmed) {
         handleWithdraw();
@@ -59,7 +59,7 @@ export default function WithdrawScreen() {
     } else {
       Alert.alert(
         "회원 탈퇴",
-        "정말 탈퇴하시겠어요?\n탈퇴 후 계정은 복구할 수 없습니다.",
+        "정말 탈퇴하시겠어요?",
         [
           {
             text: "취소",
