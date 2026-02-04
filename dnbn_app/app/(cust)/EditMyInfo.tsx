@@ -44,6 +44,20 @@ export default function EditMyInfoScreen() {
     useState(false);
   const [withdrawPassword, setWithdrawPassword] = useState("");
 
+  // 전화번호 포맷팅 함수
+  const formatPhoneNumber = (text: string) => {
+    const numbers = text.replace(/[^0-9]/g, "");
+    const limitedNumbers = numbers.slice(0, 11);
+
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers;
+    } else if (limitedNumbers.length <= 7) {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
+    } else {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3, 7)}-${limitedNumbers.slice(7)}`;
+    }
+  };
+
   const handleVerifyPassword = async () => {
     setPasswordError("");
 
@@ -163,6 +177,17 @@ export default function EditMyInfoScreen() {
   };
 
   const handleUpdate = async () => {
+    // 전화번호 검증
+    const phoneNumberOnly = phoneNumber.replace(/-/g, "");
+    if (phoneNumberOnly.length !== 11) {
+      if (Platform.OS === "web") {
+        alert("전화번호는 11자리여야 합니다.");
+      } else {
+        Alert.alert("입력 오류", "전화번호는 11자리여야 합니다.");
+      }
+      return;
+    }
+
     try {
       let custCode = null;
 
@@ -310,8 +335,9 @@ export default function EditMyInfoScreen() {
               style={styles.input}
               placeholder="전화번호를 입력하세요"
               value={phoneNumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={(text) => setPhoneNumber(formatPhoneNumber(text))}
               keyboardType="phone-pad"
+              maxLength={13}
             />
           </View>
           <View style={styles.formGroup}>
