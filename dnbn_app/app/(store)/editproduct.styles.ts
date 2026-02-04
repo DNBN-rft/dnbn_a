@@ -171,6 +171,9 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 40,
   },
+  submitButtonDisabled: {
+    backgroundColor: '#999',
+  },
   submitButtonText: {
     color: '#fff',
     fontSize: 16,

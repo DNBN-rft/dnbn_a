@@ -121,7 +121,7 @@ export const styles = StyleSheet.create({
       },
     }),
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    borderColor: "#F0F0F0",
     borderRadius: 6,
     backgroundColor: "#fff",
     justifyContent: "center",
