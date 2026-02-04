@@ -222,7 +222,7 @@ export default function TermsPage() {
       </View>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#FFFFFF" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

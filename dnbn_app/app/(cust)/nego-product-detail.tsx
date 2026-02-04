@@ -126,7 +126,7 @@ export default function ProductDetailScreen() {
   const product = productData.response;
 
   // reviewImgs를 reviewImage로 변환
-  const transformedReviews: ReviewItem[] = product.reviewList.map(review => ({
+  const transformedReviews: ReviewItem[] = product.reviewList.map((review) => ({
     custNick: review.regNm,
     reviewProductCode: product.productCode,
     reviewContent: review.reviewContent,
@@ -402,7 +402,11 @@ export default function ProductDetailScreen() {
                 <View style={styles.reviewsContent}>
                   {transformedReviews && transformedReviews.length > 0 ? (
                     transformedReviews.map((review, index) => (
-                      <ReviewCard key={index} item={review} productCode={product.productCode} />
+                      <ReviewCard
+                        key={index}
+                        item={review}
+                        productCode={product.productCode}
+                      />
                     ))
                   ) : (
                     <View style={styles.noReviewsContainer}>
@@ -495,14 +499,29 @@ export default function ProductDetailScreen() {
             <Text style={styles.negoModalTitle}>네고 요청</Text>
 
             <Text style={styles.negoModalLabel}>희망 금액</Text>
+            <Text style={styles.negoModalSubLabel}>
+              최대 {product.price.toLocaleString()}원까지 입력 가능
+            </Text>
             <TextInput
               style={styles.negoInput}
               placeholder="금액을 입력하세요"
               keyboardType="numeric"
               value={negoAmount}
+              maxLength={10}
               onChangeText={(text) => {
                 const numericText = text.replace(/[^0-9]/g, "");
-                setNegoAmount(numericText);
+                const numericValue = parseInt(numericText) || 0;
+
+                // 상품 금액을 초과하지 않도록 제한
+                if (numericValue <= product.price) {
+                  setNegoAmount(numericText);
+                } else {
+                  setNegoAmount(product.price.toString());
+                  Alert.alert(
+                    "입력 제한",
+                    `상품 금액(${product.price.toLocaleString()}원)을 초과할 수 없습니다.`,
+                  );
+                }
               }}
             />
 
@@ -517,17 +536,24 @@ export default function ProductDetailScreen() {
                 style={[styles.negoModalButton, styles.negoConfirmButton]}
                 disabled={requesting || !negoAmount}
                 onPress={async () => {
-                  if (!productCode) {
+                  if (!productCode || !product) {
                     Alert.alert("오류", "필요한 정보가 없습니다.");
                     return;
                   }
 
                   try {
                     setRequesting(true);
-                    const response = await apiPost("/cust/nego", {
-                      productCode,
-                      negoPrice: parseInt(negoAmount),
-                    });
+                    // custCode를 requestParam으로 전달
+                    const custCode = "CUST_001";
+                    const response = await apiPost(
+                      `/cust/nego?custCode=${custCode}`,
+                      {
+                        categoryNm: product.categoryNm,
+                        storeCode: product.storeCode,
+                        productCode: product.productCode,
+                        requestPrice: parseInt(negoAmount),
+                      },
+                    );
 
                     if (response.ok) {
                       Alert.alert("성공", "네고 요청이 완료되었습니다.");
