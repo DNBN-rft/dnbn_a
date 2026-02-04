@@ -117,11 +117,18 @@ export const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 24,
   },
+  warningTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  warningIcon: {
+    marginRight: 6,
+  },
   warningTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: "#ef4444",
-    marginBottom: 8,
   },
   warningText: {
     fontSize: 15,

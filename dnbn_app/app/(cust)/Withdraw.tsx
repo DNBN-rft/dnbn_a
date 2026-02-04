@@ -50,29 +50,23 @@ export default function WithdrawScreen() {
 
     // 최종 확인 Alert
     if (Platform.OS === "web") {
-      const confirmed = window.confirm(
-        "정말 탈퇴하시겠어요?",
-      );
+      const confirmed = window.confirm("정말 탈퇴하시겠어요?");
       if (confirmed) {
         handleWithdraw();
       }
     } else {
-      Alert.alert(
-        "회원 탈퇴",
-        "정말 탈퇴하시겠어요?",
-        [
-          {
-            text: "취소",
-            onPress: () => {},
-            style: "cancel",
-          },
-          {
-            text: "탈퇴",
-            onPress: handleWithdraw,
-            style: "destructive",
-          },
-        ],
-      );
+      Alert.alert("회원 탈퇴", "정말 탈퇴하시겠어요?", [
+        {
+          text: "취소",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "탈퇴",
+          onPress: handleWithdraw,
+          style: "destructive",
+        },
+      ]);
     }
   };
 
@@ -237,7 +231,15 @@ export default function WithdrawScreen() {
 
         {/* 주의사항 */}
         <View style={styles.warningSection}>
-          <Text style={styles.warningTitle}>⚠️ 주의사항</Text>
+          <View style={styles.warningTitleContainer}>
+            <Ionicons
+              name="alert-circle-outline"
+              size={20}
+              color="#ff6b6b"
+              style={styles.warningIcon}
+            />
+            <Text style={styles.warningTitle}>주의사항</Text>
+          </View>
 
           <Text style={styles.warningText}>
             • 탈퇴 요청일로부터 일주일 이내에 철회 가능하며, 이후에는 복구가
