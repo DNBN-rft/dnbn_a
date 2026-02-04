@@ -68,9 +68,6 @@ export const styles = StyleSheet.create({
     elevation: 3,
     overflow: "hidden",
   },
-  productTouchable: {
-    justifyContent: "flex-start",
-  },
   productContainer: {
     flexDirection: "row",
     overflow: "hidden",
