@@ -3,8 +3,11 @@ import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "./CategorySelectModal.styles";
 
 interface Category {
-  id: number;
-  name: string;
+  categoryIdx: number;
+  categoryNm: string;
+  fileMasterResponse?: {
+    files: Array<{ fileUrl: string; originalName: string; order: number }>;
+  };
 }
 
 interface CategorySelectModalProps {
@@ -38,10 +41,10 @@ export default function CategorySelectModal({
           <Text style={styles.modalTitle}>카테고리 선택</Text>
           {categories.map((cat) => (
             <TouchableOpacity
-              key={cat.id}
+              key={cat.categoryIdx}
               style={[
                 styles.modalOption,
-                selectedCategory?.id === cat.id && styles.modalOptionSelected,
+                selectedCategory?.categoryIdx === cat.categoryIdx && styles.modalOptionSelected,
               ]}
               onPress={() => {
                 onSelect(cat);
@@ -51,13 +54,13 @@ export default function CategorySelectModal({
               <Text
                 style={[
                   styles.modalOptionText,
-                  selectedCategory?.id === cat.id &&
+                  selectedCategory?.categoryIdx === cat.categoryIdx &&
                     styles.modalOptionTextSelected,
                 ]}
               >
-                {cat.name}
+                {cat.categoryNm}
               </Text>
-              {selectedCategory?.id === cat.id && (
+              {selectedCategory?.categoryIdx === cat.categoryIdx && (
                 <Ionicons name="checkmark" size={20} color="#000" />
               )}
             </TouchableOpacity>

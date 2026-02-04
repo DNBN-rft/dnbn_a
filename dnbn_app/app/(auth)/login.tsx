@@ -5,7 +5,9 @@ import { useState } from "react";
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -32,29 +34,32 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await apiPost("/cust/login", {
-        loginId: loginId.trim(),
-        password: password.trim(),
-      });
+      // 모바일은 /store/app/login, 웹은 /store/login
+      const endpoint = type === "cust" ? "/cust/login/signin" : (Platform.OS === "web" ? "/store/login" : "/store/app/login");
+      const requestBody = type === "cust" 
+        ? { loginId: loginId.trim(), password: password.trim() }
+        : { username: loginId.trim(), password: password.trim() };
+      
+      const response = await apiPost(endpoint, requestBody);
 
       if (response.ok) {
         const data = await response.json();
 
         // custCode를 저장 (웹: localStorage, 앱: SecureStore)
         if (Platform.OS === "web") {
-          localStorage.setItem("custCode", data.custCode);
-          localStorage.setItem("hasLocation", data.isExistLocation);
-          localStorage.setItem("hasActCategory", data.isSetActiveCategory);
+          if (data.custCode) localStorage.setItem("custCode", String(data.custCode));
+          if (data.isExistLocation !== undefined) localStorage.setItem("hasLocation", String(data.isExistLocation));
+          if (data.isSetActiveCategory !== undefined) localStorage.setItem("hasActCategory", String(data.isSetActiveCategory));
         } else {
-          await SecureStore.setItemAsync("custCode", data.custCode);
-          await SecureStore.setItemAsync(
-            "hasLocation",
-            String(data.isExistLocation),
-          );
-          await SecureStore.setItemAsync(
-            "hasActCategory",
-            String(data.isSetActiveCategory),
-          );
+          if (data.custCode) {
+            await SecureStore.setItemAsync("custCode", String(data.custCode));
+          }
+          if (data.isExistLocation !== undefined) {
+            await SecureStore.setItemAsync("hasLocation", String(data.isExistLocation));
+          }
+          if (data.isSetActiveCategory !== undefined) {
+            await SecureStore.setItemAsync("hasActCategory", String(data.isSetActiveCategory));
+          }
         }
 
         // 주소 정보가 없으면 주소 설정 페이지로 이동
@@ -71,8 +76,42 @@ export default function LoginScreen() {
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
+          // cust: custCode만 저장
+          if (Platform.OS === "web") {
+            if (data.custCode) localStorage.setItem("custCode", String(data.custCode));
+          } else {
+            if (data.custCode) {
+              await SecureStore.setItemAsync("custCode", String(data.custCode));
+            }
+          }
           router.replace("/(cust)/tabs/custhome");
         } else {
+          // store 로그인
+          if (Platform.OS === "web") {
+            // 웹: 쿠키로 token 처리
+            if (data.accessToken) localStorage.setItem("accessToken", String(data.accessToken));
+            if (data.refreshToken) localStorage.setItem("refreshToken", String(data.refreshToken));
+            if (data.accessTokenExpiresIn) localStorage.setItem("accessTokenExpiresIn", String(data.accessTokenExpiresIn));
+            if (data.refreshTokenExpiresIn) localStorage.setItem("refreshTokenExpiresIn", String(data.refreshTokenExpiresIn));
+            if (data.tokenType) localStorage.setItem("tokenType", String(data.tokenType));
+          } else {
+            // 모바일: response에서 token 받아서 저장
+            if (data.accessToken) {
+              await SecureStore.setItemAsync("accessToken", String(data.accessToken));
+            }
+            if (data.refreshToken) {
+              await SecureStore.setItemAsync("refreshToken", String(data.refreshToken));
+            }
+            if (data.accessTokenExpiresIn) {
+              await SecureStore.setItemAsync("accessTokenExpiresIn", String(data.accessTokenExpiresIn));
+            }
+            if (data.refreshTokenExpiresIn) {
+              await SecureStore.setItemAsync("refreshTokenExpiresIn", String(data.refreshTokenExpiresIn));
+            }
+            if (data.tokenType) {
+              await SecureStore.setItemAsync("tokenType", String(data.tokenType));
+            }
+          }
           router.replace("/(store)/tabs/storehome");
         }
       } else {
@@ -100,12 +139,19 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
 
-      <View style={styles.contentContainer}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.contentContainer}>
         <Image
           style={styles.logo}
           source={require("@/assets/images/logo.png")}
@@ -205,11 +251,11 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
-    </View>
+        </View>
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom }} />
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

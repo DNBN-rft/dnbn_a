@@ -130,10 +130,18 @@ export const styles = StyleSheet.create({
         height: 80,
         borderRadius: 8,
         overflow: 'hidden',
+        position: 'relative',
     },
     previewImage: {
         width: '100%',
         height: '100%',
+    },
+    removeImageButton: {
+        position: 'absolute',
+        top: -8,
+        right: -8,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        borderRadius: 12,
     },
     submitButton: {
         backgroundColor: '#000',
@@ -142,6 +150,9 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 20,
         marginBottom: 40,
+    },
+    submitButtonDisabled: {
+        backgroundColor: '#999',
     },
     submitButtonText: {
         color: '#fff',
