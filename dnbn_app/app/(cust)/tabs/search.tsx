@@ -149,9 +149,12 @@ export default function SearchView() {
     }
 
     // 검색 결과 페이지로 이동
-    router.push({
+    router.replace({
       pathname: "/tabs/search-result",
-      params: { keyword: searchKeyword.trim() },
+      params: {
+        keyword: searchKeyword.trim(),
+        timestamp: Date.now().toString(),
+      },
     });
   };
 
@@ -165,9 +168,9 @@ export default function SearchView() {
       setRecentSearches(updated);
     }
 
-    router.push({
+    router.replace({
       pathname: "/tabs/search-result",
-      params: { keyword },
+      params: { keyword, timestamp: Date.now().toString() },
     });
   };
 
@@ -232,7 +235,7 @@ export default function SearchView() {
             <View style={styles.recentSearchContainer}>
               <View style={styles.recentSearchHeader}>
                 <Text style={styles.recentSearchKeywordText}>최근 검색어</Text>
-                
+
                 <TouchableOpacity onPress={handleDeleteAllSearches}>
                   <Text style={styles.deleteAllText}>전체삭제</Text>
                 </TouchableOpacity>
@@ -247,7 +250,7 @@ export default function SearchView() {
                       onPress={() => handleRecentSearchClick(item)}
                     >
                       <Text style={styles.recentKeywordText}>{item}</Text>
-                      
+
                       <Pressable
                         style={styles.deleteButton}
                         onPress={() => handleDeleteSearch(item)}
