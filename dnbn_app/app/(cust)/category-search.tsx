@@ -81,7 +81,6 @@ export default function SearchView() {
       const response = await apiGet(
         `/cust/search/categories/${categoryId}/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
       );
-      //카테고리 검색 API
 
       if (response.ok) {
         const data: SearchResponse = await response.json();
@@ -158,7 +157,7 @@ export default function SearchView() {
           >
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.title}>검색 결과</Text>
+          <Text style={styles.title}>카테고리 검색 결과</Text>
           <View style={styles.placeholder} />
         </View>
         {/* 검색 영역 */}
