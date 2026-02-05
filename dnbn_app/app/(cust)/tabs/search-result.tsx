@@ -46,7 +46,6 @@ export default function SearchView() {
   );
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("최신순");
   const [products, setProducts] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -54,12 +53,24 @@ export default function SearchView() {
   const [sortType, setSortType] = useState("LATEST");
 
   const filterOptions = [
-    { id: "1", label: "최신순", value: "LATEST" },
-    { id: "2", label: "리뷰 많은 순", value: "MOST_REVIEWED" },
-    { id: "3", label: "별점 높은 순", value: "HIGHEST_RATING" },
-    { id: "4", label: "낮은 가격 순", value: "LOWEST_PRICE" },
-    { id: "5", label: "높은 가격 순", value: "HIGHEST_PRICE" },
+    "LATEST",
+    "MOST_REVIEWED",
+    "HIGHEST_RATING",
+    "LOWEST_PRICE",
+    "HIGHEST_PRICE",
   ];
+
+  // 정렬 타입에 따른 표시 텍스트
+  const getSortLabel = (sortType: string) => {
+    const labels: Record<string, string> = {
+      LATEST: "최신순",
+      MOST_REVIEWED: "리뷰 많은 순",
+      HIGHEST_RATING: "별점 높은 순",
+      LOWEST_PRICE: "낮은 가격 순",
+      HIGHEST_PRICE: "높은 가격 순",
+    };
+    return labels[sortType] || "최신순";
+  };
 
   // 상품 목록 조회
   const fetchProducts = async (
@@ -95,7 +106,6 @@ export default function SearchView() {
       setSearchKeyword(keyword);
       // 새로운 검색 시 정렬 초기화
       setSortType("LATEST");
-      setSelectedFilter("최신순");
       fetchProducts(keyword, 0, "LATEST");
     }
   }, [params.keyword, params.timestamp]);
@@ -104,7 +114,6 @@ export default function SearchView() {
   const handleSearch = () => {
     // 검색 시 정렬 초기화
     setSortType("LATEST");
-    setSelectedFilter("최신순");
     fetchProducts(searchKeyword, 0, "LATEST");
   };
 
@@ -122,8 +131,7 @@ export default function SearchView() {
     }, 300);
   };
 
-  const handleFilterSelect = (filter: string, value: string) => {
-    setSelectedFilter(filter);
+  const handleFilterSelect = (value: string) => {
     setSortType(value);
     closeFilterModal();
     fetchProducts(searchKeyword, 0, value);
@@ -170,7 +178,7 @@ export default function SearchView() {
             onPress={openFilterModal}
           >
             <Ionicons name="filter-outline" size={18} color="#666" />
-            <Text style={styles.filterText}>{selectedFilter}</Text>
+            <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.productResultContainer}>
@@ -283,26 +291,22 @@ export default function SearchView() {
               <View style={styles.filterOptionsContainer}>
                 {filterOptions.map((option) => (
                   <TouchableOpacity
-                    key={option.id}
+                    key={option}
                     style={[
                       styles.filterOption,
-                      selectedFilter === option.label &&
-                        styles.filterOptionSelected,
+                      sortType === option && styles.filterOptionSelected,
                     ]}
-                    onPress={() =>
-                      handleFilterSelect(option.label, option.value)
-                    }
+                    onPress={() => handleFilterSelect(option)}
                   >
                     <Text
                       style={[
                         styles.filterOptionText,
-                        selectedFilter === option.label &&
-                          styles.filterOptionTextSelected,
+                        sortType === option && styles.filterOptionTextSelected,
                       ]}
                     >
-                      {option.label}
+                      {getSortLabel(option)}
                     </Text>
-                    {selectedFilter === option.label && (
+                    {sortType === option && (
                       <Ionicons name="checkmark" size={20} color="#EF7810" />
                     )}
                   </TouchableOpacity>
