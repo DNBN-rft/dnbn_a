@@ -29,7 +29,6 @@ export default function SearchView() {
 
   const [searchKeyword, setSearchKeyword] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [custCode, setCustCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // API 데이터 상태
@@ -44,17 +43,16 @@ export default function SearchView() {
       const loadData = async () => {
         try {
           // custCode 가져오기
-          let code = null;
+          let custCode = null;
           if (Platform.OS === "web") {
-            code = localStorage.getItem("custCode");
+            custCode = localStorage.getItem("custCode");
           } else {
-            code = await SecureStore.getItemAsync("custCode");
+            custCode = await SecureStore.getItemAsync("custCode");
           }
-          setCustCode(code);
 
           // 최근 검색어 불러오기
-          if (code) {
-            const searches = await getRecentSearches(code);
+          if (custCode) {
+            const searches = await getRecentSearches(custCode);
             setRecentSearches(searches);
           }
 
@@ -149,7 +147,7 @@ export default function SearchView() {
     }
 
     // 검색 결과 페이지로 이동
-    router.replace({
+    router.push({
       pathname: "/tabs/search-result",
       params: {
         keyword: searchKeyword.trim(),
@@ -168,7 +166,7 @@ export default function SearchView() {
       setRecentSearches(updated);
     }
 
-    router.replace({
+    router.push({
       pathname: "/tabs/search-result",
       params: { keyword, timestamp: Date.now().toString() },
     });
