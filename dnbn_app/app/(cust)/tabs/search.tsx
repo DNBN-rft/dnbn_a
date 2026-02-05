@@ -81,8 +81,6 @@ export default function SearchView() {
 
       const data = await response.json();
 
-      console.log("API 응답 data.categories:", data.categories);
-
       // 카테고리 데이터 변환
       const categoriesData =
         data.categories?.map((item: any, index: number) => ({
@@ -92,7 +90,6 @@ export default function SearchView() {
           icon: { uri: item.categoryImageUrl },
         })) || [];
 
-      console.log("변환된 categoriesData:", categoriesData);
 
       // 할인 상품 데이터 변환
       const discountData =

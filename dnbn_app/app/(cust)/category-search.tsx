@@ -43,9 +43,6 @@ export default function SearchView() {
   const params = useLocalSearchParams();
   const categoryId = Number(params.categoryId);
 
-  console.log("params.categoryId:", params.categoryId);
-  console.log("categoryId:", categoryId);
-
   const [searchKeyword, setSearchKeyword] = useState(
     (params.keyword as string) || "",
   );
