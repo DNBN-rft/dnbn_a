@@ -81,13 +81,18 @@ export default function SearchView() {
 
       const data = await response.json();
 
+      console.log("API 응답 data.categories:", data.categories);
+
       // 카테고리 데이터 변환
       const categoriesData =
         data.categories?.map((item: any, index: number) => ({
           id: String(index + 1),
+          categoryId: item.categoryId,
           name: item.categoryTitle,
           icon: { uri: item.categoryImageUrl },
         })) || [];
+
+      console.log("변환된 categoriesData:", categoriesData);
 
       // 할인 상품 데이터 변환
       const discountData =
@@ -273,7 +278,14 @@ export default function SearchView() {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    onPress={() => router.push("/(cust)/category")}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(cust)/category-search",
+                        params: {
+                          categoryId: item.categoryId,
+                        },
+                      })
+                    }
                     style={styles.categoryItem}
                   >
                     <View style={styles.categoryImageBox}>
