@@ -1,7 +1,7 @@
 import { apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./purchase-box.styles";
@@ -35,6 +35,11 @@ export default function PurchaseBox() {
   const insets = useSafeAreaInsets();
   const [unusedProducts, setUnusedProducts] = useState<UnusedProduct[]>([]);
   const [usedProducts, setUsedProducts] = useState<UsedProduct[]>([]);
+  const listRef = useRef<FlatList>(null);
+
+  const scrollToTop = () => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   useEffect(() => {
     fetchPurchaseList();
@@ -119,6 +124,7 @@ export default function PurchaseBox() {
 
           {activeTab === "notUsed" ? (
             <FlatList
+              ref={listRef}
               data={unusedProducts}
               numColumns={2}
               columnWrapperStyle={{ justifyContent: "space-between" }}
@@ -159,6 +165,7 @@ export default function PurchaseBox() {
             />
           ) : (
             <FlatList
+              ref={listRef}
               data={usedProducts}
               numColumns={2}
               columnWrapperStyle={{ justifyContent: "space-between" }}
@@ -225,6 +232,14 @@ export default function PurchaseBox() {
           )}
         </View>
       </View>
+
+      {/* FloatingButton - 최상단 이동 */}
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#ef7810" />
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

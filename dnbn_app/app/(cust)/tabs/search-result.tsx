@@ -1,11 +1,11 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Modal,
+  Platform,
   Pressable,
   Text,
   TextInput,
@@ -13,100 +13,25 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet } from "../../../utils/api";
 import { styles } from "../styles/search-result.styles";
-
-interface SearchProduct {
-  productCode: string;
-  productImageUrl: string;
-  storeName: string;
-  productName: string;
-  price: string;
-  averageRate: number;
-  reviewCount: number;
-  isNego: boolean;
-  isSale: boolean;
-}
-
-interface SearchResponse {
-  content: SearchProduct[];
-  currentPage: number;
-  pageSize: number;
-  totalElements: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
 
 export default function SearchView() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [searchKeyword, setSearchKeyword] = useState(
-    (params.keyword as string) || "",
+    (params.keyword as string) || ""
   );
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("최신순");
-  const [products, setProducts] = useState<SearchProduct[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const [sortType, setSortType] = useState("LATEST");
 
   const filterOptions = [
-    { id: "1", label: "최신순", value: "LATEST" },
-    { id: "2", label: "리뷰 많은 순", value: "MOST_REVIEWED" },
-    { id: "3", label: "별점 높은 순", value: "HIGHEST_RATING" },
-    { id: "4", label: "낮은 가격 순", value: "LOWEST_PRICE" },
-    { id: "5", label: "높은 가격 순", value: "HIGHEST_PRICE" },
+    { id: "1", label: "최신순" },
+    { id: "2", label: "리뷰 많은 순" },
+    { id: "3", label: "별점 높은 순" },
+    { id: "4", label: "낮은 가격 순" },
+    { id: "5", label: "높은 가격 순" },
   ];
-
-  // 상품 목록 조회
-  const fetchProducts = async (
-    searchTerm: string = "",
-    currentPage: number = 0,
-    sortValue: string = "LATEST",
-  ) => {
-    setLoading(true);
-    try {
-      const response = await apiGet(
-        `/cust/search/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
-      );
-
-      if (response.ok) {
-        const data: SearchResponse = await response.json();
-        setProducts(data.content);
-        setTotalElements(data.totalElements);
-        setPage(data.currentPage);
-      } else {
-        console.error("상품 검색 실패:", response.status);
-      }
-    } catch (error) {
-      console.error("상품 검색 오류:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 초기 로드 및 검색어 변경 시 검색
-  useEffect(() => {
-    const keyword = params.keyword as string;
-    if (keyword) {
-      setSearchKeyword(keyword);
-      // 새로운 검색 시 정렬 초기화
-      setSortType("LATEST");
-      setSelectedFilter("최신순");
-      fetchProducts(keyword, 0, "LATEST");
-    }
-  }, [params.keyword, params.timestamp]);
-
-  // 검색 버튼 클릭
-  const handleSearch = () => {
-    // 검색 시 정렬 초기화
-    setSortType("LATEST");
-    setSelectedFilter("최신순");
-    fetchProducts(searchKeyword, 0, "LATEST");
-  };
 
   const openFilterModal = () => {
     setIsOverlayVisible(true);
@@ -122,12 +47,312 @@ export default function SearchView() {
     }, 300);
   };
 
-  const handleFilterSelect = (filter: string, value: string) => {
+  const handleFilterSelect = (filter: string) => {
     setSelectedFilter(filter);
-    setSortType(value);
     closeFilterModal();
-    fetchProducts(searchKeyword, 0, value);
+    // 여기서 필터링 로직 추가 가능
   };
+
+  const products = [
+    {
+      id: "1",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집1",
+      name: "상품1",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "2",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집2",
+      name: "상품2",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "3",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집3",
+      name: "상품3",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "4",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집4",
+      name: "상품4",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "5",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집5",
+      name: "상품5",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "6",
+      uri: require("@/assets/images/logo.png"),
+      storeName: "맛집6",
+      name: "상품6",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "7",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품1",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "8",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품2",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "9",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품3",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "10",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품1",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "11",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품2",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "12",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품3",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "13",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품1",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "14",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품2",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "15",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품3",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "16",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품1",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명1",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "17",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품2",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명2",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+    {
+      id: "18",
+      uri: require("@/assets/images/logo.png"),
+      name: "상품3",
+      discountRate: 20,
+      price: "8000",
+      originalPrice: "10000",
+      description: "상품설명3",
+      averageRate: 3.4,
+      reviewCount: 1280,
+    },
+  ];
+
+  const stores = [
+    {
+      id: "1",
+      uri: require("@/assets/images/logo.png"),
+      name: "오늘의김밥",
+      category: "분식",
+      description:
+        "신선한 재료로 매일 아침 준비하는 수제 김밥 맛있는 김밥입니다 진짜 어쩌구저쩌구 2줄을 위함",
+      averageRate: 4.6,
+      reviewCount: 1324,
+    },
+    {
+      id: "2",
+      uri: require("@/assets/images/logo.png"),
+      name: "마포숯불갈비",
+      category: "한식",
+      description: "참숯에 구워 깊은 풍미를 살린 돼지갈비 전문점",
+      averageRate: 4.3,
+      reviewCount: 987,
+    },
+    {
+      id: "3",
+      uri: require("@/assets/images/logo.png"),
+      name: "바다한접시",
+      category: "해산물",
+      description: "당일 공수한 신선한 해산물 요리",
+      averageRate: 4.1,
+      reviewCount: 542,
+    },
+    {
+      id: "4",
+      uri: require("@/assets/images/logo.png"),
+      name: "과일상회 청과",
+      category: "과일",
+      description: "제철 과일을 합리적인 가격으로 판매합니다",
+      averageRate: 4.7,
+      reviewCount: 2140,
+    },
+    {
+      id: "5",
+      uri: require("@/assets/images/logo.png"),
+      name: "달콤한하루",
+      category: "디저트",
+      description: "수제 케이크와 마카롱이 인기인 디저트 카페",
+      averageRate: 4.8,
+      reviewCount: 1763,
+    },
+    {
+      id: "6",
+      uri: require("@/assets/images/logo.png"),
+      name: "오렌지마켓",
+      category: "과일",
+      description: "산지 직송 과일 전문 매장",
+      averageRate: 4.2,
+      reviewCount: 689,
+    },
+    {
+      id: "7",
+      uri: require("@/assets/images/logo.png"),
+      name: "무드웨어",
+      category: "옷가게",
+      description: "데일리룩부터 오피스룩까지 트렌디한 의류",
+      averageRate: 4.4,
+      reviewCount: 953,
+    },
+    {
+      id: "8",
+      uri: require("@/assets/images/logo.png"),
+      name: "스트릿핏",
+      category: "옷가게",
+      description: "캐주얼 스트릿 패션 전문 스토어",
+      averageRate: 4.0,
+      reviewCount: 418,
+    },
+    {
+      id: "9",
+      uri: require("@/assets/images/logo.png"),
+      name: "클래식룸",
+      category: "옷가게",
+      description: "미니멀하고 깔끔한 남녀 공용 의류",
+      averageRate: 4.5,
+      reviewCount: 1120,
+    },
+    {
+      id: "10",
+      uri: require("@/assets/images/logo.png"),
+      name: "동네파스타",
+      category: "양식",
+      description: "가성비 좋은 파스타와 스테이크 맛집",
+      averageRate: 4.3,
+      reviewCount: 764,
+    },
+  ];
 
   return (
     <View style={styles.searchResultView}>
@@ -155,16 +380,17 @@ export default function SearchView() {
               style={styles.searchBar}
               value={searchKeyword}
               onChangeText={setSearchKeyword}
-              onSubmitEditing={handleSearch}
             />
-            <Pressable style={styles.searchButton} onPress={handleSearch}>
+            <Pressable style={styles.searchButton}>
               <Text style={styles.searchButtonText}>검색</Text>
             </Pressable>
           </View>
         </View>
         {/* 필터 헤더 */}
         <View style={styles.filterHeader}>
-          <Text style={styles.resultCountText}>총 {totalElements}개 상품</Text>
+          <Text style={styles.resultCountText}>
+            총 {products.length}개 상품
+          </Text>
           <TouchableOpacity
             style={styles.filterButton}
             onPress={openFilterModal}
@@ -174,84 +400,39 @@ export default function SearchView() {
           </TouchableOpacity>
         </View>
         <View style={styles.productResultContainer}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#EF7810" />
-            </View>
-          ) : (
-            <FlatList
-              data={products}
-              keyExtractor={(item) => item.productCode}
-              numColumns={2}
-              columnWrapperStyle={styles.row}
-              contentContainerStyle={styles.listContent}
-              renderItem={({ item: product }) => (
-                <TouchableOpacity
-                  onPress={() => router.push("/(cust)/product-detail")}
-                  style={styles.gridItem}
-                >
-                  <View style={styles.imageContainer}>
-                    {product.productImageUrl ? (
-                      <Image
-                        resizeMode="cover"
-                        source={{ uri: product.productImageUrl }}
-                        style={styles.gridImage}
-                      />
-                    ) : (
-                      <View
-                        style={[
-                          styles.gridImage,
-                          {
-                            backgroundColor: "#f0f0f0",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          },
-                        ]}
-                      >
-                        <Ionicons name="image-outline" size={40} color="#ccc" />
-                      </View>
-                    )}
-                    {(product.isNego || product.isSale) && (
-                      <View style={styles.badgeContainer}>
-                        {product.isNego && (
-                          <View style={[styles.badge, styles.negoBadge]}>
-                            <Text style={styles.badgeText}>네고</Text>
-                          </View>
-                        )}
-                        {product.isSale && (
-                          <View style={[styles.badge, styles.saleBadge]}>
-                            <Text style={styles.badgeText}>할인</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.gridInfo}>
-                    <Text style={styles.gridStoreName} numberOfLines={1}>
-                      {product.storeName}
-                    </Text>
-                    <Text style={styles.gridProductName} numberOfLines={1}>
-                      {product.productName}
-                    </Text>
-                    <Text style={styles.gridPrice}>
-                      {Number(product.price).toLocaleString()}원
-                    </Text>
-                    <View style={styles.ratingContainer}>
-                      <Ionicons name="star" size={14} color="#FFB800" />
-                      <Text style={styles.ratingText}>
-                        {product.averageRate.toFixed(1)}
-                      </Text>
-                      <Text style={styles.reviewCountText}>
-                        ({product.reviewCount})
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={true}
-            />
-          )}
+          <FlatList
+            data={products}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={[
+              styles.listContent,
+              { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }
+            ]}
+            renderItem={({ item: product }) => (
+              <TouchableOpacity
+                onPress={() => router.push("/(cust)/product-detail")}
+                style={styles.gridItem}
+              >
+                <Image
+                  resizeMode="contain"
+                  source={product.uri}
+                  style={styles.gridImage}
+                />
+                <View style={styles.gridInfo}>
+                  <Text style={styles.gridStoreName} numberOfLines={1}>
+                    {product.storeName}
+                  </Text>
+                  <Text style={styles.gridProductName} numberOfLines={1}>
+                    {product.name}
+                  </Text>
+                  <Text style={styles.gridPrice}>{product.price}원</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={true}
+          />
         </View>
         {/* 필터 모달 */}
         {isOverlayVisible && (
@@ -289,9 +470,7 @@ export default function SearchView() {
                       selectedFilter === option.label &&
                         styles.filterOptionSelected,
                     ]}
-                    onPress={() =>
-                      handleFilterSelect(option.label, option.value)
-                    }
+                    onPress={() => handleFilterSelect(option.label)}
                   >
                     <Text
                       style={[
