@@ -29,6 +29,7 @@ export default function SearchView() {
 
   const [searchKeyword, setSearchKeyword] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [custCode, setCustCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // API 데이터 상태
@@ -43,16 +44,17 @@ export default function SearchView() {
       const loadData = async () => {
         try {
           // custCode 가져오기
-          let custCode = null;
+          let code = null;
           if (Platform.OS === "web") {
-            custCode = localStorage.getItem("custCode");
+            code = localStorage.getItem("custCode");
           } else {
-            custCode = await SecureStore.getItemAsync("custCode");
+            code = await SecureStore.getItemAsync("custCode");
           }
+          setCustCode(code);
 
           // 최근 검색어 불러오기
-          if (custCode) {
-            const searches = await getRecentSearches(custCode);
+          if (code) {
+            const searches = await getRecentSearches(code);
             setRecentSearches(searches);
           }
 
