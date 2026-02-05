@@ -34,7 +34,7 @@ export default function ProductListScreen() {
   useEffect(() => {
     const fetchProductList = async () => {
       try {
-        const custCode = "CUST001"; // 하드코딩된 고객 코드
+        const custCode = "CUST_001"; // 하드코딩된 고객 코드
         const response = await apiGet(`/cust/regular?custCode=${custCode}`);
 
         if (response.ok) {
@@ -148,7 +148,11 @@ export default function ProductListScreen() {
             >
               <Image
                 resizeMode="stretch"
-                source={item.productImg?.fileUrl ? { uri: item.productImg.fileUrl } : require("@/assets/images/image1.jpg")}
+                source={
+                  item.productImg?.fileUrl
+                    ? { uri: item.productImg.fileUrl }
+                    : require("@/assets/images/image1.jpg")
+                }
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>

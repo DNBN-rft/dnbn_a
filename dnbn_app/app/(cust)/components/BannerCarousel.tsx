@@ -20,6 +20,7 @@ interface BannerItem {
   discount?: number;
   price?: number;
   originalPrice?: number;
+  saleType?: string;
 }
 
 interface BannerCarouselProps {
@@ -113,6 +114,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
                     {item.discount && (
                       <View style={bannerStyles.discountBadge}>
                         <Text style={bannerStyles.discountText}>
+                          {item.saleType === "할인가" ? "약 " : ""}
                           {item.discount}%
                         </Text>
                       </View>
@@ -172,14 +174,18 @@ const bannerStyles = StyleSheet.create({
   },
   discountBadge: {
     backgroundColor: "#EF7810",
-    paddingHorizontal: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 70,
+    paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 4,
   },
   discountText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "700",
+    textAlign: "center",
   },
   priceWrapper: {
     flexDirection: "column",

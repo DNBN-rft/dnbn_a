@@ -138,7 +138,7 @@ export default function NegoListScreen() {
     const fetchNegoProducts = async () => {
       try {
         setLoading(true);
-        const custCode = "CUST001";
+        const custCode = "CUST_001";
         const response = await apiGet(`/cust/nego?custCode=${custCode}`);
         const data = await response.json();
 
