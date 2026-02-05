@@ -90,7 +90,6 @@ export default function SearchView() {
           icon: { uri: item.categoryImageUrl },
         })) || [];
 
-
       // 할인 상품 데이터 변환
       const discountData =
         data.recommendSales?.map((item: any) => ({
@@ -155,7 +154,6 @@ export default function SearchView() {
       pathname: "/tabs/search-result",
       params: {
         keyword: searchKeyword.trim(),
-        timestamp: Date.now().toString(),
       },
     });
   };
@@ -172,7 +170,7 @@ export default function SearchView() {
 
     router.push({
       pathname: "/tabs/search-result",
-      params: { keyword, timestamp: Date.now().toString() },
+      params: { keyword },
     });
   };
 

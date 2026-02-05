@@ -108,7 +108,7 @@ export default function SearchView() {
       setSortType("LATEST");
       fetchProducts(keyword, 0, "LATEST");
     }
-  }, [params.keyword, params.timestamp]);
+  }, [params.keyword]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
