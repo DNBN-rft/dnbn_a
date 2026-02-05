@@ -3,33 +3,33 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#ffffff",
   },
-  headerContainer: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
+    padding: 20,
+    backgroundColor: "#fff",
   },
   backButton: {
     width: 44,
     height: 44,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   title: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#333333",
-    flex: 1,
+    fontWeight: "bold",
+    color: "#333",
+    position: "absolute",
+    left: 0,
+    right: 0,
     textAlign: "center",
+    pointerEvents: "none",
   },
   placeholder: {
-    width: 44,
+    width: 40,
   },
   searchTopContainer: {
     flexDirection: "row",
