@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
   },
-  header: {
+  headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
