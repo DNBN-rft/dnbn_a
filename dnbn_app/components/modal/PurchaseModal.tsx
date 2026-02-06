@@ -10,6 +10,7 @@ import {
   View,
   StyleSheet,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface PurchaseModalProps {
   visible: boolean;
@@ -159,6 +160,8 @@ export default function PurchaseModal({
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   const handleIncrement = () => {
     const currentQty = parseInt(quantity) || 0;
     if (currentQty < stock) {
@@ -198,71 +201,71 @@ export default function PurchaseModal({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 100}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
         style={{ flex: 1 }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>수량 선택</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#000" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.productInfoSection}>
-            <Text style={styles.productNameText}>{productName}</Text>
-            <Text style={styles.priceText}>
-              {price.toLocaleString()}원 / 개
-            </Text>
-            <Text style={styles.stockText}>
-              재고: {stock.toLocaleString()}개
-            </Text>
-          </View>
-
-          <View style={styles.quantitySection}>
-            <Text style={styles.quantityLabel}>수량</Text>
-            <View style={styles.quantityControl}>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={handleDecrement}
-              >
-                <Ionicons name="remove" size={20} color="#333" />
-              </TouchableOpacity>
-
-              <TextInput
-                style={styles.quantityInput}
-                value={quantity}
-                onChangeText={handleQuantityChange}
-                keyboardType="number-pad"
-                placeholder="1"
-              />
-
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={handleIncrement}
-              >
-                <Ionicons name="add" size={20} color="#333" />
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>수량 선택</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#000" />
               </TouchableOpacity>
             </View>
+
+            <View style={styles.productInfoSection}>
+              <Text style={styles.productNameText}>{productName}</Text>
+              <Text style={styles.priceText}>
+                {price.toLocaleString()}원 / 개
+              </Text>
+              <Text style={styles.stockText}>
+                재고: {stock.toLocaleString()}개
+              </Text>
+            </View>
+
+            <View style={styles.quantitySection}>
+              <Text style={styles.quantityLabel}>수량</Text>
+              <View style={styles.quantityControl}>
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={handleDecrement}
+                >
+                  <Ionicons name="remove" size={20} color="#333" />
+                </TouchableOpacity>
+
+                <TextInput
+                  style={styles.quantityInput}
+                  value={quantity}
+                  onChangeText={handleQuantityChange}
+                  keyboardType="number-pad"
+                  placeholder="1"
+                />
+
+                <TouchableOpacity
+                  style={styles.quantityButton}
+                  onPress={handleIncrement}
+                >
+                  <Ionicons name="add" size={20} color="#333" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.totalSection}>
+              <Text style={styles.totalLabel}>총 금액</Text>
+              <Text style={styles.totalPrice}>
+                {totalPrice.toLocaleString()}원
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handlePurchase}
+            >
+              <Text style={styles.addButtonText}>구매하기</Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.totalSection}>
-            <Text style={styles.totalLabel}>총 금액</Text>
-            <Text style={styles.totalPrice}>
-              {totalPrice.toLocaleString()}원
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handlePurchase}
-          >
-            <Text style={styles.addButtonText}>구매하기</Text>
-          </TouchableOpacity>
-        </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
