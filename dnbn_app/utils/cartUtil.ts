@@ -96,7 +96,7 @@ export const isAllSelected = (cartData: CartStore[]): boolean => {
 };
 
 /**
- * 상품의 수량을 변경합니다. (최소 수량: 1)
+ * 상품의 수량을 변경합니다. (최소 수량: 1, 최대 수량: 재고 수량)
  */
 export const updateItemQuantity = (
   cartData: CartStore[],
@@ -107,7 +107,7 @@ export const updateItemQuantity = (
     ...store,
     items: store.items.map((item) =>
       item.cartItemIdx === cartItemIdx
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+        ? { ...item, quantity: Math.max(1, Math.min(item.productAmount, item.quantity + delta)) }
         : item,
     ),
   }));

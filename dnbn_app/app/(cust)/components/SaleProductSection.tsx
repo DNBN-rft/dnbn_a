@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { styles } from "../styles/custhome.styles";
 
 interface SaleProduct {
@@ -21,10 +28,10 @@ export default function SaleProductSection({
 }: SaleProductSectionProps) {
   return (
     <View style={styles.contentSection}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>
-          <Ionicons name="pricetag-outline" size={15} color="#EF7810" />
-          할인상품
+      <View style={sectionStyles.headerContainer}>
+        <Text style={sectionStyles.headerTitle}>할인상품</Text>
+        <Text style={sectionStyles.headerSubtitle}>
+          지금 바로 특가로 만나보세요!
         </Text>
       </View>
       {products.length === 0 ? (
@@ -77,3 +84,22 @@ export default function SaleProductSection({
     </View>
   );
 }
+
+const sectionStyles = StyleSheet.create({
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: "#fff",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+});

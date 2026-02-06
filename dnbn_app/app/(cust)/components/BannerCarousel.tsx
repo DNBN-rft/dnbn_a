@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
   Dimensions,
@@ -6,6 +7,7 @@ import {
   Image,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { styles } from "../styles/custhome.styles";
@@ -15,6 +17,7 @@ const screenWidth = Dimensions.get("window").width;
 interface BannerItem {
   id: string;
   uri: any;
+  productCode?: string;
   productName?: string;
   storeName?: string;
   discount?: number;
@@ -74,6 +77,12 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
 
   return (
     <View style={styles.bannerContainer}>
+      <View style={bannerStyles.headerContainer}>
+        <Text style={bannerStyles.headerTitle}>오늘의 특가 상품</Text>
+        <Text style={bannerStyles.headerSubtitle}>
+          지금 놓치면 후회할 할인 상품들
+        </Text>
+      </View>
       <FlatList
         ref={bannerRef}
         data={banners}
@@ -91,7 +100,18 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
           index,
         })}
         renderItem={({ item }) => (
-          <View style={styles.bannerSlide}>
+          <TouchableOpacity
+            style={styles.bannerSlide}
+            onPress={() => {
+              if (item.productCode) {
+                router.push({
+                  pathname: "/(cust)/sale-product-detail",
+                  params: { productCode: item.productCode },
+                });
+              }
+            }}
+            activeOpacity={item.productCode ? 0.8 : 1}
+          >
             <Image
               source={item.uri}
               style={styles.bannerImage}
@@ -135,7 +155,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
                 </View>
               </LinearGradient>
             )}
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -143,6 +163,29 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
 }
 
 const bannerStyles = StyleSheet.create({
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
   gradient: {
     position: "absolute",
     bottom: 0,
@@ -153,7 +196,7 @@ const bannerStyles = StyleSheet.create({
   },
   infoContainer: {
     padding: 16,
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   storeName: {
     color: "#fff",
