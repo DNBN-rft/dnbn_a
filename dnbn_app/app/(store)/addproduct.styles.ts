@@ -119,6 +119,13 @@ export const styles = StyleSheet.create({
         fontSize: 14,
         color: '#999',
     },
+    disabledButton: {
+        borderColor: '#ccc',
+        backgroundColor: '#f5f5f5',
+    },
+    disabledText: {
+        color: '#ccc',
+    },
     imagePreviewContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',

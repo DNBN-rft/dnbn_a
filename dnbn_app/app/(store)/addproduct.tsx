@@ -98,6 +98,10 @@ export default function AddProduct() {
       Alert.alert("알림", "카테고리를 선택하세요");
       return;
     }
+    if (images.length === 0) {
+      Alert.alert("알림", "상품 이미지를 최소 1개 이상 등록하세요");
+      return;
+    }
     if (serviceType !== '서비스' && (!stock.trim() || parseInt(stock) < 0)) {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;

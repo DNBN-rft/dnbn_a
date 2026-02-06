@@ -52,6 +52,7 @@ export type WebViewMessageType =
   | { type: 'addStores'; stores: any[] }
   | { type: 'clearMarkers' }
   | { type: 'clearAllMarkers' }
+  | { type: 'highlightStore'; storeId: string }
   | { type: 'ready' };
 
 export interface ClickedLocation {

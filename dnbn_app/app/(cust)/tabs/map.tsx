@@ -10,6 +10,7 @@ import {
   FlatList,
   Modal,
   PanResponder,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -139,6 +140,9 @@ export default function CustMapScreen() {
       const result = await geocodeAddress(address);
 
       if (result) {
+        // 기존 패널들 모두 닫기
+        await closeAllPanels();
+
         // 지도 이동
         await handleMapNavigation(result.latitude, result.longitude);
 
@@ -150,7 +154,7 @@ export default function CustMapScreen() {
         slideUp(storeListAnim, 400);
       }
     },
-    [handleMapNavigation, handleFetchNearbyStores, storeListAnim],
+    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, closeAllPanels],
   );
 
   const getUserLocation = useCallback(async () => {
@@ -189,6 +193,12 @@ export default function CustMapScreen() {
             setIsLoading(false);
           }, 100);
         } else if (data.type === "storeSelected") {
+          // 지도에서 마커 클릭 시 해당 마커를 주황색으로 강조
+          sendMessageToWebView({
+            type: "highlightStore",
+            storeId: data.store.id,
+          });
+
           // 목록이 열려있으면 먼저 닫기
           if (showStoreList) {
             slideDown(storeListAnim, 300, 300, () => {
@@ -222,6 +232,7 @@ export default function CustMapScreen() {
       storeListAnim,
       selectedStore,
       slideAnim,
+      sendMessageToWebView,
     ],
   );
 
@@ -367,6 +378,15 @@ export default function CustMapScreen() {
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
+      // 지도를 해당 가맹점 위치로 이동
+      handleMapNavigation(store.latitude, store.longitude, 4);
+
+      // 해당 가맹점 마커 강조
+      sendMessageToWebView({
+        type: "highlightStore",
+        storeId: store.id,
+      });
+
       // 목록 패널 닫기
       slideDown(storeListAnim, 300, 300, () => {
         setShowStoreList(false);
@@ -376,7 +396,7 @@ export default function CustMapScreen() {
       await new Promise((resolve) => setTimeout(resolve, 350));
       setSelectedStore(store);
     },
-    [storeListAnim, clickedLocation, clickedLocationAnim],
+    [storeListAnim, clickedLocation, clickedLocationAnim, handleMapNavigation, sendMessageToWebView],
   );
 
   // 클릭한 위치 근처 가맹점 검색
@@ -742,6 +762,7 @@ export default function CustMapScreen() {
               data={stores}
               keyExtractor={(item) => item.id}
               scrollEnabled={true}
+              contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.storeListItem}
