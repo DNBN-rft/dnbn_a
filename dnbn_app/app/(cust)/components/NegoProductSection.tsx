@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { styles } from "../styles/custhome.styles";
 
 interface NegoProduct {
@@ -20,8 +27,11 @@ export default function NegoProductSection({
 }: NegoProductSectionProps) {
   return (
     <View style={styles.contentSection}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>네고왕</Text>
+      <View style={sectionStyles.headerContainer}>
+        <Text style={sectionStyles.headerTitle}>네고왕</Text>
+        <Text style={sectionStyles.headerSubtitle}>
+          가격 협상으로 더 저렴하게 구매하세요!
+        </Text>
       </View>
       {products.length === 0 ? (
         <View style={styles.emptyProductContainer}>
@@ -75,3 +85,22 @@ export default function NegoProductSection({
     </View>
   );
 }
+
+const sectionStyles = StyleSheet.create({
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: "#fff",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+});
