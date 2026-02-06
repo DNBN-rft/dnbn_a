@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { styles } from "../styles/custhome.styles";
 
@@ -31,7 +31,7 @@ export default function SaleProductSection({
       <View style={sectionStyles.headerContainer}>
         <Text style={sectionStyles.headerTitle}>할인상품</Text>
         <Text style={sectionStyles.headerSubtitle}>
-          지금 바로 특가로 만나보세요!
+          할인 중인 상품을 만나보세요!
         </Text>
       </View>
       {products.length === 0 ? (

@@ -34,6 +34,31 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
   const bannerRef = useRef<FlatList>(null);
   const currentIndex = useRef(0);
 
+  // 배너 데이터가 없으면 기본 이미지만 표시
+  const originalBanners =
+    banners.length > 0
+      ? banners
+      : [
+          {
+            id: "1",
+            uri: require("@/assets/images/normalproduct/bread.jpg"),
+          },
+          {
+            id: "2",
+            uri: require("@/assets/images/favicon.png"),
+          },
+          {
+            id: "3",
+            uri: require("@/assets/images/react-logo.png"),
+          },
+        ];
+
+  // 무한스크롤을 위한 배너 복제
+  const finalBanners = [
+    ...originalBanners,
+    { ...originalBanners[0], id: `${originalBanners[0].id}-clone` },
+  ];
+
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       const index = viewableItems[0].index;
@@ -51,7 +76,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
     const interval = setInterval(() => {
       const nextIndex = currentIndex.current + 1;
 
-      if (nextIndex >= banners.length) {
+      if (nextIndex >= finalBanners.length) {
         bannerRef.current?.scrollToIndex({
           index: 0,
           animated: false,
@@ -73,7 +98,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [banners.length]);
+  }, [finalBanners.length]);
 
   return (
     <View style={styles.bannerContainer}>
@@ -85,7 +110,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
       </View>
       <FlatList
         ref={bannerRef}
-        data={banners}
+        data={finalBanners}
         keyExtractor={(item) => item.id}
         horizontal={true}
         showsHorizontalScrollIndicator={false}
