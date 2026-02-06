@@ -4,6 +4,7 @@ import {
   setStorageItem,
 } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
   Alert,
@@ -92,6 +93,7 @@ export default function LoginScreen() {
           if (data.tokenType) storeTokens.tokenType = data.tokenType;
 
           await setMultipleItems(storeTokens);
+
           router.replace("/(store)/tabs/storehome");
         }
       } else {

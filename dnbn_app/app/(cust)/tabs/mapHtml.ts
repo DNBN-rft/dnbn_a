@@ -67,8 +67,10 @@ export const generateMapHTML = (appKey: string) => `
       <script>
           let map;
           let markers = [];
+          let markerMap = {}; // 가맹점 ID와 마커를 매핑
           let userLocationMarker = null;
           let clickedMarker = null;
+          let highlightedMarkerId = null; // 현재 강조된 마커의 ID
           let isReady = false;
           let initInProgress = false;
           let kakaoWaitTimeout = null;
@@ -150,6 +152,9 @@ export const generateMapHTML = (appKey: string) => `
                       break;
                   case 'clearAllMarkers':
                       clearAllMarkers();
+                      break;
+                  case 'highlightStore':
+                      highlightStoreMarker(data.storeId);
                       break;
               }
           };
@@ -311,11 +316,37 @@ export const generateMapHTML = (appKey: string) => `
               });
 
               markers.push(marker);
+              markerMap[store.id] = { marker: marker, store: store }; // 마커 저장
+          }
+
+          function highlightStoreMarker(storeId) {
+              // 이전에 강조된 마커 원래대로 복원
+              if (highlightedMarkerId && markerMap[highlightedMarkerId]) {
+                  markerMap[highlightedMarkerId].marker.setImage(createStoreIcon());
+              }
+              
+              // 새로운 마커 강조
+              if (markerMap[storeId]) {
+                  markerMap[storeId].marker.setImage(createHighlightedStoreIcon());
+                  highlightedMarkerId = storeId;
+              }
+          }
+
+          function createHighlightedStoreIcon() {
+              const imageSize = new kakao.maps.Size(48, 54);
+              const imageOption = { offset: new kakao.maps.Point(24, 54) };
+              return new kakao.maps.MarkerImage(
+                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 54"><path d="M24 0C10.7 0 0 10.7 0 24c0 15.6 24 30 24 30s24-14.4 24-30c0-13.3-10.7-24-24-24z" fill="%23EF7810"/><circle cx="24" cy="24" r="10" fill="white"/><circle cx="24" cy="24" r="8" fill="%23EF7810" opacity="0.3"/></svg>',
+                  imageSize,
+                  imageOption
+              );
           }
 
           function clearMarkers() {
               markers.forEach(marker => marker.setMap(null));
               markers = [];
+              markerMap = {};
+              highlightedMarkerId = null;
           }
 
           function clearAllMarkers() {

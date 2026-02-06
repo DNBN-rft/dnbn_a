@@ -324,8 +324,6 @@ export default function PurchaseScreen() {
                         <Text style={styles.productPrice}>
                           {item.price.toLocaleString()}원
                         </Text>
-                        <Text style={styles.separator}> | </Text>
-                        <Text style={styles.productDate}>{item.datetime}</Text>
                       </View>
                     </View>
                   </View>
@@ -337,12 +335,12 @@ export default function PurchaseScreen() {
       )}
 
       {/* FloatingButton - 최상단 이동 */}
-      <Pressable
-        style={[styles.scrollToTopButton, { bottom: insets.bottom + 20 }]}
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
         onPress={scrollToTop}
       >
-        <Text style={styles.scrollToTopButtonText}>▲</Text>
-      </Pressable>
+        <Ionicons name="chevron-up" size={24} color="#ef7810" />
+      </TouchableOpacity>
 
       {/* 필터 모달 배경 */}
       {isOverlayVisible && (

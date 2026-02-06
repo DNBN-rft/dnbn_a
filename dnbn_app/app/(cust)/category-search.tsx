@@ -13,8 +13,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet } from "../../../utils/api";
-import { styles } from "../styles/search-result.styles";
+import { apiGet } from "../../utils/api";
+import { styles } from "./category-search.style";
 
 interface SearchProduct {
   productCode: string;
@@ -41,6 +41,8 @@ interface SearchResponse {
 export default function SearchView() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  const categoryId = Number(params.categoryId);
+
   const [searchKeyword, setSearchKeyword] = useState(
     (params.keyword as string) || "",
   );
@@ -67,10 +69,14 @@ export default function SearchView() {
     currentPage: number = 0,
     sortValue: string = "LATEST",
   ) => {
+    if (!categoryId || isNaN(categoryId)) {
+      console.error("유효하지 않은 categoryId:", params.categoryId);
+      return;
+    }
     setLoading(true);
     try {
       const response = await apiGet(
-        `/cust/search/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
+        `/cust/search/categories/${categoryId}/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
       );
 
       if (response.ok) {
@@ -88,17 +94,22 @@ export default function SearchView() {
     }
   };
 
-  // 초기 로드 및 검색어 변경 시 검색
+  // 초기 로드
+  useEffect(() => {
+    fetchProducts("", 0, sortType);
+  }, []);
+
+  // 검색어가 params로 전달되었을 때 검색 실행
   useEffect(() => {
     const keyword = params.keyword as string;
-    if (keyword) {
+    if (keyword && categoryId && !isNaN(categoryId)) {
       setSearchKeyword(keyword);
       // 새로운 검색 시 정렬 초기화
       setSortType("LATEST");
       setSelectedFilter("최신순");
       fetchProducts(keyword, 0, "LATEST");
     }
-  }, [params.keyword, params.timestamp]);
+  }, [params.keyword, params.timestamp, params.categoryId]);
 
   // 검색 버튼 클릭
   const handleSearch = () => {
@@ -143,7 +154,7 @@ export default function SearchView() {
           >
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.title}>검색 결과</Text>
+          <Text style={styles.title}>카테고리 검색 결과</Text>
           <View style={styles.placeholder} />
         </View>
         {/* 검색 영역 */}

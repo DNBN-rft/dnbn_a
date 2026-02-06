@@ -48,7 +48,6 @@ export const getCurrentLocation = async (timeout: number = 5000): Promise<Locati
 //사용자의 현재 위치를 가져옵니다 (권한 요청 + 위치 조회)
 export const getUserLocation = async (): Promise<Location.LocationObject | null> => {
   const status = await checkLocationPermission();
-  console.log("Location permission status:", status);
   
   if (status !== "granted") {
     const newStatus = await requestLocationPermission();

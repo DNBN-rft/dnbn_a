@@ -26,6 +26,7 @@ export default function CustHomeScreen() {
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
   const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [defaultLocation, setDefaultLocation] = useState<string>("주소 로딩 중...");
 
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
@@ -69,15 +70,40 @@ export default function CustHomeScreen() {
     }
   };
 
+  // 기본 주소 조회 함수
+  const fetchDefaultLocation = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
+
+      if (!custCode) return;
+
+      const response = await apiGet(`/cust/location/default?custCode=${custCode}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setDefaultLocation(data.label || "주소 정보 없음");
+      } else {
+        setDefaultLocation("주소 정보 없음");
+      }
+    } catch (error) {
+      console.error("기본 주소 조회 중 오류:", error);
+      setDefaultLocation("주소 정보 없음");
+    }
+  };
+
   // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
         const custCode = "CUST_001";
 
-        // 읽지 않은 알림 상태 및 장바구니 개수 확인
+        // 읽지 않은 알림 상태, 장바구니 개수, 기본 주소 확인
         checkUnreadAlarm();
         fetchCartItemCount();
+        fetchDefaultLocation();
 
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
@@ -272,7 +298,7 @@ export default function CustHomeScreen() {
             style={styles.addr}
             onPress={() => router.push("/(cust)/address")}
           >
-            <Text style={styles.addrText}>행궁동</Text>
+            <Text style={styles.addrText}>{defaultLocation}</Text>
             <Ionicons name="chevron-down" size={24} color="#000" />
           </TouchableOpacity>
         </View>
@@ -301,7 +327,10 @@ export default function CustHomeScreen() {
       </View>
 
       {/* 스크롤 가능한 콘텐츠 */}
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+      >
         <BannerCarousel banners={banners} />
         <SaleProductSection products={transformedSaleProducts} />
         <NegoProductSection products={transformedNegoProducts} />
