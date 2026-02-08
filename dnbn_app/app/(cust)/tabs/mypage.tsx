@@ -85,6 +85,13 @@ export default function Mypage() {
               <Text style={styles.menuText}>구매내역</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
+                        <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/negoLogList")}
+            >
+              <Text style={styles.menuText}>네고내역</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => router.navigate("/(cust)/purchase-box")}
