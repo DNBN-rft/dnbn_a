@@ -98,7 +98,7 @@ export default function ProductDetailScreen() {
       try {
         setLoading(true);
         setError(null);
-        const response = await apiGet(`/cust/nego/${productCode}`);
+        const response = await apiGet(`/cust/negoproducts/${productCode}`);
 
         if (!response.ok) {
           throw new Error("상품 정보를 불러오는데 실패했습니다.");
@@ -517,10 +517,6 @@ export default function ProductDetailScreen() {
                   setNegoAmount(numericText);
                 } else {
                   setNegoAmount(product.price.toString());
-                  Alert.alert(
-                    "입력 제한",
-                    `상품 금액(${product.price.toLocaleString()}원)을 초과할 수 없습니다.`,
-                  );
                 }
               }}
             />
