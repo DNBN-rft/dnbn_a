@@ -272,10 +272,18 @@ export default function CartScreen() {
                 </Pressable>
                 <Text style={styles.qtyText}>{item.quantity}</Text>
                 <Pressable
-                  style={styles.cartItemQtyButton}
+                  style={[
+                    styles.cartItemQtyButton,
+                    item.quantity >= item.productAmount && styles.qtyButtonDisabled,
+                  ]}
+                  disabled={item.quantity >= item.productAmount}
                   onPress={() => handleQuantityChange(item.cartItemIdx, 1)}
                 >
-                  <Ionicons name="add" size={16} color="#666" />
+                  <Ionicons
+                    name="add"
+                    size={16}
+                    color={item.quantity >= item.productAmount ? "#ccc" : "#666"}
+                  />
                 </Pressable>
               </View>
               <Text style={styles.stockText}>재고: {item.productAmount}개</Text>

@@ -26,7 +26,8 @@ export default function CustHomeScreen() {
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
   const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [defaultLocation, setDefaultLocation] = useState<string>("주소 로딩 중...");
+  const [defaultLocation, setDefaultLocation] =
+    useState<string>("주소 로딩 중...");
 
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
@@ -80,7 +81,9 @@ export default function CustHomeScreen() {
 
       if (!custCode) return;
 
-      const response = await apiGet(`/cust/location/default?custCode=${custCode}`);
+      const response = await apiGet(
+        `/cust/location/default?custCode=${custCode}`,
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -236,55 +239,6 @@ export default function CustHomeScreen() {
       };
     });
 
-  // 배너가 없을 경우 기본 이미지 사용
-  const originalBanners =
-    transformedBanners.length > 0
-      ? transformedBanners
-      : [
-          {
-            id: "1",
-            uri: require("@/assets/images/normalproduct/bread.jpg"),
-            productName: "갓 구운 바게트 빵",
-            storeName: "동네 베이커리",
-            discount: 30,
-            price: 3500,
-            originalPrice: 5000,
-          },
-          {
-            id: "2",
-            uri: require("@/assets/images/favicon.png"),
-            productName: "프리미엄 쿠키 세트",
-            storeName: "달콤한 제과점",
-            discount: 50,
-            price: 7500,
-            originalPrice: 15000,
-          },
-          {
-            id: "3",
-            uri: require("@/assets/images/react-logo.png"),
-            productName: "신선한 샌드위치",
-            storeName: "건강한 식탁",
-            discount: 20,
-            price: 4000,
-            originalPrice: 5000,
-          },
-          {
-            id: "4",
-            uri: require("@/assets/images/logo.png"),
-            productName: "시그니처 케이크",
-            storeName: "스위트 홈",
-            discount: 40,
-            price: 18000,
-            originalPrice: 30000,
-          },
-        ];
-
-  // 무한스크롤을 위한 배너 복제
-  const banners = [
-    ...originalBanners,
-    { ...originalBanners[0], id: `${originalBanners[0].id}-clone` },
-  ];
-
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -327,11 +281,13 @@ export default function CustHomeScreen() {
       </View>
 
       {/* 스크롤 가능한 콘텐츠 */}
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+        }}
       >
-        <BannerCarousel banners={banners} />
+        <BannerCarousel banners={transformedBanners} />
         <SaleProductSection products={transformedSaleProducts} />
         <NegoProductSection products={transformedNegoProducts} />
         <RegularProductSection products={transformedRegularProducts} />
