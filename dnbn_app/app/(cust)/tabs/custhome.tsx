@@ -111,7 +111,7 @@ export default function CustHomeScreen() {
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
             await Promise.all([
-              apiGet(`/cust/nego/home?custCode=${custCode}`),
+              apiGet(`/cust/negoproducts/home?custCode=${custCode}`),
               apiGet(`/cust/sales/home?custCode=${custCode}`),
               apiGet(`/cust/regular/home?custCode=${custCode}`),
               apiGet(`/cust/sales/banner?custCode=${custCode}`), // 배너용 할인율 높은 상품

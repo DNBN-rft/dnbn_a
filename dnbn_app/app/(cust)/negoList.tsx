@@ -139,7 +139,7 @@ export default function NegoListScreen() {
       try {
         setLoading(true);
         const custCode = "CUST_001";
-        const response = await apiGet(`/cust/nego?custCode=${custCode}`);
+        const response = await apiGet(`/cust/negoproducts?custCode=${custCode}`);
         const data = await response.json();
 
         setNegoProducts(data);
