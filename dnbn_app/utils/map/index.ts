@@ -43,17 +43,22 @@ export {
 } from "./animationUtils";
 export type { AnimationConfig } from "./animationUtils";
 
-// WebView 메시지 타입 정의
-export type WebViewMessageType =
-  | { type: 'init' }
-  | { type: 'userLocation'; latitude: number; longitude: number }
-  | { type: 'userLocationWithZoom'; latitude: number; longitude: number; zoom: number }
-  | { type: 'mapNavigation'; latitude: number; longitude: number; zoom: number }
-  | { type: 'addStores'; stores: any[] }
-  | { type: 'clearMarkers' }
-  | { type: 'clearAllMarkers' }
-  | { type: 'highlightStore'; storeId: string }
-  | { type: 'ready' };
+// WebView Utils
+export {
+  sendMessageToWebView,
+  moveMapToLocation,
+  setUserLocationWithZoom,
+  addStoreMarkers,
+  clearAllMarkers,
+  highlightStoreMarker,
+} from "./webViewUtils";
+export type { WebViewMessageType } from "./webViewUtils";
+
+// Panel Gesture Utils
+export {
+  createStoreDetailPanResponder,
+  createStoreListPanResponder,
+} from "./panelGestureUtils";
 
 export interface ClickedLocation {
   latitude: number;

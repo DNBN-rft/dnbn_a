@@ -87,9 +87,15 @@ export default function LoginScreen() {
           if (data.refreshTokenExpiresIn)
             storeTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
           if (data.tokenType) storeTokens.tokenType = data.tokenType;
+          if (data.memberNm) storeTokens.memberNm = data.memberNm;
+          if (data.authorities) storeTokens.authorities = JSON.stringify(data.authorities);
+          if (data.storeCode) storeTokens.storeCode = data.storeCode;
+          if (data.subscriptionNm) storeTokens.subscriptionNm = data.subscriptionNm;
+          if (data.memberId) storeTokens.memberId = data.memberId;
 
           await setMultipleItems(storeTokens);
 
+          console.log(storeTokens);
           router.replace("/(store)/tabs/storehome");
         }
       } else {
