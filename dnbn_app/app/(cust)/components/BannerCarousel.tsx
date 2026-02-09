@@ -32,7 +32,8 @@ interface BannerCarouselProps {
 
 export default function BannerCarousel({ banners }: BannerCarouselProps) {
   const bannerRef = useRef<FlatList>(null);
-  const currentIndex = useRef(0);
+  const currentIndex = useRef(1); // 첫 번째 원본부터 시작
+  const intervalRef = useRef<number | null>(null);
 
   // 배너 데이터가 없으면 기본 이미지만 표시
   const originalBanners =
@@ -53,10 +54,14 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
           },
         ];
 
-  // 무한스크롤을 위한 배너 복제
+  // 무한스크롤을 위한 배너 복제 (양쪽에 복제본 추가)
   const finalBanners = [
+    {
+      ...originalBanners[originalBanners.length - 1],
+      id: `${originalBanners[originalBanners.length - 1].id}-clone-start`,
+    },
     ...originalBanners,
-    { ...originalBanners[0], id: `${originalBanners[0].id}-clone` },
+    { ...originalBanners[0], id: `${originalBanners[0].id}-clone-end` },
   ];
 
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -72,33 +77,91 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
     itemVisiblePercentThreshold: 50,
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  // 자동 슬라이드 시작 함수
+  const startAutoSlide = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
       const nextIndex = currentIndex.current + 1;
 
       if (nextIndex >= finalBanners.length) {
+        // 마지막 복제본 도달 시 첫번째 원본으로 즉시 점프
         bannerRef.current?.scrollToIndex({
-          index: 0,
+          index: 1,
           animated: false,
         });
-        currentIndex.current = 0;
-
-        setTimeout(() => {
-          bannerRef.current?.scrollToIndex({
-            index: 1,
-            animated: true,
-          });
-        }, 50);
+        currentIndex.current = 1;
       } else {
         bannerRef.current?.scrollToIndex({
           index: nextIndex,
           animated: true,
         });
+        currentIndex.current = nextIndex;
       }
     }, 3000);
-
-    return () => clearInterval(interval);
   }, [finalBanners.length]);
+
+  // 자동 슬라이드 정지 함수
+  const stopAutoSlide = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  // 사용자 수동 스크롤 종료 시 무한 스크롤 위치 조정
+  const handleMomentumScrollEnd = useCallback(() => {
+    const index = currentIndex.current;
+
+    // 마지막 복제본(맨 끝)에 도달한 경우 -> 첫번째 원본으로 이동
+    if (index >= finalBanners.length - 1) {
+      setTimeout(() => {
+        bannerRef.current?.scrollToIndex({
+          index: 1,
+          animated: false,
+        });
+        currentIndex.current = 1;
+      }, 50);
+    }
+    // 첫번째 복제본(맨 앞)에 도달한 경우 -> 마지막 원본으로 이동
+    else if (index <= 0) {
+      setTimeout(() => {
+        bannerRef.current?.scrollToIndex({
+          index: originalBanners.length,
+          animated: false,
+        });
+        currentIndex.current = originalBanners.length;
+      }, 50);
+    }
+
+    // 스크롤 완전히 종료 후 즉시 자동 슬라이드 재개
+    startAutoSlide();
+  }, [finalBanners.length, originalBanners.length, startAutoSlide]);
+
+  // 사용자가 스크롤 시작할 때
+  const handleScrollBegin = useCallback(() => {
+    stopAutoSlide();
+  }, [stopAutoSlide]);
+
+  useEffect(() => {
+    // 초기 위치를 첫번째 원본으로 설정
+    setTimeout(() => {
+      bannerRef.current?.scrollToIndex({
+        index: 1,
+        animated: false,
+      });
+    }, 0);
+
+    startAutoSlide();
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [startAutoSlide]);
 
   return (
     <View style={styles.bannerContainer}>
@@ -117,8 +180,14 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
         pagingEnabled={true}
         snapToAlignment="center"
         decelerationRate="fast"
+        removeClippedSubviews={false}
+        initialNumToRender={finalBanners.length}
+        maxToRenderPerBatch={finalBanners.length}
+        windowSize={10}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig.current}
+        onScrollBeginDrag={handleScrollBegin}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
         getItemLayout={(data, index) => ({
           length: screenWidth,
           offset: screenWidth * index,
