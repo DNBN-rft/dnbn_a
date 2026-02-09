@@ -1,5 +1,8 @@
 import { isWithinRange, calculateDistance } from "./locationUtils";
 
+// API 기본 URL - utils/api.ts와 동일한 주소 사용
+const API_BASE_URL = "http://192.168.0.68:8080/api";
+
 export interface Store {
   id: string;
   name: string;
@@ -93,7 +96,7 @@ export const fetchStoresFromAPI = async (
 ): Promise<Store[]> => {
   try {
     const response = await fetch(
-      `https://your-api.com/api/stores/nearby?latitude=${latitude}&longitude=${longitude}`,
+      `${API_BASE_URL}/stores/nearby?latitude=${latitude}&longitude=${longitude}`,
       {
         method: 'GET',
         headers: {
@@ -119,16 +122,17 @@ export const fetchStoresFromAPI = async (
 export const fetchNearbyStores = async (
   latitude: number,
   longitude: number,
-  threshold: number = 0.05
+  threshold: number = 10 // 범위를 크게 확대 (약 1000km - 전국 범위)
 ): Promise<Store[]> => {
   try {
     // TEST_STORES에서 범위 내 가맹점 필터링
     let stores = filterStoresInRange(TEST_STORES, latitude, longitude, threshold);
 
+    // TODO: 백엔드 API 준비되면 아래 주석 해제
     // TEST_STORES에 없으면 백엔드 API 호출
-    if (stores.length === 0) {
-      stores = await fetchStoresFromAPI(latitude, longitude);
-    }
+    // if (stores.length === 0) {
+    //   stores = await fetchStoresFromAPI(latitude, longitude);
+    // }
 
     // 거리 정보 추가 및 정렬
     if (stores.length > 0) {
