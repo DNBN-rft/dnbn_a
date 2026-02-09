@@ -9,7 +9,6 @@ import {
   Animated,
   FlatList,
   Modal,
-  PanResponder,
   Platform,
   Text,
   TouchableOpacity,
@@ -20,17 +19,23 @@ import { WebView } from "react-native-webview";
 import {
   ClickedLocation,
   DEFAULT_LOCATION,
-  expandPanel,
   fetchNearbyStores,
   geocodeAddress,
   getUserLocation as getLocation,
-  resetPanel,
   reverseGeocode,
   slideDown,
   slideUp,
   Store,
-  WebViewMessageType
+  sendMessageToWebView,
+  moveMapToLocation,
+  setUserLocationWithZoom,
+  addStoreMarkers,
+  clearAllMarkers,
+  highlightStoreMarker,
+  createStoreDetailPanResponder,
+  createStoreListPanResponder,
 } from "../../../utils/map";
+import { useMapPanels } from "../../../hooks/useMapPanels";
 import { styles } from "../styles/map.styles";
 import { generateMapHTML } from "./mapHtml";
 
@@ -52,48 +57,45 @@ export default function CustMapScreen() {
   const [showStoreList, setShowStoreList] = useState(false);
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<WebView>(null);
-  const slideAnim = useRef(new Animated.Value(300)).current;
-  const clickedLocationAnim = useRef(new Animated.Value(500)).current; // 클릭된 위치 패널 애니메이션
-  const storeListAnim = useRef(new Animated.Value(300)).current; // 가맹점 목록 애니메이션
-  const dragStartValue = useRef(0); // 드래그 시작 시의 slideAnim 값 저장
-  const storeListDragStartValue = useRef(0); // 가맹점 목록 드래그 시작값
+  const scrollOffsetY = useRef(0);
   const mapHTML = useMemo(() => generateMapHTML(KAKAO_JAVASCRIPT_KEY), []);
 
-  const sendMessageToWebView = useCallback((message: WebViewMessageType) => {
-    if (webViewRef.current) {
-      const jsonMessage = JSON.stringify(message);
-      
-      if (Platform.OS === 'android') {
-        // 안드로이드에서는 injectJavaScript 사용
-        const script = `
-          (function() {
-            try {
-              const msg = ${jsonMessage};
-              if (window.handleMessage) {
-                window.handleMessage(msg);
-              } else {
-                window.messageQueue = window.messageQueue || [];
-                window.messageQueue.push(msg);
-              }
-            } catch (e) {
-              console.error('Message injection error:', e);
-            }
-          })();
-          true;
-        `;
-        webViewRef.current.injectJavaScript(script);
-      } else {
-        // iOS는 postMessage 사용
-        webViewRef.current.postMessage(jsonMessage);
-      }
-    }
-  }, []);
+  // 패널 관리 훅 사용
+  const {
+    slideAnim,
+    clickedLocationAnim,
+    storeListAnim,
+    dragStartValue,
+    storeListDragStartValue,
+    closeClickedLocationPanel,
+    closeStoreListPanel,
+    closeStoreDetailPanel,
+  } = useMapPanels();
+
+  // 가맹점 상세 PanResponder
+  const storeDetailPanResponder = useMemo(() => {
+    return createStoreDetailPanResponder(
+      slideAnim,
+      dragStartValue,
+      () => setSelectedStore(null)
+    );
+  }, [slideAnim, dragStartValue]);
+
+  // 가맹점 목록 PanResponder
+  const storeListPanResponder = useMemo(() => {
+    return createStoreListPanResponder(
+      storeListAnim,
+      storeListDragStartValue,
+      scrollOffsetY,
+      () => setShowStoreList(false)
+    );
+  }, [storeListAnim, storeListDragStartValue]);
 
   const handleFetchNearbyStores = useCallback(
     async (latitude: number, longitude: number) => {
       try {
         // 기존 마커 제거
-        sendMessageToWebView({
+        sendMessageToWebView(webViewRef, {
           type: "clearMarkers",
         });
 
@@ -101,46 +103,33 @@ export default function CustMapScreen() {
 
         setStores(nearbyStores);
         if (nearbyStores.length > 0) {
-          sendMessageToWebView({
-            type: "addStores",
-            stores: nearbyStores,
-          });
+          addStoreMarkers(webViewRef, nearbyStores);
         }
       } catch (error) {
         console.error("Fetch stores error:", error);
         setStores([]);
-        sendMessageToWebView({
+        sendMessageToWebView(webViewRef, {
           type: "clearMarkers",
         });
       }
     },
-    [sendMessageToWebView],
+    [],
   );
 
   // 2. 좌표 설정 (지도 이동)
   const setLocationCoordinates = useCallback(
     (latitude: number, longitude: number, zoom: number = 3) => {
-      sendMessageToWebView({
-        type: "userLocationWithZoom",
-        latitude,
-        longitude,
-        zoom,
-      });
+      setUserLocationWithZoom(webViewRef, latitude, longitude, zoom);
     },
-    [sendMessageToWebView],
+    [],
   );
 
   // 지도 이동만 (마커 생성 없음)
   const handleMapNavigation = useCallback(
     (latitude: number, longitude: number, zoom: number = 2) => {
-      sendMessageToWebView({
-        type: "mapNavigation",
-        latitude,
-        longitude,
-        zoom,
-      });
+      moveMapToLocation(webViewRef, latitude, longitude, zoom);
     },
-    [sendMessageToWebView],
+    [],
   );
 
   // 3. 위치 선택 처리 (좌표 설정 + 주변 가맹점 조회)
@@ -172,39 +161,49 @@ export default function CustMapScreen() {
 
         if (result) {
           // 기존 패널들 모두 닫기
-          const closePromises = [];
+          const promises: Promise<void>[] = [];
+
+          // 클릭 위치 패널 닫기
           if (clickedLocation) {
-            closePromises.push(
+            promises.push(
               new Promise<void>((resolve) => {
                 slideDown(clickedLocationAnim, 500, 300, () => {
                   setClickedLocation(null);
                   resolve();
                 });
-              }),
+              })
             );
           }
-          if (showStoreList) {
-            closePromises.push(
-              new Promise<void>((resolve) => {
-                slideDown(storeListAnim, 300, 300, () => {
-                  setShowStoreList(false);
-                  resolve();
-                });
-              }),
-            );
-          }
+
+          // 상세보기 패널 닫기
           if (selectedStore) {
-            closePromises.push(
+            promises.push(
               new Promise<void>((resolve) => {
                 slideDown(slideAnim, 300, 300, () => {
                   setSelectedStore(null);
                   resolve();
                 });
-              }),
+              })
             );
           }
-          if (closePromises.length > 0) {
-            await Promise.all(closePromises);
+
+          // 목록 패널 닫기
+          if (showStoreList) {
+            promises.push(
+              new Promise<void>((resolve) => {
+                slideDown(storeListAnim, 300, 300, () => {
+                  setShowStoreList(false);
+                  resolve();
+                });
+              })
+            );
+          }
+
+          // 모든 패널이 닫힐 때까지 대기
+          if (promises.length > 0) {
+            await Promise.all(promises);
+            // 애니메이션이 완전히 끝날 때까지 추가 대기
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
           // 지도 이동
@@ -225,7 +224,7 @@ export default function CustMapScreen() {
         setIsLoading(false);
       }
     },
-    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, clickedLocation, clickedLocationAnim, showStoreList, selectedStore, slideAnim],
+    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, clickedLocationAnim, slideAnim, clickedLocation, selectedStore, showStoreList],
   );
 
   const getUserLocation = useCallback(async () => {
@@ -265,10 +264,7 @@ export default function CustMapScreen() {
           }, 100);
         } else if (data.type === "storeSelected") {
           // 지도에서 마커 클릭 시 해당 마커를 주황색으로 강조
-          sendMessageToWebView({
-            type: "highlightStore",
-            storeId: data.store.id,
-          });
+          highlightStoreMarker(webViewRef, data.store.id);
 
           // 목록이 열려있으면 먼저 닫기
           if (showStoreList) {
@@ -280,39 +276,35 @@ export default function CustMapScreen() {
               setSelectedStore(data.store);
             }, 350);
           } else {
+            // 목록이 닫혀있으면 바로 상세정보 표시
             setSelectedStore(data.store);
           }
         } else if (data.type === "mapClicked") {
           // 새 위치 클릭 시 기존 패널들 닫기 (하나씩)
-          if (showStoreList) {
-            slideDown(storeListAnim, 600, 300, () => {
-              setShowStoreList(false);
-            });
-          } else if (selectedStore) {
-            slideDown(slideAnim, 300, 300, () => {
-              setSelectedStore(null);
-            });
-          }
+          slideDown(storeListAnim, 600, 300, () => {
+            setShowStoreList(false);
+          });
+          slideDown(slideAnim, 300, 300, () => {
+            setSelectedStore(null);
+          });
           handleReverseGeocode(data.latitude, data.longitude);
         }
       } catch (error) {}
     },
     [
       handleReverseGeocode,
-      showStoreList,
       storeListAnim,
-      selectedStore,
       slideAnim,
-      sendMessageToWebView,
+      showStoreList,
     ],
   );
 
   const handleWebViewLoadEnd = useCallback(() => {
     // WebView가 완전히 준비될 때까지 대기
     setTimeout(() => {
-      sendMessageToWebView({ type: "init" });
+      sendMessageToWebView(webViewRef, { type: "init" });
     }, 500);
-  }, [sendMessageToWebView]);
+  }, []);
 
   // WebView 에러 핸들러
   const handleWebViewError = useCallback((syntheticEvent: any) => {
@@ -336,26 +328,52 @@ export default function CustMapScreen() {
 
   // 현재 위치로 이동 + 주변 가맹점 조회
   const handleCenterToUser = useCallback(async () => {
+    const promises: Promise<void>[] = [];
+
     // 클릭한 위치 패널 닫기
     if (clickedLocation) {
-      slideDown(clickedLocationAnim, 500, 300, () => {
-        setClickedLocation(null);
-      });
+      promises.push(
+        new Promise<void>((resolve) => {
+          slideDown(clickedLocationAnim, 500, 300, () => {
+            setClickedLocation(null);
+            resolve();
+          });
+        })
+      );
     }
 
     // 가맹점 상세정보 패널이 열려있으면 먼저 닫기
     if (selectedStore) {
-      slideDown(slideAnim, 300, 300, () => {
-        setSelectedStore(null);
-      });
-      // 패널이 닫힐 때까지 대기
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      promises.push(
+        new Promise<void>((resolve) => {
+          slideDown(slideAnim, 300, 300, () => {
+            setSelectedStore(null);
+            resolve();
+          });
+        })
+      );
+    }
+
+    // 목록 패널 닫기
+    if (showStoreList) {
+      promises.push(
+        new Promise<void>((resolve) => {
+          slideDown(storeListAnim, 300, 300, () => {
+            setShowStoreList(false);
+            resolve();
+          });
+        })
+      );
+    }
+    
+    // 패널이 닫힐 때까지 대기
+    if (promises.length > 0) {
+      await Promise.all(promises);
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     // WebView에서 모든 마커 제거 (클릭 마커 + 가맹점 마커)
-    sendMessageToWebView({
-      type: "clearAllMarkers",
-    });
+    clearAllMarkers(webViewRef);
 
     if (userLocation) {
       await handleLocationSelection(
@@ -363,17 +381,24 @@ export default function CustMapScreen() {
         userLocation.coords.longitude,
       );
     } else {
-      await getUserLocation();
+      const location = await getLocation();
+      if (location) {
+        setUserLocation(location);
+        await handleLocationSelection(
+          location.coords.latitude,
+          location.coords.longitude,
+        );
+      }
     }
   }, [
-    userLocation,
-    handleLocationSelection,
-    getUserLocation,
-    clickedLocation,
     clickedLocationAnim,
-    sendMessageToWebView,
-    selectedStore,
     slideAnim,
+    storeListAnim,
+    handleLocationSelection,
+    userLocation,
+    clickedLocation,
+    selectedStore,
+    showStoreList,
   ]);
 
   // 가맹점 정보 닫기
@@ -398,10 +423,7 @@ export default function CustMapScreen() {
       handleMapNavigation(store.latitude, store.longitude, 4);
 
       // 해당 가맹점 마커 강조
-      sendMessageToWebView({
-        type: "highlightStore",
-        storeId: store.id,
-      });
+      highlightStoreMarker(webViewRef, store.id);
 
       // 목록 패널 닫기
       slideDown(storeListAnim, 300, 300, () => {
@@ -412,52 +434,47 @@ export default function CustMapScreen() {
       await new Promise((resolve) => setTimeout(resolve, 350));
       setSelectedStore(store);
     },
-    [storeListAnim, clickedLocation, clickedLocationAnim, handleMapNavigation, sendMessageToWebView],
+    [storeListAnim, clickedLocationAnim, handleMapNavigation, clickedLocation],
   );
 
   // 클릭한 위치 근처 가맹점 검색
   const handleSearchNearbyStores = useCallback(async () => {
-    if (clickedLocation) {
-      // 1. 먼저 지도를 클릭한 위치로 이동 (마커는 이미 있으므로 네비게이션만)
-      await handleMapNavigation(
-        clickedLocation.latitude,
-        clickedLocation.longitude,
-        4,
-      );
+    if (!clickedLocation) return;
 
-      // 2. 가맹점 조회
-      await handleFetchNearbyStores(
-        clickedLocation.latitude,
-        clickedLocation.longitude,
-      );
+    const { latitude, longitude } = clickedLocation;
 
-      // 3. 다른 패널들이 열려있으면 먼저 닫기
-      if (selectedStore) {
-        slideDown(slideAnim, 300, 300, () => {
-          setSelectedStore(null);
-        });
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
+    // 1. 먼저 지도를 클릭한 위치로 이동 (마커는 이미 있으므로 네비게이션만)
+    await handleMapNavigation(latitude, longitude, 4);
 
-      // 4. 클릭 위치 패널 닫기
-      slideDown(clickedLocationAnim, 200, 300, () => {
-        setClickedLocation(null);
+    // 2. 가맹점 조회
+    await handleFetchNearbyStores(latitude, longitude);
+
+    // 3. 다른 패널들이 열려있으면 먼저 닫기
+    if (selectedStore) {
+      slideDown(slideAnim, 300, 300, () => {
+        setSelectedStore(null);
       });
-
-      // 5. 가맹점 목록 표시 (약간의 딜레이 후)
-      setTimeout(() => {
-        setShowStoreList(true);
-        slideUp(storeListAnim, 400);
-      }, 300);
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
+
+    // 4. 클릭 위치 패널 닫기
+    slideDown(clickedLocationAnim, 200, 300, () => {
+      setClickedLocation(null);
+    });
+
+    // 5. 가맹점 목록 표시 (약간의 딜레이 후)
+    setTimeout(() => {
+      setShowStoreList(true);
+      slideUp(storeListAnim, 400);
+    }, 300);
   }, [
     clickedLocation,
     handleMapNavigation,
     handleFetchNearbyStores,
     clickedLocationAnim,
     storeListAnim,
-    selectedStore,
     slideAnim,
+    selectedStore,
   ]);
 
   // 클릭 패널 닫기
@@ -467,67 +484,6 @@ export default function CustMapScreen() {
     });
   }, [clickedLocationAnim]);
 
-  // PanResponder 생성 (드래그 감지)
-  const panResponder = useMemo(() => {
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        // 드래그 시작 시 현재 slideAnim 값 저장
-        dragStartValue.current = (slideAnim as any)._value || 300;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        // 드래그 시작값 + 현재 드래그 거리
-        const newValue = dragStartValue.current + gestureState.dy;
-        if (newValue > -200 && newValue < 350) {
-          slideAnim.setValue(newValue);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 150) {
-          slideDown(slideAnim, 300, 300, () => {
-            setSelectedStore(null);
-          });
-        } else if (gestureState.dy < -50) {
-          expandPanel(slideAnim, -200, 200);
-        } else {
-          resetPanel(slideAnim, 200);
-        }
-      },
-    });
-  }, [slideAnim]);
-
-  // 가맹점 목록 드래그 PanResponder
-  const storeListPanResponder = useMemo(() => {
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        storeListDragStartValue.current = (storeListAnim as any)._value || 0;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        const newValue = storeListDragStartValue.current + gestureState.dy;
-        if (newValue > -300 && newValue < 300) {
-          storeListAnim.setValue(newValue);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 80) {
-          // 아래로 드래그 → 목록 닫기
-          slideDown(storeListAnim, 300, 300, () => {
-            setShowStoreList(false);
-          });
-        } else if (gestureState.dy < -50) {
-          // 위로 드래그 → 전체 확대
-          expandPanel(storeListAnim, -300, 200);
-        } else {
-          // 중간 → 기본 위치
-          resetPanel(storeListAnim, 200);
-        }
-      },
-    });
-  }, [storeListAnim]);
-
   // 모달 opened/closed 감시
   useLayoutEffect(() => {
     return () => {};
@@ -535,8 +491,13 @@ export default function CustMapScreen() {
 
   // 초기 로드: 위치 정보 가져오기
   useLayoutEffect(() => {
-    getUserLocation();
-  }, [getUserLocation]);
+    const initLocation = async () => {
+      const location = await getLocation();
+      setUserLocation(location);
+      setIsLocationReady(true);
+    };
+    initLocation();
+  }, []);
 
   // 지도와 위치 모두 준비되면 지도에 표시 + 주변 가맹점 조회
   useLayoutEffect(() => {
@@ -544,30 +505,36 @@ export default function CustMapScreen() {
       return;
     }
 
-    setTimeout(() => {
-      // searchAddress 파라미터가 있으면 해당 주소로 검색
-      if (searchAddress && typeof searchAddress === "string") {
-        handleGeocodeAddress(searchAddress);
-      } else if (userLocation) {
-        handleLocationSelection(
-          userLocation.coords.latitude,
-          userLocation.coords.longitude,
-        );
-      } else {
-        handleLocationSelection(
-          DEFAULT_LOCATION.latitude,
-          DEFAULT_LOCATION.longitude,
-        );
+    const initializeMap = async () => {
+      try {
+        // searchAddress 파라미터가 있으면 해당 주소로 검색
+        if (searchAddress && typeof searchAddress === "string") {
+          await handleGeocodeAddress(searchAddress);
+        } else if (userLocation) {
+          await handleLocationSelection(
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+          );
+        } else {
+          await handleLocationSelection(
+            DEFAULT_LOCATION.latitude,
+            DEFAULT_LOCATION.longitude,
+          );
+        }
+      } catch (error) {
+        console.error("Map initialization error:", error);
       }
+    };
+
+    const timer = setTimeout(() => {
+      initializeMap();
     }, 500);
+
+    return () => clearTimeout(timer);
   }, [
     isMapReady,
     isLocationReady,
-    userLocation,
-    handleLocationSelection,
-    searchAddress,
-    handleGeocodeAddress,
-  ]);
+  ])
 
   // 가맹점 선택 시 탭 숨기기/보이기
   useLayoutEffect(() => {
@@ -576,11 +543,14 @@ export default function CustMapScreen() {
         display: selectedStore ? "none" : "flex",
       },
     });
+  }, [selectedStore, navigation]);
 
+  // 가맹점 선택 시 패널 애니메이션
+  useLayoutEffect(() => {
     if (selectedStore) {
       slideUp(slideAnim, 300);
     }
-  }, [selectedStore, navigation, slideAnim]);
+  }, [selectedStore?.id]);
 
   return (
     <View style={styles.container}>
@@ -652,7 +622,7 @@ export default function CustMapScreen() {
           </View>
           <Postcode
             style={styles.postcodeStyle}
-            onSelected={(data) => {
+            onSelected={(data: any) => {
               const address = data.roadAddress || data.address;
               setShowAddressSearch(false);
 
@@ -661,7 +631,7 @@ export default function CustMapScreen() {
                 handleGeocodeAddress(address);
               }, 300);
             }}
-            onError={(error) => {
+            onError={(error: any) => {
               Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.");
             }}
           />
@@ -716,7 +686,7 @@ export default function CustMapScreen() {
               { transform: [{ translateY: slideAnim }] },
             ]}
           >
-            <View {...panResponder.panHandlers} style={styles.dragHandle}>
+            <View {...storeDetailPanResponder.panHandlers} style={styles.dragHandle}>
               <View style={styles.dragHandleBar} />
             </View>
             <TouchableOpacity
@@ -770,14 +740,21 @@ export default function CustMapScreen() {
               { transform: [{ translateY: storeListAnim }] },
             ]}
           >
+            {/* 드래그 핸들 - 항상 상단에 고정 */}
             <View style={styles.storeListDragHandle}>
               <View style={styles.storeListDragBar} />
             </View>
 
+            {/* 가맹점 목록 - 스크롤 가능 */}
             <FlatList
+              style={{ flex: 1 }}
               data={stores}
               keyExtractor={(item) => item.id}
               scrollEnabled={true}
+              scrollEventThrottle={16}
+              onScroll={(event: any) => {
+                scrollOffsetY.current = event.nativeEvent.contentOffset.y;
+              }}
               contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -795,8 +772,8 @@ export default function CustMapScreen() {
                   )}
                 </TouchableOpacity>
               )}
-              initialNumToRender={2}
-              maxToRenderPerBatch={5}
+              initialNumToRender={5}
+              maxToRenderPerBatch={10}
             />
           </Animated.View>
         </View>
