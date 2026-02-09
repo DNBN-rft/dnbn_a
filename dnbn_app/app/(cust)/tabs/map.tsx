@@ -62,8 +62,30 @@ export default function CustMapScreen() {
   const sendMessageToWebView = useCallback((message: WebViewMessageType) => {
     if (webViewRef.current) {
       const jsonMessage = JSON.stringify(message);
-      webViewRef.current.postMessage(jsonMessage);
-    } else {
+      
+      if (Platform.OS === 'android') {
+        // 안드로이드에서는 injectJavaScript 사용
+        const script = `
+          (function() {
+            try {
+              const msg = ${jsonMessage};
+              if (window.handleMessage) {
+                window.handleMessage(msg);
+              } else {
+                window.messageQueue = window.messageQueue || [];
+                window.messageQueue.push(msg);
+              }
+            } catch (e) {
+              console.error('Message injection error:', e);
+            }
+          })();
+          true;
+        `;
+        webViewRef.current.injectJavaScript(script);
+      } else {
+        // iOS는 postMessage 사용
+        webViewRef.current.postMessage(jsonMessage);
+      }
     }
   }, []);
 
@@ -124,12 +146,20 @@ export default function CustMapScreen() {
   // 3. 위치 선택 처리 (좌표 설정 + 주변 가맹점 조회)
   const handleLocationSelection = useCallback(
     async (latitude: number, longitude: number) => {
-      setLocationCoordinates(latitude, longitude);
-      await handleFetchNearbyStores(latitude, longitude);
+      try {
+        setLocationCoordinates(latitude, longitude);
+        await handleFetchNearbyStores(latitude, longitude);
 
-      // 가맹점 목록 표시
-      setShowStoreList(true);
-      slideUp(storeListAnim, 400);
+        // 가맹점 목록 표시
+        setShowStoreList(true);
+        slideUp(storeListAnim, 400);
+        
+        // 모든 작업 완료 후 로딩 종료
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Location selection error:", error);
+        setIsLoading(false);
+      }
     },
     [setLocationCoordinates, handleFetchNearbyStores, storeListAnim],
   );
@@ -137,24 +167,65 @@ export default function CustMapScreen() {
   // Kakao REST API로 주소를 좌표로 변환
   const handleGeocodeAddress = useCallback(
     async (address: string) => {
-      const result = await geocodeAddress(address);
+      try {
+        const result = await geocodeAddress(address);
 
-      if (result) {
-        // 기존 패널들 모두 닫기
-        await closeAllPanels();
+        if (result) {
+          // 기존 패널들 모두 닫기
+          const closePromises = [];
+          if (clickedLocation) {
+            closePromises.push(
+              new Promise<void>((resolve) => {
+                slideDown(clickedLocationAnim, 500, 300, () => {
+                  setClickedLocation(null);
+                  resolve();
+                });
+              }),
+            );
+          }
+          if (showStoreList) {
+            closePromises.push(
+              new Promise<void>((resolve) => {
+                slideDown(storeListAnim, 300, 300, () => {
+                  setShowStoreList(false);
+                  resolve();
+                });
+              }),
+            );
+          }
+          if (selectedStore) {
+            closePromises.push(
+              new Promise<void>((resolve) => {
+                slideDown(slideAnim, 300, 300, () => {
+                  setSelectedStore(null);
+                  resolve();
+                });
+              }),
+            );
+          }
+          if (closePromises.length > 0) {
+            await Promise.all(closePromises);
+          }
 
-        // 지도 이동
-        await handleMapNavigation(result.latitude, result.longitude);
+          // 지도 이동
+          await handleMapNavigation(result.latitude, result.longitude);
 
-        // 주변 가맹점 조회
-        await handleFetchNearbyStores(result.latitude, result.longitude);
+          // 주변 가맹점 조회
+          await handleFetchNearbyStores(result.latitude, result.longitude);
 
-        // 가맹점 목록 표시
-        setShowStoreList(true);
-        slideUp(storeListAnim, 400);
+          // 가맹점 목록 표시
+          setShowStoreList(true);
+          slideUp(storeListAnim, 400);
+          
+          // 모든 작업 완료 후 로딩 종료
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Geocode error:", error);
+        setIsLoading(false);
       }
     },
-    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, closeAllPanels],
+    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, clickedLocation, clickedLocationAnim, showStoreList, selectedStore, slideAnim],
   );
 
   const getUserLocation = useCallback(async () => {
@@ -301,61 +372,6 @@ export default function CustMapScreen() {
     clickedLocation,
     clickedLocationAnim,
     sendMessageToWebView,
-    selectedStore,
-    slideAnim,
-  ]);
-
-  /**
-   * 모든 패널을 닫습니다
-   */
-  const closeAllPanels = useCallback(async () => {
-    const closePromises = [];
-
-    // 1. 클릭한 위치 패널 닫기
-    if (clickedLocation) {
-      closePromises.push(
-        new Promise<void>((resolve) => {
-          slideDown(clickedLocationAnim, 500, 300, () => {
-            setClickedLocation(null);
-            resolve();
-          });
-        }),
-      );
-    }
-
-    // 2. 가맹점 목록 패널 닫기
-    if (showStoreList) {
-      closePromises.push(
-        new Promise<void>((resolve) => {
-          slideDown(storeListAnim, 300, 300, () => {
-            setShowStoreList(false);
-            resolve();
-          });
-        }),
-      );
-    }
-
-    // 3. 가맹점 상세정보 패널 닫기
-    if (selectedStore) {
-      closePromises.push(
-        new Promise<void>((resolve) => {
-          slideDown(slideAnim, 300, 300, () => {
-            setSelectedStore(null);
-            resolve();
-          });
-        }),
-      );
-    }
-
-    // 모든 패널이 닫힐 때까지 대기
-    if (closePromises.length > 0) {
-      await Promise.all(closePromises);
-    }
-  }, [
-    clickedLocation,
-    clickedLocationAnim,
-    showStoreList,
-    storeListAnim,
     selectedStore,
     slideAnim,
   ]);

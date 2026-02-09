@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -13,8 +13,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet } from "../../../utils/api";
-import { styles } from "../styles/search-result.styles";
+import { apiGet } from "../../utils/api";
+import { styles } from "./search-result.styles";
 
 interface SearchProduct {
   productCode: string;
@@ -46,7 +46,6 @@ export default function SearchView() {
   );
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("최신순");
   const [products, setProducts] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -54,23 +53,33 @@ export default function SearchView() {
   const [sortType, setSortType] = useState("LATEST");
 
   const filterOptions = [
-    { id: "1", label: "최신순", value: "LATEST" },
-    { id: "2", label: "리뷰 많은 순", value: "MOST_REVIEWED" },
-    { id: "3", label: "별점 높은 순", value: "HIGHEST_RATING" },
-    { id: "4", label: "낮은 가격 순", value: "LOWEST_PRICE" },
-    { id: "5", label: "높은 가격 순", value: "HIGHEST_PRICE" },
+    "LATEST",
+    "MOST_REVIEWED",
+    "HIGHEST_RATING",
+    "LOWEST_PRICE",
+    "HIGHEST_PRICE",
   ];
 
+  // 정렬 타입에 따른 표시 텍스트
+  const getSortLabel = (sortType: string) => {
+    const labels: Record<string, string> = {
+      LATEST: "최신순",
+      MOST_REVIEWED: "리뷰 많은 순",
+      HIGHEST_RATING: "별점 높은 순",
+      LOWEST_PRICE: "낮은 가격 순",
+      HIGHEST_PRICE: "높은 가격 순",
+    };
+    return labels[sortType] || "최신순";
+  };
+
   // 상품 목록 조회
-  const fetchProducts = async (
-    searchTerm: string = "",
-    currentPage: number = 0,
-    sortValue: string = "LATEST",
-  ) => {
+  const fetchProducts = async (keyword: string, sort: string = sortType, pg: number = page) => {
+    if (!keyword.trim()) return;
+    
     setLoading(true);
     try {
       const response = await apiGet(
-        `/cust/search/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
+        `/cust/search/products?searchKeyword=${encodeURIComponent(keyword)}&productSortType=${sort}&page=${pg}&size=15`,
       );
 
       if (response.ok) {
@@ -88,24 +97,38 @@ export default function SearchView() {
     }
   };
 
-  // 초기 로드 및 검색어 변경 시 검색
-  useEffect(() => {
-    const keyword = params.keyword as string;
-    if (keyword) {
-      setSearchKeyword(keyword);
-      // 새로운 검색 시 정렬 초기화
-      setSortType("LATEST");
-      setSelectedFilter("최신순");
-      fetchProducts(keyword, 0, "LATEST");
-    }
-  }, [params.keyword, params.timestamp]);
+  // 페이지가 focus될 때마다 params.keyword로 검색 실행
+  useFocusEffect(
+    useCallback(() => {
+      const keyword = params.keyword as string;
+      if (keyword) {
+        setSearchKeyword(keyword);
+        setSortType("LATEST");
+        setPage(0);
+        // params.keyword로 검색 실행 (초기값으로 명시적 전달)
+        fetchProducts(keyword, "LATEST", 0);
+      }
+    }, [params.keyword]),
+  );
 
-  // 검색 버튼 클릭
+  // 검색 버튼 클릭 (search-result 페이지 내에서)
   const handleSearch = () => {
-    // 검색 시 정렬 초기화
+    if (!searchKeyword.trim()) return;
+    
+    // 정렬 및 페이지 초기화 후 검색
     setSortType("LATEST");
-    setSelectedFilter("최신순");
-    fetchProducts(searchKeyword, 0, "LATEST");
+    setPage(0);
+    // 초기값으로 명시적 전달
+    fetchProducts(searchKeyword, "LATEST", 0);
+  };
+
+  //필터 선택
+  const handleFilterSelect = (value: string) => {
+    setSortType(value);
+    setPage(0);
+    // 필터 변경 시 현재 검색어로 재검색
+    fetchProducts(searchKeyword, value, 0);
+    closeFilterModal();
   };
 
   const openFilterModal = () => {
@@ -120,13 +143,6 @@ export default function SearchView() {
     setTimeout(() => {
       setIsOverlayVisible(false);
     }, 300);
-  };
-
-  const handleFilterSelect = (filter: string, value: string) => {
-    setSelectedFilter(filter);
-    setSortType(value);
-    closeFilterModal();
-    fetchProducts(searchKeyword, 0, value);
   };
 
   return (
@@ -155,7 +171,6 @@ export default function SearchView() {
               style={styles.searchBar}
               value={searchKeyword}
               onChangeText={setSearchKeyword}
-              onSubmitEditing={handleSearch}
             />
             <Pressable style={styles.searchButton} onPress={handleSearch}>
               <Text style={styles.searchButtonText}>검색</Text>
@@ -170,7 +185,7 @@ export default function SearchView() {
             onPress={openFilterModal}
           >
             <Ionicons name="filter-outline" size={18} color="#666" />
-            <Text style={styles.filterText}>{selectedFilter}</Text>
+            <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.productResultContainer}>
@@ -283,26 +298,22 @@ export default function SearchView() {
               <View style={styles.filterOptionsContainer}>
                 {filterOptions.map((option) => (
                   <TouchableOpacity
-                    key={option.id}
+                    key={option}
                     style={[
                       styles.filterOption,
-                      selectedFilter === option.label &&
-                        styles.filterOptionSelected,
+                      sortType === option && styles.filterOptionSelected,
                     ]}
-                    onPress={() =>
-                      handleFilterSelect(option.label, option.value)
-                    }
+                    onPress={() => handleFilterSelect(option)}
                   >
                     <Text
                       style={[
                         styles.filterOptionText,
-                        selectedFilter === option.label &&
-                          styles.filterOptionTextSelected,
+                        sortType === option && styles.filterOptionTextSelected,
                       ]}
                     >
-                      {option.label}
+                      {getSortLabel(option)}
                     </Text>
-                    {selectedFilter === option.label && (
+                    {sortType === option && (
                       <Ionicons name="checkmark" size={20} color="#EF7810" />
                     )}
                   </TouchableOpacity>
