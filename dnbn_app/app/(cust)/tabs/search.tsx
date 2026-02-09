@@ -199,7 +199,7 @@ export default function SearchView() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0 }]}>
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
