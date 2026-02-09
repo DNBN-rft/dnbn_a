@@ -158,8 +158,6 @@ export const generateMapHTML = (appKey: string) => `
                       break;
               }
           };
-          
-          // 메시지 큐 처리 (postMessage 방식을 위한 폴백)
           let messageProcessInterval = setInterval(function() {
               if (window.messageQueue && window.messageQueue.length > 0) {
                   const msg = window.messageQueue.shift();
