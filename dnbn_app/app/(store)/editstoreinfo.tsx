@@ -1,31 +1,159 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState, useEffect } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
-    Modal,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
 
+interface StoreInfo {
+  approvalStatus: string;
+  storeNm: string;
+  storeTelNo: string;
+  storeAddr: string;
+  storeAddrDetail: string;
+  storeReport: number;
+
+  bankNm: string;
+  storeAccNo: string;
+  ownerNm: string;
+
+  bizNm: string;
+  storeType: string;
+  bizNo: string;
+  ownerTelNo: string;
+  bizRegDate: string;
+
+  storeOpenDate: Array<string>;
+  storeOpenTime: string;
+  storeCloseTime: string;
+
+  planNm: string;
+  membershipStartDate: string;
+  nextBillingDate: string;
+  planPrice: number;
+  isRenew: boolean;
+  membershipInfos: MembershipInfo[];
+  mainImg: mainImg;
+}
+
+interface MembershipInfo {
+  membershipStartDate: string;
+  membershipEndDate: string;
+  PlanNm: string;
+  PlanPrice: number;
+  PaymentDateTime: string;
+  PlanType: string;
+}
+
+interface mainImg {
+  fileUrl: string;
+  originalName: string;
+  order: number;
+}
+
 export default function EditStoreInfoPage() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+  const [memberId, setMemberId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadStoreInfo = async () => {
+      try {
+        let name: string | null = null;
+
+        if (Platform.OS === "web") {
+          name = localStorage.getItem("memberId");
+        } else {
+          name = await SecureStore.getItemAsync("memberId");
+        }
+
+        if (name) {
+          setMemberId(name);
+        }
+      } catch (error) {
+        console.error("스토어 정보 로드 실패:", error);
+      }
+    };
+
+    loadStoreInfo();
+  }, []);
+
+
+  // params에서 storeInfo 파싱
+  const initialStoreInfo: StoreInfo | null = params.storeInfo
+    ? JSON.parse(params.storeInfo as string)
+    : null;
 
   // 수정 가능한 정보
-  const [storeName, setStoreName] = useState("던킨도너츠 서울역점");
-  const [phoneNumber, setPhoneNumber] = useState("02-123-4567");
-  const [address, setAddress] = useState("서울특별시 중구 세종대로 110");
-  const [bankName, setBankName] = useState("국민은행");
-  const [accountNumber, setAccountNumber] = useState("123-456-78901234");
-  const [businessHours, setBusinessHours] = useState("09:00 ~ 21:00");
-  const [businessDays, setBusinessDays] = useState("월요일 ~ 일요일");
+  const [storeName, setStoreName] = useState(initialStoreInfo?.storeNm || "");
+  const [phoneNumber, setPhoneNumber] = useState(initialStoreInfo?.storeTelNo || "");
+  const [address, setAddress] = useState(initialStoreInfo?.storeAddr || "");
+  const [detailedAddress, setDetailedAddress] = useState(initialStoreInfo?.storeAddrDetail || "");
+  const [bankName, setBankName] = useState(initialStoreInfo?.bankNm || "");
+  const [accountNumber, setAccountNumber] = useState(initialStoreInfo?.storeAccNo || "");
+  const [businessOpenTime, setBusinessOpenTime] = useState(
+    initialStoreInfo?.storeOpenTime || "09:00"
+  );
+  const [businessCloseTime, setBusinessCloseTime] = useState(
+    initialStoreInfo?.storeCloseTime || "21:00"
+  );
+  
+  // 요일 매핑
+  const dayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  const dayMapping: { [key: string]: string } = {
+    MON: "월",
+    TUE: "화",
+    WED: "수",
+    THU: "목",
+    FRI: "금",
+    SAT: "토",
+    SUN: "일",
+  };
+  const koreanToDayCode: { [key: string]: string } = {
+    "월": "MON",
+    "화": "TUE",
+    "수": "WED",
+    "목": "THU",
+    "금": "FRI",
+    "토": "SAT",
+    "일": "SUN",
+  };
+  
+  // 초기 영업일 처리
+  const getInitialBusinessDays = () => {
+    if (initialStoreInfo?.storeOpenDate && initialStoreInfo.storeOpenDate.length > 0) {
+      // storeOpenDate가 한글(월,화,수) 형식인 경우 영문 코드로 변환
+      const convertedDays = initialStoreInfo.storeOpenDate
+        .map((day: string) => {
+          // 한글로 되어 있으면 변환, 이미 영문이면 그대로
+          return koreanToDayCode[day] || day;
+        })
+        .filter((day: string) => dayOrder.includes(day)); // 유효한 값만 필터링
+      
+      return convertedDays.length > 0 ? convertedDays : dayOrder;
+    }
+    return dayOrder; // 기본값: 모든 요일
+  };
+  
+  const [businessDays, setBusinessDays] = useState<string[]>(getInitialBusinessDays());
+  const [mainImage, setMainImage] = useState(initialStoreInfo?.mainImg || null);
 
-  // 계정 정보
-  const [accountId, setAccountId] = useState("store_user");
+  // Time picker 모달 관련 state
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [activeTimePicker, setActiveTimePicker] = useState<"open" | "close" | null>(null);
+  const [selectedHour, setSelectedHour] = useState("09");
+  const [selectedMinute, setSelectedMinute] = useState("00");
 
   // 비밀번호 변경 모달
   const [passwordModalStep, setPasswordModalStep] = useState<
@@ -36,13 +164,14 @@ export default function EditStoreInfoPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(true);
 
-  const accountHolder = "홍길동";
-  const businessName = "던킨도너츠 서울역점";
-  const businessNumber = "123-45-67890";
-  const representativeName = "홍길동";
-  const representativePhone = "02-123-4567";
-  const businessType = "도소매업";
-  const registrationDate = "2020-01-15";
+  // 읽기 전용 정보 (initialStoreInfo에서 가져옴)
+  const accountHolder = initialStoreInfo?.ownerNm || "";
+  const businessName = initialStoreInfo?.bizNm || "";
+  const businessNumber = initialStoreInfo?.bizNo || "";
+  const representativeName = initialStoreInfo?.ownerNm || "";
+  const representativePhone = initialStoreInfo?.ownerTelNo || "";
+  const businessType = initialStoreInfo?.storeType || "";
+  const registrationDate = initialStoreInfo?.bizRegDate || "";
 
   const handleVerifyPassword = () => {
     // TODO: 실제 API로 현재 비밀번호 검증
@@ -80,15 +209,72 @@ export default function EditStoreInfoPage() {
     setPasswordChangeSuccess(false);
   };
 
+  const openTimePicker = (type: "open" | "close") => {
+    const timeStr = type === "open" ? businessOpenTime : businessCloseTime;
+    const [hour, minute] = timeStr.split(":");
+    setSelectedHour(hour);
+    setSelectedMinute(minute);
+    setActiveTimePicker(type);
+    setTimePickerVisible(true);
+  };
+
+  const closeTimePicker = () => {
+    setTimePickerVisible(false);
+    setActiveTimePicker(null);
+  };
+
+  const confirmTimePicker = () => {
+    const timeStr = `${selectedHour}:${selectedMinute}`;
+    if (activeTimePicker === "open") {
+      setBusinessOpenTime(timeStr);
+    } else if (activeTimePicker === "close") {
+      // 마감시간이 오픈시간보다 늦은지 확인
+      const [openHour, openMinute] = businessOpenTime.split(":").map(Number);
+      const closeHourNum = parseInt(selectedHour);
+      const closeMinuteNum = parseInt(selectedMinute);
+      
+      if (closeHourNum < openHour || (closeHourNum === openHour && closeMinuteNum < openMinute)) {
+        Alert.alert("알림", "마감 시간은 오픈 시간 이후로 설정해주세요.");
+        return;
+      }
+      setBusinessCloseTime(timeStr);
+    }
+    closeTimePicker();
+  };
+
+  const generateTimeList = () => {
+    const times: string[] = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const h = String(hour).padStart(2, "0");
+        const m = String(minute).padStart(2, "0");
+        times.push(`${h}:${m}`);
+      }
+    }
+    return times;
+  };
+
+  const toggleBusinessDay = (day: string) => {
+    setBusinessDays(
+      businessDays.includes(day)
+        ? businessDays.filter((d) => d !== day)
+        : [...businessDays, day].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+    );
+  };
+
   const handleUpdate = () => {
+    // businessDays를 백엔드 형식으로 변환 (MON, TUE, ... 형태의 List<String>)
+    const daysToSend = businessDays.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+    
     console.log({
       storeName,
       phoneNumber,
       address,
       bankName,
       accountNumber,
-      businessHours,
-      businessDays,
+      businessOpenTime,
+      businessCloseTime,
+      businessDays: daysToSend, // ["MON", "TUE", "WED", ...]
     });
 
     // 업데이트 로직 처리 후
@@ -123,7 +309,7 @@ export default function EditStoreInfoPage() {
             <Text style={styles.label}>계정 아이디</Text>
             <TextInput
               style={[styles.input, styles.inputDisabled]}
-              value={accountId}
+              value={memberId || ""}
               editable={false}
             />
             <Text style={styles.helpText}>아이디는 변경할 수 없습니다</Text>
@@ -143,6 +329,17 @@ export default function EditStoreInfoPage() {
             <Ionicons name="storefront" size={22} color="#EF7810" />
             <Text style={styles.sectionTitle}>가맹점 정보</Text>
           </View>
+
+          {mainImage && mainImage.fileUrl && (
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>가맹점 대표 이미지</Text>
+              <Image
+                source={{ uri: mainImage.fileUrl }}
+                style={{ width: 100, height: 100, borderRadius: 8 }}
+                resizeMode="cover"
+              />
+            </View>
+          )}
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>가맹점명</Text>
@@ -172,6 +369,16 @@ export default function EditStoreInfoPage() {
               placeholder="주소를 입력하세요"
               value={address}
               onChangeText={setAddress}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>상세 주소</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="상세 주소를 입력하세요"
+              value={detailedAddress}
+              onChangeText={setDetailedAddress}
             />
           </View>
         </View>
@@ -287,23 +494,57 @@ export default function EditStoreInfoPage() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>영업 시간</Text>
-            <TextInput
+            <Text style={styles.label}>오픈 시간</Text>
+            <TouchableOpacity
               style={styles.input}
-              placeholder="영업 시간을 입력하세요 (예: 09:00 ~ 21:00)"
-              value={businessHours}
-              onChangeText={setBusinessHours}
-            />
+              onPress={() => openTimePicker("open")}
+            >
+              <Text style={{ color: businessOpenTime ? "#000" : "#999", fontSize: 16 }}>
+                {businessOpenTime}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>마감 시간</Text>
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => openTimePicker("close")}
+            >
+              <Text style={{ color: businessCloseTime ? "#000" : "#999", fontSize: 16 }}>
+                {businessCloseTime}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>영업일</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="영업일을 입력하세요 (예: 월요일 ~ 일요일)"
-              value={businessDays}
-              onChangeText={setBusinessDays}
-            />
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {dayOrder.map((day) => (
+                <TouchableOpacity
+                  key={day}
+                  onPress={() => toggleBusinessDay(day)}
+                  style={{
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: 6,
+                    borderWidth: 1.5,
+                    borderColor: businessDays.includes(day) ? "#EF7810" : "#ddd",
+                    backgroundColor: businessDays.includes(day) ? "#FFF0E0" : "#fff",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: businessDays.includes(day) ? "600" : "500",
+                      color: businessDays.includes(day) ? "#EF7810" : "#666",
+                    }}
+                  >
+                    {dayMapping[day]}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -350,7 +591,7 @@ export default function EditStoreInfoPage() {
                   >
                     <Text style={styles.modalConfirmButtonText}>확인</Text>
                   </TouchableOpacity>
-                   <TouchableOpacity
+                  <TouchableOpacity
                     style={styles.modalCancelButton}
                     onPress={closePasswordModal}
                   >
@@ -449,9 +690,152 @@ export default function EditStoreInfoPage() {
         </View>
       </Modal>
 
+      {/* Time Picker Modal */}
+      <Modal
+        visible={timePickerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeTimePicker}
+      >
+        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <View style={{ backgroundColor: "#fff", paddingBottom: 20 }}>
+            <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}>
+              <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>
+                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을 선택하세요
+              </Text>
+              <Text style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}>
+                {selectedHour}:{selectedMinute}
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row", paddingHorizontal: 20, marginTop: 20, gap: 20 }}>
+              {/* Hour Picker */}
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                  시간
+                </Text>
+                <ScrollView
+                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  scrollEventThrottle={16}
+                >
+                  {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => {
+                    const isDisabled = activeTimePicker === "close" && 
+                      parseInt(hour) < parseInt(businessOpenTime.split(":")[0]);
+                    return (
+                      <TouchableOpacity
+                        key={hour}
+                        onPress={() => !isDisabled && setSelectedHour(hour)}
+                        disabled={isDisabled}
+                        style={{
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          backgroundColor: selectedHour === hour ? "#FFF0E0" : "#fff",
+                          borderBottomWidth: 1,
+                          borderBottomColor: "#f0f0f0",
+                          opacity: isDisabled ? 0.5 : 1,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontSize: 16,
+                            fontWeight: selectedHour === hour ? "600" : "400",
+                            color: selectedHour === hour ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                          }}
+                        >
+                          {hour}:00
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              {/* Minute Picker */}
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                  분
+                </Text>
+                <ScrollView
+                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  scrollEventThrottle={16}
+                >
+                  {["00", "30"].map((minute) => {
+                    const openHour = parseInt(businessOpenTime.split(":")[0]);
+                    const openMinute = parseInt(businessOpenTime.split(":")[1]);
+                    const isDisabled = activeTimePicker === "close" && 
+                      parseInt(selectedHour) === openHour && 
+                      parseInt(minute) < openMinute;
+                    return (
+                      <TouchableOpacity
+                        key={minute}
+                        onPress={() => !isDisabled && setSelectedMinute(minute)}
+                        disabled={isDisabled}
+                        style={{
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          backgroundColor: selectedMinute === minute ? "#FFF0E0" : "#fff",
+                          borderBottomWidth: 1,
+                          borderBottomColor: "#f0f0f0",
+                          opacity: isDisabled ? 0.5 : 1,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontSize: 16,
+                            fontWeight: selectedMinute === minute ? "600" : "400",
+                            color: selectedMinute === minute ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                          }}
+                        >
+                          :{minute}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            </View>
+
+            {/* Buttons */}
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 20, paddingHorizontal: 20 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  backgroundColor: "#f0f0f0",
+                  alignItems: "center",
+                }}
+                onPress={closeTimePicker}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
+                  취소
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 8,
+                  backgroundColor: "#EF7810",
+                  alignItems: "center",
+                }}
+                onPress={confirmTimePicker}
+              >
+                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
+                  확인
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
 }
+
