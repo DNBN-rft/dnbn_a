@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     FlatList,
     Image,
+    Platform,
     Text,
     TouchableOpacity,
     View,
@@ -228,7 +229,10 @@ export default function WishlistScreen() {
           data={storeList}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.storeCode || item.id}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }
+          ]}
           renderItem={({ item }) => (
             <View style={styles.storeItemContainer} key={item.storeCode}>
               <TouchableOpacity

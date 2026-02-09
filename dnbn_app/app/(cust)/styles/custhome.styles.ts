@@ -61,17 +61,17 @@ export const styles = StyleSheet.create({
     color: "#fff",
   },
   bannerContainer: {
-    height: 250,
+    height: 370,
     marginBottom: 30,
   },
   bannerSlide: {
     width: screenWidth,
-    height: 250,
+    height: 310,
     overflow: "hidden",
   },
   bannerImage: {
     width: screenWidth,
-    height: 250,
+    height: 310,
   },
   contentSection: {
     marginBottom: 20,
@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
   },
   arrowButton: {
     width: 50,
-    height: 210,
+    height: 270,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",

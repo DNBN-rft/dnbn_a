@@ -26,6 +26,8 @@ export default function CustHomeScreen() {
   const [bannerProducts, setBannerProducts] = useState<any[]>([]);
   const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [defaultLocation, setDefaultLocation] =
+    useState<string>("주소 로딩 중...");
 
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
@@ -69,20 +71,47 @@ export default function CustHomeScreen() {
     }
   };
 
+  // 기본 주소 조회 함수
+  const fetchDefaultLocation = async () => {
+    try {
+      const custCode =
+        Platform.OS === "web"
+          ? localStorage.getItem("custCode")
+          : await SecureStore.getItemAsync("custCode");
+
+      if (!custCode) return;
+
+      const response = await apiGet(
+        `/cust/location/default?custCode=${custCode}`,
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setDefaultLocation(data.label || "주소 정보 없음");
+      } else {
+        setDefaultLocation("주소 정보 없음");
+      }
+    } catch (error) {
+      console.error("기본 주소 조회 중 오류:", error);
+      setDefaultLocation("주소 정보 없음");
+    }
+  };
+
   // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
         const custCode = "CUST_001";
 
-        // 읽지 않은 알림 상태 및 장바구니 개수 확인
+        // 읽지 않은 알림 상태, 장바구니 개수, 기본 주소 확인
         checkUnreadAlarm();
         fetchCartItemCount();
+        fetchDefaultLocation();
 
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
             await Promise.all([
-              apiGet(`/cust/nego/home?custCode=${custCode}`),
+              apiGet(`/cust/negoproducts/home?custCode=${custCode}`),
               apiGet(`/cust/sales/home?custCode=${custCode}`),
               apiGet(`/cust/regular/home?custCode=${custCode}`),
               apiGet(`/cust/sales/banner?custCode=${custCode}`), // 배너용 할인율 높은 상품
@@ -210,55 +239,6 @@ export default function CustHomeScreen() {
       };
     });
 
-  // 배너가 없을 경우 기본 이미지 사용
-  const originalBanners =
-    transformedBanners.length > 0
-      ? transformedBanners
-      : [
-          {
-            id: "1",
-            uri: require("@/assets/images/normalproduct/bread.jpg"),
-            productName: "갓 구운 바게트 빵",
-            storeName: "동네 베이커리",
-            discount: 30,
-            price: 3500,
-            originalPrice: 5000,
-          },
-          {
-            id: "2",
-            uri: require("@/assets/images/favicon.png"),
-            productName: "프리미엄 쿠키 세트",
-            storeName: "달콤한 제과점",
-            discount: 50,
-            price: 7500,
-            originalPrice: 15000,
-          },
-          {
-            id: "3",
-            uri: require("@/assets/images/react-logo.png"),
-            productName: "신선한 샌드위치",
-            storeName: "건강한 식탁",
-            discount: 20,
-            price: 4000,
-            originalPrice: 5000,
-          },
-          {
-            id: "4",
-            uri: require("@/assets/images/logo.png"),
-            productName: "시그니처 케이크",
-            storeName: "스위트 홈",
-            discount: 40,
-            price: 18000,
-            originalPrice: 30000,
-          },
-        ];
-
-  // 무한스크롤을 위한 배너 복제
-  const banners = [
-    ...originalBanners,
-    { ...originalBanners[0], id: `${originalBanners[0].id}-clone` },
-  ];
-
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -272,7 +252,7 @@ export default function CustHomeScreen() {
             style={styles.addr}
             onPress={() => router.push("/(cust)/address")}
           >
-            <Text style={styles.addrText}>행궁동</Text>
+            <Text style={styles.addrText}>{defaultLocation}</Text>
             <Ionicons name="chevron-down" size={24} color="#000" />
           </TouchableOpacity>
         </View>
@@ -301,8 +281,13 @@ export default function CustHomeScreen() {
       </View>
 
       {/* 스크롤 가능한 콘텐츠 */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <BannerCarousel banners={banners} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+        }}
+      >
+        <BannerCarousel banners={transformedBanners} />
         <SaleProductSection products={transformedSaleProducts} />
         <NegoProductSection products={transformedNegoProducts} />
         <RegularProductSection products={transformedRegularProducts} />

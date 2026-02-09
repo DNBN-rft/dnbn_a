@@ -262,7 +262,7 @@ export default function EditMyInfoScreen() {
         } else {
           Alert.alert("성공", message);
         }
-        router.replace("/(cust)/EditMyInfo");
+        router.replace("/(cust)/my-info");
       } else {
         const errorMessage = await response.text();
         if (Platform.OS === "web") {

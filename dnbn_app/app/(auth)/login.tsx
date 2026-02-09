@@ -1,8 +1,5 @@
 import { apiPost } from "@/utils/api";
-import {
-  setMultipleItems,
-  setStorageItem,
-} from "@/utils/storageUtil";
+import { setMultipleItems, setStorageItem } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -92,6 +89,7 @@ export default function LoginScreen() {
           if (data.tokenType) storeTokens.tokenType = data.tokenType;
 
           await setMultipleItems(storeTokens);
+
           router.replace("/(store)/tabs/storehome");
         }
       } else {
@@ -102,7 +100,7 @@ export default function LoginScreen() {
         }
       }
     } catch (error) {
-      console.error("로그인 오류:", error);
+      console.error("로그인 오류:", "api.ts 네트워크 주소 오류");
       if (Platform.OS === "web") {
         window.alert("로그인 중 오류가 발생했습니다.");
       } else {

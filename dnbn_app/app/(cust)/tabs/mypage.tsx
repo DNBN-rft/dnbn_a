@@ -2,13 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/mypage.styles";
 
@@ -59,6 +53,7 @@ export default function Mypage() {
       <ScrollView
         style={styles.mypageView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
       >
         <View style={styles.contentView}>
           <View style={styles.section}>
@@ -93,6 +88,13 @@ export default function Mypage() {
               onPress={() => router.navigate("/(cust)/orderList")}
             >
               <Text style={styles.menuText}>구매내역</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+                        <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(cust)/negoLogList")}
+            >
+              <Text style={styles.menuText}>네고내역</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
