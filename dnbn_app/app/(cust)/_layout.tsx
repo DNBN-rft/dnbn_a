@@ -152,6 +152,14 @@ export default function CustLayout() {
           headerTitle: "가게 정보 ",
         }}
       />
+      <Stack.Screen
+        name="search-result"
+        options={{
+          title: "검색 결과",
+          headerShown: false,
+          headerTitle: "검색 결과",
+        }}
+      />
     </Stack>
   );
 }

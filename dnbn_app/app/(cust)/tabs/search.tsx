@@ -37,6 +37,9 @@ export default function SearchView() {
   const [discountProducts, setDiscountProducts] = useState<any[]>([]);
   const [negoProducts, setNegoProducts] = useState<any[]>([]);
   const [normalProducts, setNormalProducts] = useState<any[]>([]);
+  
+  // 데이터 로드 여부 추적
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   // custCode 가져오기 및 초기 데이터 로드
   useFocusEffect(
@@ -52,21 +55,24 @@ export default function SearchView() {
           }
           setCustCode(code);
 
-          // 최근 검색어 불러오기
+          // 최근 검색어 불러오기 (항상 업데이트)
           if (code) {
             const searches = await getRecentSearches(code);
             setRecentSearches(searches);
           }
 
-          // API 호출
-          await fetchSearchData();
+          // API 호출 (데이터가 없을 때만)
+          if (!hasLoadedData) {
+            await fetchSearchData();
+            setHasLoadedData(true);
+          }
         } catch (error) {
           console.error("데이터 로드 실패:", error);
         }
       };
 
       loadData();
-    }, []),
+    }, [hasLoadedData]),
   );
 
   // 검색 데이터 가져오기
@@ -151,7 +157,7 @@ export default function SearchView() {
 
     // 검색 결과 페이지로 이동
     router.push({
-      pathname: "/tabs/search-result",
+      pathname: "/(cust)/search-result",
       params: {
         keyword: searchKeyword.trim(),
       },
@@ -169,7 +175,7 @@ export default function SearchView() {
     }
 
     router.push({
-      pathname: "/tabs/search-result",
+      pathname: "/(cust)/search-result",
       params: { keyword },
     });
   };
