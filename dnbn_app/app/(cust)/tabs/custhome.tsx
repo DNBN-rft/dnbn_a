@@ -186,7 +186,7 @@ export default function CustHomeScreen() {
 
   const transformedSaleProducts = saleProducts.map((item) => {
     const discountPercent =
-      item.saleType === "PERCENTAGE"
+      item.saleType === "할인률"
         ? item.saleValue
         : Math.round(
             ((item.originalPrice - item.discountPrice) / item.originalPrice) *

@@ -1,4 +1,4 @@
-import { isWithinRange, calculateDistance } from "./locationUtils";
+import { calculateDistance, isWithinRange } from "./locationUtils";
 
 export interface Store {
   id: string;
@@ -58,10 +58,16 @@ export const filterStoresInRange = (
   stores: Store[],
   latitude: number,
   longitude: number,
-  threshold: number = 0.05
+  threshold: number = 0.05,
 ): Store[] => {
-  return stores.filter(store =>
-    isWithinRange(latitude, longitude, store.latitude, store.longitude, threshold)
+  return stores.filter((store) =>
+    isWithinRange(
+      latitude,
+      longitude,
+      store.latitude,
+      store.longitude,
+      threshold,
+    ),
   );
 };
 
@@ -69,11 +75,16 @@ export const filterStoresInRange = (
 export const addDistanceToStores = (
   stores: Store[],
   latitude: number,
-  longitude: number
+  longitude: number,
 ): Store[] => {
-  return stores.map(store => ({
+  return stores.map((store) => ({
     ...store,
-    distance: calculateDistance(latitude, longitude, store.latitude, store.longitude),
+    distance: calculateDistance(
+      latitude,
+      longitude,
+      store.latitude,
+      store.longitude,
+    ),
   }));
 };
 
@@ -89,17 +100,17 @@ export const sortStoresByDistance = (stores: Store[]): Store[] => {
 //백엔드 API에서 가맹점을 조회합니다
 export const fetchStoresFromAPI = async (
   latitude: number,
-  longitude: number
+  longitude: number,
 ): Promise<Store[]> => {
   try {
     const response = await fetch(
       `https://your-api.com/api/stores/nearby?latitude=${latitude}&longitude=${longitude}`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const data = await response.json();
@@ -119,11 +130,16 @@ export const fetchStoresFromAPI = async (
 export const fetchNearbyStores = async (
   latitude: number,
   longitude: number,
-  threshold: number = 0.05
+  threshold: number = 0.05,
 ): Promise<Store[]> => {
   try {
     // TEST_STORES에서 범위 내 가맹점 필터링
-    let stores = filterStoresInRange(TEST_STORES, latitude, longitude, threshold);
+    let stores = filterStoresInRange(
+      TEST_STORES,
+      latitude,
+      longitude,
+      threshold,
+    );
 
     // TEST_STORES에 없으면 백엔드 API 호출
     if (stores.length === 0) {
