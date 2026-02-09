@@ -91,16 +91,6 @@ export default function CustLayout() {
           ),
         }}
       />
-
-      {/* 탭에 표시하지 않는 추가 화면들 */}
-      <Tabs.Screen
-        name="search-result"
-        options={{
-          href: null, // 탭바에서 숨김
-          title: "검색 결과",
-          headerTitle: "검색 결과",
-        }}
-      />
     </Tabs>
   );
 }
