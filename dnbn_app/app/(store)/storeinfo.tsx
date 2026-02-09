@@ -23,7 +23,7 @@ interface StoreInfo {
   storeType: string;
   bizNo: string;
   ownerTelNo: string;
-  bizRegDate: string;
+  requestedDateTime: string;
 
   storeOpenDate: Array<string>;
   storeOpenTime: string;
@@ -236,8 +236,8 @@ export default function StoreInfoPage() {
               </View>
 
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>사업자 등록일</Text>
-                <Text style={styles.infoValue}>{storeInfo.bizRegDate}</Text>
+                <Text style={styles.infoLabel}>가입 신청일</Text>
+                <Text style={styles.infoValue}>{storeInfo.requestedDateTime}</Text>
               </View>
             </View>
           </View>
