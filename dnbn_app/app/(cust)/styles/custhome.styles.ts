@@ -156,7 +156,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 16,
-    backgroundColor: "#fafafa",
     borderRadius: 8,
   },
   emptyText: {

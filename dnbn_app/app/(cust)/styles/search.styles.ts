@@ -219,4 +219,16 @@ export const styles = StyleSheet.create({
     marginRight: 15,
     boxShadow: '0 0 4px rgba(0,0,0,0.2)',
   },
+  emptyProductContainer: {
+    height: 210,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 16,
+    borderRadius: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 12,
+  },
 });

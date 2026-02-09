@@ -37,7 +37,7 @@ export default function SearchView() {
   const [discountProducts, setDiscountProducts] = useState<any[]>([]);
   const [negoProducts, setNegoProducts] = useState<any[]>([]);
   const [normalProducts, setNormalProducts] = useState<any[]>([]);
-  
+
   // 데이터 로드 여부 추적
   const [hasLoadedData, setHasLoadedData] = useState(false);
 
@@ -199,7 +199,12 @@ export default function SearchView() {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0 }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0 },
+      ]}
+    >
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
@@ -291,7 +296,7 @@ export default function SearchView() {
                   >
                     <View style={styles.categoryImageBox}>
                       <Image
-                        resizeMode="contain"
+                        resizeMode="cover"
                         source={
                           typeof item.icon === "string"
                             ? { uri: item.icon }
@@ -312,179 +317,210 @@ export default function SearchView() {
             {/* 추천 할인 상품 섹션 */}
             <View style={styles.productSection}>
               <Text style={styles.sectionTitle}>추천 할인 상품</Text>
-              <FlatList
-                data={getProductsWithMore(discountProducts, "discount")}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                  if (item.isMore) {
+              {discountProducts.length === 0 ? (
+                <View style={styles.emptyProductContainer}>
+                  <Ionicons name="cart-outline" size={40} color="#ccc" />
+                  <Text style={styles.emptyText}>
+                    등록된 할인 상품이 없어요
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={getProductsWithMore(discountProducts, "discount")}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => {
+                    if (item.isMore) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => router.push("/(cust)/saleProductList")}
+                          style={styles.moreButton}
+                        >
+                          <Ionicons
+                            name="ellipsis-horizontal"
+                            size={22}
+                            color="#999"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
                     return (
                       <TouchableOpacity
-                        onPress={() => router.push("/(cust)/saleProductList")}
-                        style={styles.moreButton}
-                      >
-                        <Ionicons
-                          name="ellipsis-horizontal"
-                          size={22}
-                          color="#999"
-                        />
-                      </TouchableOpacity>
-                    );
-                  }
-                  return (
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push(
-                          `/(cust)/sale-product-detail?productCode=${item.id}`,
-                        )
-                      }
-                      style={styles.galleryItem}
-                    >
-                      <Image
-                        resizeMode="contain"
-                        source={
-                          typeof item.uri === "string"
-                            ? { uri: item.uri }
-                            : item.uri
+                        onPress={() =>
+                          router.push(
+                            `/(cust)/sale-product-detail?productCode=${item.id}`,
+                          )
                         }
-                        style={styles.galleryImage}
-                      />
-                      <View style={styles.galleryInfo}>
-                        <Text style={styles.storeName} numberOfLines={1}>
-                          {item.storeName}
-                        </Text>
-                        <Text style={styles.productName} numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                        <View style={styles.priceRow}>
-                          <Text style={styles.originalPrice}>
-                            {item.originalPrice}
+                        style={styles.galleryItem}
+                      >
+                        <Image
+                          resizeMode="cover"
+                          source={
+                            typeof item.uri === "string"
+                              ? { uri: item.uri }
+                              : item.uri
+                          }
+                          style={styles.galleryImage}
+                        />
+                        <View style={styles.galleryInfo}>
+                          <Text style={styles.storeName} numberOfLines={1}>
+                            {item.storeName}
                           </Text>
-                          <Text style={styles.discountPrice}>
-                            {item.discountValue}
+                          <Text style={styles.productName} numberOfLines={1}>
+                            {item.name}
+                          </Text>
+                          <View style={styles.priceRow}>
+                            <Text style={styles.originalPrice}>
+                              {item.originalPrice}
+                            </Text>
+                            <Text style={styles.discountPrice}>
+                              {item.discountValue}
+                            </Text>
+                          </View>
+                          <Text style={styles.productPrice}>
+                            {item.price}원
                           </Text>
                         </View>
-                        <Text style={styles.productPrice}>{item.price}원</Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.galleryContainer}
-              />
+                      </TouchableOpacity>
+                    );
+                  }}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.galleryContainer}
+                />
+              )}
             </View>
 
             {/* 추천 네고 상품 섹션 */}
             <View style={styles.productSection}>
               <Text style={styles.sectionTitle}>추천 네고 상품</Text>
-              <FlatList
-                data={getProductsWithMore(negoProducts, "nego")}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                  if (item.isMore) {
+              {negoProducts.length === 0 ? (
+                <View style={styles.emptyProductContainer}>
+                  <Ionicons name="cart-outline" size={40} color="#ccc" />
+                  <Text style={styles.emptyText}>
+                    등록된 네고 상품이 없어요
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={getProductsWithMore(negoProducts, "nego")}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => {
+                    if (item.isMore) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => router.push("/(cust)/negoList")}
+                          style={styles.moreButton}
+                        >
+                          <Ionicons
+                            name="ellipsis-horizontal"
+                            size={22}
+                            color="#999"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
                     return (
                       <TouchableOpacity
-                        onPress={() => router.push("/(cust)/negoList")}
-                        style={styles.moreButton}
+                        onPress={() =>
+                          router.push(
+                            `/(cust)/nego-product-detail?productCode=${item.id}`,
+                          )
+                        }
+                        style={styles.galleryItem}
                       >
-                        <Ionicons
-                          name="ellipsis-horizontal"
-                          size={22}
-                          color="#999"
+                        <Image
+                          resizeMode="cover"
+                          source={
+                            typeof item.uri === "string"
+                              ? { uri: item.uri }
+                              : item.uri
+                          }
+                          style={styles.galleryImage}
                         />
+                        <View style={styles.galleryInfo}>
+                          <Text style={styles.storeName} numberOfLines={1}>
+                            {item.storeName}
+                          </Text>
+                          <Text style={styles.productName} numberOfLines={1}>
+                            {item.name}
+                          </Text>
+                        </View>
                       </TouchableOpacity>
                     );
-                  }
-                  return (
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push(
-                          `/(cust)/nego-product-detail?productCode=${item.id}`,
-                        )
-                      }
-                      style={styles.galleryItem}
-                    >
-                      <Image
-                        resizeMode="contain"
-                        source={
-                          typeof item.uri === "string"
-                            ? { uri: item.uri }
-                            : item.uri
-                        }
-                        style={styles.galleryImage}
-                      />
-                      <View style={styles.galleryInfo}>
-                        <Text style={styles.storeName} numberOfLines={1}>
-                          {item.storeName}
-                        </Text>
-                        <Text style={styles.productName} numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.galleryContainer}
-              />
+                  }}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.galleryContainer}
+                />
+              )}
             </View>
 
             {/* 추천 일반 상품 섹션 */}
             <View style={styles.productSection}>
               <Text style={styles.sectionTitle}>추천 일반 상품</Text>
-              <FlatList
-                data={getProductsWithMore(normalProducts, "normal")}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
-                  if (item.isMore) {
+              {normalProducts.length === 0 ? (
+                <View style={styles.emptyProductContainer}>
+                  <Ionicons name="cart-outline" size={40} color="#ccc" />
+                  <Text style={styles.emptyText}>
+                    등록된 일반 상품이 없어요
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={getProductsWithMore(normalProducts, "normal")}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => {
+                    if (item.isMore) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => router.push("/(cust)/productList")}
+                          style={styles.moreButton}
+                        >
+                          <Ionicons
+                            name="ellipsis-horizontal"
+                            size={22}
+                            color="#999"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
                     return (
                       <TouchableOpacity
-                        onPress={() => router.push("/(cust)/productList")}
-                        style={styles.moreButton}
+                        onPress={() =>
+                          router.push(
+                            `/(cust)/product-detail?productCode=${item.id}`,
+                          )
+                        }
+                        style={styles.galleryItem}
                       >
-                        <Ionicons
-                          name="ellipsis-horizontal"
-                          size={22}
-                          color="#999"
+                        <Image
+                          resizeMode="cover"
+                          source={
+                            typeof item.uri === "string"
+                              ? { uri: item.uri }
+                              : item.uri
+                          }
+                          style={styles.galleryImage}
                         />
+                        <View style={styles.galleryInfo}>
+                          <Text style={styles.storeName} numberOfLines={1}>
+                            {item.storeName}
+                          </Text>
+                          <Text style={styles.productName} numberOfLines={1}>
+                            {item.name}
+                          </Text>
+                          <Text style={styles.productPrice}>
+                            {item.price}원
+                          </Text>
+                        </View>
                       </TouchableOpacity>
                     );
-                  }
-                  return (
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push(
-                          `/(cust)/product-detail?productCode=${item.id}`,
-                        )
-                      }
-                      style={styles.galleryItem}
-                    >
-                      <Image
-                        resizeMode="contain"
-                        source={
-                          typeof item.uri === "string"
-                            ? { uri: item.uri }
-                            : item.uri
-                        }
-                        style={styles.galleryImage}
-                      />
-                      <View style={styles.galleryInfo}>
-                        <Text style={styles.storeName} numberOfLines={1}>
-                          {item.storeName}
-                        </Text>
-                        <Text style={styles.productName} numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                        <Text style={styles.productPrice}>{item.price}원</Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.galleryContainer}
-              />
+                  }}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.galleryContainer}
+                />
+              )}
             </View>
           </View>
         )}
