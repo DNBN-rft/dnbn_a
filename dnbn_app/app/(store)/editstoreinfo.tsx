@@ -1,17 +1,19 @@
+import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 import {
   Alert,
+  Image,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Image,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
@@ -23,7 +25,9 @@ interface StoreInfo {
   storeAddr: string;
   storeAddrDetail: string;
   storeReport: number;
+  storeCode?: string;
 
+  bankIdx: number;
   bankNm: string;
   storeAccNo: string;
   ownerNm: string;
@@ -34,7 +38,7 @@ interface StoreInfo {
   ownerTelNo: string;
   bizRegDate: string;
 
-  storeOpenDate: Array<string>;
+  storeOpenDate: string[];
   storeOpenTime: string;
   storeCloseTime: string;
 
@@ -66,20 +70,23 @@ export default function EditStoreInfoPage() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [memberId, setMemberId] = useState<string | null>(null);
+  const [storeCode, setStoreCode] = useState<string | null>(null);
 
   useEffect(() => {
     const loadStoreInfo = async () => {
       try {
-        let name: string | null = null;
-
         if (Platform.OS === "web") {
-          name = localStorage.getItem("memberId");
-        } else {
-          name = await SecureStore.getItemAsync("memberId");
+          setMemberId(localStorage.getItem("memberId"));
+          setStoreCode(localStorage.getItem("storeCode"));
+          return;
         }
 
-        if (name) {
+        let name = await SecureStore.getItemAsync("memberId");
+        let storedStoreCode = await SecureStore.getItemAsync("storeCode");
+
+        if (name && storedStoreCode) {
           setMemberId(name);
+          setStoreCode(storedStoreCode);
         }
       } catch (error) {
         console.error("스토어 정보 로드 실패:", error);
@@ -89,7 +96,6 @@ export default function EditStoreInfoPage() {
     loadStoreInfo();
   }, []);
 
-
   // params에서 storeInfo 파싱
   const initialStoreInfo: StoreInfo | null = params.storeInfo
     ? JSON.parse(params.storeInfo as string)
@@ -97,18 +103,27 @@ export default function EditStoreInfoPage() {
 
   // 수정 가능한 정보
   const [storeName, setStoreName] = useState(initialStoreInfo?.storeNm || "");
-  const [phoneNumber, setPhoneNumber] = useState(initialStoreInfo?.storeTelNo || "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    initialStoreInfo?.storeTelNo || "",
+  );
   const [address, setAddress] = useState(initialStoreInfo?.storeAddr || "");
-  const [detailedAddress, setDetailedAddress] = useState(initialStoreInfo?.storeAddrDetail || "");
+  const [detailedAddress, setDetailedAddress] = useState(
+    initialStoreInfo?.storeAddrDetail || "",
+  );
   const [bankName, setBankName] = useState(initialStoreInfo?.bankNm || "");
-  const [accountNumber, setAccountNumber] = useState(initialStoreInfo?.storeAccNo || "");
+  const [bankIdx, setBankIdx] = useState<number | null>(
+    initialStoreInfo?.bankIdx || null,
+  );
+  const [accountNumber, setAccountNumber] = useState(
+    initialStoreInfo?.storeAccNo || "",
+  );
   const [businessOpenTime, setBusinessOpenTime] = useState(
-    initialStoreInfo?.storeOpenTime || "09:00"
+    initialStoreInfo?.storeOpenTime || "09:00",
   );
   const [businessCloseTime, setBusinessCloseTime] = useState(
-    initialStoreInfo?.storeCloseTime || "21:00"
+    initialStoreInfo?.storeCloseTime || "21:00",
   );
-  
+
   // 요일 매핑
   const dayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
   const dayMapping: { [key: string]: string } = {
@@ -121,18 +136,21 @@ export default function EditStoreInfoPage() {
     SUN: "일",
   };
   const koreanToDayCode: { [key: string]: string } = {
-    "월": "MON",
-    "화": "TUE",
-    "수": "WED",
-    "목": "THU",
-    "금": "FRI",
-    "토": "SAT",
-    "일": "SUN",
+    월: "MON",
+    화: "TUE",
+    수: "WED",
+    목: "THU",
+    금: "FRI",
+    토: "SAT",
+    일: "SUN",
   };
-  
+
   // 초기 영업일 처리
   const getInitialBusinessDays = () => {
-    if (initialStoreInfo?.storeOpenDate && initialStoreInfo.storeOpenDate.length > 0) {
+    if (
+      initialStoreInfo?.storeOpenDate &&
+      initialStoreInfo.storeOpenDate.length > 0
+    ) {
       // storeOpenDate가 한글(월,화,수) 형식인 경우 영문 코드로 변환
       const convertedDays = initialStoreInfo.storeOpenDate
         .map((day: string) => {
@@ -140,18 +158,49 @@ export default function EditStoreInfoPage() {
           return koreanToDayCode[day] || day;
         })
         .filter((day: string) => dayOrder.includes(day)); // 유효한 값만 필터링
-      
+
       return convertedDays.length > 0 ? convertedDays : dayOrder;
     }
     return dayOrder; // 기본값: 모든 요일
   };
-  
-  const [businessDays, setBusinessDays] = useState<string[]>(getInitialBusinessDays());
-  const [mainImage, setMainImage] = useState(initialStoreInfo?.mainImg || null);
+
+  const [businessDays, setBusinessDays] = useState<string[]>(
+    getInitialBusinessDays(),
+  );
+  const [mainImage, setMainImage] = useState<any>(
+    initialStoreInfo?.mainImg || null,
+  );
+
+  // 은행 목록 및 선택 modal 관련 state
+  const [banks, setBanks] = useState<{ bankIdx: number; bankNm: string }[]>([]);
+  const [bankPickerVisible, setBankPickerVisible] = useState(false);
+  const [banksLoading, setBanksLoading] = useState(true);
+
+  // 컴포넌트 마운트 시 은행 목록 로드
+  useEffect(() => {
+    const loadBanks = async () => {
+      try {
+        const response = await apiGet("/bank");
+        if (response.ok) {
+          const data = await response.json();
+          // data.data 또는 data가 배열인지 확인
+          const bankList = Array.isArray(data) ? data : data.data || [];
+          setBanks(bankList);
+        }
+      } catch (error) {
+        console.error("은행 목록 로드 실패:", error);
+      } finally {
+        setBanksLoading(false);
+      }
+    };
+    loadBanks();
+  }, []);
 
   // Time picker 모달 관련 state
   const [timePickerVisible, setTimePickerVisible] = useState(false);
-  const [activeTimePicker, setActiveTimePicker] = useState<"open" | "close" | null>(null);
+  const [activeTimePicker, setActiveTimePicker] = useState<
+    "open" | "close" | null
+  >(null);
   const [selectedHour, setSelectedHour] = useState("09");
   const [selectedMinute, setSelectedMinute] = useState("00");
 
@@ -232,8 +281,11 @@ export default function EditStoreInfoPage() {
       const [openHour, openMinute] = businessOpenTime.split(":").map(Number);
       const closeHourNum = parseInt(selectedHour);
       const closeMinuteNum = parseInt(selectedMinute);
-      
-      if (closeHourNum < openHour || (closeHourNum === openHour && closeMinuteNum < openMinute)) {
+
+      if (
+        closeHourNum < openHour ||
+        (closeHourNum === openHour && closeMinuteNum < openMinute)
+      ) {
         Alert.alert("알림", "마감 시간은 오픈 시간 이후로 설정해주세요.");
         return;
       }
@@ -242,49 +294,138 @@ export default function EditStoreInfoPage() {
     closeTimePicker();
   };
 
-  const generateTimeList = () => {
-    const times: string[] = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const h = String(hour).padStart(2, "0");
-        const m = String(minute).padStart(2, "0");
-        times.push(`${h}:${m}`);
-      }
-    }
-    return times;
-  };
-
   const toggleBusinessDay = (day: string) => {
     setBusinessDays(
       businessDays.includes(day)
         ? businessDays.filter((d) => d !== day)
-        : [...businessDays, day].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+        : [...businessDays, day].sort(
+            (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
+          ),
     );
   };
 
-  const handleUpdate = () => {
-    // businessDays를 백엔드 형식으로 변환 (MON, TUE, ... 형태의 List<String>)
-    const daysToSend = businessDays.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
-    
-    console.log({
-      storeName,
-      phoneNumber,
-      address,
-      bankName,
-      accountNumber,
-      businessOpenTime,
-      businessCloseTime,
-      businessDays: daysToSend, // ["MON", "TUE", "WED", ...]
-    });
+  const selectBank = (bankIdx: number, bankNm: string) => {
+    setBankIdx(bankIdx);
+    setBankName(bankNm);
+    setBankPickerVisible(false);
+  };
 
-    // 업데이트 로직 처리 후
-    router.back();
+  const pickImage = async () => {
+    try {
+      // 카메라와 라이브러리 접근 권한 요청
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets.length > 0) {
+        const selectedAsset = result.assets[0];
+        // mainImage를 새 이미지로 업데이트
+        setMainImage({
+          fileUrl: selectedAsset.uri,
+          originalName: selectedAsset.fileName || "image",
+          order: 0,
+        });
+      }
+    } catch (error) {
+      console.error("이미지 선택 오류:", error);
+      Alert.alert("오류", "이미지를 선택하는 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleUpdate = async () => {
+    // 필수 값 검증
+    if (!storeName.trim()) {
+      Alert.alert("알림", "가맹점명을 입력해주세요.");
+      return;
+    }
+    if (!bankIdx) {
+      Alert.alert("알림", "은행을 선택해주세요.");
+      return;
+    }
+    if (!accountNumber.trim()) {
+      Alert.alert("알림", "계좌번호를 입력해주세요.");
+      return;
+    }
+    if (businessDays.length === 0) {
+      Alert.alert("알림", "영업일을 선택해주세요.");
+      return;
+    }
+
+    try {
+      // FormData 생성
+      const formData = new FormData();
+      formData.append("storeNm", storeName);
+      formData.append("storeTelNo", phoneNumber);
+      formData.append("storeAddr", address);
+      formData.append("storeAddrDetail", detailedAddress);
+      formData.append("bankIdx", String(bankIdx));
+      formData.append("storeAccNo", accountNumber);
+      formData.append("ownerNm", initialStoreInfo?.ownerNm || "");
+      formData.append("storeOpenTime", businessOpenTime);
+      formData.append("storeCloseTime", businessCloseTime);
+
+      // 영업일 배열 추가 - 같은 이름으로 여러 번 append
+      const daysToSend = businessDays.sort(
+        (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
+      );
+      daysToSend.forEach((day) => {
+        formData.append("storeOpenDate", day);
+      });
+
+      // 이미지가 새로 선택된 경우 추가
+      if (mainImage && mainImage.fileUrl) {
+        const filename =
+          mainImage.fileUrl.split("/").pop() || "store-image.jpg";
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("mainImg", {
+          uri: mainImage.fileUrl,
+          type: type,
+          name: filename,
+        } as any);
+      }
+
+      // API 호출
+      const response = await apiPutFormDataWithImage(
+        `/store/info-modify/${storeCode}`,
+        formData,
+      );
+
+      if (response.ok) {
+        Alert.alert("성공", "가맹점 정보가 수정되었습니다.", [
+          {
+            text: "확인",
+            onPress: () => {
+              // storeinfo 페이지를 replace로 이동하여 강제 새로고침
+              router.replace("/(store)/storeinfo");
+            },
+          },
+        ]);
+      } else {
+        const error = await response.text();
+        Alert.alert("오류", error || "수정 중 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      console.error("수정 오류:", error);
+      Alert.alert("오류", "수정 중 오류가 발생했습니다.");
+    }
   };
 
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        <View style={[styles.safeAreaTop, { height: insets.top }]} />
       )}
 
       <View style={styles.header}>
@@ -333,11 +474,22 @@ export default function EditStoreInfoPage() {
           {mainImage && mainImage.fileUrl && (
             <View style={styles.formGroup}>
               <Text style={styles.label}>가맹점 대표 이미지</Text>
-              <Image
-                source={{ uri: mainImage.fileUrl }}
-                style={{ width: 100, height: 100, borderRadius: 8 }}
-                resizeMode="cover"
-              />
+              <TouchableOpacity
+                onPress={pickImage}
+                style={styles.imagePickerContainer}
+              >
+                <Image
+                  source={{ uri: mainImage.fileUrl }}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="cover"
+                />
+                <View style={styles.imageCameraButton}>
+                  <Ionicons name="camera" size={18} color="#fff" />
+                </View>
+              </TouchableOpacity>
+              <Text style={styles.imageChangedText}>
+                이미지를 탭하여 변경할 수 있습니다
+              </Text>
             </View>
           )}
 
@@ -391,12 +543,20 @@ export default function EditStoreInfoPage() {
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>은행명</Text>
-            <TextInput
+            <TouchableOpacity
               style={styles.input}
-              placeholder="은행명을 입력하세요"
-              value={bankName}
-              onChangeText={setBankName}
-            />
+              onPress={() => setBankPickerVisible(true)}
+            >
+              <Text
+                style={[
+                  bankName
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
+                {bankName || "은행을 선택하세요"}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.formGroup}>
@@ -499,7 +659,13 @@ export default function EditStoreInfoPage() {
               style={styles.input}
               onPress={() => openTimePicker("open")}
             >
-              <Text style={{ color: businessOpenTime ? "#000" : "#999", fontSize: 16 }}>
+              <Text
+                style={[
+                  businessOpenTime
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
                 {businessOpenTime}
               </Text>
             </TouchableOpacity>
@@ -511,7 +677,13 @@ export default function EditStoreInfoPage() {
               style={styles.input}
               onPress={() => openTimePicker("close")}
             >
-              <Text style={{ color: businessCloseTime ? "#000" : "#999", fontSize: 16 }}>
+              <Text
+                style={[
+                  businessCloseTime
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
                 {businessCloseTime}
               </Text>
             </TouchableOpacity>
@@ -519,7 +691,7 @@ export default function EditStoreInfoPage() {
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>영업일</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <View style={styles.businessDayContainer}>
               {dayOrder.map((day) => (
                 <TouchableOpacity
                   key={day}
@@ -529,8 +701,12 @@ export default function EditStoreInfoPage() {
                     paddingHorizontal: 12,
                     borderRadius: 6,
                     borderWidth: 1.5,
-                    borderColor: businessDays.includes(day) ? "#EF7810" : "#ddd",
-                    backgroundColor: businessDays.includes(day) ? "#FFF0E0" : "#fff",
+                    borderColor: businessDays.includes(day)
+                      ? "#EF7810"
+                      : "#ddd",
+                    backgroundColor: businessDays.includes(day)
+                      ? "#FFF0E0"
+                      : "#fff",
                   }}
                 >
                   <Text
@@ -697,29 +873,47 @@ export default function EditStoreInfoPage() {
         animationType="fade"
         onRequestClose={closeTimePicker}
       >
-        <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ backgroundColor: "#fff", paddingBottom: 20 }}>
-            <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#e0e0e0" }}>
-              <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>
-                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을 선택하세요
+        <View style={styles.timePickerModalOverlay}>
+          <View style={styles.timePickerModalContent}>
+            <View style={styles.timePickerModalHeader}>
+              <Text style={styles.timePickerModalTitle}>
+                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을
+                선택하세요
               </Text>
-              <Text style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}>
+              <Text
+                style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}
+              >
                 {selectedHour}:{selectedMinute}
               </Text>
             </View>
 
-            <View style={{ flexDirection: "row", paddingHorizontal: 20, marginTop: 20, gap: 20 }}>
+            <View style={styles.timePickerContainer}>
               {/* Hour Picker */}
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    marginBottom: 10,
+                    color: "#666",
+                  }}
+                >
                   시간
                 </Text>
                 <ScrollView
-                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  style={{
+                    maxHeight: 200,
+                    borderWidth: 1,
+                    borderColor: "#e0e0e0",
+                    borderRadius: 8,
+                  }}
                   scrollEventThrottle={16}
                 >
-                  {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => {
-                    const isDisabled = activeTimePicker === "close" && 
+                  {Array.from({ length: 24 }, (_, i) =>
+                    String(i).padStart(2, "0"),
+                  ).map((hour) => {
+                    const isDisabled =
+                      activeTimePicker === "close" &&
                       parseInt(hour) < parseInt(businessOpenTime.split(":")[0]);
                     return (
                       <TouchableOpacity
@@ -729,7 +923,8 @@ export default function EditStoreInfoPage() {
                         style={{
                           paddingVertical: 12,
                           paddingHorizontal: 16,
-                          backgroundColor: selectedHour === hour ? "#FFF0E0" : "#fff",
+                          backgroundColor:
+                            selectedHour === hour ? "#FFF0E0" : "#fff",
                           borderBottomWidth: 1,
                           borderBottomColor: "#f0f0f0",
                           opacity: isDisabled ? 0.5 : 1,
@@ -740,7 +935,12 @@ export default function EditStoreInfoPage() {
                             textAlign: "center",
                             fontSize: 16,
                             fontWeight: selectedHour === hour ? "600" : "400",
-                            color: selectedHour === hour ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                            color:
+                              selectedHour === hour
+                                ? "#EF7810"
+                                : isDisabled
+                                  ? "#ccc"
+                                  : "#000",
                           }}
                         >
                           {hour}:00
@@ -753,18 +953,31 @@ export default function EditStoreInfoPage() {
 
               {/* Minute Picker */}
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    marginBottom: 10,
+                    color: "#666",
+                  }}
+                >
                   분
                 </Text>
                 <ScrollView
-                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  style={{
+                    maxHeight: 200,
+                    borderWidth: 1,
+                    borderColor: "#e0e0e0",
+                    borderRadius: 8,
+                  }}
                   scrollEventThrottle={16}
                 >
                   {["00", "30"].map((minute) => {
                     const openHour = parseInt(businessOpenTime.split(":")[0]);
                     const openMinute = parseInt(businessOpenTime.split(":")[1]);
-                    const isDisabled = activeTimePicker === "close" && 
-                      parseInt(selectedHour) === openHour && 
+                    const isDisabled =
+                      activeTimePicker === "close" &&
+                      parseInt(selectedHour) === openHour &&
                       parseInt(minute) < openMinute;
                     return (
                       <TouchableOpacity
@@ -774,7 +987,8 @@ export default function EditStoreInfoPage() {
                         style={{
                           paddingVertical: 12,
                           paddingHorizontal: 16,
-                          backgroundColor: selectedMinute === minute ? "#FFF0E0" : "#fff",
+                          backgroundColor:
+                            selectedMinute === minute ? "#FFF0E0" : "#fff",
                           borderBottomWidth: 1,
                           borderBottomColor: "#f0f0f0",
                           opacity: isDisabled ? 0.5 : 1,
@@ -784,8 +998,14 @@ export default function EditStoreInfoPage() {
                           style={{
                             textAlign: "center",
                             fontSize: 16,
-                            fontWeight: selectedMinute === minute ? "600" : "400",
-                            color: selectedMinute === minute ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                            fontWeight:
+                              selectedMinute === minute ? "600" : "400",
+                            color:
+                              selectedMinute === minute
+                                ? "#EF7810"
+                                : isDisabled
+                                  ? "#ccc"
+                                  : "#000",
                           }}
                         >
                           :{minute}
@@ -798,32 +1018,20 @@ export default function EditStoreInfoPage() {
             </View>
 
             {/* Buttons */}
-            <View style={{ flexDirection: "row", gap: 12, marginTop: 20, paddingHorizontal: 20 }}>
+            <View style={styles.timePickerButtonGroup}>
               <TouchableOpacity
-                style={{
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 8,
-                  backgroundColor: "#f0f0f0",
-                  alignItems: "center",
-                }}
+                style={[styles.modalCancelButton, { flex: 1 }]}
                 onPress={closeTimePicker}
               >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
-                  취소
-                </Text>
+                <Text style={styles.modalCancelButtonText}>취소</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 8,
-                  backgroundColor: "#EF7810",
-                  alignItems: "center",
-                }}
+                style={[styles.modalSingleButton, { flex: 1 }]}
                 onPress={confirmTimePicker}
               >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}
+                >
                   확인
                 </Text>
               </TouchableOpacity>
@@ -832,10 +1040,98 @@ export default function EditStoreInfoPage() {
         </View>
       </Modal>
 
+      {/* Bank Picker Modal */}
+      <Modal
+        visible={bankPickerVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setBankPickerVisible(false)}
+      >
+        <View style={styles.bankPickerModalOverlay}>
+          <View style={styles.bankPickerModalContent}>
+            <View style={styles.bankPickerModalHeader}>
+              <Text style={styles.bankPickerModalTitle}>은행 선택</Text>
+            </View>
+
+            <ScrollView
+              style={{ paddingHorizontal: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {banksLoading ? (
+                <View
+                  style={{
+                    paddingVertical: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#999" }}>
+                    은행 목록을 불러오는 중입니다...
+                  </Text>
+                </View>
+              ) : banks.length > 0 ? (
+                banks.map((bank) => (
+                  <TouchableOpacity
+                    key={bank.bankIdx}
+                    onPress={() => selectBank(bank.bankIdx, bank.bankNm)}
+                    style={[
+                      styles.bankPickerItem,
+                      bankName === bank.bankNm
+                        ? styles.bankPickerItemActive
+                        : styles.bankPickerItemInactive,
+                    ]}
+                  >
+                    <View style={styles.bankPickerItemRow}>
+                      <Text
+                        style={[
+                          styles.bankPickerItemText,
+                          bankName === bank.bankNm
+                            ? styles.bankPickerItemTextActive
+                            : styles.bankPickerItemTextInactive,
+                        ]}
+                      >
+                        {bank.bankNm}
+                      </Text>
+                      {bankName === bank.bankNm && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color="#EF7810"
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View
+                  style={{
+                    paddingVertical: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#999" }}>
+                    사용 가능한 은행이 없습니다.
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.bankPickerModalFooter}>
+              <TouchableOpacity
+                style={styles.bankPickerCloseButton}
+                onPress={() => setBankPickerVisible(false)}
+              >
+                <Text style={styles.bankPickerCloseButtonText}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />
       )}
     </View>
   );
 }
-

@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View, Platform, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { styles } from "./storeinfo.styles";
 import { apiGet } from "@/utils/api";
 
@@ -15,6 +15,7 @@ interface StoreInfo {
   storeAddrDetail: string;
   storeReport: number;
 
+  bankIdx: number;
   bankNm: string;
   storeAccNo: string;
   ownerNm: string;
@@ -59,42 +60,45 @@ export default function StoreInfoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchStoreInfo = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // 페이지 포커스 시마다 데이터를 새로 로드
+  useFocusEffect(
+    useCallback(() => {
+      const fetchStoreInfo = async () => {
+        try {
+          setLoading(true);
+          setError(null);
 
-        let storeCode = "";
-        if (Platform.OS === "web") {
-          storeCode = localStorage.getItem("storeCode") || "";
-        } else {
-          storeCode = (await SecureStore.getItemAsync("storeCode")) || "";
-        }
+          let storeCode = "";
+          if (Platform.OS === "web") {
+            storeCode = localStorage.getItem("storeCode") || "";
+          } else {
+            storeCode = (await SecureStore.getItemAsync("storeCode")) || "";
+          }
 
-        if (!storeCode) {
-          setError("가맹점 코드를 찾을 수 없습니다.");
+          if (!storeCode) {
+            setError("가맹점 코드를 찾을 수 없습니다.");
+            setLoading(false);
+            return;
+          }
+
+          const response = await apiGet(`/store/view/${storeCode}`);
+          if (response.ok) {
+            const data: StoreInfo = await response.json();
+            setStoreInfo(data);
+          } else {
+            setError("가맹점 정보를 불러올 수 없습니다.");
+          }
+        } catch (err) {
+          setError("오류가 발생했습니다.");
+          console.error(err);
+        } finally {
           setLoading(false);
-          return;
         }
+      };
 
-        const response = await apiGet(`/store/view/${storeCode}`);
-        if (response.ok) {
-          const data: StoreInfo = await response.json();
-          setStoreInfo(data);
-        } else {
-          setError("가맹점 정보를 불러올 수 없습니다.");
-        }
-      } catch (err) {
-        setError("오류가 발생했습니다.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStoreInfo();
-  }, []);
+      fetchStoreInfo();
+    }, [])
+  );
 
   if (loading) {
     return (

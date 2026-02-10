@@ -1,4 +1,4 @@
-import { apiPost } from "@/utils/api";
+import { apiPost, API_BASE_URL } from "@/utils/api";
 import { setMultipleItems, setStorageItem } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,6 +15,18 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
+
+// 로그인용 API (토큰 없이 요청)
+const loginRequest = async (endpoint: string, body: any) => {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  return response;
+};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -46,7 +58,8 @@ export default function LoginScreen() {
           ? { loginId: loginId.trim(), password: password.trim() }
           : { username: loginId.trim(), password: password.trim() };
 
-      const response = await apiPost(endpoint, requestBody);
+      // 로그인 요청 (토큰 없이)
+      const response = await loginRequest(endpoint, requestBody);
 
       if (response.ok) {
         const data = await response.json();
@@ -95,18 +108,36 @@ export default function LoginScreen() {
 
           await setMultipleItems(storeTokens);
 
-          console.log(storeTokens);
           router.replace("/(store)/tabs/storehome");
         }
       } else {
-        if (Platform.OS === "web") {
-          window.alert("로그인에 실패했습니다.");
-        } else {
-          Alert.alert("실패", "로그인에 실패했습니다.");
+        // 에러 응답 처리
+        try {
+          const errorResponse = await response.json();
+          const errorMessage = errorResponse.message || "로그인에 실패했습니다.";
+          const errorCode = errorResponse.error || "";
+
+          // ONLY_OWNER_CAN_LOGIN 에러 처리
+          let displayMessage = errorMessage;
+          if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
+            displayMessage = "점주 계정만 로그인할 수 있습니다.";
+          }
+
+          if (Platform.OS === "web") {
+            window.alert(displayMessage);
+          } else {
+            Alert.alert("로그인 실패", displayMessage);
+          }
+        } catch {
+          // JSON 파싱 실패 시
+          if (Platform.OS === "web") {
+            window.alert("로그인에 실패했습니다.");
+          } else {
+            Alert.alert("실패", "로그인에 실패했습니다.");
+          }
         }
       }
     } catch (error) {
-      console.error("로그인 오류:", "api.ts 네트워크 주소 오류");
       if (Platform.OS === "web") {
         window.alert("로그인 중 오류가 발생했습니다.");
       } else {
@@ -205,7 +236,9 @@ export default function LoginScreen() {
 
           <View style={styles.linkContainer}>
             <TouchableOpacity
-              onPress={() => router.push("/(auth)/find-account")}
+              onPress={() => router.push({
+                    pathname: "/(auth)/find-account",
+                    params: { userType }})}
             >
               <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
             </TouchableOpacity>
