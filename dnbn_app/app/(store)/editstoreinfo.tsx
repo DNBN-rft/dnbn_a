@@ -161,7 +161,6 @@ export default function EditStoreInfoPage() {
   
   const [businessDays, setBusinessDays] = useState<string[]>(getInitialBusinessDays());
   const [mainImage, setMainImage] = useState<any>(initialStoreInfo?.mainImg || null);
-  const [newImageUri, setNewImageUri] = useState<string | null>(null);
 
   // 은행 목록 및 선택 modal 관련 state
   const [banks, setBanks] = useState<{ bankIdx: number; bankNm: string }[]>([]);
@@ -313,7 +312,6 @@ export default function EditStoreInfoPage() {
 
       if (!result.canceled && result.assets.length > 0) {
         const selectedAsset = result.assets[0];
-        setNewImageUri(selectedAsset.uri);
         // mainImage를 새 이미지로 업데이트
         setMainImage({
           fileUrl: selectedAsset.uri,
@@ -367,13 +365,13 @@ export default function EditStoreInfoPage() {
       });
 
       // 이미지가 새로 선택된 경우 추가
-      if (newImageUri) {
-        const filename = newImageUri.split("/").pop() || "store-image.jpg";
+      if (mainImage && mainImage.fileUrl) {
+        const filename = mainImage.fileUrl.split("/").pop() || "store-image.jpg";
         const match = /\.(\w+)$/.exec(filename);
         const type = match ? `image/${match[1]}` : "image/jpeg";
         
         formData.append("mainImg", {
-          uri: newImageUri,
+          uri: mainImage.fileUrl,
           type: type,
           name: filename,
         } as any);
