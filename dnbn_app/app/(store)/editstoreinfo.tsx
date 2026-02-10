@@ -1,19 +1,19 @@
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
-import * as SecureStore from "expo-secure-store";
-import * as ImagePicker from "expo-image-picker";
 import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 import {
   Alert,
+  Image,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Image,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
@@ -38,7 +38,7 @@ interface StoreInfo {
   ownerTelNo: string;
   bizRegDate: string;
 
-  storeOpenDate: Array<string>;
+  storeOpenDate: string[];
   storeOpenTime: string;
   storeCloseTime: string;
 
@@ -75,22 +75,17 @@ export default function EditStoreInfoPage() {
   useEffect(() => {
     const loadStoreInfo = async () => {
       try {
-        let name: string | null = null;
-        let storedStoreCode: string | null = null;
-
         if (Platform.OS === "web") {
-          name = localStorage.getItem("memberId");
-          storedStoreCode = localStorage.getItem("storeCode");
-        } else {
-          name = await SecureStore.getItemAsync("memberId");
-          storedStoreCode = await SecureStore.getItemAsync("storeCode");
+          setMemberId(localStorage.getItem("memberId"));
+          setStoreCode(localStorage.getItem("storeCode"));
+          return;
         }
 
-        if (name) {
+        let name = await SecureStore.getItemAsync("memberId");
+        let storedStoreCode = await SecureStore.getItemAsync("storeCode");
+
+        if (name && storedStoreCode) {
           setMemberId(name);
-        }
-
-        if (storedStoreCode) {
           setStoreCode(storedStoreCode);
         }
       } catch (error) {
@@ -101,7 +96,6 @@ export default function EditStoreInfoPage() {
     loadStoreInfo();
   }, []);
 
-
   // params에서 storeInfo 파싱
   const initialStoreInfo: StoreInfo | null = params.storeInfo
     ? JSON.parse(params.storeInfo as string)
@@ -109,19 +103,27 @@ export default function EditStoreInfoPage() {
 
   // 수정 가능한 정보
   const [storeName, setStoreName] = useState(initialStoreInfo?.storeNm || "");
-  const [phoneNumber, setPhoneNumber] = useState(initialStoreInfo?.storeTelNo || "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    initialStoreInfo?.storeTelNo || "",
+  );
   const [address, setAddress] = useState(initialStoreInfo?.storeAddr || "");
-  const [detailedAddress, setDetailedAddress] = useState(initialStoreInfo?.storeAddrDetail || "");
+  const [detailedAddress, setDetailedAddress] = useState(
+    initialStoreInfo?.storeAddrDetail || "",
+  );
   const [bankName, setBankName] = useState(initialStoreInfo?.bankNm || "");
-  const [bankIdx, setBankIdx] = useState<number | null>(initialStoreInfo?.bankIdx || null);
-  const [accountNumber, setAccountNumber] = useState(initialStoreInfo?.storeAccNo || "");
+  const [bankIdx, setBankIdx] = useState<number | null>(
+    initialStoreInfo?.bankIdx || null,
+  );
+  const [accountNumber, setAccountNumber] = useState(
+    initialStoreInfo?.storeAccNo || "",
+  );
   const [businessOpenTime, setBusinessOpenTime] = useState(
-    initialStoreInfo?.storeOpenTime || "09:00"
+    initialStoreInfo?.storeOpenTime || "09:00",
   );
   const [businessCloseTime, setBusinessCloseTime] = useState(
-    initialStoreInfo?.storeCloseTime || "21:00"
+    initialStoreInfo?.storeCloseTime || "21:00",
   );
-  
+
   // 요일 매핑
   const dayOrder = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
   const dayMapping: { [key: string]: string } = {
@@ -134,18 +136,21 @@ export default function EditStoreInfoPage() {
     SUN: "일",
   };
   const koreanToDayCode: { [key: string]: string } = {
-    "월": "MON",
-    "화": "TUE",
-    "수": "WED",
-    "목": "THU",
-    "금": "FRI",
-    "토": "SAT",
-    "일": "SUN",
+    월: "MON",
+    화: "TUE",
+    수: "WED",
+    목: "THU",
+    금: "FRI",
+    토: "SAT",
+    일: "SUN",
   };
-  
+
   // 초기 영업일 처리
   const getInitialBusinessDays = () => {
-    if (initialStoreInfo?.storeOpenDate && initialStoreInfo.storeOpenDate.length > 0) {
+    if (
+      initialStoreInfo?.storeOpenDate &&
+      initialStoreInfo.storeOpenDate.length > 0
+    ) {
       // storeOpenDate가 한글(월,화,수) 형식인 경우 영문 코드로 변환
       const convertedDays = initialStoreInfo.storeOpenDate
         .map((day: string) => {
@@ -153,14 +158,18 @@ export default function EditStoreInfoPage() {
           return koreanToDayCode[day] || day;
         })
         .filter((day: string) => dayOrder.includes(day)); // 유효한 값만 필터링
-      
+
       return convertedDays.length > 0 ? convertedDays : dayOrder;
     }
     return dayOrder; // 기본값: 모든 요일
   };
-  
-  const [businessDays, setBusinessDays] = useState<string[]>(getInitialBusinessDays());
-  const [mainImage, setMainImage] = useState<any>(initialStoreInfo?.mainImg || null);
+
+  const [businessDays, setBusinessDays] = useState<string[]>(
+    getInitialBusinessDays(),
+  );
+  const [mainImage, setMainImage] = useState<any>(
+    initialStoreInfo?.mainImg || null,
+  );
 
   // 은행 목록 및 선택 modal 관련 state
   const [banks, setBanks] = useState<{ bankIdx: number; bankNm: string }[]>([]);
@@ -175,7 +184,7 @@ export default function EditStoreInfoPage() {
         if (response.ok) {
           const data = await response.json();
           // data.data 또는 data가 배열인지 확인
-          const bankList = Array.isArray(data) ? data : (data.data || []);
+          const bankList = Array.isArray(data) ? data : data.data || [];
           setBanks(bankList);
         }
       } catch (error) {
@@ -189,7 +198,9 @@ export default function EditStoreInfoPage() {
 
   // Time picker 모달 관련 state
   const [timePickerVisible, setTimePickerVisible] = useState(false);
-  const [activeTimePicker, setActiveTimePicker] = useState<"open" | "close" | null>(null);
+  const [activeTimePicker, setActiveTimePicker] = useState<
+    "open" | "close" | null
+  >(null);
   const [selectedHour, setSelectedHour] = useState("09");
   const [selectedMinute, setSelectedMinute] = useState("00");
 
@@ -270,8 +281,11 @@ export default function EditStoreInfoPage() {
       const [openHour, openMinute] = businessOpenTime.split(":").map(Number);
       const closeHourNum = parseInt(selectedHour);
       const closeMinuteNum = parseInt(selectedMinute);
-      
-      if (closeHourNum < openHour || (closeHourNum === openHour && closeMinuteNum < openMinute)) {
+
+      if (
+        closeHourNum < openHour ||
+        (closeHourNum === openHour && closeMinuteNum < openMinute)
+      ) {
         Alert.alert("알림", "마감 시간은 오픈 시간 이후로 설정해주세요.");
         return;
       }
@@ -284,7 +298,9 @@ export default function EditStoreInfoPage() {
     setBusinessDays(
       businessDays.includes(day)
         ? businessDays.filter((d) => d !== day)
-        : [...businessDays, day].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+        : [...businessDays, day].sort(
+            (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
+          ),
     );
   };
 
@@ -297,7 +313,8 @@ export default function EditStoreInfoPage() {
   const pickImage = async () => {
     try {
       // 카메라와 라이브러리 접근 권한 요청
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
         return;
@@ -345,7 +362,6 @@ export default function EditStoreInfoPage() {
     }
 
     try {
-
       // FormData 생성
       const formData = new FormData();
       formData.append("storeNm", storeName);
@@ -357,19 +373,22 @@ export default function EditStoreInfoPage() {
       formData.append("ownerNm", initialStoreInfo?.ownerNm || "");
       formData.append("storeOpenTime", businessOpenTime);
       formData.append("storeCloseTime", businessCloseTime);
-      
+
       // 영업일 배열 추가 - 같은 이름으로 여러 번 append
-      const daysToSend = businessDays.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+      const daysToSend = businessDays.sort(
+        (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
+      );
       daysToSend.forEach((day) => {
         formData.append("storeOpenDate", day);
       });
 
       // 이미지가 새로 선택된 경우 추가
       if (mainImage && mainImage.fileUrl) {
-        const filename = mainImage.fileUrl.split("/").pop() || "store-image.jpg";
+        const filename =
+          mainImage.fileUrl.split("/").pop() || "store-image.jpg";
         const match = /\.(\w+)$/.exec(filename);
         const type = match ? `image/${match[1]}` : "image/jpeg";
-        
+
         formData.append("mainImg", {
           uri: mainImage.fileUrl,
           type: type,
@@ -380,7 +399,7 @@ export default function EditStoreInfoPage() {
       // API 호출
       const response = await apiPutFormDataWithImage(
         `/store/info-modify/${storeCode}`,
-        formData
+        formData,
       );
 
       if (response.ok) {
@@ -528,7 +547,13 @@ export default function EditStoreInfoPage() {
               style={styles.input}
               onPress={() => setBankPickerVisible(true)}
             >
-              <Text style={[bankName ? styles.selectableInput : styles.selectableInputPlaceholder]}>
+              <Text
+                style={[
+                  bankName
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
                 {bankName || "은행을 선택하세요"}
               </Text>
             </TouchableOpacity>
@@ -634,7 +659,13 @@ export default function EditStoreInfoPage() {
               style={styles.input}
               onPress={() => openTimePicker("open")}
             >
-              <Text style={[businessOpenTime ? styles.selectableInput : styles.selectableInputPlaceholder]}>
+              <Text
+                style={[
+                  businessOpenTime
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
                 {businessOpenTime}
               </Text>
             </TouchableOpacity>
@@ -646,7 +677,13 @@ export default function EditStoreInfoPage() {
               style={styles.input}
               onPress={() => openTimePicker("close")}
             >
-              <Text style={[businessCloseTime ? styles.selectableInput : styles.selectableInputPlaceholder]}>
+              <Text
+                style={[
+                  businessCloseTime
+                    ? styles.selectableInput
+                    : styles.selectableInputPlaceholder,
+                ]}
+              >
                 {businessCloseTime}
               </Text>
             </TouchableOpacity>
@@ -664,8 +701,12 @@ export default function EditStoreInfoPage() {
                     paddingHorizontal: 12,
                     borderRadius: 6,
                     borderWidth: 1.5,
-                    borderColor: businessDays.includes(day) ? "#EF7810" : "#ddd",
-                    backgroundColor: businessDays.includes(day) ? "#FFF0E0" : "#fff",
+                    borderColor: businessDays.includes(day)
+                      ? "#EF7810"
+                      : "#ddd",
+                    backgroundColor: businessDays.includes(day)
+                      ? "#FFF0E0"
+                      : "#fff",
                   }}
                 >
                   <Text
@@ -836,9 +877,12 @@ export default function EditStoreInfoPage() {
           <View style={styles.timePickerModalContent}>
             <View style={styles.timePickerModalHeader}>
               <Text style={styles.timePickerModalTitle}>
-                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을 선택하세요
+                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을
+                선택하세요
               </Text>
-              <Text style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}>
+              <Text
+                style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}
+              >
                 {selectedHour}:{selectedMinute}
               </Text>
             </View>
@@ -846,15 +890,30 @@ export default function EditStoreInfoPage() {
             <View style={styles.timePickerContainer}>
               {/* Hour Picker */}
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    marginBottom: 10,
+                    color: "#666",
+                  }}
+                >
                   시간
                 </Text>
                 <ScrollView
-                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  style={{
+                    maxHeight: 200,
+                    borderWidth: 1,
+                    borderColor: "#e0e0e0",
+                    borderRadius: 8,
+                  }}
                   scrollEventThrottle={16}
                 >
-                  {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => {
-                    const isDisabled = activeTimePicker === "close" && 
+                  {Array.from({ length: 24 }, (_, i) =>
+                    String(i).padStart(2, "0"),
+                  ).map((hour) => {
+                    const isDisabled =
+                      activeTimePicker === "close" &&
                       parseInt(hour) < parseInt(businessOpenTime.split(":")[0]);
                     return (
                       <TouchableOpacity
@@ -864,7 +923,8 @@ export default function EditStoreInfoPage() {
                         style={{
                           paddingVertical: 12,
                           paddingHorizontal: 16,
-                          backgroundColor: selectedHour === hour ? "#FFF0E0" : "#fff",
+                          backgroundColor:
+                            selectedHour === hour ? "#FFF0E0" : "#fff",
                           borderBottomWidth: 1,
                           borderBottomColor: "#f0f0f0",
                           opacity: isDisabled ? 0.5 : 1,
@@ -875,7 +935,12 @@ export default function EditStoreInfoPage() {
                             textAlign: "center",
                             fontSize: 16,
                             fontWeight: selectedHour === hour ? "600" : "400",
-                            color: selectedHour === hour ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                            color:
+                              selectedHour === hour
+                                ? "#EF7810"
+                                : isDisabled
+                                  ? "#ccc"
+                                  : "#000",
                           }}
                         >
                           {hour}:00
@@ -888,18 +953,31 @@ export default function EditStoreInfoPage() {
 
               {/* Minute Picker */}
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", marginBottom: 10, color: "#666" }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    marginBottom: 10,
+                    color: "#666",
+                  }}
+                >
                   분
                 </Text>
                 <ScrollView
-                  style={{ maxHeight: 200, borderWidth: 1, borderColor: "#e0e0e0", borderRadius: 8 }}
+                  style={{
+                    maxHeight: 200,
+                    borderWidth: 1,
+                    borderColor: "#e0e0e0",
+                    borderRadius: 8,
+                  }}
                   scrollEventThrottle={16}
                 >
                   {["00", "30"].map((minute) => {
                     const openHour = parseInt(businessOpenTime.split(":")[0]);
                     const openMinute = parseInt(businessOpenTime.split(":")[1]);
-                    const isDisabled = activeTimePicker === "close" && 
-                      parseInt(selectedHour) === openHour && 
+                    const isDisabled =
+                      activeTimePicker === "close" &&
+                      parseInt(selectedHour) === openHour &&
                       parseInt(minute) < openMinute;
                     return (
                       <TouchableOpacity
@@ -909,7 +987,8 @@ export default function EditStoreInfoPage() {
                         style={{
                           paddingVertical: 12,
                           paddingHorizontal: 16,
-                          backgroundColor: selectedMinute === minute ? "#FFF0E0" : "#fff",
+                          backgroundColor:
+                            selectedMinute === minute ? "#FFF0E0" : "#fff",
                           borderBottomWidth: 1,
                           borderBottomColor: "#f0f0f0",
                           opacity: isDisabled ? 0.5 : 1,
@@ -919,8 +998,14 @@ export default function EditStoreInfoPage() {
                           style={{
                             textAlign: "center",
                             fontSize: 16,
-                            fontWeight: selectedMinute === minute ? "600" : "400",
-                            color: selectedMinute === minute ? "#EF7810" : isDisabled ? "#ccc" : "#000",
+                            fontWeight:
+                              selectedMinute === minute ? "600" : "400",
+                            color:
+                              selectedMinute === minute
+                                ? "#EF7810"
+                                : isDisabled
+                                  ? "#ccc"
+                                  : "#000",
                           }}
                         >
                           :{minute}
@@ -938,15 +1023,15 @@ export default function EditStoreInfoPage() {
                 style={[styles.modalCancelButton, { flex: 1 }]}
                 onPress={closeTimePicker}
               >
-                <Text style={styles.modalCancelButtonText}>
-                  취소
-                </Text>
+                <Text style={styles.modalCancelButtonText}>취소</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalSingleButton, { flex: 1 }]}
                 onPress={confirmTimePicker}
               >
-                <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}
+                >
                   확인
                 </Text>
               </TouchableOpacity>
@@ -968,10 +1053,21 @@ export default function EditStoreInfoPage() {
               <Text style={styles.bankPickerModalTitle}>은행 선택</Text>
             </View>
 
-            <ScrollView style={{ paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              style={{ paddingHorizontal: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
               {banksLoading ? (
-                <View style={{ paddingVertical: 40, justifyContent: "center", alignItems: "center" }}>
-                  <Text style={{ color: "#999" }}>은행 목록을 불러오는 중입니다...</Text>
+                <View
+                  style={{
+                    paddingVertical: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#999" }}>
+                    은행 목록을 불러오는 중입니다...
+                  </Text>
                 </View>
               ) : banks.length > 0 ? (
                 banks.map((bank) => (
@@ -980,27 +1076,43 @@ export default function EditStoreInfoPage() {
                     onPress={() => selectBank(bank.bankIdx, bank.bankNm)}
                     style={[
                       styles.bankPickerItem,
-                      bankName === bank.bankNm ? styles.bankPickerItemActive : styles.bankPickerItemInactive,
+                      bankName === bank.bankNm
+                        ? styles.bankPickerItemActive
+                        : styles.bankPickerItemInactive,
                     ]}
                   >
                     <View style={styles.bankPickerItemRow}>
                       <Text
                         style={[
                           styles.bankPickerItemText,
-                          bankName === bank.bankNm ? styles.bankPickerItemTextActive : styles.bankPickerItemTextInactive,
+                          bankName === bank.bankNm
+                            ? styles.bankPickerItemTextActive
+                            : styles.bankPickerItemTextInactive,
                         ]}
                       >
                         {bank.bankNm}
                       </Text>
                       {bankName === bank.bankNm && (
-                        <Ionicons name="checkmark-circle" size={20} color="#EF7810" />
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color="#EF7810"
+                        />
                       )}
                     </View>
                   </TouchableOpacity>
                 ))
               ) : (
-                <View style={{ paddingVertical: 40, justifyContent: "center", alignItems: "center" }}>
-                  <Text style={{ color: "#999" }}>사용 가능한 은행이 없습니다.</Text>
+                <View
+                  style={{
+                    paddingVertical: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: "#999" }}>
+                    사용 가능한 은행이 없습니다.
+                  </Text>
                 </View>
               )}
             </ScrollView>
@@ -1010,9 +1122,7 @@ export default function EditStoreInfoPage() {
                 style={styles.bankPickerCloseButton}
                 onPress={() => setBankPickerVisible(false)}
               >
-                <Text style={styles.bankPickerCloseButtonText}>
-                  닫기
-                </Text>
+                <Text style={styles.bankPickerCloseButtonText}>닫기</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1025,4 +1135,3 @@ export default function EditStoreInfoPage() {
     </View>
   );
 }
-
