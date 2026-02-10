@@ -63,7 +63,7 @@ export default function FindAccountScreen() {
     try {
       
       const endPoint = userType === "cust"
-        ? "/cust/login/search-id"
+        ? "/cust/search-id"
         : "/store/search-id";
       
       const response = await apiPost(endPoint, {
@@ -109,7 +109,7 @@ export default function FindAccountScreen() {
     try {
       
       const endPoint = userType === "cust"
-        ? "/cust/login/reset-password"
+        ? "/cust/reset-password"
         : "/store/reset-password";
       
       const response = await apiPost(endPoint, {
