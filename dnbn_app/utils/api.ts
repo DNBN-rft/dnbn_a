@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import { getStorageItem, setStorageItem, removeMultipleItems } from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
 export const API_BASE_URL = "http://192.168.0.67:8080/api";
@@ -12,8 +12,7 @@ let failedQueue: {
 
 // 토큰 만료 시 공통 처리
 const handleTokenExpired = async () => {
-  await SecureStore.deleteItemAsync("accessToken");
-  await SecureStore.deleteItemAsync("refreshToken");
+  await removeMultipleItems(["accessToken", "refreshToken"]);
   // TODO: 로그인 페이지로 리다이렉트
 };
 
@@ -38,18 +37,31 @@ const handle401Response = async (
   if (!isRefreshing) {
     isRefreshing = true;
     try {
-      const refreshToken = await SecureStore.getItemAsync("refreshToken");
-      const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      const refreshToken = await getStorageItem("refreshToken");
+      const userType = await getStorageItem("userType");
+      const custCode = await getStorageItem("custCode");
+      
+      // userType에 따라 다른 엔드포인트 사용
+      const refreshEndpoint = userType === "cust" 
+        ? "/cust/refresh" 
+        : "/store/app/refresh";
+      
+      // cust 사용자는 custCode도 함께 전송
+      const refreshBody = userType === "cust" 
+        ? { refreshToken, custCode }
+        : { refreshToken };
+      
+      const refreshResponse = await fetch(`${API_BASE_URL}${refreshEndpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify(refreshBody),
       });
 
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
-        await SecureStore.setItemAsync("accessToken", data.accessToken);
+        await setStorageItem("accessToken", data.accessToken);
         processQueue(null, data.accessToken);
 
         const newOptions = {
@@ -76,7 +88,7 @@ const handle401Response = async (
     return new Promise((resolve, reject) => {
       failedQueue.push({ resolve, reject });
     }).then(async () => {
-      const token = await SecureStore.getItemAsync("accessToken");
+      const token = await getStorageItem("accessToken");
       const newOptions = {
         ...options,
         headers: {
@@ -98,14 +110,14 @@ const apiCall = async (
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
   // TODO: 로그인 연동 후 활성화
-  //const token = await SecureStore.getItemAsync("accessToken");
+  const token = await getStorageItem("accessToken");
 
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
       // TODO: 로그인 연동 후 활성화
-      //...(token ? { Authorization: `Bearer ${token}` } : {}),
-      //...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
     },
     ...options,
   };
@@ -114,9 +126,9 @@ const apiCall = async (
     let response = await fetch(url, defaultOptions);
 
     // TODO: 로그인 연동 후 활성화
-    //if (response.status === 401) {
-    //  response = await handle401Response(url, defaultOptions);
-    //}
+    if (response.status === 401) {
+      response = await handle401Response(url, defaultOptions);
+    }
 
     return response;
   } catch (error) {
@@ -175,10 +187,10 @@ export const apiPostFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
-  
+
   // options.headers에서 명시적인 Content-Type을 제거
   const customHeaders = options.headers as Record<string, string> || {};
   const filteredHeaders = Object.keys(customHeaders)
@@ -187,7 +199,7 @@ export const apiPostFormDataWithImage = async (
       acc[key] = customHeaders[key];
       return acc;
     }, {} as Record<string, string>);
-  
+
   const defaultOptions: RequestInit = {
     ...options,
     method: "POST",
@@ -213,10 +225,10 @@ export const apiPutFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
-  
+
   // options.headers에서 명시적인 Content-Type을 제거
   const customHeaders = options.headers as Record<string, string> || {};
   const filteredHeaders = Object.keys(customHeaders)
@@ -225,7 +237,7 @@ export const apiPutFormDataWithImage = async (
       acc[key] = customHeaders[key];
       return acc;
     }, {} as Record<string, string>);
-  
+
   const defaultOptions: RequestInit = {
     ...options,
     method: "PUT",
