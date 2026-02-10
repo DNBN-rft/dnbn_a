@@ -108,7 +108,6 @@ export default function LoginScreen() {
 
           await setMultipleItems(storeTokens);
 
-          console.log(storeTokens);
           router.replace("/(store)/tabs/storehome");
         }
       } else {
@@ -139,7 +138,6 @@ export default function LoginScreen() {
         }
       }
     } catch (error) {
-      console.error("로그인 오류:", "api.ts 네트워크 주소 오류");
       if (Platform.OS === "web") {
         window.alert("로그인 중 오류가 발생했습니다.");
       } else {

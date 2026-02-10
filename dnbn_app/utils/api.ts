@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 //소윤: 67, 형운: 68, 진용: 136
-const API_BASE_URL = "http://192.168.0.136:8080/api";
+export const API_BASE_URL = "http://192.168.0.67:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -98,14 +98,14 @@ const apiCall = async (
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
   // TODO: 로그인 연동 후 활성화
-  const token = await SecureStore.getItemAsync("accessToken");
+  //const token = await SecureStore.getItemAsync("accessToken");
 
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
       // TODO: 로그인 연동 후 활성화
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
+      //...(token ? { Authorization: `Bearer ${token}` } : {}),
+      //...options.headers,
     },
     ...options,
   };
@@ -114,9 +114,9 @@ const apiCall = async (
     let response = await fetch(url, defaultOptions);
 
     // TODO: 로그인 연동 후 활성화
-    if (response.status === 401) {
-      response = await handle401Response(url, defaultOptions);
-    }
+    //if (response.status === 401) {
+    //  response = await handle401Response(url, defaultOptions);
+    //}
 
     return response;
   } catch (error) {
