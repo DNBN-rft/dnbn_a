@@ -105,7 +105,7 @@ const apiCall = async (
       "Content-Type": "application/json",
       // TODO: 로그인 연동 후 활성화
       // ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
+      // ...options.headers,
     },
     ...options,
   };
