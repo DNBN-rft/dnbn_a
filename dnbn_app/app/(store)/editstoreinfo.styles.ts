@@ -234,4 +234,186 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  // 추가 스타일들
+  safeAreaTop: {
+    backgroundColor: '#fff',
+  },
+  imagePickerContainer: {
+    position: 'relative' as any,
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageCameraButton: {
+    position: 'absolute' as any,
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#EF7810',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageChangedText: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 8,
+  },
+  selectableInput: {
+    color: '#000',
+    fontSize: 16,
+  },
+  selectableInputPlaceholder: {
+    color: '#999',
+    fontSize: 16,
+  },
+  businessDayContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  businessDayButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  businessDayButtonActive: {
+    backgroundColor: '#FFF0E0',
+    borderColor: '#EF7810',
+  },
+  businessDayButtonInactive: {
+    backgroundColor: '#fff',
+  },
+  businessDayButtonText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  businessDayButtonTextActive: {
+    color: '#EF7810',
+  },
+  businessDayButtonTextInactive: {
+    color: '#333',
+  },
+  // 모달 관련
+  timePickerModalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  timePickerModalContent: {
+    backgroundColor: '#fff',
+    paddingBottom: 20,
+  },
+  timePickerModalHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  timePickerModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  timePickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  timePickerWheel: {
+    width: 70,
+    height: 150,
+  },
+  timePickerSeparator: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  timePickerButtonGroup: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  bankPickerModalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  bankPickerModalContent: {
+    backgroundColor: '#fff',
+    maxHeight: '70%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  bankPickerModalHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  bankPickerModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  bankPickerItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  bankPickerItemActive: {
+    backgroundColor: '#FFF0E0',
+  },
+  bankPickerItemInactive: {
+    backgroundColor: '#fff',
+  },
+  bankPickerItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bankPickerItemText: {
+    fontSize: 16,
+  },
+  bankPickerItemTextActive: {
+    fontWeight: '600',
+    color: '#EF7810',
+  },
+  bankPickerItemTextInactive: {
+    fontWeight: '400',
+    color: '#000',
+  },
+  bankPickerModalFooter: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  bankPickerCloseButton: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+  },
+  bankPickerCloseButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  safeAreaBottom: {
+    backgroundColor: '#000',
+  },
 });

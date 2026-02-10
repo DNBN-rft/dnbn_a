@@ -19,8 +19,14 @@ interface ProductItem {
   isStock: boolean;
   productRegDateTime: string;
   images: {
-    files: Array<{ originalName: string; fileUrl: string; order: number }>;
+    files: File[];
   };
+}
+
+interface File{
+  originalName: string;
+  fileUrl: string;
+  order: number;
 }
 
 export default function StoreProducts() {
@@ -346,7 +352,7 @@ export default function StoreProducts() {
                     value={saleStartDate}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate) => {
+                    onChange={(event, selectedDate: Date | undefined) => {
                       setShowDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setSaleStartDate(selectedDate);
@@ -363,7 +369,7 @@ export default function StoreProducts() {
                     value={saleStartDate}
                     mode="time"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate) => {
+                    onChange={(event, selectedDate: Date | undefined) => {
                       setShowTimePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setSaleStartDate(selectedDate);
@@ -441,7 +447,7 @@ export default function StoreProducts() {
                     value={negoStartDate}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate) => {
+                    onChange={(event, selectedDate: Date | undefined) => {
                       setShowNegoDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setNegoStartDate(selectedDate);
@@ -458,7 +464,7 @@ export default function StoreProducts() {
                     value={negoStartDate}
                     mode="time"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate) => {
+                    onChange={(event, selectedDate: Date | undefined) => {
                       setShowNegoTimePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setNegoStartDate(selectedDate);

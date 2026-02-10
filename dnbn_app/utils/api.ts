@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 //소윤: 67, 형운: 68, 진용: 136
-const API_BASE_URL = "http://192.168.0.68:8080/api";
+export const API_BASE_URL = "http://192.168.0.67:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -98,13 +98,13 @@ const apiCall = async (
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
   // TODO: 로그인 연동 후 활성화
-  // const token = await SecureStore.getItemAsync("accessToken");
+  const token = await SecureStore.getItemAsync("accessToken");
 
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
       // TODO: 로그인 연동 후 활성화
-      // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
     ...options,
@@ -114,9 +114,9 @@ const apiCall = async (
     let response = await fetch(url, defaultOptions);
 
     // TODO: 로그인 연동 후 활성화
-    // if (response.status === 401) {
-    //   response = await handle401Response(url, defaultOptions);
-    // }
+    if (response.status === 401) {
+      response = await handle401Response(url, defaultOptions);
+    }
 
     return response;
   } catch (error) {
@@ -175,13 +175,26 @@ export const apiPostFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
+  const defaultHeaders: HeadersInit = {};
+  
+  // options.headers에서 명시적인 Content-Type을 제거
+  const customHeaders = options.headers as Record<string, string> || {};
+  const filteredHeaders = Object.keys(customHeaders)
+    .filter(key => key.toLowerCase() !== "content-type")
+    .reduce((acc, key) => {
+      acc[key] = customHeaders[key];
+      return acc;
+    }, {} as Record<string, string>);
+  
   const defaultOptions: RequestInit = {
     ...options,
     method: "POST",
     body: formData,
     headers: {
-      // FormData 사용 시 Content-Type을 명시하지 않음 (자동으로 multipart/form-data 설정)
-      ...options.headers,
+      ...defaultHeaders,
+      ...filteredHeaders,
     },
   };
 
@@ -200,13 +213,26 @@ export const apiPutFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
+  
+  // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
+  const defaultHeaders: HeadersInit = {};
+  
+  // options.headers에서 명시적인 Content-Type을 제거
+  const customHeaders = options.headers as Record<string, string> || {};
+  const filteredHeaders = Object.keys(customHeaders)
+    .filter(key => key.toLowerCase() !== "content-type")
+    .reduce((acc, key) => {
+      acc[key] = customHeaders[key];
+      return acc;
+    }, {} as Record<string, string>);
+  
   const defaultOptions: RequestInit = {
     ...options,
     method: "PUT",
     body: formData,
     headers: {
-      // FormData 사용 시 Content-Type을 명시하지 않음 (자동으로 multipart/form-data 설정)
-      ...options.headers,
+      ...defaultHeaders,
+      ...filteredHeaders,
     },
   };
 
