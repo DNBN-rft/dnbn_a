@@ -205,7 +205,9 @@ export default function LoginScreen() {
 
           <View style={styles.linkContainer}>
             <TouchableOpacity
-              onPress={() => router.push("/(auth)/find-account")}
+              onPress={() => router.push({
+                    pathname: "/(auth)/find-account",
+                    params: { userType }})}
             >
               <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
             </TouchableOpacity>
