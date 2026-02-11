@@ -7,7 +7,7 @@ import {
   validateUserId,
 } from "@/utils/find-accountUtil";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -35,6 +35,11 @@ export default function FindAccountScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
+  const { userType } = useLocalSearchParams();
+  
+  
+  
+  
   // 에러 메시지 state
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -56,7 +61,12 @@ export default function FindAccountScreen() {
 
     // 아이디 찾기 API 호출
     try {
-      const response = await apiPost("/cust/login/search-id", {
+      
+      const endPoint = userType === "cust"
+        ? "/cust/search-id"
+        : "/store/search-id";
+      
+      const response = await apiPost(endPoint, {
         name: name,
         email: email,
       });
@@ -95,9 +105,14 @@ export default function FindAccountScreen() {
       return;
     }
 
-    // 비밀번호 찾기 API 호출
+    // 비밀번호 재설정 API 호출
     try {
-      const response = await apiPost("/cust/login/reset-password", {
+      
+      const endPoint = userType === "cust"
+        ? "/cust/reset-password"
+        : "/store/reset-password";
+      
+      const response = await apiPost(endPoint, {
         loginId: userId,
         email: email,
         phoneNumber: phone.replace(/[^0-9]/g, ""), // 하이픈 제거
