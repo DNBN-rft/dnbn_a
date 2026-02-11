@@ -23,7 +23,7 @@ export default function LoginScreen() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (type: "cust" | "store") => {
+  const handleLogin = async () => {
     if (!loginId || !password) {
       if (Platform.OS === "web") {
         window.alert("아이디와 비밀번호를 입력해주세요.");
@@ -35,9 +35,9 @@ export default function LoginScreen() {
 
     try {
       // 모두 /store/app/login 사용
-      const endpoint = type === "cust" ? "/cust/login" : "/store/app/login";
+      const endpoint = userType === "cust" ? "/cust/login" : "/store/app/login";
       const requestBody =
-        type === "cust"
+        userType === "cust"
           ? { loginId: loginId, password: password }
           : { username: loginId, password: password };
 
@@ -55,10 +55,10 @@ export default function LoginScreen() {
         });
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
-        if (type === "cust") {
+        if (userType === "cust") {
           // cust 로그인 - 토큰 저장
           const custTokens: Record<string, any> = {
-            userType: "cust", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             custTokens.custCode = data.custCode;
@@ -89,7 +89,7 @@ export default function LoginScreen() {
         } else {
           // store 로그인 - 토큰 저장
           const storeTokens: Record<string, any> = {
-            userType: "store", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             storeTokens.accessToken = data.accessToken;
