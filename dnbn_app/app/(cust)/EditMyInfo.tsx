@@ -1,4 +1,4 @@
-import { apiPost, apiPut } from "@/utils/api";
+import { apiGet, apiPost, apiPut } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -293,7 +293,7 @@ export default function EditMyInfoScreen() {
       }
 
       if (custCode) {
-        const response = await apiPost("/cust/info/edit", { custCode });
+        const response = await apiGet("/cust/info/edit");
 
         if (response.ok) {
           const data: CustInfoEditData = await response.json();

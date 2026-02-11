@@ -69,18 +69,6 @@ export default function LoginScreen() {
           hasActCategory: data.isSetActiveCategory,
         });
 
-        // 주소 정보가 없으면 주소 설정 페이지로 이동
-        if (data.isExistLocation === false) {
-          router.replace("/(cust)/address-select");
-          return;
-        }
-
-        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
-        if (data.isSetActiveCategory === false) {
-          router.replace("/(cust)/category");
-          return;
-        }
-
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
           // cust 로그인 - 토큰 저장
@@ -95,6 +83,19 @@ export default function LoginScreen() {
           if (data.tokenType) custTokens.tokenType = data.tokenType;
 
           await setMultipleItems(custTokens);
+
+          // 주소 정보가 없으면 주소 설정 페이지로 이동
+          if (data.isExistLocation === false) {
+            router.replace("/(cust)/address-select");
+            return;
+          }
+
+          // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+          if (data.isSetActiveCategory === false) {
+            router.replace("/(cust)/category");
+            return;
+          }
+
           router.replace("/(cust)/tabs/custhome");
         } else {
           // store 로그인 - 토큰 저장
