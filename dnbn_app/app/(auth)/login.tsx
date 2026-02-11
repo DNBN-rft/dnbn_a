@@ -1,3 +1,4 @@
+import { apiPost } from "@/utils/api";
 import { setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -53,32 +54,34 @@ export default function LoginScreen() {
           hasActCategory: data.isSetActiveCategory,
         });
 
-        // 주소 정보가 없으면 주소 설정 페이지로 이동
-        if (data.isExistLocation === false) {
-          router.replace("/(cust)/address-select");
-          return;
-        }
-
-        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
-        if (data.isSetActiveCategory === false) {
-          router.replace("/(cust)/category");
-          return;
-        }
-
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
           // cust 로그인 - 토큰 저장
           const custTokens: Record<string, any> = {
             userType: "cust", // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
-          if (data.custCode) custTokens.custCode = data.custCode;
-          if (data.accessToken) custTokens.accessToken = data.accessToken;
-          if (data.refreshToken) custTokens.refreshToken = data.refreshToken;
-          if (data.accessTokenExpiresIn)
+          if (data) {
+            custTokens.custCode = data.custCode;
+            custTokens.accessToken = data.accessToken;
+            custTokens.refreshToken = data.refreshToken;
             custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
-          if (data.refreshTokenExpiresIn)
             custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
-          if (data.tokenType) custTokens.tokenType = data.tokenType;
+            custTokens.tokenType = data.tokenType;
+          } else {
+            return;
+          }
+
+          // 주소 정보가 없으면 주소 설정 페이지로 이동
+          if (data.isExistLocation === false) {
+            router.replace("/(cust)/address-select");
+            return;
+          }
+
+          // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+          if (data.isSetActiveCategory === false) {
+            router.replace("/(cust)/category");
+            return;
+          }
 
           await setMultipleItems(custTokens);
           router.replace("/(cust)/tabs/custhome");
