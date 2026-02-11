@@ -155,8 +155,8 @@ export default function ReviewRegScreen() {
 
       // API 호출
       const endpoint = isEditMode
-        ? `/cust/review/${reviewIdx}?custCode=${custCode}`
-        : `/cust/review?custCode=${custCode}`;
+        ? `/cust/review/${reviewIdx}?`
+        : `/cust/review`;
 
       const response = isEditMode
         ? await apiPutFormDataWithImage(endpoint, formData)

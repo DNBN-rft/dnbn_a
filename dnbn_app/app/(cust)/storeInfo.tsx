@@ -55,9 +55,8 @@ export default function StoreInfo() {
     try {
       setLoading(true);
       setError(null);
-      const custCode = "CUST_001";
       const response = await apiGet(
-        `/cust/storeinfo?storeCode=${storeCode}&custCode=${custCode}`,
+        `/cust/storeinfo?storeCode=${storeCode}`,
       );
       if (!response.ok) throw new Error("매장 정보를 불러오는데 실패했습니다.");
 
@@ -154,10 +153,9 @@ export default function StoreInfo() {
     setIsWishStore(newWishState);
 
     if (!storeCode) return;
-    const custCode = "CUST_001";
 
     try {
-      await apiPost(`/cust/wish?custCode=${custCode}`, {
+      await apiPost(`/cust/wish`, {
         storeCodes: [storeCode],
       });
     } catch (err) {

@@ -56,7 +56,6 @@ export default function CustReviewListScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
-  const custCode = "CUST_001"; // TODO: 실제 로그인한 사용자의 custCode 가져오기
 
   useEffect(() => {
     fetchReviews();
@@ -68,12 +67,12 @@ export default function CustReviewListScreen() {
 
       // 미작성 리뷰 조회
       const unwrittenResponse = await apiGet(
-        `/cust/review?reviewType=UNWRITTEN&custCode=${custCode}`,
+        `/cust/review?reviewType=UNWRITTEN`,
       );
       const unWrittenData: UnwrittenReview[] = await unwrittenResponse.json();
       // 작성한 리뷰 조회
       const writtenResponse = await apiGet(
-        `/cust/review?reviewType=WRITTEN&custCode=${custCode}`,
+        `/cust/review?reviewType=WRITTEN`,
       );
       const writtenData: WrittenReview[] = await writtenResponse.json();
 

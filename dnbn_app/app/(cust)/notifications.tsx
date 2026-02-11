@@ -180,7 +180,7 @@ export default function NotificationsScreen() {
       }
 
       const response = await apiGet(
-        `/cust/alarm/list?custCode=${custCode}&page=${page}&size=20`
+        `/cust/alarm/list?page=${page}&size=20`
       );
 
       if (response.ok) {

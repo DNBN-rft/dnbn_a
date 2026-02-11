@@ -36,8 +36,7 @@ export default function NoticeDetailScreen() {
     try {
       setLoading(true);
       setError(false);
-      const custCode = "CUST_001";
-      const response = await apiGet(`/cust/question/${custCode}`);
+      const response = await apiGet(`/cust/question`);
 
       if (response.ok) {
         const data: QuestionResponse[] = await response.json();

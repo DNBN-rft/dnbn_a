@@ -26,8 +26,7 @@ export default function NotificationSetting() {
 
   const fetchNotificationSettings = async () => {
     try {
-      const custCode = "CUST_001";
-      const response = await apiGet(`/cust/alarm?custCode=${custCode}`);
+      const response = await apiGet(`/cust/alarm`);
 
       if (response.ok) {
         const data = await response.json();

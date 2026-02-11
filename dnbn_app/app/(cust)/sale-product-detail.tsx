@@ -108,8 +108,6 @@ export default function ProductDetailScreen() {
 
   // 장바구니 추가 핸들러
   const handleAddToCart = async (quantity: number) => {
-    // TODO: custCode를 실제 로그인 사용자 정보에서 가져오기
-    const custCode = "CUST_001"; // 임시값
     
     if (!productData) {
       Alert.alert("오류", "상품 정보를 찾을 수 없습니다.");
@@ -117,7 +115,7 @@ export default function ProductDetailScreen() {
     }
 
     try {
-      const response = await apiPost(`/cust/cart?custCode=${custCode}`, {
+      const response = await apiPost(`/cust/cart`, {
         productCode: productData.response.productCode,
         storeCode: productData.response.storeCode,
         quantity,

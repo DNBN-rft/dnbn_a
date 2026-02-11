@@ -44,9 +44,8 @@ export default function ReportListScreen() {
         setLoadingMore(true);
       }
 
-      const custCode = "CUST_001";
       const response = await apiGet(
-        `/cust/report?custCode=${custCode}&page=${pageNum}&size=10`,
+        `/cust/report?page=${pageNum}&size=10`,
       );
 
       if (!response.ok) {

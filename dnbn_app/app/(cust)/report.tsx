@@ -150,10 +150,8 @@ export default function ReportPage() {
               }
             }
 
-            const custCode = "CUST_001";
-
             const response = await apiPostFormDataWithImage(
-              `/cust/report/register?custCode=${custCode}`,
+              `/cust/report/register`,
               formData,
             );
 

@@ -34,8 +34,7 @@ export default function ProductListScreen() {
   useEffect(() => {
     const fetchProductList = async () => {
       try {
-        const custCode = "CUST_001"; // 하드코딩된 고객 코드
-        const response = await apiGet(`/cust/regular?custCode=${custCode}`);
+        const response = await apiGet(`/cust/regular`);
 
         if (response.ok) {
           const data = await response.json();

@@ -98,8 +98,7 @@ export default function SaleProductListScreen() {
   const fetchSaleProducts = async () => {
     try {
       setLoading(true);
-      const custCode = "CUST_001";
-      const response = await apiGet(`/cust/sales?custCode=${custCode}`);
+      const response = await apiGet(`/cust/sales`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch sale products");
