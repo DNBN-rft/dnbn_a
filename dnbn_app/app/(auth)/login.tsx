@@ -24,7 +24,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async (type: "cust" | "store") => {
-    if (!loginId.trim() || !password.trim()) {
+    if (!loginId || !password) {
       if (Platform.OS === "web") {
         window.alert("아이디와 비밀번호를 입력해주세요.");
       } else {
@@ -38,8 +38,8 @@ export default function LoginScreen() {
       const endpoint = type === "cust" ? "/cust/login" : "/store/app/login";
       const requestBody =
         type === "cust"
-          ? { loginId: loginId.trim(), password: password.trim() }
-          : { username: loginId.trim(), password: password.trim() };
+          ? { loginId: loginId, password: password }
+          : { username: loginId, password: password };
 
       // 로그인 요청
       const response = await apiPost(endpoint, requestBody);
