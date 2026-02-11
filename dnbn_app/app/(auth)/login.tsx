@@ -47,10 +47,7 @@ export default function LoginScreen() {
 
     try {
       // 모두 /store/app/login 사용
-      const endpoint =
-        type === "cust"
-          ? "/cust/login"
-          : "/store/app/login";
+      const endpoint = type === "cust" ? "/cust/login" : "/store/app/login";
       const requestBody =
         type === "cust"
           ? { loginId: loginId.trim(), password: password.trim() }
@@ -69,18 +66,6 @@ export default function LoginScreen() {
           hasActCategory: data.isSetActiveCategory,
         });
 
-        // 주소 정보가 없으면 주소 설정 페이지로 이동
-        if (data.isExistLocation === false) {
-          router.replace("/(cust)/address-select");
-          return;
-        }
-
-        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
-        if (data.isSetActiveCategory === false) {
-          router.replace("/(cust)/category");
-          return;
-        }
-
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
           // cust 로그인 - 토큰 저장
@@ -90,11 +75,26 @@ export default function LoginScreen() {
           if (data.custCode) custTokens.custCode = data.custCode;
           if (data.accessToken) custTokens.accessToken = data.accessToken;
           if (data.refreshToken) custTokens.refreshToken = data.refreshToken;
-          if (data.accessTokenExpiresIn) custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
-          if (data.refreshTokenExpiresIn) custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
+          if (data.accessTokenExpiresIn)
+            custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
+          if (data.refreshTokenExpiresIn)
+            custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
           if (data.tokenType) custTokens.tokenType = data.tokenType;
-
+          
           await setMultipleItems(custTokens);
+          
+          // 주소 정보가 없으면 주소 설정 페이지로 이동
+          if (data.isExistLocation === false) {
+            router.replace("/(cust)/address-select");
+            return;
+          }
+
+          // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+          if (data.isSetActiveCategory === false) {
+            router.replace("/(cust)/category");
+            return;
+          }
+          
           router.replace("/(cust)/tabs/custhome");
         } else {
           // store 로그인 - 토큰 저장
@@ -109,9 +109,11 @@ export default function LoginScreen() {
             storeTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
           if (data.tokenType) storeTokens.tokenType = data.tokenType;
           if (data.memberNm) storeTokens.memberNm = data.memberNm;
-          if (data.authorities) storeTokens.authorities = JSON.stringify(data.authorities);
+          if (data.authorities)
+            storeTokens.authorities = JSON.stringify(data.authorities);
           if (data.storeCode) storeTokens.storeCode = data.storeCode;
-          if (data.subscriptionNm) storeTokens.subscriptionNm = data.subscriptionNm;
+          if (data.subscriptionNm)
+            storeTokens.subscriptionNm = data.subscriptionNm;
           if (data.memberId) storeTokens.memberId = data.memberId;
 
           await setMultipleItems(storeTokens);
@@ -243,9 +245,12 @@ export default function LoginScreen() {
 
           <View style={styles.linkContainer}>
             <TouchableOpacity
-              onPress={() => router.push({
-                    pathname: "/(auth)/find-account",
-                    params: { userType }})}
+              onPress={() =>
+                router.push({
+                  pathname: "/(auth)/find-account",
+                  params: { userType },
+                })
+              }
             >
               <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
             </TouchableOpacity>
