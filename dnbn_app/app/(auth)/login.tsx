@@ -90,20 +90,20 @@ export default function LoginScreen() {
           const storeTokens: Record<string, any> = {
             userType: "store", // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
-          if (data.accessToken) storeTokens.accessToken = data.accessToken;
-          if (data.refreshToken) storeTokens.refreshToken = data.refreshToken;
-          if (data.accessTokenExpiresIn)
+          if (data) {
+            storeTokens.accessToken = data.accessToken;
+            storeTokens.refreshToken = data.refreshToken;
             storeTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
-          if (data.refreshTokenExpiresIn)
             storeTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
-          if (data.tokenType) storeTokens.tokenType = data.tokenType;
-          if (data.memberNm) storeTokens.memberNm = data.memberNm;
-          if (data.authorities)
+            storeTokens.tokenType = data.tokenType;
+            storeTokens.memberNm = data.memberNm;
             storeTokens.authorities = JSON.stringify(data.authorities);
-          if (data.storeCode) storeTokens.storeCode = data.storeCode;
-          if (data.subscriptionNm)
+            storeTokens.storeCode = data.storeCode;
             storeTokens.subscriptionNm = data.subscriptionNm;
-          if (data.memberId) storeTokens.memberId = data.memberId;
+            storeTokens.memberId = data.memberId;
+          } else {
+            return;
+          }
 
           await setMultipleItems(storeTokens);
 
