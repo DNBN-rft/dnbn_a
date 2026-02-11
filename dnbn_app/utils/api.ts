@@ -1,7 +1,11 @@
-import { getStorageItem, setStorageItem, removeMultipleItems } from "@/utils/storageUtil";
+import {
+  getStorageItem,
+  removeMultipleItems,
+  setStorageItem,
+} from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
-export const API_BASE_URL = "http://192.168.0.67:8080/api";
+const API_BASE_URL = "http://192.168.0.68:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -40,17 +44,15 @@ const handle401Response = async (
       const refreshToken = await getStorageItem("refreshToken");
       const userType = await getStorageItem("userType");
       const custCode = await getStorageItem("custCode");
-      
+
       // userType에 따라 다른 엔드포인트 사용
-      const refreshEndpoint = userType === "cust" 
-        ? "/cust/refresh" 
-        : "/store/app/refresh";
-      
+      const refreshEndpoint =
+        userType === "cust" ? "/cust/refresh" : "/store/app/refresh";
+
       // cust 사용자는 custCode도 함께 전송
-      const refreshBody = userType === "cust" 
-        ? { refreshToken, custCode }
-        : { refreshToken };
-      
+      const refreshBody =
+        userType === "cust" ? { refreshToken, custCode } : { refreshToken };
+
       const refreshResponse = await fetch(`${API_BASE_URL}${refreshEndpoint}`, {
         method: "POST",
         headers: {
@@ -192,13 +194,16 @@ export const apiPostFormDataWithImage = async (
   const defaultHeaders: HeadersInit = {};
 
   // options.headers에서 명시적인 Content-Type을 제거
-  const customHeaders = options.headers as Record<string, string> || {};
+  const customHeaders = (options.headers as Record<string, string>) || {};
   const filteredHeaders = Object.keys(customHeaders)
-    .filter(key => key.toLowerCase() !== "content-type")
-    .reduce((acc, key) => {
-      acc[key] = customHeaders[key];
-      return acc;
-    }, {} as Record<string, string>);
+    .filter((key) => key.toLowerCase() !== "content-type")
+    .reduce(
+      (acc, key) => {
+        acc[key] = customHeaders[key];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
   const defaultOptions: RequestInit = {
     ...options,
@@ -230,13 +235,16 @@ export const apiPutFormDataWithImage = async (
   const defaultHeaders: HeadersInit = {};
 
   // options.headers에서 명시적인 Content-Type을 제거
-  const customHeaders = options.headers as Record<string, string> || {};
+  const customHeaders = (options.headers as Record<string, string>) || {};
   const filteredHeaders = Object.keys(customHeaders)
-    .filter(key => key.toLowerCase() !== "content-type")
-    .reduce((acc, key) => {
-      acc[key] = customHeaders[key];
-      return acc;
-    }, {} as Record<string, string>);
+    .filter((key) => key.toLowerCase() !== "content-type")
+    .reduce(
+      (acc, key) => {
+        acc[key] = customHeaders[key];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
   const defaultOptions: RequestInit = {
     ...options,

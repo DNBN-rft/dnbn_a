@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/utils/api";
+import { apiPost } from "@/utils/api";
 import { setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,18 +15,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
-
-// 로그인용 API (토큰 없이 요청)
-const loginRequest = async (endpoint: string, body: any) => {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  return response;
-};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -47,17 +35,14 @@ export default function LoginScreen() {
 
     try {
       // 모두 /store/app/login 사용
-      const endpoint =
-        type === "cust"
-          ? "/cust/login"
-          : "/store/app/login";
+      const endpoint = type === "cust" ? "/cust/login" : "/store/app/login";
       const requestBody =
         type === "cust"
           ? { loginId: loginId.trim(), password: password.trim() }
           : { username: loginId.trim(), password: password.trim() };
 
-      // 로그인 요청 (토큰 없이)
-      const response = await loginRequest(endpoint, requestBody);
+      // 로그인 요청
+      const response = await apiPost(endpoint, requestBody);
 
       if (response.ok) {
         const data = await response.json();
@@ -75,12 +60,28 @@ export default function LoginScreen() {
           const custTokens: Record<string, any> = {
             userType: "cust", // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
-          if (data.custCode) custTokens.custCode = data.custCode;
-          if (data.accessToken) custTokens.accessToken = data.accessToken;
-          if (data.refreshToken) custTokens.refreshToken = data.refreshToken;
-          if (data.accessTokenExpiresIn) custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
-          if (data.refreshTokenExpiresIn) custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
-          if (data.tokenType) custTokens.tokenType = data.tokenType;
+          if (data) {
+            custTokens.custCode = data.custCode;
+            custTokens.accessToken = data.accessToken;
+            custTokens.refreshToken = data.refreshToken;
+            custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
+            custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
+            custTokens.tokenType = data.tokenType;
+          } else {
+            return;
+          }
+
+          // 주소 정보가 없으면 주소 설정 페이지로 이동
+          if (data.isExistLocation === false) {
+            router.replace("/(cust)/address-select");
+            return;
+          }
+
+          // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+          if (data.isSetActiveCategory === false) {
+            router.replace("/(cust)/category");
+            return;
+          }
 
           await setMultipleItems(custTokens);
 
@@ -102,18 +103,20 @@ export default function LoginScreen() {
           const storeTokens: Record<string, any> = {
             userType: "store", // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
-          if (data.accessToken) storeTokens.accessToken = data.accessToken;
-          if (data.refreshToken) storeTokens.refreshToken = data.refreshToken;
-          if (data.accessTokenExpiresIn)
+          if (data) {
+            storeTokens.accessToken = data.accessToken;
+            storeTokens.refreshToken = data.refreshToken;
             storeTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
-          if (data.refreshTokenExpiresIn)
             storeTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
-          if (data.tokenType) storeTokens.tokenType = data.tokenType;
-          if (data.memberNm) storeTokens.memberNm = data.memberNm;
-          if (data.authorities) storeTokens.authorities = JSON.stringify(data.authorities);
-          if (data.storeCode) storeTokens.storeCode = data.storeCode;
-          if (data.subscriptionNm) storeTokens.subscriptionNm = data.subscriptionNm;
-          if (data.memberId) storeTokens.memberId = data.memberId;
+            storeTokens.tokenType = data.tokenType;
+            storeTokens.memberNm = data.memberNm;
+            storeTokens.authorities = JSON.stringify(data.authorities);
+            storeTokens.storeCode = data.storeCode;
+            storeTokens.subscriptionNm = data.subscriptionNm;
+            storeTokens.memberId = data.memberId;
+          } else {
+            return;
+          }
 
           await setMultipleItems(storeTokens);
 
@@ -244,9 +247,12 @@ export default function LoginScreen() {
 
           <View style={styles.linkContainer}>
             <TouchableOpacity
-              onPress={() => router.push({
-                    pathname: "/(auth)/find-account",
-                    params: { userType }})}
+              onPress={() =>
+                router.push({
+                  pathname: "/(auth)/find-account",
+                  params: { userType },
+                })
+              }
             >
               <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
             </TouchableOpacity>

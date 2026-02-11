@@ -1,3 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   Image,
   ScrollView,
@@ -6,11 +9,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { styles } from "./use-gift.styles";
-import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useState } from "react";
+import { styles } from "./use-gift.styles";
 
 export default function UseGift() {
   const insets = useSafeAreaInsets();
@@ -32,9 +32,7 @@ export default function UseGift() {
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.title}>
-          선물함
-        </Text>
+        <Text style={styles.title}>선물함</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -131,9 +129,12 @@ export default function UseGift() {
           </View>
         </View>
       </ScrollView>
-        <TouchableOpacity style={styles.useButton}>
-          <Text style={styles.useButtonText}>사용하기</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.useButton}
+        onPress={() => router.push("/(cust)/qr-used")}
+      >
+        <Text style={styles.useButtonText}>사용하기</Text>
+      </TouchableOpacity>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
