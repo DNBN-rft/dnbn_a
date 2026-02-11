@@ -268,12 +268,12 @@ export default function LoginScreen() {
               >
                 <Text style={styles.kakaoButtonText}>카카오톡 로그인</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.snsButton, styles.naverButton]}
                 onPress={() => handleSNSLogin("naver")}
               >
                 <Text style={styles.naverButtonText}>네이버 로그인</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           )}
         </View>
