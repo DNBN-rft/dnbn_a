@@ -71,18 +71,6 @@ export default function LoginScreen() {
             return;
           }
 
-          // 주소 정보가 없으면 주소 설정 페이지로 이동
-          if (data.isExistLocation === false) {
-            router.replace("/(cust)/address-select");
-            return;
-          }
-
-          // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
-          if (data.isSetActiveCategory === false) {
-            router.replace("/(cust)/category");
-            return;
-          }
-
           await setMultipleItems(custTokens);
 
           // 주소 정보가 없으면 주소 설정 페이지로 이동
