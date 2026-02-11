@@ -121,7 +121,8 @@ export default function LoginScreen() {
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
             displayMessage = "시스템 관리자에게 문의해주세요.";
           } else {
-            displayMessage = "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
+            displayMessage =
+              "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
           }
 
           if (Platform.OS === "web") {
@@ -157,6 +158,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={-insets.bottom}
       style={styles.container}
     >
       {insets.top > 0 && (
@@ -230,7 +232,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => handleLogin(userType)}
+            onPress={() => handleLogin()}
           >
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
@@ -275,7 +277,9 @@ export default function LoginScreen() {
             </View>
           )}
         </View>
-        {insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
