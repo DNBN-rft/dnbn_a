@@ -1,5 +1,5 @@
-import { apiPost, API_BASE_URL } from "@/utils/api";
-import { setMultipleItems, setStorageItem } from "@/utils/storageUtil";
+import { API_BASE_URL } from "@/utils/api";
+import { setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -46,13 +46,11 @@ export default function LoginScreen() {
     }
 
     try {
-      // 모바일은 /store/app/login, 웹은 /store/login
+      // 모두 /store/app/login 사용
       const endpoint =
         type === "cust"
           ? "/cust/login"
-          : Platform.OS === "web"
-            ? "/store/login"
-            : "/store/app/login";
+          : "/store/app/login";
       const requestBody =
         type === "cust"
           ? { loginId: loginId.trim(), password: password.trim() }
@@ -64,7 +62,7 @@ export default function LoginScreen() {
       if (response.ok) {
         const data = await response.json();
 
-        // custCode를 저장 (웹: localStorage, 앱: SecureStore)
+        // 원본 저장 (선택사항)
         await setMultipleItems({
           custCode: data.custCode,
           hasLocation: data.isExistLocation,
@@ -85,14 +83,24 @@ export default function LoginScreen() {
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (type === "cust") {
-          // cust: custCode만 저장
-          if (data.custCode) {
-            await setStorageItem("custCode", String(data.custCode));
-          }
+          // cust 로그인 - 토큰 저장
+          const custTokens: Record<string, any> = {
+            userType: "cust", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+          };
+          if (data.custCode) custTokens.custCode = data.custCode;
+          if (data.accessToken) custTokens.accessToken = data.accessToken;
+          if (data.refreshToken) custTokens.refreshToken = data.refreshToken;
+          if (data.accessTokenExpiresIn) custTokens.accessTokenExpiresIn = data.accessTokenExpiresIn;
+          if (data.refreshTokenExpiresIn) custTokens.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
+          if (data.tokenType) custTokens.tokenType = data.tokenType;
+
+          await setMultipleItems(custTokens);
           router.replace("/(cust)/tabs/custhome");
         } else {
-          // store 로그인
-          const storeTokens: Record<string, any> = {};
+          // store 로그인 - 토큰 저장
+          const storeTokens: Record<string, any> = {
+            userType: "store", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+          };
           if (data.accessToken) storeTokens.accessToken = data.accessToken;
           if (data.refreshToken) storeTokens.refreshToken = data.refreshToken;
           if (data.accessTokenExpiresIn)
@@ -114,13 +122,12 @@ export default function LoginScreen() {
         // 에러 응답 처리
         try {
           const errorResponse = await response.json();
-          const errorMessage = errorResponse.message || "로그인에 실패했습니다.";
           const errorCode = errorResponse.error || "";
 
-          // ONLY_OWNER_CAN_LOGIN 에러 처리
-          let displayMessage = errorMessage;
+          let displayMessage = "시스템 관리자에게 문의해주세요.";
+
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
-            displayMessage = "점주 계정만 로그인할 수 있습니다.";
+            displayMessage = "시스템 관리자에게 문의해주세요.";
           }
 
           if (Platform.OS === "web") {
