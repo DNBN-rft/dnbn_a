@@ -71,6 +71,8 @@ export default function LoginScreen() {
             return;
           }
 
+          await setMultipleItems(custTokens);
+
           // 주소 정보가 없으면 주소 설정 페이지로 이동
           if (data.isExistLocation === false) {
             router.replace("/(cust)/address-select");
@@ -83,7 +85,6 @@ export default function LoginScreen() {
             return;
           }
 
-          await setMultipleItems(custTokens);
           router.replace("/(cust)/tabs/custhome");
         } else {
           // store 로그인 - 토큰 저장

@@ -1,4 +1,4 @@
-import { apiPost } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -69,7 +69,7 @@ export default function MyInfoScreen() {
       }
 
       if (custCode) {
-        const response = await apiPost("/cust/info", { custCode });
+        const response = await apiGet("/cust/info");
 
         if (response.ok) {
           const data: CustInfoData = await response.json();

@@ -1,4 +1,4 @@
-import { apiPost } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -47,22 +47,7 @@ export default function PurchaseBox() {
 
   const fetchPurchaseList = async () => {
     try {
-      // // custCode 가져오기
-      // let custCode = "";
-      // if (Platform.OS === "web") {
-      //   custCode = localStorage.getItem("custCode") || "";
-      // } else {
-      //   custCode = (await SecureStore.getItemAsync("custCode")) || "";
-      // }
-
-      // if (!custCode) {
-      //   console.error("custCode가 없습니다.");
-      //   return;
-      // }
-
-      const response = await apiPost("/cust/purchase-list", {
-        custCode: "CUST_001", // 테스트용 하드코딩
-      });
+      const response = await apiGet("/cust/purchase-list");
 
       if (response.ok) {
         const data: PurchaseListResponse = await response.json();
