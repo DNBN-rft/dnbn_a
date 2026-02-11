@@ -193,6 +193,8 @@ export const apiPostFormDataWithImage = async (
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
 
+  const token = await getStorageItem("accessToken");
+
   // options.headers에서 명시적인 Content-Type을 제거
   const customHeaders = (options.headers as Record<string, string>) || {};
   const filteredHeaders = Object.keys(customHeaders)
@@ -212,6 +214,7 @@ export const apiPostFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
@@ -230,6 +233,8 @@ export const apiPutFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
+
+  const token = await getStorageItem("accessToken");
 
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
@@ -253,6 +258,7 @@ export const apiPutFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
