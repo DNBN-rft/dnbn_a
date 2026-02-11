@@ -39,7 +39,7 @@ export default function LoginScreen() {
       const requestBody =
         userType === "cust"
           ? { loginId: loginId, password: password }
-          : { username: loginId, password: password };
+          : { login: loginId, password: password };
 
       // 로그인 요청
       const response = await apiPost(endpoint, requestBody);
