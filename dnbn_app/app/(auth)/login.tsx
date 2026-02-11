@@ -1,4 +1,4 @@
-import { apiPost, API_BASE_URL } from "@/utils/api";
+import { apiPost } from "@/utils/api";
 import { setMultipleItems, setStorageItem } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,18 +15,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
-
-// 로그인용 API (토큰 없이 요청)
-const loginRequest = async (endpoint: string, body: any) => {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  return response;
-};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -58,8 +46,8 @@ export default function LoginScreen() {
           ? { loginId: loginId.trim(), password: password.trim() }
           : { username: loginId.trim(), password: password.trim() };
 
-      // 로그인 요청 (토큰 없이)
-      const response = await loginRequest(endpoint, requestBody);
+      // 로그인 요청
+      const response = await apiPost(endpoint, requestBody);
 
       if (response.ok) {
         const data = await response.json();
