@@ -539,10 +539,8 @@ export default function ProductDetailScreen() {
 
                   try {
                     setRequesting(true);
-                    // custCode를 requestParam으로 전달
-                    const custCode = "CUST_001";
                     const response = await apiPost(
-                      `/cust/nego?custCode=${custCode}`,
+                      `/cust/nego`,
                       {
                         categoryNm: product.categoryNm,
                         storeCode: product.storeCode,

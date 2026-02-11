@@ -33,35 +33,27 @@ export default function AddressScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   // 주소 정보 불러오기
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      let custCode = null;
+  const fetchAddresses = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiGet(`/cust/location`);
 
-      if (Platform.OS === "web") {
-        custCode = localStorage.getItem("custCode");
+      if (response.ok) {
+        const data: AddressData[] = await response.json();
+        setAddr(data);
       } else {
-        custCode = await SecureStore.getItemAsync("custCode");
+        console.error("주소 정보를 불러오는데 실패했습니다.");
       }
-
-      try {
-        setIsLoading(true);
-        const response = await apiGet(`/cust/location?custCode=${custCode}`);
-
-        if (response.ok) {
-          const data: AddressData[] = await response.json();
-          setAddr(data);
-        } else {
-          console.error("주소 정보를 불러오는데 실패했습니다.");
-        }
-      } catch (error) {
-        console.error("주소 정보 불러오기 오류:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAddresses();
+    } catch (error) {
+      console.error("주소 정보 불러오기 오류:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
 
   // 새 주소 추가 페이지로 이동
   const handleAddNewAddress = useCallback(() => {

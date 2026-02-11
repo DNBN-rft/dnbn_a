@@ -43,11 +43,10 @@ export default function OrderPage() {
     const fetchOrderData = async () => {
       try {
         setLoading(true);
-        const custCode = await getStorageItem("custCode");
 
         // API 호출
         const response = await apiGet(
-          `/cust/order/info?custCode=${custCode}&productCode=${productCode}&orderQty=${Number(orderQty) || 1}`,
+          `/cust/order/info?productCode=${productCode}&orderQty=${Number(orderQty) || 1}`,
         );
 
         if (response.ok) {

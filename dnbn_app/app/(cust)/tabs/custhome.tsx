@@ -32,14 +32,7 @@ export default function CustHomeScreen() {
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
     try {
-      const custCode =
-        Platform.OS === "web"
-          ? localStorage.getItem("custCode")
-          : await SecureStore.getItemAsync("custCode");
-
-      if (!custCode) return;
-
-      const response = await apiGet(`/cust/alarm/unread?custCode=${custCode}`);
+      const response = await apiGet(`/cust/alarm/unread`);
 
       if (response.ok) {
         const data = await response.json();
@@ -53,14 +46,7 @@ export default function CustHomeScreen() {
   // 장바구니 아이템 개수 조회 함수
   const fetchCartItemCount = async () => {
     try {
-      const custCode =
-        Platform.OS === "web"
-          ? localStorage.getItem("custCode")
-          : await SecureStore.getItemAsync("custCode");
-
-      if (!custCode) return;
-
-      const response = await apiGet(`/cust/cart/cnt?custCode=${custCode}`);
+      const response = await apiGet(`/cust/cart/cnt`);
 
       if (response.ok) {
         const data = await response.json();
@@ -74,15 +60,8 @@ export default function CustHomeScreen() {
   // 기본 주소 조회 함수
   const fetchDefaultLocation = async () => {
     try {
-      const custCode =
-        Platform.OS === "web"
-          ? localStorage.getItem("custCode")
-          : await SecureStore.getItemAsync("custCode");
-
-      if (!custCode) return;
-
       const response = await apiGet(
-        `/cust/location/default?custCode=${custCode}`,
+        `/cust/location/default`,
       );
 
       if (response.ok) {
@@ -101,7 +80,6 @@ export default function CustHomeScreen() {
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
-        const custCode = "CUST_001";
 
         // 읽지 않은 알림 상태, 장바구니 개수, 기본 주소 확인
         checkUnreadAlarm();
@@ -111,10 +89,10 @@ export default function CustHomeScreen() {
         try {
           const [negoResponse, saleResponse, regularResponse, bannerResponse] =
             await Promise.all([
-              apiGet(`/cust/negoproducts/home?custCode=${custCode}`),
-              apiGet(`/cust/sales/home?custCode=${custCode}`),
-              apiGet(`/cust/regular/home?custCode=${custCode}`),
-              apiGet(`/cust/sales/banner?custCode=${custCode}`), // 배너용 할인율 높은 상품
+              apiGet(`/cust/negoproducts/home`),
+              apiGet(`/cust/sales/home`),
+              apiGet(`/cust/regular/home`),
+              apiGet(`/cust/sales/banner`), // 배너용 할인율 높은 상품
             ]);
 
           // 네고 상품 처리
@@ -189,9 +167,9 @@ export default function CustHomeScreen() {
       item.saleType === "할인률"
         ? item.saleValue
         : Math.round(
-            ((item.originalPrice - item.discountPrice) / item.originalPrice) *
-              100,
-          );
+          ((item.originalPrice - item.discountPrice) / item.originalPrice) *
+          100,
+        );
 
     return {
       id: item.productCode,

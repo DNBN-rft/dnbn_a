@@ -66,9 +66,8 @@ export default function PurchaseScreen() {
     try {
       setLoading(true);
       setError(false);
-      const custCode = "CUST_001";
       const response = await apiGet(
-        `/cust/order/purchase-history?custCode=${custCode}`,
+        `/cust/order/purchase-history`,
       );
 
       if (response.ok) {
@@ -95,7 +94,6 @@ export default function PurchaseScreen() {
     try {
       setLoading(true);
       setError(false);
-      const custCode = "CUST_001";
 
       // 파라미터가 있으면 사용, 없으면 상태값 사용
       const currentStatus = filterStatus !== undefined ? filterStatus : status;
@@ -123,7 +121,7 @@ export default function PurchaseScreen() {
       const mappedDateRange = dateRangeMap[currentPeriod] || "";
 
       const response = await apiGet(
-        `/cust/order/purchase-history/filter?custCode=${custCode}&status=${mappedStatus}&keyword=${encodeURIComponent(currentKeyword)}&dateRange=${mappedDateRange}`,
+        `/cust/order/purchase-history/filter?status=${mappedStatus}&keyword=${encodeURIComponent(currentKeyword)}&dateRange=${mappedDateRange}`,
       );
 
       if (response.ok) {

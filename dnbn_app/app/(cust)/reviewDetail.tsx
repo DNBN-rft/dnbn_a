@@ -64,10 +64,9 @@ export default function ReviewDetailScreen() {
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      const custCode = "CUST001";
       
       const response = await apiDelete(
-        `/cust/review/${reviewIdx}?custCode=${custCode}`
+        `/cust/review/${reviewIdx}`
       );
 
       if (response.ok) {
