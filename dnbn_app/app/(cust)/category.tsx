@@ -104,7 +104,7 @@ export default function CategoryScreen() {
     try {
       setLoading(true);
       setError(false);
-      const response = await apiGet("/category/cust?custCode=CUST_001");
+      const response = await apiGet("/category/cust");
 
       if (response.ok) {
         const data: CategoryResponse[] = await response.json();
@@ -151,11 +151,19 @@ export default function CategoryScreen() {
       return;
     }
 
+    const categoryIdxList = selectedCategories.map((id) => Number(id));
+
     try {
-      const categoryIdxList = selectedCategories.map((id) => Number(id));
+      let custCode = null;
+
+      if (Platform.OS === "web") {
+        custCode = localStorage.getItem("custCode");
+      } else {
+        custCode = await SecureStore.getItemAsync("custCode");
+      }
 
       const response = await apiPost("/category/active", {
-        custCode: "CUST_001",
+        custCode: custCode,
         categoryIdxList: categoryIdxList,
       });
 
@@ -318,7 +326,7 @@ export default function CategoryScreen() {
                   }
                 >
                   {category.fileMasterResponse?.files &&
-                  category.fileMasterResponse.files.length > 0 ? (
+                    category.fileMasterResponse.files.length > 0 ? (
                     <Image
                       source={{
                         uri: category.fileMasterResponse.files[0].fileUrl,

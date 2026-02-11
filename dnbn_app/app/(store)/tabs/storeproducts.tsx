@@ -352,7 +352,7 @@ export default function StoreProducts() {
                     value={saleStartDate}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate: Date | undefined) => {
+                    onChange={(event, selectedDate: Date) => {
                       setShowDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setSaleStartDate(selectedDate);
@@ -369,7 +369,7 @@ export default function StoreProducts() {
                     value={saleStartDate}
                     mode="time"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate: Date | undefined) => {
+                    onChange={(event, selectedDate: Date) => {
                       setShowTimePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setSaleStartDate(selectedDate);
@@ -447,7 +447,7 @@ export default function StoreProducts() {
                     value={negoStartDate}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate: Date | undefined) => {
+                    onChange={(event, selectedDate: Date) => {
                       setShowNegoDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setNegoStartDate(selectedDate);
@@ -464,7 +464,7 @@ export default function StoreProducts() {
                     value={negoStartDate}
                     mode="time"
                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate: Date | undefined) => {
+                    onChange={(event, selectedDate: Date) => {
                       setShowNegoTimePicker(Platform.OS === 'ios');
                       if (selectedDate) {
                         setNegoStartDate(selectedDate);

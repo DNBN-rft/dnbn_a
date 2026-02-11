@@ -89,8 +89,7 @@ export default function NegoLogListScreen() {
                 return;
             }
 
-            const custCode1 = "CUST_001"; // 테스트용 하드코딩
-            const response = await apiGet(`/cust/nego?custCode=${custCode1}&negoStatus=${status}`, {});
+            const response = await apiGet(`/cust/nego?negoStatus=${status}`, {});
 
             if (response.ok) {
                 const data = await response.json();

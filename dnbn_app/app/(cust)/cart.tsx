@@ -56,15 +56,8 @@ export default function CartScreen() {
     try {
       setLoading(true);
       setError(false);
-      const custCode = await getStorageItem("custCode");
 
-      if (!custCode) {
-        console.log("custCode가 없습니다.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await apiGet(`/cust/cart?custCode=${custCode}`);
+      const response = await apiGet(`/cust/cart`);
 
       if (response.ok) {
         const data = await response.json();

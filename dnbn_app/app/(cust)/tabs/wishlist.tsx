@@ -78,8 +78,7 @@ export default function WishlistScreen() {
       setLoading(true);
       setError(null);
 
-      const custCode = "CUST_001";
-      const response = await apiGet(`/cust/wish?custCode=${custCode}`);
+      const response = await apiGet(`/cust/wish`);
 
       if (!response.ok) {
         throw new Error("위시리스트를 불러오는데 실패했습니다.");
@@ -130,12 +129,10 @@ export default function WishlistScreen() {
           return;
         }
 
-        const custCode = "CUST_001";
-
         (async () => {
           try {
             const response = await apiDelete(
-              `/cust/wish?custCode=${custCode}`,
+              `/cust/wish`,
               {
                 body: JSON.stringify({ storeCodes: storeCodesToRemove }),
               },
