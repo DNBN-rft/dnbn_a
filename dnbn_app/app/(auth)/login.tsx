@@ -120,6 +120,8 @@ export default function LoginScreen() {
 
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
             displayMessage = "시스템 관리자에게 문의해주세요.";
+          } else {
+            displayMessage = "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
           }
 
           if (Platform.OS === "web") {
