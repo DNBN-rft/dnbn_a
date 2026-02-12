@@ -4,15 +4,16 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ReportReasonModal } from "./components/ReportReasonModal";
 import { styles } from "./report.styles";
 
@@ -30,6 +31,7 @@ export default function ReportPage() {
     { label: string; value: string }[]
   >([{ label: "신고 사유를 선택하세요", value: "" }]);
   const [loading, setLoading] = useState(true);
+  const insets = useSafeAreaInsets();
 
   // 신고 사유 목록 가져오기
   useEffect(() => {
@@ -184,6 +186,9 @@ export default function ReportPage() {
 
   return (
     <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#FFF" }} />
+      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <View style={styles.backButton}>
@@ -270,6 +275,9 @@ export default function ReportPage() {
           <Text style={styles.cancelButtonText}>취소</Text>
         </TouchableOpacity>
       </View>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
   );
 }

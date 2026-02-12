@@ -281,7 +281,7 @@ export default function AddressSelectScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={-insets.bottom}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
         <ScrollView style={styles.content}>
           {/* 주소 별칭 입력 */}

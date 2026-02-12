@@ -64,6 +64,7 @@ const handle401Response = async (
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         await setStorageItem("accessToken", data.accessToken);
+        await setStorageItem("refreshToken", data.refreshToken);
         processQueue(null, data.accessToken);
 
         const newOptions = {
@@ -103,6 +104,16 @@ const handle401Response = async (
   }
 };
 
+// 인증이 필요 없는 공개 엔드포인트 목록
+const PUBLIC_ENDPOINTS = [
+  "/cust/login",
+  "/store/app/login",
+  "/cust/signup",
+  "/store/signup",
+  "/cust/refresh",
+  "/store/app/refresh",
+];
+
 /**
  * API 요청 래퍼 함수
  */
@@ -111,13 +122,19 @@ const apiCall = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
-  // TODO: 로그인 연동 후 활성화
-  const token = await getStorageItem("accessToken");
+
+  // 공개 엔드포인트 여부 확인
+  const isPublicEndpoint = PUBLIC_ENDPOINTS.some((publicEndpoint) =>
+    endpoint.startsWith(publicEndpoint),
+  );
+
+  // 공개 엔드포인트가 아닐 때만 토큰 가져오기
+  const token = !isPublicEndpoint ? await getStorageItem("accessToken") : null;
 
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
-      // TODO: 로그인 연동 후 활성화
+      // 공개 엔드포인트가 아니고 토큰이 있을 때만 Authorization 헤더 추가
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -127,8 +144,9 @@ const apiCall = async (
   try {
     let response = await fetch(url, defaultOptions);
 
-    // TODO: 로그인 연동 후 활성화
-    if (response.status === 401) {
+    // 공개 엔드포인트가 아닌 경우에만 401 처리
+
+    if (response.status === 401 && !isPublicEndpoint) {
       response = await handle401Response(url, defaultOptions);
     }
 

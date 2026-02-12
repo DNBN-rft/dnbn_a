@@ -1,8 +1,15 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { removeMultipleItems } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/mypage.styles";
 
@@ -13,6 +20,26 @@ export default function Mypage() {
 
   const changeArrow = () => {
     setOpenInfo((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await removeMultipleItems([
+        "accessToken",
+        "refreshToken",
+        "accessTokenExpiresIn",
+        "refreshTokenExpiresIn",
+        "tokenType",
+        "userType",
+        "custCode",
+        "hasLocation",
+        "hasActCategory",
+      ]);
+    } catch (error) {
+      // Storage 정리 실패 시도 로그인 페이지로 이동
+    } finally {
+      router.replace("/(auth)/login");
+    }
   };
 
   return (
@@ -53,7 +80,9 @@ export default function Mypage() {
       <ScrollView
         style={styles.mypageView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+        }}
       >
         <View style={styles.contentView}>
           <View style={styles.section}>
@@ -90,7 +119,7 @@ export default function Mypage() {
               <Text style={styles.menuText}>구매내역</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
-                        <TouchableOpacity
+            <TouchableOpacity
               style={styles.menuItem}
               onPress={() => router.navigate("/(cust)/negoLogList")}
             >
@@ -141,7 +170,7 @@ export default function Mypage() {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(auth)/login")}
+              onPress={handleLogout}
             >
               <Text style={{ color: "#FF3B30", fontSize: 16 }}>로그아웃</Text>
               <Ionicons name="chevron-forward" size={24} color="#FF3B30" />

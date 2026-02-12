@@ -201,7 +201,7 @@ export default function PracticeView() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={-insets.bottom}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
