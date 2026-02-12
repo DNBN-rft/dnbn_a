@@ -36,10 +36,7 @@ export default function LoginScreen() {
     try {
       // 모두 /store/app/login 사용
       const endpoint = userType === "cust" ? "/cust/login" : "/store/app/login";
-      const requestBody =
-        userType === "cust"
-          ? { loginId: loginId, password: password }
-          : { loginId: loginId, password: password };
+      const requestBody = { loginId: loginId, password: password };
 
       // 로그인 요청
       const response = await apiPost(endpoint, requestBody);
@@ -58,7 +55,7 @@ export default function LoginScreen() {
         if (userType === "cust") {
           // cust 로그인 - 토큰 저장
           const custTokens: Record<string, any> = {
-            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType: userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             custTokens.custCode = data.custCode;
@@ -89,7 +86,7 @@ export default function LoginScreen() {
         } else {
           // store 로그인 - 토큰 저장
           const storeTokens: Record<string, any> = {
-            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType: userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             storeTokens.accessToken = data.accessToken;
