@@ -48,11 +48,12 @@ export default function ReviewRegScreen() {
   );
   const [images, setImages] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ReviewImageFile[]>([]);
-  const [permission, requestPermission] = ImagePicker.useCameraPermissions();
+  const [cameraPermission, requestCameraPermission] =
+    ImagePicker.useCameraPermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    requestPermission();
+    requestCameraPermission();
 
     // 수정 모드일 때 기존 이미지 파싱
     if (isEditMode && initialReviewImages) {
@@ -63,14 +64,14 @@ export default function ReviewRegScreen() {
         setExistingImages([]);
       }
     }
-  }, [requestPermission]);
+  }, [requestCameraPermission]);
 
   const pickImage = async () => {
     const totalImages = existingImages.length + images.length;
     if (totalImages >= 3) return;
 
-    if (!permission?.granted) {
-      const result = await requestPermission();
+    if (!cameraPermission?.granted) {
+      const result = await requestCameraPermission();
       if (!result.granted) return;
     }
 
@@ -192,9 +193,13 @@ export default function ReviewRegScreen() {
     } catch (error) {
       console.error("Review submission error:", error);
       if (Platform.OS === "web") {
-        window.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        window.alert(
+          "리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        );
       } else {
-        Alert.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        Alert.alert(
+          "리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        );
       }
     } finally {
       setIsSubmitting(false);
