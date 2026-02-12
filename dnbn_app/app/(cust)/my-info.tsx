@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/utils/api";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";

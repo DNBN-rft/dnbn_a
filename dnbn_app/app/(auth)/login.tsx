@@ -23,8 +23,8 @@ export default function LoginScreen() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (type: "cust" | "store") => {
-    if (!loginId.trim() || !password.trim()) {
+  const handleLogin = async () => {
+    if (!loginId || !password) {
       if (Platform.OS === "web") {
         window.alert("아이디와 비밀번호를 입력해주세요.");
       } else {
@@ -35,11 +35,11 @@ export default function LoginScreen() {
 
     try {
       // 모두 /store/app/login 사용
-      const endpoint = type === "cust" ? "/cust/login" : "/store/app/login";
+      const endpoint = userType === "cust" ? "/cust/login" : "/store/app/login";
       const requestBody =
-        type === "cust"
-          ? { loginId: loginId.trim(), password: password.trim() }
-          : { username: loginId.trim(), password: password.trim() };
+        userType === "cust"
+          ? { loginId: loginId, password: password }
+          : { loginId: loginId, password: password };
 
       // 로그인 요청
       const response = await apiPost(endpoint, requestBody);
@@ -55,10 +55,10 @@ export default function LoginScreen() {
         });
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
-        if (type === "cust") {
+        if (userType === "cust") {
           // cust 로그인 - 토큰 저장
           const custTokens: Record<string, any> = {
-            userType: "cust", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             custTokens.custCode = data.custCode;
@@ -89,7 +89,7 @@ export default function LoginScreen() {
         } else {
           // store 로그인 - 토큰 저장
           const storeTokens: Record<string, any> = {
-            userType: "store", // 리프레시 시 어느 엔드포인트를 사용할지 판단
+            userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
           if (data) {
             storeTokens.accessToken = data.accessToken;
@@ -120,6 +120,9 @@ export default function LoginScreen() {
 
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
             displayMessage = "시스템 관리자에게 문의해주세요.";
+          } else {
+            displayMessage =
+              "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
           }
 
           if (Platform.OS === "web") {
@@ -155,6 +158,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={-insets.bottom}
       style={styles.container}
     >
       {insets.top > 0 && (
@@ -228,7 +232,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => handleLogin(userType)}
+            onPress={() => handleLogin()}
           >
             <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
@@ -264,16 +268,18 @@ export default function LoginScreen() {
               >
                 <Text style={styles.kakaoButtonText}>카카오톡 로그인</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.snsButton, styles.naverButton]}
                 onPress={() => handleSNSLogin("naver")}
               >
                 <Text style={styles.naverButtonText}>네이버 로그인</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           )}
         </View>
-        {insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

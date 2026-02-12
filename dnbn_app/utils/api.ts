@@ -5,7 +5,7 @@ import {
 } from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
-const API_BASE_URL = "http://192.168.0.68:8080/api";
+const API_BASE_URL = "http://192.168.0.136:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -64,6 +64,7 @@ const handle401Response = async (
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         await setStorageItem("accessToken", data.accessToken);
+        await setStorageItem("refreshToken", data.refreshToken);
         processQueue(null, data.accessToken);
 
         const newOptions = {
@@ -193,6 +194,8 @@ export const apiPostFormDataWithImage = async (
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
 
+  const token = await getStorageItem("accessToken");
+
   // options.headers에서 명시적인 Content-Type을 제거
   const customHeaders = (options.headers as Record<string, string>) || {};
   const filteredHeaders = Object.keys(customHeaders)
@@ -212,6 +215,7 @@ export const apiPostFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
@@ -230,6 +234,8 @@ export const apiPutFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
+
+  const token = await getStorageItem("accessToken");
 
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
@@ -253,6 +259,7 @@ export const apiPutFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
