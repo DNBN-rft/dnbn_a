@@ -27,6 +27,7 @@ interface CustInfoData {
   custTelNo: string;
   custGender: string;
   custPaymentType: string;
+  custBankNm: string;
   custPaymentDetail: string;
   locationTitle: string;
   locationAddr: string;
@@ -179,6 +180,9 @@ export default function MyInfoScreen() {
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>결제 정보</Text>
+                <Text style={styles.infoValue}>
+                  {loading ? "로딩 중..." : custInfo?.custBankNm || "-"}
+                </Text>
                 <Text style={styles.infoValue}>
                   {loading ? "로딩 중..." : custInfo?.custPaymentDetail || "-"}
                 </Text>

@@ -1,13 +1,12 @@
 import { apiDelete, apiGet, apiPut } from "@/utils/api";
 import {
-    isAllSelected,
-    isStoreAllSelected,
-    toggleAllSelection,
-    toggleItemSelection,
-    toggleStoreSelection,
-    updateItemQuantity,
+  isAllSelected,
+  isStoreAllSelected,
+  toggleAllSelection,
+  toggleItemSelection,
+  toggleStoreSelection,
+  updateItemQuantity,
 } from "@/utils/cartUtil";
-import { getStorageItem } from "@/utils/storageUtil";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -267,7 +266,8 @@ export default function CartScreen() {
                 <Pressable
                   style={[
                     styles.cartItemQtyButton,
-                    item.quantity >= item.productAmount && styles.qtyButtonDisabled,
+                    item.quantity >= item.productAmount &&
+                      styles.qtyButtonDisabled,
                   ]}
                   disabled={item.quantity >= item.productAmount}
                   onPress={() => handleQuantityChange(item.cartItemIdx, 1)}
@@ -275,7 +275,9 @@ export default function CartScreen() {
                   <Ionicons
                     name="add"
                     size={16}
-                    color={item.quantity >= item.productAmount ? "#ccc" : "#666"}
+                    color={
+                      item.quantity >= item.productAmount ? "#ccc" : "#666"
+                    }
                   />
                 </Pressable>
               </View>

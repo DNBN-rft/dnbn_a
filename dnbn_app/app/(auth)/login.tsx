@@ -1,7 +1,7 @@
 import { apiPost } from "@/utils/api";
-import { setMultipleItems } from "@/utils/storageUtil";
+import { removeMultipleItems, setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -22,6 +22,29 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+
+  // 로그인 페이지 접근 시 인증 정보 정리
+  useEffect(() => {
+    const clearAuthData = async () => {
+      try {
+        await removeMultipleItems([
+          "accessToken",
+          "refreshToken",
+          "accessTokenExpiresIn",
+          "refreshTokenExpiresIn",
+          "tokenType",
+          "userType",
+          "custCode",
+          "hasLocation",
+          "hasActCategory",
+        ]);
+      } catch (error) {
+        // Storage 정리 실패 시 무시 (로그인은 계속 진행)
+      }
+    };
+
+    clearAuthData();
+  }, []);
 
   const handleLogin = async () => {
     if (!loginId || !password) {
@@ -113,7 +136,7 @@ export default function LoginScreen() {
           const errorResponse = await response.json();
           const errorCode = errorResponse.error || "";
 
-          let displayMessage = "시스템 관리자에게 문의해주세요.";
+          let displayMessage = "";
 
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
             displayMessage = "시스템 관리자에게 문의해주세요.";
@@ -153,131 +176,129 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={-insets.bottom}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+        <View style={{ height: insets.top, backgroundColor: "#FFF" }} />
       )}
-
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
+        style={{ flex: 1 }}
       >
-        <View style={styles.contentContainer}>
-          <Image
-            style={styles.logo}
-            source={require("@/assets/images/logo.png")}
-          />
-
-          <View style={styles.typeSelector}>
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                userType === "cust" && styles.typeButtonActive,
-              ]}
-              onPress={() => setUserType("cust")}
-            >
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  userType === "cust" && styles.typeButtonTextActive,
-                ]}
-              >
-                일반
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                userType === "store" && styles.typeButtonActive,
-              ]}
-              onPress={() => setUserType("store")}
-            >
-              <Text
-                style={[
-                  styles.typeButtonText,
-                  userType === "store" && styles.typeButtonTextActive,
-                ]}
-              >
-                사업자
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="아이디"
-              placeholderTextColor="#999"
-              value={loginId}
-              onChangeText={setLoginId}
-              autoCapitalize="none"
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.contentContainer}>
+            <Image
+              style={styles.logo}
+              source={require("@/assets/images/logo.png")}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="비밀번호"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-            />
-          </View>
 
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => handleLogin()}
-          >
-            <Text style={styles.loginButtonText}>로그인</Text>
-          </TouchableOpacity>
-
-          <View style={styles.linkContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/(auth)/find-account",
-                  params: { userType },
-                })
-              }
-            >
-              <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
-            </TouchableOpacity>
-            {userType === "cust" && (
-              <>
-                <View style={styles.separator} />
-                <TouchableOpacity
-                  onPress={() => router.push("/(auth)/terms-page")}
+            <View style={styles.typeSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  userType === "cust" && styles.typeButtonActive,
+                ]}
+                onPress={() => setUserType("cust")}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    userType === "cust" && styles.typeButtonTextActive,
+                  ]}
                 >
-                  <Text style={styles.linkText}>회원가입</Text>
+                  일반
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  userType === "store" && styles.typeButtonActive,
+                ]}
+                onPress={() => setUserType("store")}
+              >
+                <Text
+                  style={[
+                    styles.typeButtonText,
+                    userType === "store" && styles.typeButtonTextActive,
+                  ]}
+                >
+                  사업자
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="아이디"
+                placeholderTextColor="#999"
+                value={loginId}
+                onChangeText={setLoginId}
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="비밀번호"
+                placeholderTextColor="#999"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>로그인</Text>
+            </TouchableOpacity>
+
+            <View style={styles.linkContainer}>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/(auth)/find-account",
+                    params: { userType },
+                  })
+                }
+              >
+                <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
+              </TouchableOpacity>
+              {userType === "cust" && (
+                <>
+                  <View style={styles.separator} />
+                  <TouchableOpacity
+                    onPress={() => router.push("/(auth)/terms-page")}
+                  >
+                    <Text style={styles.linkText}>회원가입</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+
+            {userType === "cust" && (
+              <View style={styles.snsContainer}>
+                <TouchableOpacity
+                  style={[styles.snsButton, styles.kakaoButton]}
+                  onPress={() => handleSNSLogin("kakao")}
+                >
+                  <Text style={styles.kakaoButtonText}>카카오톡 로그인</Text>
                 </TouchableOpacity>
-              </>
+                <TouchableOpacity
+                  style={[styles.snsButton, styles.naverButton]}
+                  onPress={() => handleSNSLogin("naver")}
+                >
+                  <Text style={styles.naverButtonText}>네이버 로그인</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
-
-          {userType === "cust" && (
-            <View style={styles.snsContainer}>
-              <TouchableOpacity
-                style={[styles.snsButton, styles.kakaoButton]}
-                onPress={() => handleSNSLogin("kakao")}
-              >
-                <Text style={styles.kakaoButtonText}>카카오톡 로그인</Text>
-              </TouchableOpacity>
-              {/* <TouchableOpacity
-                style={[styles.snsButton, styles.naverButton]}
-                onPress={() => handleSNSLogin("naver")}
-              >
-                <Text style={styles.naverButtonText}>네이버 로그인</Text>
-              </TouchableOpacity> */}
-            </View>
-          )}
-        </View>
-        {insets.bottom > 0 && (
-          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-        )}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
+    </View>
   );
 }
