@@ -2,7 +2,7 @@ import { apiPostFormDataWithImage, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -48,11 +48,15 @@ export default function ReviewRegScreen() {
   );
   const [images, setImages] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ReviewImageFile[]>([]);
+  const [mediaLibraryPermission, requestMediaLibraryPermission] =
+    ImagePicker.useMediaLibraryPermissions();
   const [cameraPermission, requestCameraPermission] =
     ImagePicker.useCameraPermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // 두 권한 모두 요청
+    requestMediaLibraryPermission();
     requestCameraPermission();
 
     // 수정 모드일 때 기존 이미지 파싱
@@ -66,13 +70,43 @@ export default function ReviewRegScreen() {
     }
   }, [requestCameraPermission]);
 
-  const pickImage = async () => {
+  // 사진 촬영
+  const takePhoto = async () => {
     const totalImages = existingImages.length + images.length;
     if (totalImages >= 3) return;
 
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
-      if (!result.granted) return;
+      if (!result.granted) {
+        Alert.alert("알림", "카메라 접근 권한이 필요합니다.");
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setImages((prev) =>
+        [...prev, result.assets[0].uri].slice(0, 3 - existingImages.length),
+      );
+    }
+  };
+
+  // 앨범에서 선택
+  const pickImage = async () => {
+    const totalImages = existingImages.length + images.length;
+    if (totalImages >= 3) return;
+
+    if (!mediaLibraryPermission?.granted) {
+      const result = await requestMediaLibraryPermission();
+      if (!result.granted) {
+        Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -84,9 +118,41 @@ export default function ReviewRegScreen() {
 
     if (!result.canceled) {
       const newUris = result.assets.map((asset) => asset.uri);
-
       setImages((prev) => [...prev, ...newUris].slice(0, 3 - totalImages));
     }
+  };
+
+  // 이미지 추가 옵션 선택
+  const handleAddImage = () => {
+    const totalImages = existingImages.length + images.length;
+    if (totalImages >= 3) return;
+
+    // 웹은 카메라 촬영 불가 - 앨범에서만 선택
+    if (Platform.OS === "web") {
+      pickImage();
+      return;
+    }
+
+    // iOS, 안드로이드: 사진 촬영 또는 앨범 선택
+    Alert.alert(
+      "사진 추가",
+      "사진을 추가할 방법을 선택하세요",
+      [
+        {
+          text: "사진 촬영",
+          onPress: takePhoto,
+        },
+        {
+          text: "앨범에서 선택",
+          onPress: pickImage,
+        },
+        {
+          text: "취소",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   const removeImage = (index: number) => {
@@ -360,7 +426,7 @@ export default function ReviewRegScreen() {
                     <View key={`empty-${index}`} style={styles.photoSlot}>
                       <Pressable
                         style={styles.photoUploadButton}
-                        onPress={pickImage}
+                        onPress={handleAddImage}
                         disabled={existingImages.length + images.length >= 3}
                       >
                         <Ionicons
@@ -407,7 +473,7 @@ export default function ReviewRegScreen() {
       </ScrollView>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </KeyboardAvoidingView>
   );
