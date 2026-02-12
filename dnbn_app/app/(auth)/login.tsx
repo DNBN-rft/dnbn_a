@@ -1,7 +1,7 @@
 import { apiPost } from "@/utils/api";
-import { setMultipleItems, removeMultipleItems } from "@/utils/storageUtil";
+import { removeMultipleItems, setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -47,7 +47,7 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (!loginId.trim() || !password.trim()) {
+    if (!loginId || !password) {
       if (Platform.OS === "web") {
         window.alert("아이디와 비밀번호를 입력해주세요.");
       } else {
@@ -59,10 +59,7 @@ export default function LoginScreen() {
     try {
       // 모두 /store/app/login 사용
       const endpoint = userType === "cust" ? "/cust/login" : "/store/app/login";
-      const requestBody =
-        userType === "cust"
-          ? { loginId: loginId.trim(), password: password.trim() }
-          : { username: loginId.trim(), password: password.trim() };
+      const requestBody = { loginId: loginId, password: password };
 
       // 로그인 요청
       const response = await apiPost(endpoint, requestBody);
@@ -139,10 +136,13 @@ export default function LoginScreen() {
           const errorResponse = await response.json();
           const errorCode = errorResponse.error || "";
 
-          let displayMessage = "시스템 관리자에게 문의해주세요.";
+          let displayMessage = "";
 
           if (errorCode === "ONLY_OWNER_CAN_LOGIN") {
             displayMessage = "시스템 관리자에게 문의해주세요.";
+          } else {
+            displayMessage =
+              "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.";
           }
 
           if (Platform.OS === "web") {
@@ -250,10 +250,7 @@ export default function LoginScreen() {
               />
             </View>
 
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={handleLogin}
-            >
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>로그인</Text>
             </TouchableOpacity>
 
