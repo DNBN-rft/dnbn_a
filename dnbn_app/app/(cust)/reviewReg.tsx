@@ -1,12 +1,12 @@
 import { apiPostFormDataWithImage, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -118,7 +118,7 @@ export default function ReviewRegScreen() {
 
     if (!result.canceled) {
       const newUris = result.assets.map((asset) => asset.uri);
-      setImages((prev) => [...prev, ...newUris].slice(0, 3 - totalImages));
+      setImages((prev) => [...prev, ...newUris].slice(0, 3 - existingImages.length));
     }
   };
 
@@ -273,19 +273,20 @@ export default function ReviewRegScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-      enabled={true}
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {insets.top > 0 && (
-          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-        )}
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
 
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
+        enabled={true}
+      >
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -470,11 +471,11 @@ export default function ReviewRegScreen() {
             </>
           )}
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }

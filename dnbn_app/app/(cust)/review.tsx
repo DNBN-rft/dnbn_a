@@ -71,9 +71,7 @@ export default function CustReviewListScreen() {
       );
       const unWrittenData: UnwrittenReview[] = await unwrittenResponse.json();
       // 작성한 리뷰 조회
-      const writtenResponse = await apiGet(
-        `/cust/review?reviewType=WRITTEN`,
-      );
+      const writtenResponse = await apiGet(`/cust/review?reviewType=WRITTEN`);
       const writtenData: WrittenReview[] = await writtenResponse.json();
 
       if (unwrittenResponse.ok) {
@@ -393,7 +391,7 @@ export default function CustReviewListScreen() {
         />
       )}
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
