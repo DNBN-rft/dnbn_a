@@ -134,7 +134,7 @@ export default function UsedGift() {
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>
-          구매상세함
+          구매함
         </Text>
         <View style={styles.placeholder} />
       </View>
