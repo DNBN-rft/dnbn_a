@@ -5,7 +5,7 @@ import {
 } from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
-const API_BASE_URL = "http://192.168.0.68:8080/api";
+const API_BASE_URL = "http://192.168.0.136:8080/api";
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -65,7 +65,6 @@ const handle401Response = async (
         const data = await refreshResponse.json();
         await setStorageItem("accessToken", data.accessToken);
         await setStorageItem("refreshToken", data.refreshToken);
-
         processQueue(null, data.accessToken);
 
         const newOptions = {
@@ -105,6 +104,16 @@ const handle401Response = async (
   }
 };
 
+// 인증이 필요 없는 공개 엔드포인트 목록
+const PUBLIC_ENDPOINTS = [
+  "/cust/login",
+  "/store/app/login",
+  "/cust/signup",
+  "/store/signup",
+  "/cust/refresh",
+  "/store/app/refresh",
+];
+
 /**
  * API 요청 래퍼 함수
  */
@@ -113,13 +122,19 @@ const apiCall = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
-  // TODO: 로그인 연동 후 활성화
-  const token = await getStorageItem("accessToken");
+
+  // 공개 엔드포인트 여부 확인
+  const isPublicEndpoint = PUBLIC_ENDPOINTS.some((publicEndpoint) =>
+    endpoint.startsWith(publicEndpoint),
+  );
+
+  // 공개 엔드포인트가 아닐 때만 토큰 가져오기
+  const token = !isPublicEndpoint ? await getStorageItem("accessToken") : null;
 
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
-      // TODO: 로그인 연동 후 활성화
+      // 공개 엔드포인트가 아니고 토큰이 있을 때만 Authorization 헤더 추가
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -129,8 +144,9 @@ const apiCall = async (
   try {
     let response = await fetch(url, defaultOptions);
 
-    // TODO: 로그인 연동 후 활성화
-    if (response.status === 401) {
+    // 공개 엔드포인트가 아닌 경우에만 401 처리
+
+    if (response.status === 401 && !isPublicEndpoint) {
       response = await handle401Response(url, defaultOptions);
     }
 
@@ -195,6 +211,8 @@ export const apiPostFormDataWithImage = async (
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
 
+  const token = await getStorageItem("accessToken");
+
   // options.headers에서 명시적인 Content-Type을 제거
   const customHeaders = (options.headers as Record<string, string>) || {};
   const filteredHeaders = Object.keys(customHeaders)
@@ -214,6 +232,7 @@ export const apiPostFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 
@@ -232,6 +251,8 @@ export const apiPutFormDataWithImage = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const url = `${API_BASE_URL}${endpoint}`;
+
+  const token = await getStorageItem("accessToken");
 
   // 기본 헤더 설정 (Content-Type 제외 - FormData가 자동으로 multipart/form-data로 설정)
   const defaultHeaders: HeadersInit = {};
@@ -255,6 +276,7 @@ export const apiPutFormDataWithImage = async (
     headers: {
       ...defaultHeaders,
       ...filteredHeaders,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   };
 

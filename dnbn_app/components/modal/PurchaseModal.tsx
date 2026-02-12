@@ -4,11 +4,11 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -259,10 +259,7 @@ export default function PurchaseModal({
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handlePurchase}
-            >
+            <TouchableOpacity style={styles.addButton} onPress={handlePurchase}>
               <Text style={styles.addButtonText}>구매하기</Text>
             </TouchableOpacity>
           </View>

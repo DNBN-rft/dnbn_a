@@ -166,7 +166,7 @@ export default function EditMyInfoScreen() {
   };
 
   const handleWithdrawPasswordSubmit = async () => {
-    if (!withdrawPassword.trim()) {
+    if (!withdrawPassword) {
       if (Platform.OS === "web") {
         alert("비밀번호를 입력해주세요.");
       } else {

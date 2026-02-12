@@ -1,5 +1,5 @@
-import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 
 /**
  * 플랫폼에 따라 적절한 저장소에 데이터를 저장합니다.
@@ -8,7 +8,7 @@ import * as SecureStore from "expo-secure-store";
  */
 export const setStorageItem = async (
   key: string,
-  value: string
+  value: string,
 ): Promise<void> => {
   try {
     if (Platform.OS === "web") {
@@ -28,7 +28,7 @@ export const setStorageItem = async (
  * Native: expo-secure-store
  */
 export const setMultipleItems = async (
-  items: Record<string, any>
+  items: Record<string, any>,
 ): Promise<void> => {
   try {
     if (Platform.OS === "web") {
@@ -38,8 +38,8 @@ export const setMultipleItems = async (
     } else {
       await Promise.all(
         Object.entries(items).map(([key, value]) =>
-          SecureStore.setItemAsync(key, String(value))
-        )
+          SecureStore.setItemAsync(key, String(value)),
+        ),
       );
     }
   } catch (error) {
@@ -117,12 +117,10 @@ export const clearStorage = async (keys?: string[]): Promise<void> => {
       }
     } else {
       if (keys && keys.length > 0) {
-        await Promise.all(
-          keys.map((key) => SecureStore.deleteItemAsync(key))
-        );
+        await Promise.all(keys.map((key) => SecureStore.deleteItemAsync(key)));
       } else {
         console.warn(
-          "Native platform requires specific keys to clear. Please provide keys array."
+          "Native platform requires specific keys to clear. Please provide keys array.",
         );
       }
     }
