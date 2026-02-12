@@ -64,6 +64,8 @@ const handle401Response = async (
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         await setStorageItem("accessToken", data.accessToken);
+        await setStorageItem("refreshToken", data.refreshToken);
+
         processQueue(null, data.accessToken);
 
         const newOptions = {

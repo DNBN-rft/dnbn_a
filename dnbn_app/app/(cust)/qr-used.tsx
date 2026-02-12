@@ -1,13 +1,16 @@
 import { styles } from "./qr-used.styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef } from "react";
 import * as Brightness from "expo-brightness";
 
 export default function QrUsedScreen() {
   const insets = useSafeAreaInsets();
+  const searchParams = useLocalSearchParams();
+  const qrImageUrl = searchParams.qrImageUrl as string;
   const originalBrightness = useRef<number>(0);
 
   useEffect(() => {
@@ -54,9 +57,15 @@ export default function QrUsedScreen() {
       </View>
 
       <View style={styles.qrContainer}>
-        <Image source={require("@/assets/images/qr.png")}
-        style={styles.qrImage}/>
-        <Text style={styles.qrText}>ORD12384</Text>
+        {qrImageUrl ? (
+          <Image
+            source={qrImageUrl}
+            style={styles.qrImage}
+            contentFit="contain"
+          />
+        ) : (
+          <Text style={styles.qrText}>QR 코드를 불러올 수 없습니다.</Text>
+        )}
       </View>
 
       {insets.bottom > 0 && (
