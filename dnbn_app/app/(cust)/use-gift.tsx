@@ -22,11 +22,11 @@ const formatDateTime = (dateTimeString: string): string => {
   const day = date.getDate();
   const hours = date.getHours();
   const minutes = date.getMinutes();
-  
+
   const ampm = hours >= 12 ? "오후" : "오전";
   const displayHours = hours % 12 || 12;
   const displayMinutes = String(minutes).padStart(2, "0");
-  
+
   return `${year}년 ${month}월 ${day}일 ${ampm} ${displayHours}시 ${displayMinutes}분`;
 };
 
@@ -44,6 +44,8 @@ export default function UseGift() {
   interface UnusedQrCode {
     storeNm: string;
     productNm: string;
+    orderCode: string;
+    qrExpiredAt: string;
     orderDetailPrice: number;
     orderDetailAmount: number;
     orderDetailTotal: number;
@@ -64,14 +66,14 @@ export default function UseGift() {
       try {
         setLoading(true);
         const orderDetailIdx = searchParams.orderDetailIdx as string;
-        
+
         if (!orderDetailIdx) {
           setError("주문 상세 정보를 찾을 수 없습니다.");
           return;
         }
 
         const response = await apiGet(`/cust/purchase-list/unused/${orderDetailIdx}`);
-        
+
         if (!response.ok) {
           throw new Error("구매 정보를 가져오는데 실패했습니다.");
         }
@@ -215,10 +217,14 @@ export default function UseGift() {
           </View>
         </View>
         <View style={styles.giftDetailInfo}>
-          <Text style={styles.giftDetailTitle}>선물 사용 정보</Text>
+          <Text style={styles.giftDetailTitle}>구매 상세 정보</Text>
           <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>금액</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailLabel}>유효기간</Text>
+            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.qrExpiredAt)}</Text>
+          </View>
+          <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>주문번호</Text>
+            <Text style={styles.giftDetailValue}>{purchaseData.orderCode}</Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
@@ -229,16 +235,16 @@ export default function UseGift() {
             <Text style={styles.giftDetailValue}>{purchaseData.orderDetailPrice.toLocaleString()}원</Text>
           </View>
           <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>총금액</Text>
+            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+          </View>
+          <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
             <Text style={styles.giftDetailValue}>{purchaseData.storeNm}</Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>주문일</Text>
             <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.orderDateTime)}</Text>
-          </View>
-          <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>사용상태</Text>
-            <Text style={styles.giftDetailValue}>사용 가능</Text>
           </View>
         </View>
       </ScrollView>
