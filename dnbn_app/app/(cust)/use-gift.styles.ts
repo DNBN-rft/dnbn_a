@@ -58,6 +58,8 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
   qrImage: {
+    borderWidth: 1,
+    borderColor: "#ccc",
     width: 100,
     height: 100,
     resizeMode: "contain",
@@ -93,9 +95,7 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   explanationTextToggle: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 40,
+    flex: 1,
   },
   explanationToggle: {
     flexDirection: "row",
@@ -139,7 +139,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#EF7810",
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderRadius: 5,
   },
   useButtonText: {

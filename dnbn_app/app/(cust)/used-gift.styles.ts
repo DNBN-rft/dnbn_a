@@ -93,9 +93,7 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   explanationTextToggle: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 40,
+    flex: 1,
   },
   explanationToggle: {
     flexDirection: "row",
