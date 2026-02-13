@@ -1,5 +1,6 @@
 import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
   Alert,
   Dimensions,
   FlatList,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -178,38 +178,53 @@ export default function ProductDetailScreen() {
         <ScrollView style={styles.productDetailContainer}>
           {/* 이미지 슬라이더 */}
           <View style={styles.imageSliderContainer}>
-            <FlatList
-              data={product.productImgs?.files || []}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={(event) => {
-                const index = Math.round(
-                  event.nativeEvent.contentOffset.x / screenWidth,
-                );
-                setCurrentImageIndex(index);
-              }}
-              scrollEventThrottle={16}
-              keyExtractor={(item, index) => `image-${index}`}
-              renderItem={({ item, index }) => (
-                <Pressable
-                  onPress={() => {
-                    setSelectedImageIndex(index);
-                    setImageModalVisible(true);
-                  }}
-                >
-                  <Image
-                    source={
-                      item.fileUrl
-                        ? { uri: item.fileUrl }
-                        : require("@/assets/images/logo.png")
-                    }
-                    style={[styles.productImage, { width: screenWidth }]}
-                    resizeMode="cover"
-                  />
-                </Pressable>
-              )}
-            />
+            {product.productImgs?.files && product.productImgs.files.length > 0 ? (
+              <FlatList
+                data={product.productImgs.files}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={(event) => {
+                  const index = Math.round(
+                    event.nativeEvent.contentOffset.x / screenWidth,
+                  );
+                  setCurrentImageIndex(index);
+                }}
+                scrollEventThrottle={16}
+                keyExtractor={(item, index) => `image-${index}`}
+                renderItem={({ item, index }) => (
+                  <Pressable
+                    onPress={() => {
+                      setSelectedImageIndex(index);
+                      setImageModalVisible(true);
+                    }}
+                    style={{ width: screenWidth, height: 350 }}
+                  >
+                    <Image
+                      source={item.fileUrl || require("@/assets/images/logo.png")}
+                      style={[styles.productImage, { width: screenWidth }]}
+                      priority="high"
+                      cachePolicy="memory-disk"
+                      contentFit="cover"
+                      transition={200}
+                      placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                    />
+                  </Pressable>
+                )}
+              />
+            ) : (
+              <Pressable style={{ width: screenWidth, height: 350 }}>
+                <Image
+                  source={require("@/assets/images/logo.png")}
+                  style={[styles.productImage, { width: screenWidth }]}
+                  priority="high"
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                  transition={200}
+                  placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                />
+              </Pressable>
+            )}
 
             {/* 페이지네이션 인디케이터 */}
             {product.productImgs?.files &&
@@ -244,45 +259,49 @@ export default function ProductDetailScreen() {
                 <Ionicons name="close" size={32} color="#fff" />
               </TouchableOpacity>
 
-              <FlatList
-                data={product.productImgs?.files || []}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                initialScrollIndex={selectedImageIndex}
-                onMomentumScrollEnd={(event) => {
-                  const index = Math.round(
-                    event.nativeEvent.contentOffset.x / screenWidth,
-                  );
-                  setSelectedImageIndex(index);
-                }}
-                getItemLayout={(data, index) => ({
-                  length: screenWidth,
-                  offset: screenWidth * index,
-                  index,
-                })}
-                keyExtractor={(item, index) => `modal-image-${index}`}
-                renderItem={({ item }) => (
-                  <View style={styles.imageModalSlide}>
-                    <Image
-                      source={
-                        item.fileUrl
-                          ? { uri: item.fileUrl }
-                          : require("@/assets/images/logo.png")
-                      }
-                      style={styles.imageModalImage}
-                      resizeMode="contain"
-                    />
-                  </View>
-                )}
-              />
+              {product.productImgs?.files && product.productImgs.files.length > 0 && (
+                <>
+                  <FlatList
+                    data={product.productImgs.files}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    initialScrollIndex={selectedImageIndex}
+                    onMomentumScrollEnd={(event) => {
+                      const index = Math.round(
+                        event.nativeEvent.contentOffset.x / screenWidth,
+                      );
+                      setSelectedImageIndex(index);
+                    }}
+                    getItemLayout={(data, index) => ({
+                      length: screenWidth,
+                      offset: screenWidth * index,
+                      index,
+                    })}
+                    keyExtractor={(item, index) => `modal-image-${index}`}
+                    renderItem={({ item }) => (
+                      <View style={[styles.imageModalSlide, { width: screenWidth, height: screenWidth }]}>
+                        <Image
+                          source={item.fileUrl || require("@/assets/images/logo.png")}
+                          style={styles.imageModalImage}
+                          priority="high"
+                          cachePolicy="memory-disk"
+                          contentFit="contain"
+                          transition={200}
+                          placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                        />
+                      </View>
+                    )}
+                  />
 
-              <View style={styles.imageModalCounter}>
-                <Text style={styles.imageModalCounterText}>
-                  {selectedImageIndex + 1} /{" "}
-                  {product.productImgs?.files?.length || 0}
-                </Text>
-              </View>
+                  <View style={styles.imageModalCounter}>
+                    <Text style={styles.imageModalCounterText}>
+                      {selectedImageIndex + 1} /{" "}
+                      {product.productImgs.files.length}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
           </Modal>
 
