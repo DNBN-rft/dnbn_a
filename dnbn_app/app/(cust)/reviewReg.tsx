@@ -1,12 +1,12 @@
 import { apiPostFormDataWithImage, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -48,11 +48,16 @@ export default function ReviewRegScreen() {
   );
   const [images, setImages] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ReviewImageFile[]>([]);
-  const [permission, requestPermission] = ImagePicker.useCameraPermissions();
+  const [mediaLibraryPermission, requestMediaLibraryPermission] =
+    ImagePicker.useMediaLibraryPermissions();
+  const [cameraPermission, requestCameraPermission] =
+    ImagePicker.useCameraPermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    requestPermission();
+    // 두 권한 모두 요청
+    requestMediaLibraryPermission();
+    requestCameraPermission();
 
     // 수정 모드일 때 기존 이미지 파싱
     if (isEditMode && initialReviewImages) {
@@ -63,15 +68,45 @@ export default function ReviewRegScreen() {
         setExistingImages([]);
       }
     }
-  }, [requestPermission]);
+  }, [requestCameraPermission]);
 
+  // 사진 촬영
+  const takePhoto = async () => {
+    const totalImages = existingImages.length + images.length;
+    if (totalImages >= 3) return;
+
+    if (!cameraPermission?.granted) {
+      const result = await requestCameraPermission();
+      if (!result.granted) {
+        Alert.alert("알림", "카메라 접근 권한이 필요합니다.");
+        return;
+      }
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      allowsEditing: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setImages((prev) =>
+        [...prev, result.assets[0].uri].slice(0, 3 - existingImages.length),
+      );
+    }
+  };
+
+  // 앨범에서 선택
   const pickImage = async () => {
     const totalImages = existingImages.length + images.length;
     if (totalImages >= 3) return;
 
-    if (!permission?.granted) {
-      const result = await requestPermission();
-      if (!result.granted) return;
+    if (!mediaLibraryPermission?.granted) {
+      const result = await requestMediaLibraryPermission();
+      if (!result.granted) {
+        Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -83,9 +118,41 @@ export default function ReviewRegScreen() {
 
     if (!result.canceled) {
       const newUris = result.assets.map((asset) => asset.uri);
-
-      setImages((prev) => [...prev, ...newUris].slice(0, 3 - totalImages));
+      setImages((prev) => [...prev, ...newUris].slice(0, 3 - existingImages.length));
     }
+  };
+
+  // 이미지 추가 옵션 선택
+  const handleAddImage = () => {
+    const totalImages = existingImages.length + images.length;
+    if (totalImages >= 3) return;
+
+    // 웹은 카메라 촬영 불가 - 앨범에서만 선택
+    if (Platform.OS === "web") {
+      pickImage();
+      return;
+    }
+
+    // iOS, 안드로이드: 사진 촬영 또는 앨범 선택
+    Alert.alert(
+      "사진 추가",
+      "사진을 추가할 방법을 선택하세요",
+      [
+        {
+          text: "사진 촬영",
+          onPress: takePhoto,
+        },
+        {
+          text: "앨범에서 선택",
+          onPress: pickImage,
+        },
+        {
+          text: "취소",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   const removeImage = (index: number) => {
@@ -192,9 +259,13 @@ export default function ReviewRegScreen() {
     } catch (error) {
       console.error("Review submission error:", error);
       if (Platform.OS === "web") {
-        window.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        window.alert(
+          "리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        );
       } else {
-        Alert.alert("리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        Alert.alert(
+          "리뷰 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -202,19 +273,20 @@ export default function ReviewRegScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-      enabled={true}
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {insets.top > 0 && (
-          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-        )}
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
 
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
+        enabled={true}
+      >
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -355,7 +427,7 @@ export default function ReviewRegScreen() {
                     <View key={`empty-${index}`} style={styles.photoSlot}>
                       <Pressable
                         style={styles.photoUploadButton}
-                        onPress={pickImage}
+                        onPress={handleAddImage}
                         disabled={existingImages.length + images.length >= 3}
                       >
                         <Ionicons
@@ -399,11 +471,11 @@ export default function ReviewRegScreen() {
             </>
           )}
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }

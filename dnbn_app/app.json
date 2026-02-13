@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "리뷰 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "리뷰 사진을 선택하기 위해 사진 라이브러리 접근 권한이 필요합니다.",
+        "NSPhotoLibraryAddUsageDescription": "촬영한 사진을 저장하기 위해 사진 라이브러리 접근 권한이 필요합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +27,11 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "package": "com.anonymous.dnbn_app"
     },
@@ -32,6 +41,13 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "리뷰 및 문의 사진을 선택하기 위해 사진 라이브러리 접근 권한이 필요합니다.",
+          "cameraPermission": "리뷰 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
+        }
+      ],
       [
         "expo-splash-screen",
         {
