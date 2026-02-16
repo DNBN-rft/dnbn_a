@@ -28,6 +28,7 @@ export default function CustHomeScreen() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [defaultLocation, setDefaultLocation] =
     useState<string>("주소 로딩 중...");
+  const [userType, setUserType] = useState<string | null>(null);
 
   // 읽지 않은 알림 확인 함수
   const checkUnreadAlarm = async () => {
@@ -60,6 +61,32 @@ export default function CustHomeScreen() {
   // 기본 주소 조회 함수
   const fetchDefaultLocation = async () => {
     try {
+      // userType 확인
+      let currentUserType: string | null = null;
+      if (Platform.OS === "web") {
+        currentUserType = localStorage.getItem("userType");
+      } else {
+        currentUserType = await SecureStore.getItemAsync("userType");
+      }
+
+      // store 사용자인 경우 저장된 가맹점 주소 사용
+      if (currentUserType === "store") {
+        let storeAddress: string | null = null;
+        if (Platform.OS === "web") {
+          storeAddress = localStorage.getItem("storeAddress");
+        } else {
+          storeAddress = await SecureStore.getItemAsync("storeAddress");
+        }
+
+        if (storeAddress) {
+          setDefaultLocation(storeAddress);
+        } else {
+          setDefaultLocation("주소 정보 없음");
+        }
+        return;
+      }
+
+      // cust 사용자인 경우 기본 주소 API 조회
       const response = await apiGet(
         `/cust/location/default`,
       );
@@ -80,10 +107,21 @@ export default function CustHomeScreen() {
   useFocusEffect(
     useCallback(() => {
       const fetchAllProducts = async () => {
+        // userType 가져오기
+        let currentUserType: string | null = null;
+        if (Platform.OS === "web") {
+          currentUserType = localStorage.getItem("userType");
+        } else {
+          currentUserType = await SecureStore.getItemAsync("userType");
+        }
+        setUserType(currentUserType);
 
         // 읽지 않은 알림 상태, 장바구니 개수, 기본 주소 확인
         checkUnreadAlarm();
-        fetchCartItemCount();
+        // store 사용자는 장바구니 개수를 가져오지 않음
+        if (currentUserType !== "store") {
+          fetchCartItemCount();
+        }
         fetchDefaultLocation();
 
         try {
@@ -230,31 +268,55 @@ export default function CustHomeScreen() {
             style={styles.addr}
             onPress={() => router.push("/(cust)/address")}
           >
-            <Text style={styles.addrText}>{defaultLocation}</Text>
-            <Ionicons name="chevron-down" size={24} color="#000" />
+            <Text
+              style={[styles.addrText, userType === "store" && { fontSize: 13 }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {defaultLocation}
+            </Text>
+            {userType !== "store" && (
+              <Ionicons name="chevron-down" size={24} color="#000" />
+            )}
           </TouchableOpacity>
         </View>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => router.push("/(cust)/notifications")}
+            onPress={() => {
+              // userType에 따라 알람 페이지 분기
+              if (userType === "store") {
+                router.push("/(store)/notifications");
+              } else {
+                router.push("/(cust)/notifications");
+              }
+            }}
           >
             <Ionicons name="notifications-outline" size={24} color="#000" />
             {hasUnreadAlarm && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => router.push("/(cust)/cart")}
-          >
-            <Ionicons name="cart-outline" size={24} color="#000" />
-            {cartItemCount > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>
-                  {cartItemCount > 9 ? "9+" : cartItemCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {userType === "store" ? (
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => router.push("/(store)/tabs/storehome")}
+            >
+              <Ionicons name="home-outline" size={24} color="#000" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => router.push("/(cust)/cart")}
+            >
+              <Ionicons name="cart-outline" size={24} color="#000" />
+              {cartItemCount > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>
+                    {cartItemCount > 9 ? "9+" : cartItemCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

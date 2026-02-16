@@ -1,8 +1,8 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { removeMultipleItems } from "@/utils/storageUtil";
+import { clearAuthData } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { useEffect, useState } from "react";
 import {
   Platform,
   ScrollView,
@@ -16,7 +16,24 @@ import { styles } from "../styles/mypage.styles";
 export default function Mypage() {
   const insets = useSafeAreaInsets();
   const [openInfo, setOpenInfo] = useState(false);
-  const { userType } = useAuth();
+
+  // store 사용자인 경우 storeMyPage로 리다이렉트
+  useEffect(() => {
+    const checkUserType = async () => {
+      let currentUserType: string | null = null;
+      if (Platform.OS === "web") {
+        currentUserType = localStorage.getItem("userType");
+      } else {
+        currentUserType = await SecureStore.getItemAsync("userType");
+      }
+
+      if (currentUserType === "store") {
+        router.push("/(store)/tabs/storemypage");
+      }
+    };
+
+    checkUserType();
+  }, []);
 
   const changeArrow = () => {
     setOpenInfo((prev) => !prev);
@@ -24,17 +41,7 @@ export default function Mypage() {
 
   const handleLogout = async () => {
     try {
-      await removeMultipleItems([
-        "accessToken",
-        "refreshToken",
-        "accessTokenExpiresIn",
-        "refreshTokenExpiresIn",
-        "tokenType",
-        "userType",
-        "custCode",
-        "hasLocation",
-        "hasActCategory",
-      ]);
+      await clearAuthData("cust");
     } catch (error) {
       // Storage 정리 실패 시도 로그인 페이지로 이동
     } finally {
@@ -55,26 +62,12 @@ export default function Mypage() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => {
-            if (userType === "store") {
-              router.push("/(store)/tabs/storehome");
-            } else {
-              router.back();
-            }
-          }}
+          onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>마이페이지</Text>
-        {userType === "store" && (
-          <TouchableOpacity
-            style={styles.storeButton}
-            onPress={() => router.push("/(store)/tabs/storehome")}
-          >
-            <Text style={styles.storeButtonText}>Store</Text>
-          </TouchableOpacity>
-        )}
-        {userType !== "store" && <View style={styles.placeholder} />}
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView
@@ -168,10 +161,7 @@ export default function Mypage() {
           </View>
 
           <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleLogout}
-            >
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
               <Text style={{ color: "#FF3B30", fontSize: 16 }}>로그아웃</Text>
               <Ionicons name="chevron-forward" size={24} color="#FF3B30" />
             </TouchableOpacity>
