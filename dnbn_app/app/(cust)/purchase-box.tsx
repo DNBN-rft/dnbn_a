@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./purchase-box.styles";
 
 interface UnusedProduct {
+  orderDetailIdx: number;
   storeNm: string;
   productImageUrl: string;
   productNm: string;
@@ -16,6 +17,7 @@ interface UnusedProduct {
 }
 
 interface UsedProduct {
+  orderDetailIdx: number;
   storeNm: string;
   productImageUrl: string;
   productNm: string;
@@ -117,7 +119,10 @@ export default function PurchaseBox() {
               renderItem={({ item: notUsed }) => (
                 <TouchableOpacity
                   style={styles.products}
-                  onPress={() => router.navigate("/(cust)/use-gift")}
+                  onPress={() => router.push({
+                    pathname: "/(cust)/use-gift",
+                    params: { orderDetailIdx: notUsed.orderDetailIdx.toString() }
+                  })}
                 >
                   <View style={styles.productImageContainer}>
                     <Image
@@ -158,7 +163,10 @@ export default function PurchaseBox() {
               renderItem={({ item: used }) => (
                 <TouchableOpacity
                   style={styles.products}
-                  onPress={() => router.navigate("/(cust)/used-gift")}
+                  onPress={() => router.push({
+                    pathname: "/(cust)/used-gift",
+                    params: { orderDetailIdx: used.orderDetailIdx.toString() }
+                  })}
                 >
                   <View style={styles.productImageContainer}>
                     <Image
