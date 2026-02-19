@@ -101,14 +101,6 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#EF7810",
   },
-  statusContainer: {
-    marginTop: 4,
-  },
-  statusText: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
   buttonContainer: {
     borderTopWidth: 1,
     borderTopColor: "#F5F5F5",

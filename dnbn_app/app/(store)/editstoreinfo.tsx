@@ -6,17 +6,22 @@ import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Image,
-  Modal,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
+import AccountInfoSection from "@/components/store/AccountInfoSection";
+import StoreInfoSection from "@/components/store/StoreInfoSection";
+import BankInfoSection from "@/components/store/BankInfoSection";
+import BusinessInfoSection from "@/components/store/BusinessInfoSection";
+import OperatingInfoSection from "@/components/store/OperatingInfoSection";
+import PasswordChangeModal from "@/components/store/PasswordChangeModal";
+import TimePickerModal from "@/components/store/TimePickerModal";
+import BankPickerModal from "@/components/store/BankPickerModal";
 
 interface StoreInfo {
   approvalStatus: string;
@@ -196,22 +201,12 @@ export default function EditStoreInfoPage() {
     loadBanks();
   }, []);
 
-  // Time picker 모달 관련 state
+  // 모달 관련 state
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [activeTimePicker, setActiveTimePicker] = useState<
     "open" | "close" | null
   >(null);
-  const [selectedHour, setSelectedHour] = useState("09");
-  const [selectedMinute, setSelectedMinute] = useState("00");
-
-  // 비밀번호 변경 모달
-  const [passwordModalStep, setPasswordModalStep] = useState<
-    "none" | "verify" | "change" | "result"
-  >("none");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(true);
 
   // 읽기 전용 정보 (initialStoreInfo에서 가져옴)
   const accountHolder = initialStoreInfo?.ownerNm || "";
@@ -222,76 +217,19 @@ export default function EditStoreInfoPage() {
   const businessType = initialStoreInfo?.storeType || "";
   const registrationDate = initialStoreInfo?.bizRegDate || "";
 
-  const handleVerifyPassword = () => {
-    // TODO: 실제 API로 현재 비밀번호 검증
-    if (currentPassword === "") {
-      alert("현재 비밀밀번호를 입력하세요.");
-      return;
-    }
-    // 검증 성공 가정
-    setPasswordModalStep("change");
-  };
-
-  const handleChangePassword = () => {
-    if (newPassword === "" || confirmPassword === "") {
-      alert("새 비밀번호를 입력하세요.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      alert("새 비밀밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    // TODO: 실제 API로 비밀번호 변경
-    console.log("비밀번호 변경:", { currentPassword, newPassword });
-
-    // 변경 성공 가정
-    setPasswordChangeSuccess(true);
-    setPasswordModalStep("result");
-  };
-
-  const closePasswordModal = () => {
-    setPasswordModalStep("none");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setPasswordChangeSuccess(false);
-  };
-
   const openTimePicker = (type: "open" | "close") => {
-    const timeStr = type === "open" ? businessOpenTime : businessCloseTime;
-    const [hour, minute] = timeStr.split(":");
-    setSelectedHour(hour);
-    setSelectedMinute(minute);
     setActiveTimePicker(type);
     setTimePickerVisible(true);
   };
 
-  const closeTimePicker = () => {
+  const handleTimeConfirm = (time: string) => {
+    if (activeTimePicker === "open") {
+      setBusinessOpenTime(time);
+    } else if (activeTimePicker === "close") {
+      setBusinessCloseTime(time);
+    }
     setTimePickerVisible(false);
     setActiveTimePicker(null);
-  };
-
-  const confirmTimePicker = () => {
-    const timeStr = `${selectedHour}:${selectedMinute}`;
-    if (activeTimePicker === "open") {
-      setBusinessOpenTime(timeStr);
-    } else if (activeTimePicker === "close") {
-      // 마감시간이 오픈시간보다 늦은지 확인
-      const [openHour, openMinute] = businessOpenTime.split(":").map(Number);
-      const closeHourNum = parseInt(selectedHour);
-      const closeMinuteNum = parseInt(selectedMinute);
-
-      if (
-        closeHourNum < openHour ||
-        (closeHourNum === openHour && closeMinuteNum < openMinute)
-      ) {
-        Alert.alert("알림", "마감 시간은 오픈 시간 이후로 설정해주세요.");
-        return;
-      }
-      setBusinessCloseTime(timeStr);
-    }
-    closeTimePicker();
   };
 
   const toggleBusinessDay = (day: string) => {
@@ -302,12 +240,6 @@ export default function EditStoreInfoPage() {
             (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b),
           ),
     );
-  };
-
-  const selectBank = (bankIdx: number, bankNm: string) => {
-    setBankIdx(bankIdx);
-    setBankName(bankNm);
-    setBankPickerVisible(false);
   };
 
   const pickImage = async () => {
@@ -440,694 +372,85 @@ export default function EditStoreInfoPage() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="person-circle" size={22} color="#EF7810" />
-            <Text style={styles.sectionTitle}>계정 정보</Text>
-          </View>
+        <AccountInfoSection
+          memberId={memberId}
+          onPasswordChange={() => setPasswordModalVisible(true)}
+        />
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>계정 아이디</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={memberId || ""}
-              editable={false}
-            />
-            <Text style={styles.helpText}>아이디는 변경할 수 없습니다</Text>
-          </View>
+        <StoreInfoSection
+          mainImage={mainImage}
+          storeName={storeName}
+          phoneNumber={phoneNumber}
+          address={address}
+          detailedAddress={detailedAddress}
+          onStoreNameChange={setStoreName}
+          onPhoneNumberChange={setPhoneNumber}
+          onAddressChange={setAddress}
+          onDetailedAddressChange={setDetailedAddress}
+          onImagePick={pickImage}
+        />
 
-          <TouchableOpacity
-            style={styles.passwordChangeButton}
-            onPress={() => setPasswordModalStep("verify")}
-          >
-            <Ionicons name="lock-closed" size={18} color="#EF7810" />
-            <Text style={styles.passwordChangeButtonText}>비밀번호 변경</Text>
-          </TouchableOpacity>
-        </View>
+        <BankInfoSection
+          bankName={bankName}
+          accountNumber={accountNumber}
+          accountHolder={accountHolder}
+          onBankSelect={() => setBankPickerVisible(true)}
+          onAccountNumberChange={setAccountNumber}
+        />
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="storefront" size={22} color="#EF7810" />
-            <Text style={styles.sectionTitle}>가맹점 정보</Text>
-          </View>
+        <BusinessInfoSection
+          businessName={businessName}
+          businessNumber={businessNumber}
+          representativeName={representativeName}
+          representativePhone={representativePhone}
+          businessType={businessType}
+          registrationDate={registrationDate}
+        />
 
-          {mainImage && mainImage.fileUrl && (
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>가맹점 대표 이미지</Text>
-              <TouchableOpacity
-                onPress={pickImage}
-                style={styles.imagePickerContainer}
-              >
-                <Image
-                  source={{ uri: mainImage.fileUrl }}
-                  style={{ width: "100%", height: "100%" }}
-                  resizeMode="cover"
-                />
-                <View style={styles.imageCameraButton}>
-                  <Ionicons name="camera" size={18} color="#fff" />
-                </View>
-              </TouchableOpacity>
-              <Text style={styles.imageChangedText}>
-                이미지를 탭하여 변경할 수 있습니다
-              </Text>
-            </View>
-          )}
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>가맹점명</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="가맹점명을 입력하세요"
-              value={storeName}
-              onChangeText={setStoreName}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>전화번호</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="전화번호를 입력하세요"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>주소</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="주소를 입력하세요"
-              value={address}
-              onChangeText={setAddress}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>상세 주소</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="상세 주소를 입력하세요"
-              value={detailedAddress}
-              onChangeText={setDetailedAddress}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="card" size={22} color="#EF7810" />
-            <Text style={styles.sectionTitle}>계좌 정보</Text>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>은행명</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setBankPickerVisible(true)}
-            >
-              <Text
-                style={[
-                  bankName
-                    ? styles.selectableInput
-                    : styles.selectableInputPlaceholder,
-                ]}
-              >
-                {bankName || "은행을 선택하세요"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>계좌번호</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="계좌번호를 입력하세요"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>예금주</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={accountHolder}
-              editable={false}
-            />
-            <Text style={styles.helpText}>예금주는 변경할 수 없습니다</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="document-text" size={22} color="#999" />
-            <Text style={[styles.sectionTitle, styles.disabledTitle]}>
-              사업자 정보
-            </Text>
-          </View>
-          <Text style={styles.sectionDescription}>
-            사업자 정보는 변경할 수 없습니다
-          </Text>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>사업자명</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={businessName}
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>사업자등록번호</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={businessNumber}
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>대표자명</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={representativeName}
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>대표 연락처</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={representativePhone}
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>업태</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={businessType}
-              editable={false}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>사업자 등록일</Text>
-            <TextInput
-              style={[styles.input, styles.inputDisabled]}
-              value={registrationDate}
-              editable={false}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="time" size={22} color="#EF7810" />
-            <Text style={styles.sectionTitle}>운영 정보</Text>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>오픈 시간</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => openTimePicker("open")}
-            >
-              <Text
-                style={[
-                  businessOpenTime
-                    ? styles.selectableInput
-                    : styles.selectableInputPlaceholder,
-                ]}
-              >
-                {businessOpenTime}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>마감 시간</Text>
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => openTimePicker("close")}
-            >
-              <Text
-                style={[
-                  businessCloseTime
-                    ? styles.selectableInput
-                    : styles.selectableInputPlaceholder,
-                ]}
-              >
-                {businessCloseTime}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>영업일</Text>
-            <View style={styles.businessDayContainer}>
-              {dayOrder.map((day) => (
-                <TouchableOpacity
-                  key={day}
-                  onPress={() => toggleBusinessDay(day)}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    borderRadius: 6,
-                    borderWidth: 1.5,
-                    borderColor: businessDays.includes(day)
-                      ? "#EF7810"
-                      : "#ddd",
-                    backgroundColor: businessDays.includes(day)
-                      ? "#FFF0E0"
-                      : "#fff",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: businessDays.includes(day) ? "600" : "500",
-                      color: businessDays.includes(day) ? "#EF7810" : "#666",
-                    }}
-                  >
-                    {dayMapping[day]}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
+        <OperatingInfoSection
+          businessOpenTime={businessOpenTime}
+          businessCloseTime={businessCloseTime}
+          businessDays={businessDays}
+          dayOrder={dayOrder}
+          dayMapping={dayMapping}
+          onOpenTimePick={() => openTimePicker("open")}
+          onCloseTimePick={() => openTimePicker("close")}
+          onToggleBusinessDay={toggleBusinessDay}
+        />
 
         <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
           <Text style={styles.submitButtonText}>수정 완료</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      <Modal
-        visible={passwordModalStep !== "none"}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={closePasswordModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {passwordModalStep === "verify" && (
-              <>
-                <View style={styles.modalHeader}>
-                  <Ionicons name="lock-closed" size={28} color="#EF7810" />
-                  <Text style={styles.modalTitle}>비밀번호 확인</Text>
-                </View>
+      <PasswordChangeModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
+      />
 
-                <Text style={styles.modalDescription}>
-                  비밀번호 변경을 위해 현재 비밀번호를 입력해주세요
-                </Text>
-
-                <View style={styles.modalInputGroup}>
-                  <Text style={styles.modalLabel}>현재 비밀번호</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="현재 비밀번호를 입력하세요"
-                    value={currentPassword}
-                    onChangeText={setCurrentPassword}
-                    secureTextEntry
-                    autoFocus
-                  />
-                </View>
-
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalConfirmButton}
-                    onPress={handleVerifyPassword}
-                  >
-                    <Text style={styles.modalConfirmButtonText}>확인</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.modalCancelButton}
-                    onPress={closePasswordModal}
-                  >
-                    <Text style={styles.modalCancelButtonText}>취소</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-
-            {passwordModalStep === "change" && (
-              <>
-                <View style={styles.modalHeader}>
-                  <Ionicons name="key" size={28} color="#EF7810" />
-                  <Text style={styles.modalTitle}>새 비밀번호 설정</Text>
-                </View>
-
-                <Text style={styles.modalDescription}>
-                  새로운 비밀번호를 입력해주세요
-                </Text>
-
-                <View style={styles.modalInputGroup}>
-                  <Text style={styles.modalLabel}>새 비밀번호</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="새 비밀번호를 입력하세요"
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                    secureTextEntry
-                    autoFocus
-                  />
-                </View>
-
-                <View style={styles.modalInputGroup}>
-                  <Text style={styles.modalLabel}>새 비밀번호 확인</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="새 비밀번호를 다시 입력하세요"
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry
-                  />
-                </View>
-
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalConfirmButton}
-                    onPress={handleChangePassword}
-                  >
-                    <Text style={styles.modalConfirmButtonText}>변경</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.modalCancelButton}
-                    onPress={closePasswordModal}
-                  >
-                    <Text style={styles.modalCancelButtonText}>취소</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-
-            {passwordModalStep === "result" && (
-              <>
-                <View style={styles.modalHeader}>
-                  <Ionicons
-                    name={
-                      passwordChangeSuccess
-                        ? "checkmark-circle"
-                        : "close-circle"
-                    }
-                    size={48}
-                    color={passwordChangeSuccess ? "#ef7810" : "#ef4444"}
-                  />
-                </View>
-
-                <Text style={styles.modalResultTitle}>
-                  {passwordChangeSuccess
-                    ? "비밀번호 변경 완료"
-                    : "비밀번호 변경 실패"}
-                </Text>
-
-                <Text style={styles.modalDescription}>
-                  {passwordChangeSuccess
-                    ? "비밀번호가 성공적으로 변경되었습니다."
-                    : "비밀번호 변경 중 오류가 발생했습니다. 다시 시도해주세요."}
-                </Text>
-
-                <TouchableOpacity
-                  style={styles.modalSingleButton}
-                  onPress={closePasswordModal}
-                >
-                  <Text style={styles.modalSingleButtonText}>확인</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* Time Picker Modal */}
-      <Modal
+      <TimePickerModal
         visible={timePickerVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={closeTimePicker}
-      >
-        <View style={styles.timePickerModalOverlay}>
-          <View style={styles.timePickerModalContent}>
-            <View style={styles.timePickerModalHeader}>
-              <Text style={styles.timePickerModalTitle}>
-                {activeTimePicker === "open" ? "오픈 시간" : "마감 시간"}을
-                선택하세요
-              </Text>
-              <Text
-                style={{ fontSize: 32, fontWeight: "bold", color: "#EF7810" }}
-              >
-                {selectedHour}:{selectedMinute}
-              </Text>
-            </View>
+        type={activeTimePicker}
+        currentTime={
+          activeTimePicker === "open" ? businessOpenTime : businessCloseTime
+        }
+        businessOpenTime={businessOpenTime}
+        onConfirm={handleTimeConfirm}
+        onClose={() => setTimePickerVisible(false)}
+      />
 
-            <View style={styles.timePickerContainer}>
-              {/* Hour Picker */}
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    marginBottom: 10,
-                    color: "#666",
-                  }}
-                >
-                  시간
-                </Text>
-                <ScrollView
-                  style={{
-                    maxHeight: 200,
-                    borderWidth: 1,
-                    borderColor: "#e0e0e0",
-                    borderRadius: 8,
-                  }}
-                  scrollEventThrottle={16}
-                >
-                  {Array.from({ length: 24 }, (_, i) =>
-                    String(i).padStart(2, "0"),
-                  ).map((hour) => {
-                    const isDisabled =
-                      activeTimePicker === "close" &&
-                      parseInt(hour) < parseInt(businessOpenTime.split(":")[0]);
-                    return (
-                      <TouchableOpacity
-                        key={hour}
-                        onPress={() => !isDisabled && setSelectedHour(hour)}
-                        disabled={isDisabled}
-                        style={{
-                          paddingVertical: 12,
-                          paddingHorizontal: 16,
-                          backgroundColor:
-                            selectedHour === hour ? "#FFF0E0" : "#fff",
-                          borderBottomWidth: 1,
-                          borderBottomColor: "#f0f0f0",
-                          opacity: isDisabled ? 0.5 : 1,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            textAlign: "center",
-                            fontSize: 16,
-                            fontWeight: selectedHour === hour ? "600" : "400",
-                            color:
-                              selectedHour === hour
-                                ? "#EF7810"
-                                : isDisabled
-                                  ? "#ccc"
-                                  : "#000",
-                          }}
-                        >
-                          {hour}:00
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              {/* Minute Picker */}
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    marginBottom: 10,
-                    color: "#666",
-                  }}
-                >
-                  분
-                </Text>
-                <ScrollView
-                  style={{
-                    maxHeight: 200,
-                    borderWidth: 1,
-                    borderColor: "#e0e0e0",
-                    borderRadius: 8,
-                  }}
-                  scrollEventThrottle={16}
-                >
-                  {["00", "30"].map((minute) => {
-                    const openHour = parseInt(businessOpenTime.split(":")[0]);
-                    const openMinute = parseInt(businessOpenTime.split(":")[1]);
-                    const isDisabled =
-                      activeTimePicker === "close" &&
-                      parseInt(selectedHour) === openHour &&
-                      parseInt(minute) < openMinute;
-                    return (
-                      <TouchableOpacity
-                        key={minute}
-                        onPress={() => !isDisabled && setSelectedMinute(minute)}
-                        disabled={isDisabled}
-                        style={{
-                          paddingVertical: 12,
-                          paddingHorizontal: 16,
-                          backgroundColor:
-                            selectedMinute === minute ? "#FFF0E0" : "#fff",
-                          borderBottomWidth: 1,
-                          borderBottomColor: "#f0f0f0",
-                          opacity: isDisabled ? 0.5 : 1,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            textAlign: "center",
-                            fontSize: 16,
-                            fontWeight:
-                              selectedMinute === minute ? "600" : "400",
-                            color:
-                              selectedMinute === minute
-                                ? "#EF7810"
-                                : isDisabled
-                                  ? "#ccc"
-                                  : "#000",
-                          }}
-                        >
-                          :{minute}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            </View>
-
-            {/* Buttons */}
-            <View style={styles.timePickerButtonGroup}>
-              <TouchableOpacity
-                style={[styles.modalCancelButton, { flex: 1 }]}
-                onPress={closeTimePicker}
-              >
-                <Text style={styles.modalCancelButtonText}>취소</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSingleButton, { flex: 1 }]}
-                onPress={confirmTimePicker}
-              >
-                <Text
-                  style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}
-                >
-                  확인
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Bank Picker Modal */}
-      <Modal
+      <BankPickerModal
         visible={bankPickerVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setBankPickerVisible(false)}
-      >
-        <View style={styles.bankPickerModalOverlay}>
-          <View style={styles.bankPickerModalContent}>
-            <View style={styles.bankPickerModalHeader}>
-              <Text style={styles.bankPickerModalTitle}>은행 선택</Text>
-            </View>
-
-            <ScrollView
-              style={{ paddingHorizontal: 20 }}
-              showsVerticalScrollIndicator={false}
-            >
-              {banksLoading ? (
-                <View
-                  style={{
-                    paddingVertical: 40,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ color: "#999" }}>
-                    은행 목록을 불러오는 중입니다...
-                  </Text>
-                </View>
-              ) : banks.length > 0 ? (
-                banks.map((bank) => (
-                  <TouchableOpacity
-                    key={bank.bankIdx}
-                    onPress={() => selectBank(bank.bankIdx, bank.bankNm)}
-                    style={[
-                      styles.bankPickerItem,
-                      bankName === bank.bankNm
-                        ? styles.bankPickerItemActive
-                        : styles.bankPickerItemInactive,
-                    ]}
-                  >
-                    <View style={styles.bankPickerItemRow}>
-                      <Text
-                        style={[
-                          styles.bankPickerItemText,
-                          bankName === bank.bankNm
-                            ? styles.bankPickerItemTextActive
-                            : styles.bankPickerItemTextInactive,
-                        ]}
-                      >
-                        {bank.bankNm}
-                      </Text>
-                      {bankName === bank.bankNm && (
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={20}
-                          color="#EF7810"
-                        />
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <View
-                  style={{
-                    paddingVertical: 40,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ color: "#999" }}>
-                    사용 가능한 은행이 없습니다.
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
-
-            <View style={styles.bankPickerModalFooter}>
-              <TouchableOpacity
-                style={styles.bankPickerCloseButton}
-                onPress={() => setBankPickerVisible(false)}
-              >
-                <Text style={styles.bankPickerCloseButtonText}>닫기</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        banks={banks}
+        selectedBankName={bankName}
+        loading={banksLoading}
+        onSelect={(bankIdx, bankNm) => {
+          setBankIdx(bankIdx);
+          setBankName(bankNm);
+          setBankPickerVisible(false);
+        }}
+        onClose={() => setBankPickerVisible(false)}
+      />
 
       {insets.bottom > 0 && (
         <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />
