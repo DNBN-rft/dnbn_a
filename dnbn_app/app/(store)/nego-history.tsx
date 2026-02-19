@@ -25,6 +25,7 @@ interface NegoLogImages {
 }
 
 interface NegoLogItem {
+  negoLogIdx: number;
   categoryNm: string;
   images: NegoLogImages;
   startDateTime: string;
@@ -376,7 +377,10 @@ export default function NegoHistory() {
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() => {
-                    router.navigate("/(store)/nego-history-detail");
+                    router.navigate({
+                      pathname: "/(store)/nego-history-detail",
+                      params: { negoLogIdx: item.negoLogIdx },
+                    });
                   }}
                 >
                   <Text style={styles.detailButtonText}>상세</Text>

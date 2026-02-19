@@ -1,47 +1,171 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./nego-history-detail.styles";
 
+// API 응답 타입 정의
+interface FileItem {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface NegoLogFiles {
+  files: FileItem[];
+}
+
+interface NegoLogDetailResponse {
+  negoLogStatus: string;
+  files: NegoLogFiles;
+  categoryNm: string;
+  productNm: string;
+  productPrice: number;
+  productAmount: number;
+  detailDescription: string;
+  startDateTime: string;
+  endDateTime: string;
+}
+
 export default function NegoHistoryDetailPage() {
   const insets = useSafeAreaInsets();
+  const { negoLogIdx } = useLocalSearchParams<{ negoLogIdx: string }>();
 
-  // Mock 데이터
-  const negoHistoryDetail = {
-    status: "완료", // "완료" | "삭제"
-    registrationDate: "2024.01.12",
-    images: [
-      require("@/assets/images/image1.jpg"),
-      require("@/assets/images/logo.png"),
-      require("@/assets/images/qr.png"),
-    ],
-    categoryName: "음료",
-    productName: "아메리카노",
-    price: 4500,
-    stock: 20,
-    description:
-      "고급 원두로 만든 프리미엄 아메리카노입니다.\n깊고 진한 커피 향이 일품입니다.",
-    negoStartDate: "2024.01.10 10:00",
-    negoEndDate: "2024.01.12 10:00",
+  const [negoHistoryDetail, setNegoHistoryDetail] =
+    useState<NegoLogDetailResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // 날짜 포맷 변환 함수 (ISO -> YYYY.MM.DD HH:mm)
+  const formatDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // 상태 텍스트 변환
+  const getStatusText = (status: string) => {
+    return status === "COMPLETED" ? "완료" : status;
+  };
+
+  // 이미지 배열 생성 (3개 미만일 때 logo.png로 채우기)
+  const getImages = () => {
+    const logoImage = require("@/assets/images/logo.png");
+    const images = [];
+
+    if (
+      negoHistoryDetail?.files?.files &&
+      negoHistoryDetail.files.files.length > 0
+    ) {
+      // API에서 받은 이미지 추가
+      negoHistoryDetail.files.files.forEach((file) => {
+        images.push({ uri: file.fileUrl });
+      });
+    }
+
+    // 3개 미만이면 logo.png로 채우기
+    while (images.length < 3) {
+      images.push(logoImage);
+    }
+
+    return images;
+  };
+
+  // 네고 이력 상세 API 호출
+  const fetchNegoLogDetail = async () => {
+    if (!negoLogIdx) return;
+
+    try {
+      setLoading(true);
+      const response = await apiGet(`/store/app/nego-log/detail/${negoLogIdx}`);
+
+      if (response.ok) {
+        const data: NegoLogDetailResponse = await response.json();
+        setNegoHistoryDetail(data);
+      } else {
+        console.error("네고 이력 상세 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("네고 이력 상세 API 호출 에러:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 초기 데이터 로드
+  useFocusEffect(
+    useCallback(() => {
+      fetchNegoLogDetail();
+    }, [negoLogIdx]),
+  );
 
   // 이전 이미지
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? negoHistoryDetail.images.length - 1 : prev - 1,
-    );
+    const images = getImages();
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   // 다음 이미지
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === negoHistoryDetail.images.length - 1 ? 0 : prev + 1,
-    );
+    const images = getImages();
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
+
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
+  if (!negoHistoryDetail) {
+    return (
+      <View style={styles.container}>
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.title}>네고 이력 상세</Text>
+          <View style={styles.placeholder}></View>
+        </View>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text>데이터를 불러올 수 없습니다.</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const images = getImages();
 
   return (
     <View style={styles.container}>
@@ -67,10 +191,7 @@ export default function NegoHistoryDetailPage() {
             <View style={styles.productImagesContainer}>
               <View style={styles.productMetaContainer}>
                 <Text style={styles.productStatus}>
-                  {negoHistoryDetail.status}
-                </Text>
-                <Text style={styles.registrationDate}>
-                  등록일: {negoHistoryDetail.registrationDate}
+                  {getStatusText(negoHistoryDetail.negoLogStatus)}
                 </Text>
               </View>
 
@@ -84,7 +205,7 @@ export default function NegoHistoryDetailPage() {
 
                 <Image
                   style={styles.productMainImage}
-                  source={negoHistoryDetail.images[currentImageIndex]}
+                  source={images[currentImageIndex]}
                   resizeMode="contain"
                 />
 
@@ -97,7 +218,7 @@ export default function NegoHistoryDetailPage() {
               </View>
 
               <View style={styles.productSubImages}>
-                {negoHistoryDetail.images.map((image, index) => (
+                {images.map((image, index) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => setCurrentImageIndex(index)}
@@ -119,19 +240,19 @@ export default function NegoHistoryDetailPage() {
 
             <View style={styles.productInfoContainer}>
               <Text style={styles.categoryName}>
-                {negoHistoryDetail.categoryName}
+                {negoHistoryDetail.categoryNm}
               </Text>
               <Text style={styles.productName}>
-                {negoHistoryDetail.productName}
+                {negoHistoryDetail.productNm}
               </Text>
               <Text style={styles.productPrice}>
-                ₩ {negoHistoryDetail.price.toLocaleString()}
+                ₩ {negoHistoryDetail.productPrice.toLocaleString()}
               </Text>
               <Text style={styles.productStock}>
-                재고: {negoHistoryDetail.stock}개
+                재고: {negoHistoryDetail.productAmount}개
               </Text>
               <Text style={styles.productDescription}>
-                {negoHistoryDetail.description}
+                {negoHistoryDetail.detailDescription || "상세 설명이 없습니다."}
               </Text>
             </View>
           </View>
@@ -140,8 +261,8 @@ export default function NegoHistoryDetailPage() {
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>네고 기간</Text>
               <Text style={styles.statusInfoContent}>
-                {negoHistoryDetail.negoStartDate} ~{" "}
-                {negoHistoryDetail.negoEndDate}
+                {formatDateTime(negoHistoryDetail.startDateTime)} ~{" "}
+                {formatDateTime(negoHistoryDetail.endDateTime)}
               </Text>
             </View>
           </View>
