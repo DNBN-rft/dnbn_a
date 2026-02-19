@@ -1,5 +1,5 @@
 import { apiPost } from "@/utils/api";
-import { removeMultipleItems, setMultipleItems } from "@/utils/storageUtil";
+import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -25,25 +25,15 @@ export default function LoginScreen() {
 
   // 로그인 페이지 접근 시 인증 정보 정리
   useEffect(() => {
-    const clearAuthData = async () => {
+    const initAuth = async () => {
       try {
-        await removeMultipleItems([
-          "accessToken",
-          "refreshToken",
-          "accessTokenExpiresIn",
-          "refreshTokenExpiresIn",
-          "tokenType",
-          "userType",
-          "custCode",
-          "hasLocation",
-          "hasActCategory",
-        ]);
+        await clearAuthData(); // 모든 인증 정보 삭제
       } catch (error) {
         // Storage 정리 실패 시 무시 (로그인은 계속 진행)
       }
     };
 
-    clearAuthData();
+    initAuth();
   }, []);
 
   const handleLogin = async () => {
@@ -67,12 +57,14 @@ export default function LoginScreen() {
       if (response.ok) {
         const data = await response.json();
 
-        // 원본 저장 (선택사항)
-        await setMultipleItems({
-          custCode: data.custCode,
-          hasLocation: data.isExistLocation,
-          hasActCategory: data.isSetActiveCategory,
-        });
+        // cust 사용자만 custCode, hasLocation, hasActCategory 저장
+        if (userType === "cust") {
+          await setMultipleItems({
+            custCode: data.custCode,
+            hasLocation: data.isExistLocation,
+            hasActCategory: data.isSetActiveCategory,
+          });
+        }
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (userType === "cust") {

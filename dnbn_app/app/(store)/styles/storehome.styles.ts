@@ -36,6 +36,12 @@ export const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 20,
   },
+  salesInfo: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 16,
+  },
   statsContainer: {
     flexDirection: "row",
     gap: 12,

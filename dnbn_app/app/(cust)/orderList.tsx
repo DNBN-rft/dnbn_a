@@ -66,9 +66,7 @@ export default function PurchaseScreen() {
     try {
       setLoading(true);
       setError(false);
-      const response = await apiGet(
-        `/cust/order/purchase-history`,
-      );
+      const response = await apiGet(`/cust/order/purchase-history`);
 
       if (response.ok) {
         const data = await response.json();
@@ -368,43 +366,47 @@ export default function PurchaseScreen() {
                 </Pressable>
               </View>
               <View style={styles.filterOptions}>
-                <Pressable
+                <TouchableOpacity
                   style={[
                     styles.filterOptionButton,
                     tempStatus === "ALL" && styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("ALL")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>전체</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterOptionButton,
                     tempStatus === "PURCHASE" &&
                       styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("PURCHASE")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>구매</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterOptionButton,
                     tempStatus === "CANCEL" && styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("CANCEL")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>취소</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterOptionButton,
                     tempStatus === "REFUND" && styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("REFUND")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>환불</Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -412,58 +414,67 @@ export default function PurchaseScreen() {
             <View style={styles.filterSection}>
               <Text style={styles.filterSectionTitle}>기간</Text>
               <View style={styles.filterDateOptions}>
-                <Pressable
+                <TouchableOpacity
                   style={[
                     styles.filterDateButton,
                     tempPeriod === "1M" && styles.filterDateButtonActive,
                   ]}
                   onPress={() => setTempPeriod("1M")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 1개월</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterDateButton,
                     tempPeriod === "3M" && styles.filterDateButtonActive,
                   ]}
                   onPress={() => setTempPeriod("3M")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 3개월</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterDateButton,
                     tempPeriod === "6M" && styles.filterDateButtonActive,
                   ]}
                   onPress={() => setTempPeriod("6M")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 6개월</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterDateButton,
                     tempPeriod === "1Y" && styles.filterDateButtonActive,
                   ]}
                   onPress={() => setTempPeriod("1Y")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>최근 1년</Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={[
                     styles.filterDateButton,
                     tempPeriod === "ALL" && styles.filterDateButtonActive,
                   ]}
                   onPress={() => setTempPeriod("ALL")}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.filterOptionButtonText}>모든 기간</Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
 
             {/* 조회하기 버튼 */}
-            <Pressable style={styles.applyButton} onPress={handleApplyFilter}>
+            <TouchableOpacity
+              style={styles.applyButton}
+              onPress={handleApplyFilter}
+              activeOpacity={0.7}
+            >
               <Text style={styles.applyButtonText}>조회하기</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
