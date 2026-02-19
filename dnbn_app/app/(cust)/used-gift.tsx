@@ -44,11 +44,13 @@ export default function UsedGift() {
   interface UsedQrCode {
     storeNm: string;
     productNm: string;
+    orderCode: string;
     orderDetailPrice: number;
     orderDetailAmount: number;
     orderDetailTotal: number;
     orderDateTime: string;
     qrUsed: boolean;
+    qrUsedAt: string;
     cancelReason: string;
     orderRefundTime: string;
     qrImg: Img | null;
@@ -63,7 +65,7 @@ export default function UsedGift() {
 
   useEffect(() => {
     const fetchPurchaseDetail = async () => {
-      try{
+      try {
         setLoading(true);
         const orderDetailIdx = searchParams.orderDetailIdx as string;
 
@@ -215,10 +217,14 @@ export default function UsedGift() {
           </View>
         </View>
         <View style={styles.giftDetailInfo}>
-          <Text style={styles.giftDetailTitle}>선물 사용 정보</Text>
+          <Text style={styles.giftDetailTitle}>구매 상세 정보</Text>
           <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>금액</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailLabel}>QR 사용일</Text>
+            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.qrUsedAt)}</Text>
+          </View>
+          <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>주문번호</Text>
+            <Text style={styles.giftDetailValue}>{purchaseData.orderCode}</Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
@@ -229,25 +235,25 @@ export default function UsedGift() {
             <Text style={styles.giftDetailValue}>{purchaseData.orderDetailPrice.toLocaleString()}원</Text>
           </View>
           <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>금액</Text>
+            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+          </View>
+          <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
             <Text style={styles.giftDetailValue}>{purchaseData.storeNm}</Text>
           </View>
-          <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>선물 주문일</Text>
-            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.orderDateTime)}</Text>
-          </View>
-          <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>사용상태</Text>
-            <Text style={styles.giftDetailValue}>사용 완료</Text>
-          </View>
-          <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>환불 사유</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.cancelReason ? purchaseData.cancelReason : "없음"}</Text>
-          </View>
-          <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>환불 시간</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderRefundTime ? formatDateTime(purchaseData.orderRefundTime) : "없음"}</Text>
-          </View>
+          {purchaseData.cancelReason && (
+            <View style={styles.giftDetailRow}>
+              <Text style={styles.giftDetailLabel}>환불 사유</Text>
+              <Text style={styles.giftDetailValue}>{purchaseData.cancelReason}</Text>
+            </View>
+          )}
+          {purchaseData.orderRefundTime && (
+            <View style={styles.giftDetailRow}>
+              <Text style={styles.giftDetailLabel}>환불 시간</Text>
+              <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.orderRefundTime)}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
       {insets.bottom > 0 && (

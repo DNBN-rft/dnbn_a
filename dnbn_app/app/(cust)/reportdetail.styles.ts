@@ -94,17 +94,31 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EF7810",
   },
+  statusBadgePending: {
+    backgroundColor: "#F5F5F5",
+    borderColor: "#BDBDBD",
+  },
   statusBadgeCompleted: {
-    backgroundColor: "#E8F5E9",
-    borderColor: "#4CAF50",
+    backgroundColor: "#FFF5ED",
+    borderColor: "#FF6B00",
+  },
+  statusBadgeRejected: {
+    backgroundColor: "#FFEBEE",
+    borderColor: "#E53935",
   },
   statusText: {
     fontSize: 13,
     fontWeight: "600",
     color: "#EF7810",
   },
+  statusTextPending: {
+    color: "#757575",
+  },
   statusTextCompleted: {
-    color: "#4CAF50",
+    color: "#FF6B00",
+  },
+  statusTextRejected: {
+    color: "#E53935",
   },
   contentCard: {
     backgroundColor: "#fff",
