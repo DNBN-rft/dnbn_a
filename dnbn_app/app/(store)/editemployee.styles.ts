@@ -124,4 +124,49 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  permissionContainer: {
+    gap: 12,
+    marginTop: 8,
+  },
+  permissionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  permissionItemActive: {
+    backgroundColor: '#FFF5ED',
+    borderColor: '#EF7810',
+  },
+  permissionIcon: {
+    marginRight: 12,
+  },
+  permissionText: {
+    fontSize: 15,
+    color: '#333',
+    fontWeight: '400',
+  },
+  permissionTextActive: {
+    color: '#EF7810',
+    fontWeight: '600',
+  },
+  safeAreaTop: {
+    backgroundColor: '#fff',
+  },
+  safeAreaBottom: {
+    backgroundColor: '#000',
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  inputDisabled: {
+    backgroundColor: '#f5f5f5',
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
 });
