@@ -21,6 +21,7 @@ interface NegoImages {
 }
 
 interface NegoListItem {
+  negoIdx: number;
   categoryNm: string;
   images: NegoImages;
   startDateTime: string;
@@ -355,7 +356,7 @@ export default function StoreNego() {
                   onPress={() =>
                     router.navigate({
                       pathname: "/(store)/detailnego",
-                      params: { negoIdx: 6 },
+                      params: { negoIdx: item.negoIdx },
                     })
                   }
                 >
