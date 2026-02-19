@@ -352,7 +352,12 @@ export default function StoreNego() {
               <View style={styles.detailButtonContainer}>
                 <TouchableOpacity
                   style={styles.detailButton}
-                  onPress={() => router.navigate("/(store)/detailnego")}
+                  onPress={() =>
+                    router.navigate({
+                      pathname: "/(store)/detailnego",
+                      params: { negoIdx: 6 },
+                    })
+                  }
                 >
                   <Text style={styles.detailButtonText}>상세</Text>
                 </TouchableOpacity>
