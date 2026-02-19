@@ -60,6 +60,35 @@ interface NegoListResponse {
   empty: boolean;
 }
 
+// 네고 요청 API 응답 타입 정의
+interface NegoRequestItem {
+  images: NegoImages;
+  categoryNm: string;
+  custCode: string;
+  custNm: string;
+  custTelNo: string;
+  productCode: string;
+  productNm: string;
+  requestDateTime: string;
+  requestPrice: number;
+  requestStatus: boolean;
+  storeCode: string;
+}
+
+interface NegoRequestResponse {
+  content: NegoRequestItem[];
+  pageable: Pageable;
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  size: number;
+  number: number;
+  sort: PageableSort;
+  numberOfElements: number;
+  empty: boolean;
+}
+
 export default function StoreNego() {
   const insets = useSafeAreaInsets();
   const { tab } = useLocalSearchParams<{ tab?: "list" | "request" }>();
@@ -71,6 +100,13 @@ export default function StoreNego() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // 네고 요청 리스트 상태
+  const [negoRequestList, setNegoRequestList] = useState<NegoRequestItem[]>([]);
+  const [requestPage, setRequestPage] = useState(0);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestHasMore, setRequestHasMore] = useState(true);
+  const [requestRefreshing, setRequestRefreshing] = useState(false);
 
   // 네고 리스트 API 호출
   const fetchNegoList = async (pageNum: number, isRefresh: boolean = false) => {
@@ -118,12 +154,65 @@ export default function StoreNego() {
     }
   };
 
+  // 네고 요청 리스트 API 호출
+  const fetchNegoRequestList = async (
+    pageNum: number,
+    isRefresh: boolean = false,
+  ) => {
+    if (requestLoading || (!requestHasMore && !isRefresh)) return;
+
+    try {
+      setRequestLoading(true);
+      const response = await apiGet(
+        `/store/app/nego-req/list?page=${pageNum}&size=10`,
+      );
+
+      if (response.ok) {
+        const data: NegoRequestResponse = await response.json();
+
+        if (isRefresh) {
+          setNegoRequestList(data.content);
+        } else {
+          setNegoRequestList((prev) => [...prev, ...data.content]);
+        }
+
+        setRequestHasMore(!data.last);
+        setRequestPage(pageNum);
+      } else {
+        console.error("네고 요청 리스트 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("네고 요청 리스트 API 호출 에러:", error);
+    } finally {
+      setRequestLoading(false);
+      setRequestRefreshing(false);
+    }
+  };
+
+  // 요청 새로고침
+  const handleRequestRefresh = () => {
+    setRequestRefreshing(true);
+    setRequestHasMore(true);
+    fetchNegoRequestList(0, true);
+  };
+
+  // 요청 무한 스크롤 - 더 불러오기
+  const loadMoreRequest = () => {
+    if (!requestLoading && requestHasMore) {
+      fetchNegoRequestList(requestPage + 1);
+    }
+  };
+
   // 초기 데이터 로드
   useFocusEffect(
     useCallback(() => {
-      setActiveTab(tab || "list");
-      if (activeTab === "list" && negoList.length === 0) {
+      const newTab = tab || "list";
+      setActiveTab(newTab);
+
+      if (newTab === "list" && negoList.length === 0) {
         fetchNegoList(0, true);
+      } else if (newTab === "request" && negoRequestList.length === 0) {
+        fetchNegoRequestList(0, true);
       }
     }, [tab]),
   );
@@ -132,39 +221,8 @@ export default function StoreNego() {
     "approve" | "reject" | "noOpen"
   >("noOpen");
   const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
-
-  const negoRequest = [
-    {
-      id: "1",
-      uri: require("@/assets/images/image1.jpg"),
-      category: "카테고리 1",
-      productName: "상품 1",
-      price: 9000,
-      offeredPrice: 8500,
-      requestor: "김진용",
-      requestorPhone: "010-1234-5678",
-    },
-    {
-      id: "2",
-      uri: require("@/assets/images/image1.jpg"),
-      category: "카테고리 2",
-      productName: "상품 2",
-      price: 92000,
-      offeredPrice: 17000,
-      requestor: "전형운",
-      requestorPhone: "010-1234-5678",
-    },
-    {
-      id: "3",
-      uri: require("@/assets/images/image1.jpg"),
-      category: "카테고리 3",
-      productName: "상품 3",
-      price: 90040,
-      offeredPrice: 24000,
-      requestor: "박소윤",
-      requestorPhone: "010-1234-5678",
-    },
-  ];
+  const [selectedRequest, setSelectedRequest] =
+    useState<NegoRequestItem | null>(null);
 
   const handleApprove = (status) => {
     // {
@@ -215,7 +273,12 @@ export default function StoreNego() {
           style={
             activeTab === "request" ? styles.tabButtonActive : styles.tabButton
           }
-          onPress={() => setActiveTab("request")}
+          onPress={() => {
+            setActiveTab("request");
+            if (negoRequestList.length === 0) {
+              fetchNegoRequestList(0, true);
+            }
+          }}
         >
           <Text
             style={
@@ -260,7 +323,7 @@ export default function StoreNego() {
                   ) : (
                     <Image
                       style={styles.productImage}
-                      source={require("@/assets/images/image1.jpg")}
+                      source={require("@/assets/images/logo.png")}
                     />
                   )}
                 </View>
@@ -304,43 +367,53 @@ export default function StoreNego() {
           contentContainerStyle={{
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
           }}
-          data={negoRequest}
-          keyExtractor={(item) => item.id}
+          data={negoRequestList}
+          keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
+          onRefresh={handleRequestRefresh}
+          refreshing={requestRefreshing}
+          onEndReached={loadMoreRequest}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            requestLoading && !requestRefreshing ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color="#000" />
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
                 <View style={styles.negoRequestProductImageContainer}>
-                  <Image
-                    style={styles.negoRequestProductImage}
-                    source={item.uri}
-                  />
+                  {item.images?.files && item.images.files.length > 0 ? (
+                    <Image
+                      style={styles.negoRequestProductImage}
+                      source={{ uri: item.images.files[0] }}
+                    />
+                  ) : (
+                    <Image
+                      style={styles.negoRequestProductImage}
+                      source={require("@/assets/images/logo.png")}
+                    />
+                  )}
                 </View>
 
                 <View style={styles.negoRequestproductInfoContainer}>
                   <View>
-                    <Text style={styles.productNameText}>
-                      {item.productName}
-                    </Text>
+                    <Text style={styles.productNameText}>{item.productNm}</Text>
                   </View>
 
                   <View>
                     <View>
-                      <Text style={styles.registPriceText}>
-                        {item.price.toLocaleString()}원
-                      </Text>
-                    </View>
-
-                    <View>
                       <Text style={styles.negoPriceText}>
-                        {item.offeredPrice.toLocaleString()}원
+                        {item.requestPrice.toLocaleString()}원
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.requestor}>
-                    <Text>{item.requestor}</Text>
-                    <Text>{item.requestorPhone}</Text>
+                    <Text>{item.custNm}</Text>
+                    <Text>{item.custTelNo}</Text>
                   </View>
                 </View>
               </View>
@@ -349,6 +422,7 @@ export default function StoreNego() {
                 <View style={styles.requestButtonContainer}>
                   <TouchableOpacity
                     onPress={() => {
+                      setSelectedRequest(item);
                       setApproveModal("approve");
                       setStatusNm("승인");
                     }}
@@ -361,6 +435,7 @@ export default function StoreNego() {
 
                   <TouchableOpacity
                     onPress={() => {
+                      setSelectedRequest(item);
                       setApproveModal("reject");
                       setStatusNm("거절");
                     }}
