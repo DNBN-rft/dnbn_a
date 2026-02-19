@@ -1,11 +1,47 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./nego-history-detail.styles";
 
 export default function NegoHistoryDetailPage() {
   const insets = useSafeAreaInsets();
+
+  // Mock 데이터
+  const negoHistoryDetail = {
+    status: "완료", // "완료" | "삭제"
+    registrationDate: "2024.01.12",
+    images: [
+      require("@/assets/images/image1.jpg"),
+      require("@/assets/images/logo.png"),
+      require("@/assets/images/qr.png"),
+    ],
+    categoryName: "음료",
+    productName: "아메리카노",
+    price: 4500,
+    stock: 20,
+    description:
+      "고급 원두로 만든 프리미엄 아메리카노입니다.\n깊고 진한 커피 향이 일품입니다.",
+    negoStartDate: "2024.01.10 10:00",
+    negoEndDate: "2024.01.12 10:00",
+  };
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // 이전 이미지
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? negoHistoryDetail.images.length - 1 : prev - 1,
+    );
+  };
+
+  // 다음 이미지
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === negoHistoryDetail.images.length - 1 ? 0 : prev + 1,
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -30,56 +66,72 @@ export default function NegoHistoryDetailPage() {
           <View style={styles.contentRow}>
             <View style={styles.productImagesContainer}>
               <View style={styles.productMetaContainer}>
-                <Text style={styles.productStatus}>완료</Text>
-                <Text style={styles.registrationDate}>등록일: 2024.01.12</Text>
+                <Text style={styles.productStatus}>
+                  {negoHistoryDetail.status}
+                </Text>
+                <Text style={styles.registrationDate}>
+                  등록일: {negoHistoryDetail.registrationDate}
+                </Text>
               </View>
-              
+
               <View style={styles.mainImageContainer}>
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/*이전 이미지 함수 */}}
+                  onPress={handlePrevImage}
                 >
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
-                
-                <Image 
+
+                <Image
                   style={styles.productMainImage}
-                  source={require('@/assets/images/image1.jpg')}
+                  source={negoHistoryDetail.images[currentImageIndex]}
                   resizeMode="contain"
                 />
-                
+
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/*다음 이미지 함수 */}}
+                  onPress={handleNextImage}
                 >
                   <Ionicons name="chevron-forward" size={24} color="#666" />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.productSubImages}>
-                <Image 
-                  style={styles.productSubImage}
-                  source={require('@/assets/images/image1.jpg')}
-                />
-                <Image 
-                  style={styles.productSubImage}
-                  source={require('@/assets/images/image1.jpg')}
-                />
-                <Image 
-                  style={styles.productSubImage}
-                  source={require('@/assets/images/image1.jpg')}
-                />
+                {negoHistoryDetail.images.map((image, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setCurrentImageIndex(index)}
+                  >
+                    <Image
+                      style={[
+                        styles.productSubImage,
+                        currentImageIndex === index && {
+                          borderWidth: 2,
+                          borderColor: "#007AFF",
+                        },
+                      ]}
+                      source={image}
+                    />
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
 
             <View style={styles.productInfoContainer}>
-              <Text style={styles.categoryName}>음료</Text>
-              <Text style={styles.productName}>아메리카노</Text>
-              <Text style={styles.productPrice}>₩ 4,500</Text>
-              <Text style={styles.productStock}>재고: 20개</Text>
+              <Text style={styles.categoryName}>
+                {negoHistoryDetail.categoryName}
+              </Text>
+              <Text style={styles.productName}>
+                {negoHistoryDetail.productName}
+              </Text>
+              <Text style={styles.productPrice}>
+                ₩ {negoHistoryDetail.price.toLocaleString()}
+              </Text>
+              <Text style={styles.productStock}>
+                재고: {negoHistoryDetail.stock}개
+              </Text>
               <Text style={styles.productDescription}>
-                고급 원두로 만든 프리미엄 아메리카노입니다.
-                깊고 진한 커피 향이 일품입니다.
+                {negoHistoryDetail.description}
               </Text>
             </View>
           </View>
@@ -87,7 +139,10 @@ export default function NegoHistoryDetailPage() {
           <View style={styles.productStatusContainer}>
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>네고 기간</Text>
-              <Text style={styles.statusInfoContent}>2024.01.10 10:00 ~ 2024.01.12 10:00</Text>
+              <Text style={styles.statusInfoContent}>
+                {negoHistoryDetail.negoStartDate} ~{" "}
+                {negoHistoryDetail.negoEndDate}
+              </Text>
             </View>
           </View>
         </View>
