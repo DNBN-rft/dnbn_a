@@ -197,13 +197,17 @@ export default function ReportDetailScreen() {
               <View
                 style={[
                   styles.statusBadge,
-                  report.status === "답변완료" && styles.statusBadgeCompleted,
+                  report.status === "처리완료" && styles.statusBadgeCompleted,
+                  report.status === "처리대기" && styles.statusBadgePending,
+                  report.status === "반려" && styles.statusBadgeRejected,
                 ]}
               >
                 <Text
                   style={[
                     styles.statusText,
-                    report.status === "답변완료" && styles.statusTextCompleted,
+                    report.status === "처리완료" && styles.statusTextCompleted,
+                    report.status === "처리대기" && styles.statusTextPending,
+                    report.status === "반려" && styles.statusTextRejected,
                   ]}
                 >
                   {report.status}
