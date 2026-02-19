@@ -129,3 +129,54 @@ export const clearStorage = async (keys?: string[]): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * 인증 관련 storage 정보를 삭제합니다.
+ * recentSearches 등 사용자 편의 데이터는 유지됩니다.
+ */
+export const clearAuthData = async (
+  userType?: "cust" | "store",
+): Promise<void> => {
+  const commonKeys = [
+    "accessToken",
+    "refreshToken",
+    "accessTokenExpiresIn",
+    "refreshTokenExpiresIn",
+    "tokenType",
+    "userType",
+  ];
+
+  let keysToRemove: string[] = [...commonKeys];
+
+  if (!userType) {
+    // userType이 지정되지 않은 경우 (로그인 페이지 접근 등) 모든 인증 정보 삭제
+    keysToRemove = [
+      ...commonKeys,
+      "custCode",
+      "hasLocation",
+      "hasActCategory",
+      "storeCode",
+      "memberNm",
+      "authorities",
+      "memberId",
+      "subscriptionNm",
+      "storeAddress",
+    ];
+  } else if (userType === "cust") {
+    // 고객 로그아웃
+    keysToRemove = [...commonKeys, "custCode", "hasLocation", "hasActCategory"];
+  } else if (userType === "store") {
+    // 사업자 로그아웃
+    keysToRemove = [
+      ...commonKeys,
+      "storeCode",
+      "memberNm",
+      "authorities",
+      "memberId",
+      "subscriptionNm",
+      "storeAddress",
+    ];
+  }
+
+  await removeMultipleItems(keysToRemove);
+};

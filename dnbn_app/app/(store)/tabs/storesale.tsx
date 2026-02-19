@@ -1,63 +1,111 @@
+import { apiDelete, apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
-import { FlatList, Image, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/storesale.styles";
+
+interface ImageFile {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface ProductImages {
+  files: ImageFile[];
+}
+
+interface SaleItem {
+  saleIdx: number;
+  images: ProductImages;
+  productCode: string;
+  productNm: string;
+  saleType: string;
+  saleValue: number;
+  originalPrice: number;
+  discountedPrice: number;
+  saleStatus: string;
+  startDateTime: string;
+  endDateTime: string;
+}
+
+interface SaleListResponse {
+  content: SaleItem[];
+  pageable: any;
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
 
 export default function StoreSale() {
   const insets = useSafeAreaInsets();
   const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedSaleIdx, setSelectedSaleIdx] = useState<number | null>(null);
+  const [saleList, setSaleList] = useState<SaleItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const saleList = [
-    { 
-      id: "1", 
-      uri: require("@/assets/images/image1.jpg"), 
-      category: "카테고리 1", 
-      productName: "상품 1", 
-      status: "진행",
-      originalPrice: 10000, 
-      discountRate: 10,
-      salePrice: 9000
-    },
-    { 
-      id: "2", 
-      uri: require("@/assets/images/image1.jpg"), 
-      category: "카테고리 2", 
-      productName: "상품 2", 
-      status: "대기",
-      originalPrice: 20000, 
-      discountRate: 20,
-      salePrice: 16000
-    },
-    { 
-      id: "3", 
-      uri: require("@/assets/images/image1.jpg"), 
-      category: "카테고리 3", 
-      productName: "상품 3", 
-      status: "대기",
-      originalPrice: 30000, 
-      discountRate: 15,
-      salePrice: 25500
-    },
-    { 
-      id: "4", 
-      uri: require("@/assets/images/image1.jpg"), 
-      category: "카테고리 4", 
-      productName: "상품 4", 
-      status: "대기",
-      originalPrice: 90000, 
-      discountRate: 10,
-      salePrice: 81000
-    },
-  ];
+  const fetchSaleList = async () => {
+    setLoading(true);
+    try {
+      const response = await apiGet("/store/app/sale");
 
-  const handleDelete = () => {
-    // TODO: 실제 삭제 로직 구현
-    console.log("삭제할 상품 ID:", selectedItemId);
-    setDeleteModal(false);
-    setSelectedItemId(null);
+      if (response.ok) {
+        const data: SaleListResponse = await response.json();
+        setSaleList(data.content);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        Alert.alert(
+          "오류",
+          errorData.message || "할인 목록을 불러오는데 실패했습니다.",
+        );
+      }
+    } catch (error) {
+      console.error("할인 목록 불러오기 오류:", error);
+      Alert.alert("오류", "네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSaleList();
+  }, []);
+
+  const handleDelete = async () => {
+    if (!selectedSaleIdx) return;
+
+    try {
+      const response = await apiDelete(`/store/app/sale/${selectedSaleIdx}`);
+
+      if (response.ok) {
+        Alert.alert("성공", "할인이 삭제되었습니다.");
+        fetchSaleList(); // 목록 새로고침
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        Alert.alert("오류", errorData.message || "삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("삭제 오류:", error);
+      Alert.alert("오류", "네트워크 오류가 발생했습니다.");
+    } finally {
+      setDeleteModal(false);
+      setSelectedSaleIdx(null);
+    }
   };
 
   return (
@@ -80,60 +128,63 @@ export default function StoreSale() {
       </View>
 
       <FlatList
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+        }}
         data={saleList}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.saleIdx.toString()}
         showsVerticalScrollIndicator={false}
+        refreshing={loading}
+        onRefresh={fetchSaleList}
         renderItem={({ item }) => (
           <View style={styles.saleProduct}>
             <View style={styles.productContainer}>
               <View style={styles.productImageContainer}>
                 <Image
                   style={styles.productImage}
-                  source={item.uri} />
+                  source={{ uri: item.images.files[0]?.fileUrl }}
+                />
               </View>
-  
+
               <View style={styles.productInfoContainer}>
                 <View>
-                  <Text style={styles.categoryText}>{item.category}</Text>
+                  <Text style={styles.categoryText}>{item.saleStatus}</Text>
 
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
                     style={styles.productNameText}
-                  >{item.productName}</Text>
+                  >
+                    {item.productNm}
+                  </Text>
                 </View>
-                
+
                 <View>
                   <Text style={styles.originalPriceText}>
                     {item.originalPrice.toLocaleString()}원
                   </Text>
                   <View style={styles.discountContainer}>
                     <Text style={styles.discountRateText}>
-                      {item.discountRate}%
+                      {item.saleValue}
+                      {item.saleType === "할인률" ? "%" : "원"}
                     </Text>
                     <Text style={styles.salePriceText}>
-                      {item.salePrice.toLocaleString()}원
-                    </Text>
-                  </View>
-                  <View style={styles.statusContainer}>
-                    <Text style={styles.statusText}>
-                      {item.status}
+                      {item.discountedPrice.toLocaleString()}원
                     </Text>
                   </View>
                 </View>
               </View>
             </View>
-  
+
             <View style={styles.buttonContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => {
-                  setSelectedItemId(item.id);
+                  setSelectedSaleIdx(item.saleIdx);
                   setDeleteModal(true);
                 }}
               >
-                <Text style={styles.deleteButtonText}>삭제</Text>
+                <Text style={styles.deleteButtonText}>할인 취소</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -148,24 +199,24 @@ export default function StoreSale() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.deleteModalContent}>
-            <Text style={styles.deleteModalTitle}>
-              알림
-            </Text>
+            <Text style={styles.deleteModalTitle}>알림</Text>
             <Text style={styles.deleteModalMessage}>
-              정말로 이 할인을 삭제하시겠습니까?
+              정말로 이 할인을 취소하시겠습니까?
             </Text>
-            
+
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}
-                onPress={handleDelete}>
-                <Text style={styles.confirmButtonText}>삭제</Text>
+                onPress={handleDelete}
+              >
+                <Text style={styles.confirmButtonText}>네</Text>
               </TouchableOpacity>
-        
+
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.cancelButton]}
-                onPress={() => setDeleteModal(false)}>
-                <Text style={styles.modalCancelButtonText}>취소</Text>
+                onPress={() => setDeleteModal(false)}
+              >
+                <Text style={styles.modalCancelButtonText}>아니오</Text>
               </TouchableOpacity>
             </View>
           </View>

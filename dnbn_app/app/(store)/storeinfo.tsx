@@ -1,11 +1,77 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View, Platform, Image } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storeinfo.styles";
-import { apiGet } from "@/utils/api";
+
+const dateFormatter = (dateString: string): string => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}년 ${month}월 ${day}일`;
+};
+
+const openDaysFormatter = (days: string[]): string => {
+  if (!days || days.length === 0) return "";
+
+  const dayMap: { [key: string]: number } = {
+    월: 0,
+    화: 1,
+    수: 2,
+    목: 3,
+    금: 4,
+    토: 5,
+    일: 6,
+  };
+
+  const dayNames = ["월", "화", "수", "목", "금", "토", "일"];
+
+  const dayNumbers = days
+    .map((day) => dayMap[day])
+    .filter((num) => num !== undefined)
+    .sort((a, b) => a - b);
+
+  if (dayNumbers.length === 0) return "";
+
+  const groups: number[][] = [];
+  let currentGroup: number[] = [dayNumbers[0]];
+
+  for (let i = 1; i < dayNumbers.length; i++) {
+    if (dayNumbers[i] === currentGroup[currentGroup.length - 1] + 1) {
+      currentGroup.push(dayNumbers[i]);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [dayNumbers[i]];
+    }
+  }
+  groups.push(currentGroup);
+
+  const formatted = groups.map((group) => {
+    if (group.length >= 3) {
+      return `${dayNames[group[0]]} ~ ${dayNames[group[group.length - 1]]}`;
+    } else if (group.length === 2) {
+      return `${dayNames[group[0]]}, ${dayNames[group[1]]}`;
+    } else {
+      return dayNames[group[0]];
+    }
+  });
+
+  return formatted.join(", ");
+};
 
 interface StoreInfo {
   approvalStatus: string;
@@ -26,7 +92,7 @@ interface StoreInfo {
   ownerTelNo: string;
   requestedDateTime: string;
 
-  storeOpenDate: Array<string>;
+  storeOpenDate: string[];
   storeOpenTime: string;
   storeCloseTime: string;
 
@@ -34,7 +100,7 @@ interface StoreInfo {
   membershipStartDate: string;
   nextBillingDate: string;
   planPrice: number;
-  isRenew: boolean
+  isRenew: boolean;
   membershipInfos: MembershipInfo[];
   mainImg: mainImg;
 }
@@ -51,7 +117,7 @@ interface MembershipInfo {
 interface mainImg {
   fileUrl: string;
   originalName: string;
-  order: number
+  order: number;
 }
 
 export default function StoreInfoPage() {
@@ -97,7 +163,7 @@ export default function StoreInfoPage() {
       };
 
       fetchStoreInfo();
-    }, [])
+    }, []),
   );
 
   if (loading) {
@@ -111,7 +177,9 @@ export default function StoreInfoPage() {
   if (error || !storeInfo) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: "center", marginTop: 20 }}>{error || "정보를 불러올 수 없습니다."}</Text>
+        <Text style={{ textAlign: "center", marginTop: 20 }}>
+          {error || "정보를 불러올 수 없습니다."}
+        </Text>
       </View>
     );
   }
@@ -135,8 +203,8 @@ export default function StoreInfoPage() {
             router.push({
               pathname: "/(store)/editstoreinfo",
               params: {
-                storeInfo: JSON.stringify(storeInfo)
-              }
+                storeInfo: JSON.stringify(storeInfo),
+              },
             });
           }}
         >
@@ -156,12 +224,11 @@ export default function StoreInfoPage() {
               <Text style={styles.sectionTitle}>가맹점 정보</Text>
             </View>
 
-
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>가맹점 대표 이미지</Text>
-                <Image 
-                  source={{ uri: storeInfo.mainImg.fileUrl }} 
+                <Image
+                  source={{ uri: storeInfo.mainImg.fileUrl }}
                   style={{ width: 100, height: 100, borderRadius: 8 }}
                   resizeMode="cover"
                 />
@@ -178,7 +245,9 @@ export default function StoreInfoPage() {
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>주소</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeAddr} {storeInfo.storeAddrDetail}</Text>
+                <Text style={styles.infoValue}>
+                  {storeInfo.storeAddr} {storeInfo.storeAddrDetail}
+                </Text>
               </View>
             </View>
           </View>
@@ -241,7 +310,9 @@ export default function StoreInfoPage() {
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>가입 신청일</Text>
-                <Text style={styles.infoValue}>{storeInfo.requestedDateTime}</Text>
+                <Text style={styles.infoValue}>
+                  {dateFormatter(storeInfo.requestedDateTime)}
+                </Text>
               </View>
             </View>
           </View>
@@ -255,12 +326,16 @@ export default function StoreInfoPage() {
             <View style={styles.infoContainer}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>영업 시간</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeOpenTime} ~ {storeInfo.storeCloseTime}</Text>
+                <Text style={styles.infoValue}>
+                  {storeInfo.storeOpenTime} ~ {storeInfo.storeCloseTime}
+                </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>영업일</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeOpenDate}</Text>
+                <Text style={styles.infoValue}>
+                  {openDaysFormatter(storeInfo.storeOpenDate)}
+                </Text>
               </View>
             </View>
           </View>

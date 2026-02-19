@@ -3,12 +3,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiDelete, apiGet } from "../../utils/api";
 import { styles } from "./question-answer.styles";
@@ -236,6 +236,11 @@ export default function QuestionAnswer() {
                     key={index}
                     source={{ uri: img.fileUrl }}
                     style={styles.questionImage}
+                    priority="high"
+                    cachePolicy="memory-disk"
+                    contentFit="cover"
+                    transition={200}
+                    placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
                   />
                 ))}
             </ScrollView>

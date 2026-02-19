@@ -141,13 +141,13 @@ export default function NoticeDetailScreen() {
         // 웹 환경에서는 window.alert 사용
         if (Platform.OS === "web") {
           window.alert("문의가 성공적으로 등록되었습니다.");
-          router.navigate("/(cust)/question");
+          router.replace("/(cust)/question");
         } else {
           // 네이티브 환경에서는 Alert.alert 사용
           Alert.alert("성공", "문의가 성공적으로 등록되었습니다.", [
             {
               text: "확인",
-              onPress: () => router.navigate("/(cust)/question"),
+              onPress: () => router.replace("/(cust)/question"),
             },
           ]);
         }
