@@ -221,8 +221,6 @@ export default function StoreNego() {
     "approve" | "reject" | "noOpen"
   >("noOpen");
   const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
-  const [selectedRequest, setSelectedRequest] =
-    useState<NegoRequestItem | null>(null);
 
   const handleApprove = (status) => {
     // {
@@ -422,7 +420,6 @@ export default function StoreNego() {
                 <View style={styles.requestButtonContainer}>
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedRequest(item);
                       setApproveModal("approve");
                       setStatusNm("승인");
                     }}
@@ -435,7 +432,6 @@ export default function StoreNego() {
 
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedRequest(item);
                       setApproveModal("reject");
                       setStatusNm("거절");
                     }}
