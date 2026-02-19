@@ -153,12 +153,6 @@ export const styles = StyleSheet.create({
     color: '#EF7810',
     fontWeight: '600',
   },
-  safeAreaTop: {
-    backgroundColor: '#fff',
-  },
-  safeAreaBottom: {
-    backgroundColor: '#000',
-  },
   loadingContainer: {
     padding: 40,
     alignItems: 'center',

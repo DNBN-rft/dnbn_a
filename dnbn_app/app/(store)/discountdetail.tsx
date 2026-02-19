@@ -1,34 +1,160 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./discountdetail.styles";
 
+interface FileItem {
+  originalName: string;
+  fileUrl: string;
+  order: number;
+}
+
+interface FileMasterResponse {
+  files: FileItem[];
+}
+
+interface SaleHistoryDetail {
+  saleLogIdx: number;
+  productCode: string;
+  productNm: string;
+  originalPrice: number;
+  saleType: string;
+  saleValue: number;
+  discountedPrice: number;
+  startDateTime: string;
+  endDateTime: string;
+  saleLogStatus: string;
+  productDescription?: string;
+  files?: FileMasterResponse;
+  categoryNm?: string;
+  stock?: number;
+}
+
 export default function DiscountDetailPage() {
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams();
+  const { saleLogIdx } = useLocalSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [discountData, setDiscountData] = useState<SaleHistoryDetail | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // 실제로는 id를 기반으로 서버에서 데이터를 가져옴
-  const discountData = {
-    category: "전자제품",
-    productName: "고급 무선 이어폰",
-    originalPrice: 89000,
-    discountRate: 20,
-    discountedPrice: 17800,
-    finalPrice: 71200,
-    stock: 15,
-    status: "완료",
-    startTime: "2024.01.10 10:00",
-    endTime: "2024.01.12 23:59",
-    registrationDate: "2024.01.10",
-    description: "고음질 사운드를 제공하는 프리미엄 무선 이어폰입니다.\n노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.",
-    images: [
-      'https://via.placeholder.com/300',
-      'https://via.placeholder.com/80',
-      'https://via.placeholder.com/80',
-      'https://via.placeholder.com/80',
-    ]
+  useEffect(() => {
+    const loadDiscountDetail = async () => {
+      if (!saleLogIdx) {
+        Alert.alert("오류", "할인 정보를 찾을 수 없습니다.");
+        router.back();
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await apiGet(`/store/app/sale-history/detail/${saleLogIdx}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+console.log("할인 상세 API 응답:", data);
+
+          setDiscountData(data);
+        } else {
+          const errorText = await response.text();
+          Alert.alert("오류", errorText || "할인 상세 정보를 불러오는데 실패했습니다.");
+          router.back();
+        }
+      } catch (error) {
+        console.error("할인 상세 조회 실패:", error);
+        Alert.alert("오류", "할인 상세 정보를 불러오는데 실패했습니다.");
+        router.back();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDiscountDetail();
+  }, [saleLogIdx]);
+
+  const formatDateTime = (dateTime: string) => {
+    if (!dateTime) return '';
+    const date = new Date(dateTime);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(/\. /g, '.').replace(/\.$/, '');
   };
+
+  const formatDate = (dateTime: string) => {
+    if (!dateTime) return '';
+    const date = new Date(dateTime);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\. /g, '.').replace(/\.$/, '');
+  };
+
+  const getStatusText = (status: string) => {
+    // API가 이미 한글로 반환하므로 그대로 사용
+    return status;
+  };
+
+  const handlePreviousImage = () => {
+    const images = discountData?.files?.files || [];
+    if (images.length > 1) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? images.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const handleNextImage = () => {
+    const images = discountData?.files?.files || [];
+    if (images.length > 1) {
+      setCurrentImageIndex((prev) => 
+        prev === images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  if (loading || !discountData) {
+    return (
+      <View style={styles.container}>
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.title}>할인 상세</Text>
+          <View style={styles.placeholder}></View>
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#EF7810" />
+        </View>
+      </View>
+    );
+  }
+
+  const displayImages = discountData.files?.files?.map(file => file.fileUrl) || ['https://via.placeholder.com/300'];
+  const finalPrice = discountData.originalPrice - discountData.discountedPrice;
+  const discountRate = discountData.saleType === '할인률' 
+    ? discountData.saleValue 
+    : Math.round((discountData.discountedPrice / discountData.originalPrice) * 100);
 
   return (
     <View style={styles.container}>
@@ -55,50 +181,59 @@ export default function DiscountDetailPage() {
               <View style={styles.productMetaContainer}>
                 <Text style={[
                   styles.productStatus,
-                  discountData.status === '완료' ? styles.statusComplete : styles.statusCanceled
+                  discountData.saleLogStatus === '할인 완료' ? styles.statusComplete : styles.statusCanceled
                 ]}>
-                  {discountData.status}
+                  {getStatusText(discountData.saleLogStatus)}
                 </Text>
                 <Text style={styles.registrationDate}>
-                  등록일: {discountData.registrationDate}
+                  등록일: {formatDate(discountData.startDateTime)}
                 </Text>
               </View>
               
               <View style={styles.mainImageContainer}>
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/* 이전 이미지 함수 */}}
+                  onPress={handlePreviousImage}
                 >
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
                 
                 <Image 
                   style={styles.productMainImage}
-                  source={{ uri: discountData.images[0] }}
+                  source={{ uri: displayImages[currentImageIndex] }}
                 />
                 
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/* 다음 이미지 함수 */}}
+                  onPress={handleNextImage}
                 >
                   <Ionicons name="chevron-forward" size={24} color="#666" />
                 </TouchableOpacity>
               </View>
               
-              <View style={styles.productSubImages}>
-                {discountData.images.slice(1).map((uri, index) => (
-                  <Image 
-                    key={index}
-                    style={styles.productSubImage}
-                    source={{ uri }}
-                  />
-                ))}
-              </View>
+              {displayImages.length > 1 && (
+                <View style={styles.productSubImages}>
+                  {displayImages.map((uri, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setCurrentImageIndex(index)}
+                    >
+                      <Image 
+                        style={[
+                          styles.productSubImage,
+                          currentImageIndex === index && { borderColor: '#EF7810', borderWidth: 2 }
+                        ]}
+                        source={{ uri }}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={styles.productInfoContainer}>
-              <Text style={styles.categoryName}>{discountData.category}</Text>
-              <Text style={styles.productName}>{discountData.productName}</Text>
+              <Text style={styles.categoryName}>{discountData.categoryNm || '카테고리 없음'}</Text>
+              <Text style={styles.productName}>{discountData.productNm}</Text>
               
               <View style={styles.priceInfoContainer}>
                 <View style={styles.priceRow}>
@@ -111,7 +246,7 @@ export default function DiscountDetailPage() {
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>할인:</Text>
                   <Text style={styles.discountRate}>
-                    {discountData.discountRate}%
+                    {discountRate}%
                   </Text>
                 </View>
 
@@ -125,15 +260,19 @@ export default function DiscountDetailPage() {
                 <View style={[styles.priceRow, styles.finalPriceRow]}>
                   <Text style={styles.finalPriceLabel}>최종 금액:</Text>
                   <Text style={styles.finalPrice}>
-                    ₩ {discountData.finalPrice.toLocaleString()}
+                    ₩ {finalPrice.toLocaleString()}
                   </Text>
                 </View>
               </View>
 
-              <Text style={styles.productStock}>재고: {discountData.stock}개</Text>
-              <Text style={styles.productDescription}>
-                {discountData.description}
-              </Text>
+              {discountData.stock !== undefined && (
+                <Text style={styles.productStock}>재고: {discountData.stock}개</Text>
+              )}
+              {discountData.productDescription && (
+                <Text style={styles.productDescription}>
+                  {discountData.productDescription}
+                </Text>
+              )}
             </View>
           </View>
 
@@ -141,7 +280,7 @@ export default function DiscountDetailPage() {
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>할인 기간</Text>
               <Text style={styles.statusInfoContent}>
-                {discountData.startTime} ~ {discountData.endTime}
+                {formatDateTime(discountData.startDateTime)} ~ {formatDateTime(discountData.endDateTime)}
               </Text>
             </View>
           </View>

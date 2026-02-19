@@ -330,7 +330,7 @@ export default function EditStoreInfoPage() {
 
       // API 호출
       const response = await apiPutFormDataWithImage(
-        `/store/info-modify/${storeCode}`,
+        `/store/app/info-modify/${storeCode}`,
         formData,
       );
 

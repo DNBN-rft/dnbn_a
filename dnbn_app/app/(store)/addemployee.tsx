@@ -97,7 +97,7 @@ export default function AddEmployeePage() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={[styles.safeAreaTop, { height: insets.top }]} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       
       <View style={styles.header}>
@@ -253,7 +253,7 @@ export default function AddEmployeePage() {
       </KeyboardAvoidingView>
 
       {insets.bottom > 0 && (
-        <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

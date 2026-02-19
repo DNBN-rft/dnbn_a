@@ -73,8 +73,7 @@ export default function StoreEmployeeManageScreen() {
         Alert.alert("성공", "직원이 삭제되었습니다.");
         loadEmployees(); // 목록 새로고침
       } else {
-        const errorText = await response.text();
-        Alert.alert("오류", errorText || "직원 삭제에 실패했습니다.");
+        Alert.alert("오류", "직원 삭제에 실패했습니다.");
       }
     } catch (error) {
       console.error("직원 삭제 실패:", error);
@@ -88,7 +87,7 @@ export default function StoreEmployeeManageScreen() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={[styles.safeAreaTop, { height: insets.top }]} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
         <TouchableOpacity
@@ -242,7 +241,7 @@ export default function StoreEmployeeManageScreen() {
       </Modal>
 
       {insets.bottom > 0 && (
-        <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
