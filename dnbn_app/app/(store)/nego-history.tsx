@@ -103,12 +103,14 @@ export default function NegoHistory() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // 네고 요청 로그 리스트 상태 (요청 탭)
   const [requestList, setRequestList] = useState<NegoRequestLogItem[]>([]);
   const [requestPage, setRequestPage] = useState(0);
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestHasMore, setRequestHasMore] = useState(true);
+  const [requestRefreshing, setRequestRefreshing] = useState(false);
 
   // 네고 로그 API 호출
   const fetchNegoLogList = async (
@@ -141,6 +143,7 @@ export default function NegoHistory() {
       console.error("네고 로그 리스트 API 호출 에러:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -149,6 +152,13 @@ export default function NegoHistory() {
     if (!loading && hasMore) {
       fetchNegoLogList(page + 1);
     }
+  };
+
+  // 새로고침 (상품 탭)
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setHasMore(true);
+    fetchNegoLogList(0, true);
   };
 
   // 네고 요청 로그 API 호출
@@ -182,6 +192,7 @@ export default function NegoHistory() {
       console.error("네고 요청 로그 리스트 API 호출 에러:", error);
     } finally {
       setRequestLoading(false);
+      setRequestRefreshing(false);
     }
   };
 
@@ -190,6 +201,13 @@ export default function NegoHistory() {
     if (!requestLoading && requestHasMore) {
       fetchNegoRequestLogList(requestPage + 1);
     }
+  };
+
+  // 새로고침 (요청 탭)
+  const handleRequestRefresh = () => {
+    setRequestRefreshing(true);
+    setRequestHasMore(true);
+    fetchNegoRequestLogList(0, true);
   };
 
   // 날짜 포맷 변환 함수 (ISO -> YYYY.MM.DD)
@@ -292,10 +310,12 @@ export default function NegoHistory() {
           data={productList}
           keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
-            loading ? (
+            loading && !refreshing ? (
               <View style={{ padding: 20, alignItems: "center" }}>
                 <ActivityIndicator size="small" color="#000" />
               </View>
@@ -370,10 +390,12 @@ export default function NegoHistory() {
           data={requestList}
           keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
+          onRefresh={handleRequestRefresh}
+          refreshing={requestRefreshing}
           onEndReached={loadMoreRequest}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
-            requestLoading ? (
+            requestLoading && !requestRefreshing ? (
               <View style={{ padding: 20, alignItems: "center" }}>
                 <ActivityIndicator size="small" color="#000" />
               </View>
