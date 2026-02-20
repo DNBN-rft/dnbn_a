@@ -115,9 +115,7 @@ export default function StoreNego() {
 
     try {
       setLoading(true);
-      const response = await apiGet(
-        `/store/app/nego/list?page=${pageNum}&size=10`,
-      );
+      const response = await apiGet(`/store/app/nego?page=${pageNum}&size=10`);
 
       if (response.ok) {
         const data: NegoListResponse = await response.json();
@@ -165,7 +163,7 @@ export default function StoreNego() {
     try {
       setRequestLoading(true);
       const response = await apiGet(
-        `/store/app/nego-req/list?page=${pageNum}&size=10`,
+        `/store/app/nego-req?page=${pageNum}&size=10`,
       );
 
       if (response.ok) {
@@ -318,10 +316,10 @@ export default function StoreNego() {
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  {item.images?.files && 
-                   item.images.files.length > 0 && 
-                   typeof item.images.files[0] === 'string' &&
-                   item.images.files[0].trim() !== '' ? (
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  typeof item.images.files[0] === "string" &&
+                  item.images.files[0].trim() !== "" ? (
                     <Image
                       style={styles.productImage}
                       source={{ uri: item.images.files[0] }}
@@ -396,10 +394,10 @@ export default function StoreNego() {
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
                 <View style={styles.negoRequestProductImageContainer}>
-                  {item.images?.files && 
-                   item.images.files.length > 0 && 
-                   typeof item.images.files[0] === 'string' &&
-                   item.images.files[0].trim() !== '' ? (
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  typeof item.images.files[0] === "string" &&
+                  item.images.files[0].trim() !== "" ? (
                     <Image
                       style={styles.negoRequestProductImage}
                       source={{ uri: item.images.files[0] }}
