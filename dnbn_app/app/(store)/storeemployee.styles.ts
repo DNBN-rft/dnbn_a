@@ -229,4 +229,27 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#666',
   },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  permissionBadgesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    flex: 1,
+  },
+  permissionBadge: {
+    backgroundColor: '#FFF5ED',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFE5D3',
+  },
+  permissionBadgeText: {
+    fontSize: 12,
+    color: '#EF7810',
+    fontWeight: '500',
+  },
 });

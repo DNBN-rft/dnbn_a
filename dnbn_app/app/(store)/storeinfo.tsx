@@ -147,7 +147,7 @@ export default function StoreInfoPage() {
             return;
           }
 
-          const response = await apiGet(`/store/view/${storeCode}`);
+          const response = await apiGet(`/store/app/view/${storeCode}`);
           if (response.ok) {
             const data: StoreInfo = await response.json();
             setStoreInfo(data);

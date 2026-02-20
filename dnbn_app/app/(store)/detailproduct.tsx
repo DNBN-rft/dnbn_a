@@ -45,7 +45,7 @@ export default function DetailProductPage() {
 
     try {
       setIsLoading(true);
-      const response = await apiGet(`/store/product/detail/${productCode}`);
+      const response = await apiGet(`/store/app/product/detail/${productCode}`);
       if (response.ok) {
         const data = await response.json();
         setProduct(data);
