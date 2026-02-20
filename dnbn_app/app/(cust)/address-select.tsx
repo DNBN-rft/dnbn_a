@@ -269,10 +269,7 @@ export default function AddressSelectScreen() {
 
       <View style={styles.header}>
         <View style={styles.leftSection}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
         </View>
