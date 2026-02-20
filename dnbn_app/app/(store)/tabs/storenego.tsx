@@ -318,7 +318,10 @@ export default function StoreNego() {
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  {item.images?.files && item.images.files.length > 0 ? (
+                  {item.images?.files && 
+                   item.images.files.length > 0 && 
+                   typeof item.images.files[0] === 'string' &&
+                   item.images.files[0].trim() !== '' ? (
                     <Image
                       style={styles.productImage}
                       source={{ uri: item.images.files[0] }}
@@ -393,7 +396,10 @@ export default function StoreNego() {
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
                 <View style={styles.negoRequestProductImageContainer}>
-                  {item.images?.files && item.images.files.length > 0 ? (
+                  {item.images?.files && 
+                   item.images.files.length > 0 && 
+                   typeof item.images.files[0] === 'string' &&
+                   item.images.files[0].trim() !== '' ? (
                     <Image
                       style={styles.negoRequestProductImage}
                       source={{ uri: item.images.files[0] }}
