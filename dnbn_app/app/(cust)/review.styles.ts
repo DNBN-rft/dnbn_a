@@ -8,28 +8,32 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: 20,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
   },
-  placeholder: {
-    width: 40,
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    position: "absolute",
-    left: 0,
-    right: 0,
     textAlign: "center",
-    pointerEvents: "none",
+  },
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   topnav: {
     flexDirection: "row",

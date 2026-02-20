@@ -101,15 +101,20 @@ export default function ReportDetailScreen() {
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>신고상세</Text>
-          <View style={styles.placeholder} />
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>신고상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
+
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#FF6B00" />
           <Text style={styles.loadingText}>신고 상세를 불러오는 중...</Text>

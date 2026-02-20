@@ -55,9 +55,7 @@ export default function StoreInfo() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiGet(
-        `/cust/storeinfo?storeCode=${storeCode}`,
-      );
+      const response = await apiGet(`/cust/storeinfo?storeCode=${storeCode}`);
       if (!response.ok) throw new Error("매장 정보를 불러오는데 실패했습니다.");
 
       const data: StoreInfoResponse = await response.json();
@@ -179,17 +177,22 @@ export default function StoreInfo() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          {loading ? "로딩중..." : storeInfo?.storeNm || "가맹점 정보"}
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>
+            {loading ? "로딩중..." : storeInfo?.storeNm || "가맹점 정보"}
+          </Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {loading && (
@@ -282,10 +285,7 @@ export default function StoreInfo() {
                 ) : null
               }
               renderItem={({ item }) => (
-                <ReviewCard
-                  item={item}
-                  productCode={item.reviewProductCode}
-                />
+                <ReviewCard item={item} productCode={item.reviewProductCode} />
               )}
             />
           )}

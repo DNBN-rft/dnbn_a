@@ -1,10 +1,18 @@
+import { apiDelete, apiGet } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet, apiDelete } from "@/utils/api";
-import { getStorageItem } from "@/utils/storageUtil";
 import { styles } from "./storeemployee.styles";
 
 interface Employee {
@@ -60,7 +68,7 @@ export default function StoreEmployeeManageScreen() {
   useFocusEffect(
     useCallback(() => {
       loadEmployees();
-    }, [])
+    }, []),
   );
 
   const handleDelete = async () => {
@@ -88,18 +96,26 @@ export default function StoreEmployeeManageScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>직원 관리</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>직원 관리</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.contentContainer}>
           {loading ? (
             <View style={styles.loadingContainer}>
@@ -111,7 +127,9 @@ export default function StoreEmployeeManageScreen() {
               <View style={styles.statusCard}>
                 <View style={styles.statusRow}>
                   <Text style={styles.statusLabel}>등록된 직원</Text>
-                  <Text style={styles.statusValue}>{employees.length} / {MAX_EMPLOYEES}명</Text>
+                  <Text style={styles.statusValue}>
+                    {employees.length} / {MAX_EMPLOYEES}명
+                  </Text>
                 </View>
                 {remainingSlots > 0 && (
                   <Text style={styles.statusHelpText}>
@@ -130,25 +148,35 @@ export default function StoreEmployeeManageScreen() {
                         <Text style={styles.roleText}>{emp.memberType}</Text>
                       </View>
                     </View>
-                    {emp.memberType !== '점주' && (
+                    {emp.memberType !== "점주" && (
                       <View style={styles.employeeActions}>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                           style={styles.actionButton}
-                          onPress={() => router.push({
-                            pathname: "/(store)/editemployee",
-                            params: { employeeId: emp.memberId }
-                          })}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/(store)/editemployee",
+                              params: { employeeId: emp.memberId },
+                            })
+                          }
                         >
-                          <Ionicons name="create-outline" size={20} color="#EF7810" />
+                          <Ionicons
+                            name="create-outline"
+                            size={20}
+                            color="#EF7810"
+                          />
                         </TouchableOpacity>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                           style={styles.actionButton}
                           onPress={() => {
                             setSelectedEmployee(emp.memberId);
                             setDeleteModal(true);
                           }}
                         >
-                          <Ionicons name="trash-outline" size={20} color="#ff3b30" />
+                          <Ionicons
+                            name="trash-outline"
+                            size={20}
+                            color="#ff3b30"
+                          />
                         </TouchableOpacity>
                       </View>
                     )}
@@ -166,12 +194,18 @@ export default function StoreEmployeeManageScreen() {
                       <Text style={styles.infoValue}>{emp.memberTelNo}</Text>
                     </View>
                     <View style={styles.infoRow}>
-                      <Ionicons name="clipboard-outline" size={16} color="#666" />
+                      <Ionicons
+                        name="clipboard-outline"
+                        size={16}
+                        color="#666"
+                      />
                       <Text style={styles.infoLabel}>권한</Text>
                       <View style={styles.permissionBadgesContainer}>
                         {emp.menuAuth.map((auth, index) => (
                           <View key={index} style={styles.permissionBadge}>
-                            <Text style={styles.permissionBadgeText}>{auth.displayName}</Text>
+                            <Text style={styles.permissionBadgeText}>
+                              {auth.displayName}
+                            </Text>
                           </View>
                         ))}
                       </View>
@@ -183,24 +217,28 @@ export default function StoreEmployeeManageScreen() {
           )}
 
           {/* 직원 추가 버튼 */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.addButton,
-              !canAddEmployee && styles.addButtonDisabled
+              !canAddEmployee && styles.addButtonDisabled,
             ]}
-            onPress={() => canAddEmployee && router.push("/(store)/addemployee")}
+            onPress={() =>
+              canAddEmployee && router.push("/(store)/addemployee")
+            }
             disabled={!canAddEmployee}
           >
-            <Ionicons 
-              name="add-circle-outline" 
-              size={24} 
-              color={canAddEmployee ? "#EF7810" : "#ccc"} 
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              color={canAddEmployee ? "#EF7810" : "#ccc"}
             />
-            <Text style={[
-              styles.addButtonText,
-              !canAddEmployee && styles.addButtonTextDisabled
-            ]}>
-              {canAddEmployee ? '새 직원 등록' : '최대 인원 등록 완료'}
+            <Text
+              style={[
+                styles.addButtonText,
+                !canAddEmployee && styles.addButtonTextDisabled,
+              ]}
+            >
+              {canAddEmployee ? "새 직원 등록" : "최대 인원 등록 완료"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -218,9 +256,10 @@ export default function StoreEmployeeManageScreen() {
             <Ionicons name="warning-outline" size={48} color="#ff3b30" />
             <Text style={styles.deleteModalTitle}>직원 삭제</Text>
             <Text style={styles.deleteModalMessage}>
-              정말로 이 직원을 삭제하시겠습니까?{"\n"}삭제된 정보는 복구할 수 없습니다.
+              정말로 이 직원을 삭제하시겠습니까?{"\n"}삭제된 정보는 복구할 수
+              없습니다.
             </Text>
-            
+
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}

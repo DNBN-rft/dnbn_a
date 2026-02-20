@@ -165,15 +165,18 @@ export default function DetailNegoProductPage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>네고 상세</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>네고 상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.scrollContainer}>
@@ -197,7 +200,7 @@ export default function DetailNegoProductPage() {
                 <Image
                   style={styles.productMainImage}
                   source={images[currentImageIndex]}
-                  resizeMode="contain"
+                  contentFit="contain"
                 />
 
                 <TouchableOpacity

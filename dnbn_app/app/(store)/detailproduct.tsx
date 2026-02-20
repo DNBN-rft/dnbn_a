@@ -1,10 +1,16 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useFocusEffect } from "expo-router";
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiGet } from "@/utils/api";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./detailproduct.styles";
 
 interface ProductDetailResponse {
@@ -24,8 +30,14 @@ interface ProductDetailResponse {
   modNm: string;
   modDateTime: string;
   imgs: {
-    files: Array<{ fileUrl: string; originalName: string; order: number }>;
+    files: images[];
   };
+}
+
+interface images {
+  fileUrl: string;
+  originalName: string;
+  order: number;
 }
 
 export default function DetailProductPage() {
@@ -71,13 +83,15 @@ export default function DetailProductPage() {
   useFocusEffect(
     useCallback(() => {
       loadProductDetail();
-    }, [loadProductDetail])
+    }, [loadProductDetail]),
   );
 
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={{ flex: 1, textAlign: "center", marginTop: 20 }}>로딩 중...</Text>
+        <Text style={{ flex: 1, textAlign: "center", marginTop: 20 }}>
+          로딩 중...
+        </Text>
       </View>
     );
   }
@@ -85,7 +99,9 @@ export default function DetailProductPage() {
   if (!product) {
     return (
       <View style={styles.container}>
-        <Text style={{ flex: 1, textAlign: "center", marginTop: 20 }}>상품 정보를 찾을 수 없습니다</Text>
+        <Text style={{ flex: 1, textAlign: "center", marginTop: 20 }}>
+          상품 정보를 찾을 수 없습니다
+        </Text>
       </View>
     );
   }
@@ -100,15 +116,18 @@ export default function DetailProductPage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>상품 상세</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>상품 상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.scrollContainer}>
@@ -118,33 +137,54 @@ export default function DetailProductPage() {
               <View style={styles.productMetaContainer}>
                 <Text style={styles.productStatus}>{product.productState}</Text>
                 <Text style={styles.registrationDate}>
-                  등록일: {new Date(product.regDateTime).toLocaleDateString('ko-KR')}
+                  등록일:{" "}
+                  {new Date(product.regDateTime).toLocaleDateString("ko-KR")}
                 </Text>
               </View>
-              
+
               <View style={styles.mainImageContainer}>
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+                  onPress={() =>
+                    setCurrentImageIndex(Math.max(0, currentImageIndex - 1))
+                  }
                   disabled={currentImageIndex === 0}
                 >
-                  <Ionicons name="chevron-back" size={24} color={currentImageIndex === 0 ? "#ccc" : "#666"} />
+                  <Ionicons
+                    name="chevron-back"
+                    size={24}
+                    color={currentImageIndex === 0 ? "#ccc" : "#666"}
+                  />
                 </TouchableOpacity>
-                
-                <Image 
+
+                <Image
                   style={styles.productMainImage}
-                  source={{ uri: currentImage?.fileUrl || 'https://via.placeholder.com/300' }}
+                  source={{
+                    uri:
+                      currentImage?.fileUrl ||
+                      "https://via.placeholder.com/300",
+                  }}
                 />
-                
+
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => setCurrentImageIndex(Math.min(images.length - 1, currentImageIndex + 1))}
+                  onPress={() =>
+                    setCurrentImageIndex(
+                      Math.min(images.length - 1, currentImageIndex + 1),
+                    )
+                  }
                   disabled={currentImageIndex === images.length - 1}
                 >
-                  <Ionicons name="chevron-forward" size={24} color={currentImageIndex === images.length - 1 ? "#ccc" : "#666"} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={24}
+                    color={
+                      currentImageIndex === images.length - 1 ? "#ccc" : "#666"
+                    }
+                  />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.productSubImages}>
                 {images.map((img, index) => (
                   <TouchableOpacity
@@ -152,7 +192,7 @@ export default function DetailProductPage() {
                     onPress={() => setCurrentImageIndex(index)}
                     style={{ opacity: currentImageIndex === index ? 1 : 0.5 }}
                   >
-                    <Image 
+                    <Image
                       style={styles.productSubImage}
                       source={{ uri: img.fileUrl }}
                     />
@@ -164,8 +204,12 @@ export default function DetailProductPage() {
             <View style={styles.productInfoContainer}>
               <Text style={styles.categoryName}>{product.categoryNm}</Text>
               <Text style={styles.productName}>{product.productNm}</Text>
-              <Text style={styles.productPrice}>₩ {product.productPrice.toLocaleString()}</Text>
-              <Text style={styles.productStock}>재고: {product.productAmount}개</Text>
+              <Text style={styles.productPrice}>
+                ₩ {product.productPrice.toLocaleString()}
+              </Text>
+              <Text style={styles.productStock}>
+                재고: {product.productAmount}개
+              </Text>
               <Text style={styles.productDescription}>
                 {product.productDetailDescription}
               </Text>
@@ -175,22 +219,30 @@ export default function DetailProductPage() {
           <View style={styles.productStatusContainer}>
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>할인 여부</Text>
-              <Text style={styles.statusInfoContent}>{product.isSale ? '할인 중' : '할인 없음'}</Text>
+              <Text style={styles.statusInfoContent}>
+                {product.isSale ? "할인 중" : "할인 없음"}
+              </Text>
             </View>
 
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>네고 여부</Text>
-              <Text style={styles.statusInfoContent}>{product.isNego ? '네고 중' : '네고 없음'}</Text>
+              <Text style={styles.statusInfoContent}>
+                {product.isNego ? "네고 중" : "네고 없음"}
+              </Text>
             </View>
 
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>상품 구분</Text>
-              <Text style={styles.statusInfoContent}>{product.isAdult ? '성인' : '일반'}</Text>
+              <Text style={styles.statusInfoContent}>
+                {product.isAdult ? "성인" : "일반"}
+              </Text>
             </View>
 
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>상품 타입</Text>
-              <Text style={styles.statusInfoContent}>{product.isStock ? '재고 있음' : '서비스'}</Text>
+              <Text style={styles.statusInfoContent}>
+                {product.isStock ? "일반" : "서비스"}
+              </Text>
             </View>
           </View>
         </View>

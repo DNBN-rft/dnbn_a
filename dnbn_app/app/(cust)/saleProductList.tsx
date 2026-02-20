@@ -224,14 +224,18 @@ export default function SaleProductListScreen() {
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>할인 상품</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>할인 상품</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {/* 정렬 옵션 */}
@@ -280,100 +284,109 @@ export default function SaleProductListScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingVertical: 8 }}
           renderItem={({ item }) => {
-            const isExpired = timeLeft[item.id] !== undefined && timeLeft[item.id] <= 0;
-            
+            const isExpired =
+              timeLeft[item.id] !== undefined && timeLeft[item.id] <= 0;
+
             return (
-            <TouchableOpacity
-              style={[
-                styles.productItemContainer,
-                isExpired && styles.productItemExpired
-              ]}
-              onPress={() => {
-                router.push({
-                  pathname: "/(cust)/sale-product-detail",
-                  params: { productCode: item.productCode },
-                });
-              }}
-              activeOpacity={0.7}
-              disabled={isExpired}
-            >
-              {/* 시간 제한 배너 */}
-              {item.timeLimitSeconds && timeLeft[item.id] !== undefined && (
-                <View style={[
-                  styles.timeLimitBanner,
-                  isExpired && styles.timeLimitBannerExpired
-                ]}>
-                  <Ionicons 
-                    name={isExpired ? "close-circle" : "time"} 
-                    size={16} 
-                    color={isExpired ? "#999" : "rgb(239, 120, 16)"} 
-                  />
-                  <Text style={[
-                    styles.timeLimitBannerText,
-                    isExpired && styles.timeLimitBannerTextExpired
-                  ]}>
-                    {isExpired ? "등록 시간 만료" : `남은 시간: ${formatCountdown(timeLeft[item.id])}`}
-                  </Text>
-                </View>
-              )}
-
-              {/* 이미지와 정보 */}
-              <View style={styles.productContentRow}>
-                {/* 이미지 */}
-                <View style={styles.productImageWrapper}>
-                  <Image
-                    resizeMode="stretch"
-                    source={item.uri}
+              <TouchableOpacity
+                style={[
+                  styles.productItemContainer,
+                  isExpired && styles.productItemExpired,
+                ]}
+                onPress={() => {
+                  router.push({
+                    pathname: "/(cust)/sale-product-detail",
+                    params: { productCode: item.productCode },
+                  });
+                }}
+                activeOpacity={0.7}
+                disabled={isExpired}
+              >
+                {/* 시간 제한 배너 */}
+                {item.timeLimitSeconds && timeLeft[item.id] !== undefined && (
+                  <View
                     style={[
-                      styles.productImage,
-                      isExpired && styles.productImageExpired
+                      styles.timeLimitBanner,
+                      isExpired && styles.timeLimitBannerExpired,
                     ]}
-                  />
-                  {/* 할인 배지 */}
-                  <View style={[
-                    styles.discountBadge,
-                    isExpired && styles.discountBadgeExpired
-                  ]}>
-                    <Text style={styles.discountBadgeText}>
-                      {item.saleType === "할인률"
-                        ? `${item.discount}%`
-                        : "정가할인"}
+                  >
+                    <Ionicons
+                      name={isExpired ? "close-circle" : "time"}
+                      size={16}
+                      color={isExpired ? "#999" : "rgb(239, 120, 16)"}
+                    />
+                    <Text
+                      style={[
+                        styles.timeLimitBannerText,
+                        isExpired && styles.timeLimitBannerTextExpired,
+                      ]}
+                    >
+                      {isExpired
+                        ? "등록 시간 만료"
+                        : `남은 시간: ${formatCountdown(timeLeft[item.id])}`}
                     </Text>
+                  </View>
+                )}
+
+                {/* 이미지와 정보 */}
+                <View style={styles.productContentRow}>
+                  {/* 이미지 */}
+                  <View style={styles.productImageWrapper}>
+                    <Image
+                      resizeMode="stretch"
+                      source={item.uri}
+                      style={[
+                        styles.productImage,
+                        isExpired && styles.productImageExpired,
+                      ]}
+                    />
+                    {/* 할인 배지 */}
+                    <View
+                      style={[
+                        styles.discountBadge,
+                        isExpired && styles.discountBadgeExpired,
+                      ]}
+                    >
+                      <Text style={styles.discountBadgeText}>
+                        {item.saleType === "할인률"
+                          ? `${item.discount}%`
+                          : "정가할인"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* 정보 */}
+                  <View style={styles.productInfo}>
+                    <View style={styles.storeNameRow}>
+                      <Text style={styles.storeName}>{item.storeName}</Text>
+                      <Text style={styles.distanceText}>
+                        {formatDistance(item.distance)}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.productName}>{item.productName}</Text>
+
+                    <Text style={styles.originalPriceText}>
+                      {item.originalPrice.toLocaleString()}원
+                    </Text>
+
+                    <View style={styles.discountPriceRow}>
+                      <Text style={styles.priceText}>
+                        {item.price.toLocaleString()}원
+                      </Text>
+                    </View>
+
+                    <View style={styles.reviewSection}>
+                      <Ionicons name="star" size={14} color="#FFB800" />
+                      <Text style={styles.ratingText}>{item.rating}</Text>
+                      <Text style={styles.reviewCountText}>
+                        ({item.reviewCount})
+                      </Text>
+                    </View>
                   </View>
                 </View>
-
-                {/* 정보 */}
-                <View style={styles.productInfo}>
-                  <View style={styles.storeNameRow}>
-                    <Text style={styles.storeName}>{item.storeName}</Text>
-                    <Text style={styles.distanceText}>
-                      {formatDistance(item.distance)}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.productName}>{item.productName}</Text>
-
-                  <Text style={styles.originalPriceText}>
-                    {item.originalPrice.toLocaleString()}원
-                  </Text>
-
-                  <View style={styles.discountPriceRow}>
-                    <Text style={styles.priceText}>
-                      {item.price.toLocaleString()}원
-                    </Text>
-                  </View>
-
-                  <View style={styles.reviewSection}>
-                    <Ionicons name="star" size={14} color="#FFB800" />
-                    <Text style={styles.ratingText}>{item.rating}</Text>
-                    <Text style={styles.reviewCountText}>
-                      ({item.reviewCount})
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
+              </TouchableOpacity>
+            );
           }}
         ></FlatList>
       )}

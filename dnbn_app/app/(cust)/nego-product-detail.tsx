@@ -143,15 +143,20 @@ export default function ProductDetailScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>상품 상세</Text>
-        <View style={styles.placeholder}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>상품 상세</Text>
+        </View>
+        <View style={styles.rightSection}>
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="share-social-outline" size={24} color="#333" />
           </TouchableOpacity>
@@ -178,7 +183,8 @@ export default function ProductDetailScreen() {
         <ScrollView style={styles.productDetailContainer}>
           {/* 이미지 슬라이더 */}
           <View style={styles.imageSliderContainer}>
-            {product.productImgs?.files && product.productImgs.files.length > 0 ? (
+            {product.productImgs?.files &&
+            product.productImgs.files.length > 0 ? (
               <FlatList
                 data={product.productImgs.files}
                 horizontal
@@ -201,7 +207,9 @@ export default function ProductDetailScreen() {
                     style={{ width: screenWidth, height: 350 }}
                   >
                     <Image
-                      source={item.fileUrl || require("@/assets/images/logo.png")}
+                      source={
+                        item.fileUrl || require("@/assets/images/logo.png")
+                      }
                       style={[styles.productImage, { width: screenWidth }]}
                       priority="high"
                       cachePolicy="memory-disk"
@@ -259,49 +267,58 @@ export default function ProductDetailScreen() {
                 <Ionicons name="close" size={32} color="#fff" />
               </TouchableOpacity>
 
-              {product.productImgs?.files && product.productImgs.files.length > 0 && (
-                <>
-                  <FlatList
-                    data={product.productImgs.files}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    initialScrollIndex={selectedImageIndex}
-                    onMomentumScrollEnd={(event) => {
-                      const index = Math.round(
-                        event.nativeEvent.contentOffset.x / screenWidth,
-                      );
-                      setSelectedImageIndex(index);
-                    }}
-                    getItemLayout={(data, index) => ({
-                      length: screenWidth,
-                      offset: screenWidth * index,
-                      index,
-                    })}
-                    keyExtractor={(item, index) => `modal-image-${index}`}
-                    renderItem={({ item }) => (
-                      <View style={[styles.imageModalSlide, { width: screenWidth, height: screenWidth }]}>
-                        <Image
-                          source={item.fileUrl || require("@/assets/images/logo.png")}
-                          style={styles.imageModalImage}
-                          priority="high"
-                          cachePolicy="memory-disk"
-                          contentFit="contain"
-                          transition={200}
-                          placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-                        />
-                      </View>
-                    )}
-                  />
+              {product.productImgs?.files &&
+                product.productImgs.files.length > 0 && (
+                  <>
+                    <FlatList
+                      data={product.productImgs.files}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      initialScrollIndex={selectedImageIndex}
+                      onMomentumScrollEnd={(event) => {
+                        const index = Math.round(
+                          event.nativeEvent.contentOffset.x / screenWidth,
+                        );
+                        setSelectedImageIndex(index);
+                      }}
+                      getItemLayout={(data, index) => ({
+                        length: screenWidth,
+                        offset: screenWidth * index,
+                        index,
+                      })}
+                      keyExtractor={(item, index) => `modal-image-${index}`}
+                      renderItem={({ item }) => (
+                        <View
+                          style={[
+                            styles.imageModalSlide,
+                            { width: screenWidth, height: screenWidth },
+                          ]}
+                        >
+                          <Image
+                            source={
+                              item.fileUrl ||
+                              require("@/assets/images/logo.png")
+                            }
+                            style={styles.imageModalImage}
+                            priority="high"
+                            cachePolicy="memory-disk"
+                            contentFit="contain"
+                            transition={200}
+                            placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                          />
+                        </View>
+                      )}
+                    />
 
-                  <View style={styles.imageModalCounter}>
-                    <Text style={styles.imageModalCounterText}>
-                      {selectedImageIndex + 1} /{" "}
-                      {product.productImgs.files.length}
-                    </Text>
-                  </View>
-                </>
-              )}
+                    <View style={styles.imageModalCounter}>
+                      <Text style={styles.imageModalCounterText}>
+                        {selectedImageIndex + 1} /{" "}
+                        {product.productImgs.files.length}
+                      </Text>
+                    </View>
+                  </>
+                )}
             </View>
           </Modal>
 
@@ -558,15 +575,12 @@ export default function ProductDetailScreen() {
 
                   try {
                     setRequesting(true);
-                    const response = await apiPost(
-                      `/cust/nego`,
-                      {
-                        categoryNm: product.categoryNm,
-                        storeCode: product.storeCode,
-                        productCode: product.productCode,
-                        requestPrice: parseInt(negoAmount),
-                      },
-                    );
+                    const response = await apiPost(`/cust/nego`, {
+                      categoryNm: product.categoryNm,
+                      storeCode: product.storeCode,
+                      productCode: product.productCode,
+                      requestPrice: parseInt(negoAmount),
+                    });
 
                     if (response.ok) {
                       Alert.alert("성공", "네고 요청이 완료되었습니다.");

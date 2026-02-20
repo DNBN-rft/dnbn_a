@@ -156,15 +156,20 @@ export default function SearchView() {
 
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>카테고리 검색 결과</Text>
-          <View style={styles.placeholder} />
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>카테고리 검색 결과</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
+
         {/* 검색 영역 */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBarContainer}>

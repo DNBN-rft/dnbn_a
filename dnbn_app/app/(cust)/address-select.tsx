@@ -267,15 +267,18 @@ export default function AddressSelectScreen() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
 
-      {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          {isEditMode ? "주소 수정" : "새 주소 추가"}
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>
+            {isEditMode ? "주소 수정" : "새 주소 추가"}
+          </Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <KeyboardAvoidingView

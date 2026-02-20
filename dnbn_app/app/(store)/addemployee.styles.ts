@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#f8f8f8",
   },
   header: {
     flexDirection: "row",
@@ -39,14 +39,44 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  section: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a1a",
+  },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
     marginBottom: 8,
+  },
+  helpText: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 6,
   },
   input: {
     backgroundColor: "#fff",
@@ -55,32 +85,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     borderWidth: 1,
     borderColor: "#E0E0E0",
-  },
-  inputDisabled: {
-    backgroundColor: "#F5F5F5",
-    color: "#999",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  selectButton: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  selectButtonText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  selectButtonPlaceholder: {
-    color: "#999",
+    color: "#1a1a1a",
   },
   toggleGroup: {
     flexDirection: "row",
@@ -97,8 +102,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   toggleButtonActive: {
-    backgroundColor: "#000",
-    borderColor: "#000",
+    backgroundColor: "#EF7810",
+    borderColor: "#EF7810",
   },
   toggleText: {
     fontSize: 14,
@@ -108,62 +113,13 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
-  imageUploadButton: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderStyle: "dashed",
-    padding: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imageUploadText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#999",
-  },
-  disabledButton: {
-    borderColor: "#ccc",
-    backgroundColor: "#f5f5f5",
-  },
-  disabledText: {
-    color: "#ccc",
-  },
-  imagePreviewContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 10,
-  },
-  imagePreview: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    overflow: "hidden",
-    position: "relative",
-  },
-  previewImage: {
-    width: "100%",
-    height: "100%",
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: -8,
-    right: -8,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    borderRadius: 12,
-  },
   submitButton: {
-    backgroundColor: "#000",
+    backgroundColor: "#EF7810",
     borderRadius: 8,
     padding: 16,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 8,
     marginBottom: 40,
-  },
-  submitButtonDisabled: {
-    backgroundColor: "#999",
   },
   submitButtonText: {
     color: "#fff",

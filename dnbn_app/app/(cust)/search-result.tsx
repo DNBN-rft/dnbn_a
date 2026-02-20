@@ -73,9 +73,13 @@ export default function SearchView() {
   };
 
   // 상품 목록 조회
-  const fetchProducts = async (keyword: string, sort: string = sortType, pg: number = page) => {
+  const fetchProducts = async (
+    keyword: string,
+    sort: string = sortType,
+    pg: number = page,
+  ) => {
     if (!keyword.trim()) return;
-    
+
     setLoading(true);
     try {
       const response = await apiGet(
@@ -114,7 +118,7 @@ export default function SearchView() {
   // 검색 버튼 클릭 (search-result 페이지 내에서)
   const handleSearch = () => {
     if (!searchKeyword.trim()) return;
-    
+
     // 정렬 및 페이지 초기화 후 검색
     setSortType("LATEST");
     setPage(0);
@@ -153,15 +157,20 @@ export default function SearchView() {
 
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>검색 결과</Text>
-          <View style={styles.placeholder} />
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>검색 결과</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
+
         {/* 검색 영역 */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBarContainer}>

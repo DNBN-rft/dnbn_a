@@ -95,22 +95,28 @@ export default function MyInfoScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>내 정보</Text>
 
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => router.push("/(cust)/EditMyInfo")}
-        >
-          <Ionicons name="create-outline" size={20} color="#EF7810" />
-          <Text style={styles.editText}>수정</Text>
-        </TouchableOpacity>
+      <View style={styles.header}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>내정보</Text>
+        </View>
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => router.push("/(cust)/EditMyInfo")}
+          >
+            <Ionicons name="create-outline" size={20} color="#EF7810" />
+            <Text style={styles.editText}>수정</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView

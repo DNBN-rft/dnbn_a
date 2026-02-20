@@ -1,18 +1,18 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
-  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./used-gift.styles";
-import { apiGet } from "@/utils/api";
 
 // 날짜 포맷팅 함수
 const formatDateTime = (dateTimeString: string): string => {
@@ -75,7 +75,9 @@ export default function UsedGift() {
           return;
         }
 
-        const response = await apiGet(`/cust/purchase-list/used/${orderDetailIdx}`);
+        const response = await apiGet(
+          `/cust/purchase-list/used/${orderDetailIdx}`,
+        );
 
         if (!response.ok) {
           setError("구매 상세 정보를 불러오는 데 실패했습니다.");
@@ -100,7 +102,12 @@ export default function UsedGift() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
@@ -108,7 +115,12 @@ export default function UsedGift() {
 
   if (error || !purchaseData) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Text style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 20 }}>
           {error || "구매 정보를 불러올 수 없습니다."}
         </Text>
@@ -129,16 +141,18 @@ export default function UsedGift() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          구매함
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>구매함</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -153,7 +167,11 @@ export default function UsedGift() {
             <View
               style={[
                 styles.giftImage,
-                { justifyContent: "center", alignItems: "center", backgroundColor: "#f0f0f0" },
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#f0f0f0",
+                },
               ]}
             >
               <Text style={{ fontSize: 16, color: "#999", fontWeight: "bold" }}>
@@ -220,7 +238,9 @@ export default function UsedGift() {
           <Text style={styles.giftDetailTitle}>구매 상세 정보</Text>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>QR 사용일</Text>
-            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.qrUsedAt)}</Text>
+            <Text style={styles.giftDetailValue}>
+              {formatDateTime(purchaseData.qrUsedAt)}
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>주문번호</Text>
@@ -228,15 +248,21 @@ export default function UsedGift() {
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailAmount}개</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailAmount}개
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>단가</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailPrice.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailPrice.toLocaleString()}원
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>금액</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailTotal.toLocaleString()}원
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
@@ -245,13 +271,17 @@ export default function UsedGift() {
           {purchaseData.cancelReason && (
             <View style={styles.giftDetailRow}>
               <Text style={styles.giftDetailLabel}>환불 사유</Text>
-              <Text style={styles.giftDetailValue}>{purchaseData.cancelReason}</Text>
+              <Text style={styles.giftDetailValue}>
+                {purchaseData.cancelReason}
+              </Text>
             </View>
           )}
           {purchaseData.orderRefundTime && (
             <View style={styles.giftDetailRow}>
               <Text style={styles.giftDetailLabel}>환불 시간</Text>
-              <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.orderRefundTime)}</Text>
+              <Text style={styles.giftDetailValue}>
+                {formatDateTime(purchaseData.orderRefundTime)}
+              </Text>
             </View>
           )}
         </View>

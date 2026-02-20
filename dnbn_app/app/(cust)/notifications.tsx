@@ -159,14 +159,14 @@ export default function NotificationsScreen() {
 
   const fetchAlarms = async (page: number = 0, isRefresh: boolean = false) => {
     if (!hasMore && !isRefresh) return;
-    
+
     try {
       if (isRefresh) {
         setLoading(true);
       } else {
         setLoadingMore(true);
       }
-      
+
       const custCode =
         Platform.OS === "web"
           ? localStorage.getItem("custCode")
@@ -179,20 +179,18 @@ export default function NotificationsScreen() {
         return;
       }
 
-      const response = await apiGet(
-        `/cust/alarm/list?page=${page}&size=20`
-      );
+      const response = await apiGet(`/cust/alarm/list?page=${page}&size=20`);
 
       if (response.ok) {
         const data: PagedAlarmResponse = await response.json();
         const newAlarms = data.content.map(mapResponseToAlarm);
-        
+
         if (isRefresh) {
           setNotifications(newAlarms);
         } else {
-          setNotifications(prev => [...prev, ...newAlarms]);
+          setNotifications((prev) => [...prev, ...newAlarms]);
         }
-        
+
         setCurrentPage(page);
         setHasMore(!data.last);
       } else {
@@ -229,14 +227,18 @@ export default function NotificationsScreen() {
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>알림</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>알림</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.tabContainer}>

@@ -1,10 +1,20 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View, ScrollView, FlatList, Modal, ActivityIndicator, Alert } from "react-native";
-import { styles } from "./reviewdetail.styles";
-import { router, useLocalSearchParams } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import React, { useState } from "react";
 import { apiDelete } from "@/utils/api";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./reviewdetail.styles";
 
 interface ReviewImageFile {
   fileUrl: string;
@@ -32,7 +42,7 @@ export default function ReviewDetailScreen() {
 
   let images: ReviewImageFile[] = [];
   try {
-    if (reviewImages && typeof reviewImages === 'string') {
+    if (reviewImages && typeof reviewImages === "string") {
       const parsed = JSON.parse(reviewImages);
       // 배열로 바로 받을 수도, { files: [] } 형식으로 받을 수도 있음
       images = Array.isArray(parsed) ? parsed : parsed.files || [];
@@ -51,7 +61,7 @@ export default function ReviewDetailScreen() {
           size={20}
           color="#FFD700"
           style={styles.starIcon}
-        />
+        />,
       );
     }
     return stars;
@@ -64,10 +74,7 @@ export default function ReviewDetailScreen() {
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      
-      const response = await apiDelete(
-        `/cust/review/${reviewIdx}`
-      );
+      const response = await apiDelete(`/cust/review/${reviewIdx}`);
 
       if (response.ok) {
         setDeleteModalVisible(false);
@@ -75,7 +82,7 @@ export default function ReviewDetailScreen() {
           {
             text: "확인",
             onPress: () => router.replace("/(cust)/review"),
-          }
+          },
         ]);
       } else {
         const errorText = await response.text();
@@ -98,16 +105,18 @@ export default function ReviewDetailScreen() {
         <View style={[{ height: insets.top }, styles.insetTopView]} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          리뷰 상세
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>리뷰 상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -174,18 +183,20 @@ export default function ReviewDetailScreen() {
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             style={styles.editButton}
-            onPress={() => router.push({
-              pathname: "/(cust)/reviewReg",
-              params: {
-                reviewIdx: reviewIdx,
-                storeNm: storeNm,
-                productName: productName,
-                productImage: productImage,
-                reviewRate: reviewRate,
-                reviewContent: reviewContent,
-                reviewImages: reviewImages
-              }
-            })}
+            onPress={() =>
+              router.push({
+                pathname: "/(cust)/reviewReg",
+                params: {
+                  reviewIdx: reviewIdx,
+                  storeNm: storeNm,
+                  productName: productName,
+                  productImage: productImage,
+                  reviewRate: reviewRate,
+                  reviewContent: reviewContent,
+                  reviewImages: reviewImages,
+                },
+              })
+            }
           >
             <Text style={styles.editButtonText}>수정</Text>
           </TouchableOpacity>
@@ -215,7 +226,10 @@ export default function ReviewDetailScreen() {
             <Text style={styles.modalMessage}>정말로 삭제하시겠습니까?</Text>
             <View style={styles.modalButtonsContainer}>
               <TouchableOpacity
-                style={[styles.modalConfirmButton, isDeleting && { opacity: 0.6 }]}
+                style={[
+                  styles.modalConfirmButton,
+                  isDeleting && { opacity: 0.6 },
+                ]}
                 onPress={handleConfirmDelete}
                 disabled={isDeleting}
               >

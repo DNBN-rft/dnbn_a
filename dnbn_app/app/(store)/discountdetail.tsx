@@ -45,7 +45,9 @@ export default function DiscountDetailPage() {
   const insets = useSafeAreaInsets();
   const { saleLogIdx } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
-  const [discountData, setDiscountData] = useState<SaleHistoryDetail | null>(null);
+  const [discountData, setDiscountData] = useState<SaleHistoryDetail | null>(
+    null,
+  );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
@@ -58,11 +60,12 @@ export default function DiscountDetailPage() {
 
       try {
         setLoading(true);
-        const response = await apiGet(`/store/app/sale-history/detail/${saleLogIdx}`);
-        
+        const response = await apiGet(
+          `/store/app/sale-history/detail/${saleLogIdx}`,
+        );
+
         if (response.ok) {
           const data = await response.json();
-console.log("할인 상세 API 응답:", data);
 
           setDiscountData(data);
         } else {
@@ -82,25 +85,31 @@ console.log("할인 상세 API 응답:", data);
   }, [saleLogIdx]);
 
   const formatDateTime = (dateTime: string) => {
-    if (!dateTime) return '';
+    if (!dateTime) return "";
     const date = new Date(dateTime);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).replace(/\. /g, '.').replace(/\.$/, '');
+    return date
+      .toLocaleString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(/\. /g, ".")
+      .replace(/\.$/, "");
   };
 
   const formatDate = (dateTime: string) => {
-    if (!dateTime) return '';
+    if (!dateTime) return "";
     const date = new Date(dateTime);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).replace(/\. /g, '.').replace(/\.$/, '');
+    return date
+      .toLocaleString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\. /g, ".")
+      .replace(/\.$/, "");
   };
 
   const getStatusText = (status: string) => {
@@ -111,8 +120,8 @@ console.log("할인 상세 API 응답:", data);
   const handlePreviousImage = () => {
     const images = discountData?.files?.files || [];
     if (images.length > 1) {
-      setCurrentImageIndex((prev) => 
-        prev === 0 ? images.length - 1 : prev - 1
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? images.length - 1 : prev - 1,
       );
     }
   };
@@ -120,8 +129,8 @@ console.log("할인 상세 API 응답:", data);
   const handleNextImage = () => {
     const images = discountData?.files?.files || [];
     if (images.length > 1) {
-      setCurrentImageIndex((prev) => 
-        prev === images.length - 1 ? 0 : prev + 1
+      setCurrentImageIndex((prev) =>
+        prev === images.length - 1 ? 0 : prev + 1,
       );
     }
   };
@@ -133,27 +142,38 @@ console.log("할인 상세 API 응답:", data);
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>할인 상세</Text>
-          <View style={styles.placeholder}></View>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>할인 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#EF7810" />
         </View>
       </View>
     );
   }
 
-  const displayImages = discountData.files?.files?.map(file => file.fileUrl) || ['https://via.placeholder.com/300'];
+  const displayImages = discountData.files?.files?.map(
+    (file) => file.fileUrl,
+  ) || ["https://via.placeholder.com/300"];
   const finalPrice = discountData.originalPrice - discountData.discountedPrice;
-  const discountRate = discountData.saleType === '할인률' 
-    ? discountData.saleValue 
-    : Math.round((discountData.discountedPrice / discountData.originalPrice) * 100);
+  const discountRate =
+    discountData.saleType === "할인률"
+      ? discountData.saleValue
+      : Math.round(
+          (discountData.discountedPrice / discountData.originalPrice) * 100,
+        );
 
   return (
     <View style={styles.container}>
@@ -162,15 +182,18 @@ console.log("할인 상세 API 응답:", data);
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>할인 상세</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>할인 상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.scrollContainer}>
@@ -178,17 +201,21 @@ console.log("할인 상세 API 응답:", data);
           <View style={styles.contentRow}>
             <View style={styles.productImagesContainer}>
               <View style={styles.productMetaContainer}>
-                <Text style={[
-                  styles.productStatus,
-                  discountData.saleLogStatus === '할인 완료' ? styles.statusComplete : styles.statusCanceled
-                ]}>
+                <Text
+                  style={[
+                    styles.productStatus,
+                    discountData.saleLogStatus === "할인 완료"
+                      ? styles.statusComplete
+                      : styles.statusCanceled,
+                  ]}
+                >
                   {getStatusText(discountData.saleLogStatus)}
                 </Text>
                 <Text style={styles.registrationDate}>
                   등록일: {formatDate(discountData.startDateTime)}
                 </Text>
               </View>
-              
+
               <View style={styles.mainImageContainer}>
                 <TouchableOpacity
                   style={styles.mainImageButton}
@@ -196,12 +223,12 @@ console.log("할인 상세 API 응답:", data);
                 >
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
-                
-                <Image 
+
+                <Image
                   style={styles.productMainImage}
                   source={{ uri: displayImages[currentImageIndex] }}
                 />
-                
+
                 <TouchableOpacity
                   style={styles.mainImageButton}
                   onPress={handleNextImage}
@@ -209,7 +236,7 @@ console.log("할인 상세 API 응답:", data);
                   <Ionicons name="chevron-forward" size={24} color="#666" />
                 </TouchableOpacity>
               </View>
-              
+
               {displayImages.length > 1 && (
                 <View style={styles.productSubImages}>
                   {displayImages.map((uri, index) => (
@@ -217,10 +244,13 @@ console.log("할인 상세 API 응답:", data);
                       key={index}
                       onPress={() => setCurrentImageIndex(index)}
                     >
-                      <Image 
+                      <Image
                         style={[
                           styles.productSubImage,
-                          currentImageIndex === index && { borderColor: '#EF7810', borderWidth: 2 }
+                          currentImageIndex === index && {
+                            borderColor: "#EF7810",
+                            borderWidth: 2,
+                          },
                         ]}
                         source={{ uri }}
                       />
@@ -231,9 +261,11 @@ console.log("할인 상세 API 응답:", data);
             </View>
 
             <View style={styles.productInfoContainer}>
-              <Text style={styles.categoryName}>{discountData.categoryNm || '카테고리 없음'}</Text>
+              <Text style={styles.categoryName}>
+                {discountData.categoryNm || "카테고리 없음"}
+              </Text>
               <Text style={styles.productName}>{discountData.productNm}</Text>
-              
+
               <View style={styles.priceInfoContainer}>
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>원가:</Text>
@@ -244,9 +276,7 @@ console.log("할인 상세 API 응답:", data);
 
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>할인:</Text>
-                  <Text style={styles.discountRate}>
-                    {discountRate}%
-                  </Text>
+                  <Text style={styles.discountRate}>{discountRate}%</Text>
                 </View>
 
                 <View style={styles.priceRow}>
@@ -265,7 +295,9 @@ console.log("할인 상세 API 응답:", data);
               </View>
 
               {discountData.stock !== undefined && (
-                <Text style={styles.productStock}>재고: {discountData.stock}개</Text>
+                <Text style={styles.productStock}>
+                  재고: {discountData.stock}개
+                </Text>
               )}
               {discountData.productDescription && (
                 <Text style={styles.productDescription}>
@@ -279,7 +311,8 @@ console.log("할인 상세 API 응답:", data);
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>할인 기간</Text>
               <Text style={styles.statusInfoContent}>
-                {formatDateTime(discountData.startDateTime)} ~ {formatDateTime(discountData.endDateTime)}
+                {formatDateTime(discountData.startDateTime)} ~{" "}
+                {formatDateTime(discountData.endDateTime)}
               </Text>
             </View>
           </View>
