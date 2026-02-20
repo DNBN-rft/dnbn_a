@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
 
   productMetaContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 12,
     marginLeft: 48,

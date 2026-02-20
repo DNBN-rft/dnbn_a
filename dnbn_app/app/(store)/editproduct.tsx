@@ -12,7 +12,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editproduct.styles";
@@ -87,7 +87,9 @@ export default function EditProductPage() {
 
       try {
         setIsLoading(true);
-        const response = await apiGet(`/store/product/detail/${productCode}`);
+        const response = await apiGet(
+          `/store/app/product/detail/${productCode}`,
+        );
         if (response.ok) {
           const data: ProductDetailResponse = await response.json();
           setProductName(data.productNm);
@@ -150,7 +152,9 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!isLoading && categories.length > 0 && !category) {
       const loadProductDetail = async () => {
-        const response = await apiGet(`/store/product/detail/${productCode}`);
+        const response = await apiGet(
+          `/store/app/product/detail/${productCode}`,
+        );
         if (response.ok) {
           const data: ProductDetailResponse = await response.json();
           const selectedCat = categories.find(
@@ -242,7 +246,7 @@ export default function EditProductPage() {
 
       // API 요청
       const response = await apiPutFormDataWithImage(
-        `/store/product/${productCode}`,
+        `/store/app/product/${productCode}`,
         formData,
       );
 

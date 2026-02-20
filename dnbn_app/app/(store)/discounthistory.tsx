@@ -36,6 +36,7 @@ interface SaleHistoryContent {
   files: {
     files: ProductFile[];
   };
+  saleLogIdx: number;
   productCode: string;
   startDateTime: string;
   endDateTime: string;
@@ -50,6 +51,7 @@ interface SaleHistoryContent {
 // 화면 표시용 타입
 interface DiscountHistoryItem {
   id: string;
+  saleLogIdx: number;
   uri: any;
   category: string;
   productName: string;
@@ -97,6 +99,7 @@ export default function DiscountHistoryPage() {
 
         return {
           id: item.productCode,
+          saleLogIdx: item.saleLogIdx,
           uri: imageUrl
             ? { uri: imageUrl }
             : require("@/assets/images/image1.jpg"),
@@ -151,7 +154,6 @@ export default function DiscountHistoryPage() {
 
           if (response.ok) {
             const apiData: SaleHistoryApiResponse = await response.json();
-            console.log("할인 내역 API 응답:", apiData);
 
             const transformedData = transformApiData(apiData.content);
 
@@ -165,17 +167,11 @@ export default function DiscountHistoryPage() {
             setTotalElements(apiData.totalElements);
             setCurrentPage(apiData.currentPage);
             setHasNext(apiData.hasNext);
-
-            console.log("변환된 할인 내역 데이터:", transformedData);
           } else {
             setError("할인 내역을 불러오는데 실패했습니다.");
           }
         } else {
           // 앱 환경에서의 API 호출
-          console.log(
-            `앱 환경에서 할인 내역 조회 (페이지 ${page}):`,
-            storeCode,
-          );
           const response = await apiGet(url);
 
           if (response.ok) {
@@ -365,7 +361,7 @@ export default function DiscountHistoryPage() {
                     onPress={() =>
                       router.push({
                         pathname: "/(store)/discountdetail",
-                        params: { id: item.id },
+                        params: { saleLogIdx: item.saleLogIdx },
                       })
                     }
                   >

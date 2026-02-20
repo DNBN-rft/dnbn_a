@@ -146,7 +146,7 @@ export default function AddProduct() {
 
       // API 요청
       const response = await apiPostFormDataWithImage(
-        "/store/product",
+        "/store/app/product",
         formData,
       );
 
