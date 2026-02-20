@@ -6,7 +6,7 @@ import {
 
 //소윤: 67, 형운: 68, 진용: 136
 
-const API_BASE_URL = "http://192.168.0.67:8080/api";
+const API_BASE_URL = "http://192.168.0.68:8080/api";
 
 // 글로벌 로그아웃 콜백
 let logoutCallback: (() => void) | null = null;
@@ -24,7 +24,13 @@ let failedQueue: {
 
 // 토큰 만료 시 공통 처리
 const handleTokenExpired = async () => {
-  await removeMultipleItems(["accessToken", "refreshToken", "userType", "custCode", "storeCode"]);
+  await removeMultipleItems([
+    "accessToken",
+    "refreshToken",
+    "userType",
+    "custCode",
+    "storeCode",
+  ]);
   // 등록된 콜백 호출 (로그인 페이지로 이동)
   if (logoutCallback) {
     logoutCallback();
