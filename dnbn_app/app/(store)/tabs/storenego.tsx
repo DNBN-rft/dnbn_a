@@ -5,7 +5,6 @@ import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Modal,
   Platform,
   Text,
@@ -14,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/storenego.styles";
+import { Image } from "expo-image";
 
 // 네고 리스트 API 응답 타입 정의
 interface NegoImages {
