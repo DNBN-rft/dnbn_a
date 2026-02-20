@@ -74,7 +74,7 @@ export default function PurchaseBox() {
         <View style={styles.leftSection}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.push("/tabs/mypage")}
+            onPress={() => router.back()}
           >
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
