@@ -142,14 +142,18 @@ export default function DiscountDetailPage() {
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>할인 상세</Text>
-          <View style={styles.rightSection}></View>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>할인 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
