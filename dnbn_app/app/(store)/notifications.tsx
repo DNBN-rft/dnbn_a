@@ -127,7 +127,7 @@ export default function NotificationsScreen() {
           return;
         }
 
-        const response = await apiGet(`/store/alarm/list?memberId=${memberId}`);
+        const response = await apiGet(`/store/app/alarm/list?memberId=${memberId}`);
         if (response.ok) {
           const data = await response.json();
           setAlarms(Array.isArray(data) ? data : []);
@@ -147,7 +147,7 @@ export default function NotificationsScreen() {
   // 알림 읽음 처리
   const handleReadAlarm = async (alarmIdx: number) => {
     try {
-      const response = await apiPut(`/store/alarm/read?storeAlarmIdx=${alarmIdx}`, null);
+      const response = await apiPut(`/store/app/alarm/read?storeAlarmIdx=${alarmIdx}`, null);
       if (response.ok) {
         // 로컬 상태 업데이트
         setAlarms((prevAlarms) =>

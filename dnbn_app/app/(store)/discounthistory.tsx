@@ -27,6 +27,7 @@ interface SaleHistoryApiResponse {
 }
 
 interface SaleHistoryContent {
+  saleLogIdx: number;
   productCode: string;
   startDateTime: string;
   endDateTime: string;
@@ -41,6 +42,7 @@ interface SaleHistoryContent {
 // 화면 표시용 타입
 interface DiscountHistoryItem {
   id: string;
+  saleLogIdx: number;
   uri: any;
   category: string;
   productName: string;
@@ -80,6 +82,7 @@ export default function DiscountHistoryPage() {
   const transformApiData = useCallback((content: SaleHistoryContent[]): DiscountHistoryItem[] => {
     return content.map((item) => ({
       id: item.productCode,
+      saleLogIdx: item.saleLogIdx,
       uri: require("@/assets/images/image1.jpg"), // 기본 이미지
       category: "", // API에서 제공하지 않으므로 빈 값
       productName: item.productNm,
@@ -125,7 +128,6 @@ export default function DiscountHistoryPage() {
 
         if (response.ok) {
           const apiData: SaleHistoryApiResponse = await response.json();
-          console.log("할인 내역 API 응답:", apiData);
           
           const transformedData = transformApiData(apiData.content);
           
@@ -140,7 +142,6 @@ export default function DiscountHistoryPage() {
           setCurrentPage(apiData.currentPage);
           setHasNext(apiData.hasNext);
           
-          console.log("변환된 할인 내역 데이터:", transformedData);
         } else {
           setError("할인 내역을 불러오는데 실패했습니다.");
         }
@@ -151,7 +152,6 @@ export default function DiscountHistoryPage() {
 
         if (response.ok) {
           const apiData: SaleHistoryApiResponse = await response.json();
-          console.log("할인 내역 API 응답:", apiData);
           
           const transformedData = transformApiData(apiData.content);
           
@@ -166,7 +166,6 @@ export default function DiscountHistoryPage() {
           setCurrentPage(apiData.currentPage);
           setHasNext(apiData.hasNext);
           
-          console.log("변환된 할인 내역 데이터:", transformedData);
         } else {
           setError("할인 내역을 불러오는데 실패했습니다.");
         }
@@ -322,7 +321,7 @@ export default function DiscountHistoryPage() {
                     onPress={() =>
                       router.push({
                         pathname: "/(store)/discountdetail",
-                        params: { id: item.id },
+                        params: { saleLogIdx: item.saleLogIdx },
                       })
                     }
                   >

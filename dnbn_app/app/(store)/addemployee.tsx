@@ -1,9 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiPost } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
 import { styles } from "./editemployee.styles";
+
+const AVAILABLE_PERMISSIONS = [
+  { code: 'STORE_ALARM', displayName: '알림' },
+  { code: 'STORE_CS', displayName: '고객센터' },
+  { code: 'STORE_MEMBER', displayName: '직원 관리' },
+  { code: 'STORE_ORDER', displayName: '매출 관리' },
+  { code: 'STORE_ORDER_STAT', displayName: '매출 통계' },
+  { code: 'STORE_PRODUCT', displayName: '상품 관리' },
+  { code: 'STORE_REVIEW', displayName: '리뷰 관리' },
+  { code: 'STORE_LOG', displayName: '이력' },
+  { code: 'STORE_MYPAGE', displayName: '마이페이지' },
+];
 
 export default function AddEmployeePage() {
   const insets = useSafeAreaInsets();
@@ -11,23 +25,73 @@ export default function AddEmployeePage() {
   const [employeeId, setEmployeeId] = useState('');
   const [employeeName, setEmployeeName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'매니저' | '일반'>('일반');
+  const [email, setEmail] = useState('');
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleAdd = () => {
-    if (!employeeId || !employeeName || !phoneNumber || !password) {
-      alert('모든 필드를 입력해주세요.');
+  const togglePermission = (code: string) => {
+    setSelectedPermissions(prev => {
+      if (prev.includes(code)) {
+        return prev.filter(p => p !== code);
+      } else {
+        return [...prev, code];
+      }
+    });
+  };
+
+  const handleAdd = async () => {
+    if (!employeeId || !employeeName || !phoneNumber || !password || !passwordConfirm || !email) {
+      Alert.alert('오류', '모든 필드를 입력해주세요.');
       return;
     }
 
-    console.log({
-      employeeId,
-      employeeName,
-      phoneNumber,
-      role,
-      password
-    });
-    router.back();
+    if (password !== passwordConfirm) {
+      Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    if (selectedPermissions.length === 0) {
+      Alert.alert('오류', '최소 하나의 권한을 선택해주세요.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const storeCode = await getStorageItem("storeCode");
+      if (!storeCode) {
+        Alert.alert("오류", "매장 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      const response = await apiPost('/store/app/member/register', {
+        memberId: employeeId,
+        memberPw: password,
+        memberNm: employeeName,
+        memberTelNo: phoneNumber,
+        menuAuth: selectedPermissions,
+        storeCode: storeCode,
+        memberEmail: email,
+        approved: true,
+        memberType: '매니저',
+        marketAgreed: false,
+      });
+
+      if (response.ok) {
+        const message = await response.text();
+        Alert.alert('성공', message);
+        router.back();
+      } else {
+        const errorText = await response.text();
+        Alert.alert('오류', errorText || '직원 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('직원 등록 실패:', error);
+      Alert.alert('오류', '직원 등록에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +111,12 @@ export default function AddEmployeePage() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
+      >
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* 기본 정보 */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -85,6 +154,18 @@ export default function AddEmployeePage() {
               keyboardType="phone-pad"
             />
           </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>이메일</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="이메일을 입력하세요"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
         </View>
 
         {/* 권한 설정 */}
@@ -95,23 +176,34 @@ export default function AddEmployeePage() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>권한</Text>
-            <View style={styles.toggleGroup}>
-              <TouchableOpacity
-                style={[styles.toggleButton, role === '매니저' && styles.toggleButtonActive]}
-                onPress={() => setRole('매니저')}
-              >
-                <Text style={[styles.toggleText, role === '매니저' && styles.toggleTextActive]}>매니저</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.toggleButton, role === '일반' && styles.toggleButtonActive]}
-                onPress={() => setRole('일반')}
-              >
-                <Text style={[styles.toggleText, role === '일반' && styles.toggleTextActive]}>일반</Text>
-              </TouchableOpacity>
+            <Text style={styles.label}>메뉴 접근 권한</Text>
+            <View style={styles.permissionContainer}>
+              {AVAILABLE_PERMISSIONS.filter(p => p.code !== 'STORE_MEMBER').map((permission) => (
+                <TouchableOpacity
+                  key={permission.code}
+                  style={[
+                    styles.permissionItem,
+                    selectedPermissions.includes(permission.code) && styles.permissionItemActive
+                  ]}
+                  onPress={() => togglePermission(permission.code)}
+                >
+                  <Ionicons 
+                    name={selectedPermissions.includes(permission.code) ? "checkbox" : "square-outline"} 
+                    size={24} 
+                    color={selectedPermissions.includes(permission.code) ? "#EF7810" : "#999"}
+                    style={styles.permissionIcon}
+                  />
+                  <Text style={[
+                    styles.permissionText,
+                    selectedPermissions.includes(permission.code) && styles.permissionTextActive
+                  ]}>
+                    {permission.displayName}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
             <Text style={styles.helpText}>
-              매니저는 모든 기능에 접근할 수 있습니다
+              선택한 권한에 해당하는 메뉴에만 접근할 수 있습니다
             </Text>
           </View>
         </View>
@@ -133,12 +225,32 @@ export default function AddEmployeePage() {
               secureTextEntry
             />
           </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>비밀번호 확인</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="비밀번호를 다시 입력하세요"
+              value={passwordConfirm}
+              onChangeText={setPasswordConfirm}
+              secureTextEntry
+            />
+          </View>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleAdd}>
-          <Text style={styles.submitButtonText}>등록 완료</Text>
+        <TouchableOpacity 
+          style={[styles.submitButton, loading && styles.submitButtonDisabled]} 
+          onPress={handleAdd}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>등록 완료</Text>
+          )}
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

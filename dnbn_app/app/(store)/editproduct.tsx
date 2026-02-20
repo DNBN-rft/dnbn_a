@@ -73,7 +73,7 @@ export default function EditProductPage() {
 
       try {
         setIsLoading(true);
-        const response = await apiGet(`/store/product/detail/${productCode}`);
+        const response = await apiGet(`/store/app/product/detail/${productCode}`);
         if (response.ok) {
           const data: ProductDetailResponse = await response.json();
           setProductName(data.productNm);
@@ -135,7 +135,7 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!isLoading && categories.length > 0 && !category) {
       const loadProductDetail = async () => {
-        const response = await apiGet(`/store/product/detail/${productCode}`);
+        const response = await apiGet(`/store/app/product/detail/${productCode}`);
         if (response.ok) {
           const data: ProductDetailResponse = await response.json();
           const selectedCat = categories.find(cat => cat.categoryNm === data.categoryNm);
@@ -218,7 +218,7 @@ export default function EditProductPage() {
       });
 
       // API 요청
-      const response = await apiPutFormDataWithImage(`/store/product/${productCode}`, formData);
+      const response = await apiPutFormDataWithImage(`/store/app/product/${productCode}`, formData);
 
       if (response.ok) {
         Alert.alert("성공", "상품이 수정되었습니다", [

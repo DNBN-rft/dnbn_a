@@ -5,7 +5,15 @@ import {
 } from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
-const API_BASE_URL = "http://192.168.0.136:8080/api";
+
+const API_BASE_URL = "http://192.168.0.67:8080/api";
+
+// 글로벌 로그아웃 콜백
+let logoutCallback: (() => void) | null = null;
+
+export const setLogoutCallback = (callback: () => void) => {
+  logoutCallback = callback;
+};
 
 // 토큰 갱신 중인지 추적
 let isRefreshing = false;
@@ -16,8 +24,11 @@ let failedQueue: {
 
 // 토큰 만료 시 공통 처리
 const handleTokenExpired = async () => {
-  await removeMultipleItems(["accessToken", "refreshToken"]);
-  // TODO: 로그인 페이지로 리다이렉트
+  await removeMultipleItems(["accessToken", "refreshToken", "userType", "custCode", "storeCode"]);
+  // 등록된 콜백 호출 (로그인 페이지로 이동)
+  if (logoutCallback) {
+    logoutCallback();
+  }
 };
 
 // 대기 중인 요청 처리

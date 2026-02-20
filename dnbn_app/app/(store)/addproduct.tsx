@@ -131,7 +131,7 @@ export default function AddProduct() {
       });
 
       // API 요청
-      const response = await apiPostFormDataWithImage('/store/product', formData);
+      const response = await apiPostFormDataWithImage('/store/app/product', formData);
 
       if (response.ok) {
         Alert.alert("성공", "상품이 등록되었습니다", [
