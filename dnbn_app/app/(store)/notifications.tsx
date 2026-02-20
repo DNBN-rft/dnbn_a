@@ -1,10 +1,16 @@
+import { apiGet, apiPut } from "@/utils/api";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
-import { Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { apiGet, apiPut } from "@/utils/api";
+import { useEffect, useState } from "react";
+import {
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./notifications.styles";
 
 // AlarmType
@@ -28,7 +34,7 @@ const AlarmType = {
   NEW_NOTICE: "NEW_NOTICE",
 } as const;
 
-type AlarmType = typeof AlarmType[keyof typeof AlarmType];
+type AlarmType = (typeof AlarmType)[keyof typeof AlarmType];
 
 // Alarm 인터페이스
 interface Alarm {
@@ -53,27 +59,39 @@ function formatTime(date: string): string {
   if (diffHours < 24) return `${diffHours}시간 전`;
   if (diffDays < 7) return `${diffDays}일 전`;
 
-  return createdDate.toLocaleDateString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
+  return createdDate.toLocaleDateString("ko-KR", {
+    month: "short",
+    day: "numeric",
   });
 }
 
 // 알람 타입을 카테고리로 변환
 const getCategoryFromAlarmType = (alarmType: string): string => {
   if (!alarmType) return "기타";
-  
+
   // 백엔드에서 한글로 오는 경우
   if (alarmType === "주문" || alarmType === "할인") return "product";
   if (alarmType === "네고" || alarmType === "네고 요청") return "nego";
   if (alarmType === "리뷰" || alarmType === "리뷰 요청") return "review";
-  if (alarmType === "상품신고" || alarmType === "리뷰신고" || alarmType === "가맹신고" || alarmType === "문의") return "customer";
+  if (
+    alarmType === "상품신고" ||
+    alarmType === "리뷰신고" ||
+    alarmType === "가맹신고" ||
+    alarmType === "문의"
+  )
+    return "customer";
   if (alarmType === "상품 제재" || alarmType === "리뷰 숨김") return "etc";
-  
+
   return "etc";
 };
 
-function AlarmItemComponent({ alarm, onRead }: { alarm: Alarm; onRead: (alarmIdx: number) => void }) {
+function AlarmItemComponent({
+  alarm,
+  onRead,
+}: {
+  alarm: Alarm;
+  onRead: (alarmIdx: number) => void;
+}) {
   const isRead = alarm.readDateTime !== null;
 
   const handlePress = async () => {
@@ -85,10 +103,7 @@ function AlarmItemComponent({ alarm, onRead }: { alarm: Alarm; onRead: (alarmIdx
 
   return (
     <TouchableOpacity
-      style={[
-        styles.alarmItem,
-        !isRead && styles.alarmItemUnread,
-      ]}
+      style={[styles.alarmItem, !isRead && styles.alarmItemUnread]}
       onPress={handlePress}
     >
       <View style={styles.alarmItemContent}>
@@ -107,7 +122,9 @@ export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<"all" | "product" | "nego" | "review" | "customer" | "etc">("all");
+  const [selectedTab, setSelectedTab] = useState<
+    "all" | "product" | "nego" | "review" | "customer" | "etc"
+  >("all");
 
   // 알림 목록 조회
   useEffect(() => {
@@ -147,15 +164,18 @@ export default function NotificationsScreen() {
   // 알림 읽음 처리
   const handleReadAlarm = async (alarmIdx: number) => {
     try {
-      const response = await apiPut(`/store/alarm/read?storeAlarmIdx=${alarmIdx}`, null);
+      const response = await apiPut(
+        `/store/alarm/read?storeAlarmIdx=${alarmIdx}`,
+        null,
+      );
       if (response.ok) {
         // 로컬 상태 업데이트
         setAlarms((prevAlarms) =>
           prevAlarms.map((alarm) =>
             alarm.alarmIdx === alarmIdx
               ? { ...alarm, readDateTime: new Date().toISOString() }
-              : alarm
-          )
+              : alarm,
+          ),
         );
       }
     } catch (error) {
@@ -164,9 +184,12 @@ export default function NotificationsScreen() {
   };
 
   // 탭에 따른 필터링
-  const filteredAlarms = selectedTab === "all" 
-    ? alarms 
-    : alarms.filter((alarm) => getCategoryFromAlarmType(alarm.alarmType) === selectedTab);
+  const filteredAlarms =
+    selectedTab === "all"
+      ? alarms
+      : alarms.filter(
+          (alarm) => getCategoryFromAlarmType(alarm.alarmType) === selectedTab,
+        );
 
   const tabs = [
     { id: "all", label: "전체" },
@@ -183,26 +206,25 @@ export default function NotificationsScreen() {
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          알림
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>알림</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.tabContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[
-              styles.tab,
-              selectedTab === tab.id && styles.tabActive,
-            ]}
+            style={[styles.tab, selectedTab === tab.id && styles.tabActive]}
             onPress={() => setSelectedTab(tab.id)}
           >
             <Text
@@ -225,8 +247,8 @@ export default function NotificationsScreen() {
         ) : (
           <View style={styles.alarmList}>
             {filteredAlarms.map((alarm) => (
-              <AlarmItemComponent 
-                key={alarm.alarmIdx} 
+              <AlarmItemComponent
+                key={alarm.alarmIdx}
                 alarm={alarm}
                 onRead={handleReadAlarm}
               />

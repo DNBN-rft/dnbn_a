@@ -26,7 +26,7 @@ export default function StoreEmployeeManageScreen() {
   const canAddEmployee = employees.length < MAX_EMPLOYEES;
 
   const handleDelete = () => {
-    setEmployees(employees.filter(emp => emp.id !== selectedEmployee));
+    setEmployees(employees.filter((emp) => emp.id !== selectedEmployee));
     setDeleteModal(false);
     setSelectedEmployee(null);
   };
@@ -36,24 +36,34 @@ export default function StoreEmployeeManageScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>직원 관리</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>직원 관리</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.contentContainer}>
           {/* 등록 현황 */}
           <View style={styles.statusCard}>
             <View style={styles.statusRow}>
               <Text style={styles.statusLabel}>등록된 직원</Text>
-              <Text style={styles.statusValue}>{employees.length} / {MAX_EMPLOYEES}명</Text>
+              <Text style={styles.statusValue}>
+                {employees.length} / {MAX_EMPLOYEES}명
+              </Text>
             </View>
             {remainingSlots > 0 && (
               <Text style={styles.statusHelpText}>
@@ -73,16 +83,18 @@ export default function StoreEmployeeManageScreen() {
                   </View>
                 </View>
                 <View style={styles.employeeActions}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={() => router.push({
-                      pathname: "/(store)/editemployee",
-                      params: { employeeId: emp.id }
-                    })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(store)/editemployee",
+                        params: { employeeId: emp.id },
+                      })
+                    }
                   >
                     <Ionicons name="create-outline" size={20} color="#EF7810" />
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => {
                       setSelectedEmployee(emp.id);
@@ -110,24 +122,28 @@ export default function StoreEmployeeManageScreen() {
           ))}
 
           {/* 직원 추가 버튼 */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.addButton,
-              !canAddEmployee && styles.addButtonDisabled
+              !canAddEmployee && styles.addButtonDisabled,
             ]}
-            onPress={() => canAddEmployee && router.push("/(store)/addemployee")}
+            onPress={() =>
+              canAddEmployee && router.push("/(store)/addemployee")
+            }
             disabled={!canAddEmployee}
           >
-            <Ionicons 
-              name="add-circle-outline" 
-              size={24} 
-              color={canAddEmployee ? "#EF7810" : "#ccc"} 
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              color={canAddEmployee ? "#EF7810" : "#ccc"}
             />
-            <Text style={[
-              styles.addButtonText,
-              !canAddEmployee && styles.addButtonTextDisabled
-            ]}>
-              {canAddEmployee ? '새 직원 등록' : '최대 인원 등록 완료'}
+            <Text
+              style={[
+                styles.addButtonText,
+                !canAddEmployee && styles.addButtonTextDisabled,
+              ]}
+            >
+              {canAddEmployee ? "새 직원 등록" : "최대 인원 등록 완료"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -145,9 +161,10 @@ export default function StoreEmployeeManageScreen() {
             <Ionicons name="warning-outline" size={48} color="#ff3b30" />
             <Text style={styles.deleteModalTitle}>직원 삭제</Text>
             <Text style={styles.deleteModalMessage}>
-              정말로 이 직원을 삭제하시겠습니까?{"\n"}삭제된 정보는 복구할 수 없습니다.
+              정말로 이 직원을 삭제하시겠습니까?{"\n"}삭제된 정보는 복구할 수
+              없습니다.
             </Text>
-            
+
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}

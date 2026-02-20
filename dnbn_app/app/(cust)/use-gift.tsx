@@ -1,18 +1,18 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
-  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./use-gift.styles";
-import { apiGet } from "@/utils/api";
 
 // 날짜 포맷팅 함수
 const formatDateTime = (dateTimeString: string): string => {
@@ -72,7 +72,9 @@ export default function UseGift() {
           return;
         }
 
-        const response = await apiGet(`/cust/purchase-list/unused/${orderDetailIdx}`);
+        const response = await apiGet(
+          `/cust/purchase-list/unused/${orderDetailIdx}`,
+        );
 
         if (!response.ok) {
           throw new Error("구매 정보를 가져오는데 실패했습니다.");
@@ -95,7 +97,12 @@ export default function UseGift() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
@@ -103,7 +110,12 @@ export default function UseGift() {
 
   if (error || !purchaseData) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Text style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 20 }}>
           {error || "구매 정보를 불러올 수 없습니다."}
         </Text>
@@ -124,14 +136,18 @@ export default function UseGift() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>구매함</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>구매함</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -146,7 +162,11 @@ export default function UseGift() {
             <View
               style={[
                 styles.giftImage,
-                { justifyContent: "center", alignItems: "center", backgroundColor: "#f0f0f0" },
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#f0f0f0",
+                },
               ]}
             >
               <Text style={{ fontSize: 16, color: "#999", fontWeight: "bold" }}>
@@ -220,7 +240,9 @@ export default function UseGift() {
           <Text style={styles.giftDetailTitle}>구매 상세 정보</Text>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>유효기간</Text>
-            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.qrExpiredAt)}</Text>
+            <Text style={styles.giftDetailValue}>
+              {formatDateTime(purchaseData.qrExpiredAt)}
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>주문번호</Text>
@@ -228,15 +250,21 @@ export default function UseGift() {
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailAmount}개</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailAmount}개
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>단가</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailPrice.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailPrice.toLocaleString()}원
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>총금액</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.orderDetailTotal.toLocaleString()}원</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.orderDetailTotal.toLocaleString()}원
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
@@ -244,7 +272,9 @@ export default function UseGift() {
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>주문일</Text>
-            <Text style={styles.giftDetailValue}>{formatDateTime(purchaseData.orderDateTime)}</Text>
+            <Text style={styles.giftDetailValue}>
+              {formatDateTime(purchaseData.orderDateTime)}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -254,7 +284,7 @@ export default function UseGift() {
           if (purchaseData.qrImg?.fileUrl) {
             router.push({
               pathname: "/(cust)/qr-used",
-              params: { qrImageUrl: purchaseData.qrImg.fileUrl }
+              params: { qrImageUrl: purchaseData.qrImg.fileUrl },
             });
           }
         }}

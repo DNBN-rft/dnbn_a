@@ -8,30 +8,32 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    position: "absolute",
-    left: 0,
-    right: 0,
     textAlign: "center",
-    pointerEvents: "none",
   },
-  placeholder: {
-    width: 40,
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollContainer: {
     flex: 1,
@@ -39,7 +41,7 @@ export const styles = StyleSheet.create({
   productDetailContainer: {
     padding: 20,
   },
-  
+
   productMetaContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -57,13 +59,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
   },
-  
+
   contentRow: {
     flexDirection: "column",
     gap: 16,
     marginBottom: 16,
   },
-  
+
   productImagesContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -116,7 +118,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     borderRadius: 16,
   },
-  
+
   productInfoContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -157,7 +159,7 @@ export const styles = StyleSheet.create({
     color: "#444",
     lineHeight: 22,
   },
-  
+
   productStatusContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,

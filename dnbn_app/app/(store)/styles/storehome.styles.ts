@@ -8,17 +8,33 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    padding: 20,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
-  headerTitle: {
-    fontSize: 20,
+  leftSection: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    textAlign: "center",
+  },
+  rightSection: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   iconButton: {
     padding: 8,

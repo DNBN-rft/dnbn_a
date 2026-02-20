@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/utils/api";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -71,14 +71,18 @@ export default function PurchaseBox() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push("/tabs/mypage")}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>구매함</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push("/tabs/mypage")}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>구매함</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.purchaseBoxContainer}>
@@ -119,10 +123,14 @@ export default function PurchaseBox() {
               renderItem={({ item: notUsed }) => (
                 <TouchableOpacity
                   style={styles.products}
-                  onPress={() => router.push({
-                    pathname: "/(cust)/use-gift",
-                    params: { orderDetailIdx: notUsed.orderDetailIdx.toString() }
-                  })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(cust)/use-gift",
+                      params: {
+                        orderDetailIdx: notUsed.orderDetailIdx.toString(),
+                      },
+                    })
+                  }
                 >
                   <View style={styles.productImageContainer}>
                     <Image
@@ -163,10 +171,14 @@ export default function PurchaseBox() {
               renderItem={({ item: used }) => (
                 <TouchableOpacity
                   style={styles.products}
-                  onPress={() => router.push({
-                    pathname: "/(cust)/used-gift",
-                    params: { orderDetailIdx: used.orderDetailIdx.toString() }
-                  })}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(cust)/used-gift",
+                      params: {
+                        orderDetailIdx: used.orderDetailIdx.toString(),
+                      },
+                    })
+                  }
                 >
                   <View style={styles.productImageContainer}>
                     <Image

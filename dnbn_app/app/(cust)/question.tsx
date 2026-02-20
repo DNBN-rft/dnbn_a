@@ -85,14 +85,18 @@ export default function NoticeDetailScreen() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>문의사항</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>문의사항</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.questionListContainer}>

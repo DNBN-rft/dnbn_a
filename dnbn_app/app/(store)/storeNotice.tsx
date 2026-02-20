@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./notice.styles";
+import { styles } from "./storeNotice.styles";
 
 interface Notice {
   noticeIdx: number;
@@ -20,35 +20,41 @@ interface Notice {
   isPinned: boolean;
 }
 
-export default function NoticeScreen() {
+export default function StoreNoticeScreen() {
   const insets = useSafeAreaInsets();
   const [noticeList, setNoticeList] = useState<Notice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isLastPage, setIsLastPage] = useState(false);
 
   useEffect(() => {
-    fetchNotices();
+    fetchNotices(0);
   }, []);
 
-  const fetchNotices = async () => {
+  const fetchNotices = async (page: number) => {
     try {
-      setIsLoading(true);
+      if (page === 0) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
       setError(null);
-      const response = await apiGet("/cust/notice");
+
+      const response = await apiGet(`/store/app/notice?page=${page}&size=10`);
 
       if (response.ok) {
         const data = await response.json();
-        // isPinned인 항목을 먼저, 그 다음 최근순으로 정렬
-        const sorted = data.sort((a: Notice, b: Notice) => {
-          if (a.isPinned === b.isPinned) {
-            return (
-              new Date(b.regDateTime).getTime() -
-              new Date(a.regDateTime).getTime()
-            );
-          }
-          return a.isPinned ? -1 : 1;
-        });
-        setNoticeList(sorted);
+
+        if (page === 0) {
+          setNoticeList(data.content);
+        } else {
+          setNoticeList((prev) => [...prev, ...data.content]);
+        }
+
+        setIsLastPage(data.last);
+        setCurrentPage(page);
       } else {
         setError("공지사항을 불러올 수 없습니다");
       }
@@ -57,12 +63,25 @@ export default function NoticeScreen() {
       console.error(err);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!isLoadingMore && !isLastPage) {
+      fetchNotices(currentPage + 1);
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ko-KR");
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
   return (
@@ -95,7 +114,10 @@ export default function NoticeScreen() {
         <View style={styles.emptyContainer}>
           <Ionicons name="alert-circle-outline" size={60} color="#999" />
           <Text style={styles.emptyText}>서버 오류가 발생했습니다</Text>
-          <TouchableOpacity style={styles.refreshButton} onPress={fetchNotices}>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={() => fetchNotices(0)}
+          >
             <Ionicons name="refresh" size={20} color="#EF7810" />
             <Text style={styles.refreshButtonText}>다시 시도</Text>
           </TouchableOpacity>
@@ -110,6 +132,15 @@ export default function NoticeScreen() {
           data={noticeList}
           keyExtractor={(item) => item.noticeIdx.toString()}
           contentContainerStyle={{ paddingTop: 12, paddingBottom: 20 }}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <View style={{ paddingVertical: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color="#EF7810" />
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <Pressable
               style={({ pressed }) => [
@@ -119,7 +150,7 @@ export default function NoticeScreen() {
               ]}
               onPress={() =>
                 router.push({
-                  pathname: "/(cust)/noticeDetail",
+                  pathname: "/(store)/storeNoticeDetail",
                   params: { noticeIdx: item.noticeIdx },
                 })
               }

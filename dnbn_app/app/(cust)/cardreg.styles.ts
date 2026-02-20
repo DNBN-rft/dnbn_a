@@ -8,28 +8,32 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: 20,
     backgroundColor: "#fff",
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    position: "absolute",
-    left: 0,
-    right: 0,
     textAlign: "center",
-    pointerEvents: "none",
   },
-  placeholder: {
-    width: 40,
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,
@@ -101,7 +105,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   checkbox: {
-      width: 20,
+    width: 20,
     height: 20,
     borderRadius: 2,
     borderWidth: 1,

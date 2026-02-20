@@ -178,15 +178,19 @@ export default function PurchaseScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>구매내역</Text>
-        <View style={styles.placeholder} />
+      <View style={styles.header}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>구매내역</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.searchTopContainer}>

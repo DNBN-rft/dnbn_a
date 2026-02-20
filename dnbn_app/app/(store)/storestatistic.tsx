@@ -30,15 +30,18 @@ export default function StoreStatistic() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="black" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>매출 통계</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>매출 통계</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView
@@ -107,7 +110,9 @@ export default function StoreStatistic() {
             <Text style={styles.topSectionPrice}>₩55,500</Text>
             <View style={styles.changeIndicator}>
               <Ionicons name="trending-down" size={16} color="#EF4444" />
-              <Text style={[styles.changeText, { color: "#EF4444" }]}>-3.1%</Text>
+              <Text style={[styles.changeText, { color: "#EF4444" }]}>
+                -3.1%
+              </Text>
             </View>
           </View>
           <View style={styles.topSectionBox}>
@@ -162,7 +167,9 @@ export default function StoreStatistic() {
           <View style={styles.rankingList}>
             <View style={styles.rankingItem}>
               <View style={styles.rankingLeft}>
-                <View style={[styles.trophyBadge, { backgroundColor: "#FFD700" }]}>
+                <View
+                  style={[styles.trophyBadge, { backgroundColor: "#FFD700" }]}
+                >
                   <Text style={styles.rankNumber}>1</Text>
                 </View>
                 <View style={styles.rankingInfo}>
@@ -177,7 +184,9 @@ export default function StoreStatistic() {
 
             <View style={styles.rankingItem}>
               <View style={styles.rankingLeft}>
-                <View style={[styles.trophyBadge, { backgroundColor: "#C0C0C0" }]}>
+                <View
+                  style={[styles.trophyBadge, { backgroundColor: "#C0C0C0" }]}
+                >
                   <Text style={styles.rankNumber}>2</Text>
                 </View>
                 <View style={styles.rankingInfo}>
@@ -192,7 +201,9 @@ export default function StoreStatistic() {
 
             <View style={styles.rankingItem}>
               <View style={styles.rankingLeft}>
-                <View style={[styles.trophyBadge, { backgroundColor: "#CD7F32" }]}>
+                <View
+                  style={[styles.trophyBadge, { backgroundColor: "#CD7F32" }]}
+                >
                   <Text style={styles.rankNumber}>3</Text>
                 </View>
                 <View style={styles.rankingInfo}>
@@ -211,8 +222,14 @@ export default function StoreStatistic() {
           <View style={styles.categoryList}>
             <View style={styles.categoryItem}>
               <View style={styles.categoryLeft}>
-                <View style={[styles.categoryIcon, { backgroundColor: "#EFF6FF" }]}>
-                  <Ionicons name="phone-portrait-outline" size={20} color="#3B82F6" />
+                <View
+                  style={[styles.categoryIcon, { backgroundColor: "#EFF6FF" }]}
+                >
+                  <Ionicons
+                    name="phone-portrait-outline"
+                    size={20}
+                    color="#3B82F6"
+                  />
                 </View>
                 <Text style={styles.categoryTitle}>가전</Text>
               </View>
@@ -223,7 +240,9 @@ export default function StoreStatistic() {
 
             <View style={styles.categoryItem}>
               <View style={styles.categoryLeft}>
-                <View style={[styles.categoryIcon, { backgroundColor: "#F0FDF4" }]}>
+                <View
+                  style={[styles.categoryIcon, { backgroundColor: "#F0FDF4" }]}
+                >
                   <Ionicons name="home-outline" size={20} color="#22C55E" />
                 </View>
                 <Text style={styles.categoryTitle}>생활용품</Text>
@@ -235,8 +254,14 @@ export default function StoreStatistic() {
 
             <View style={styles.categoryItem}>
               <View style={styles.categoryLeft}>
-                <View style={[styles.categoryIcon, { backgroundColor: "#FEF3C7" }]}>
-                  <Ionicons name="basketball-outline" size={20} color="#F59E0B" />
+                <View
+                  style={[styles.categoryIcon, { backgroundColor: "#FEF3C7" }]}
+                >
+                  <Ionicons
+                    name="basketball-outline"
+                    size={20}
+                    color="#F59E0B"
+                  />
                 </View>
                 <Text style={styles.categoryTitle}>스포츠</Text>
               </View>
@@ -247,7 +272,9 @@ export default function StoreStatistic() {
 
             <View style={styles.categoryItem}>
               <View style={styles.categoryLeft}>
-                <View style={[styles.categoryIcon, { backgroundColor: "#F3E8FF" }]}>
+                <View
+                  style={[styles.categoryIcon, { backgroundColor: "#F3E8FF" }]}
+                >
                   <Ionicons name="shirt-outline" size={20} color="#A855F7" />
                 </View>
                 <Text style={styles.categoryTitle}>패션</Text>

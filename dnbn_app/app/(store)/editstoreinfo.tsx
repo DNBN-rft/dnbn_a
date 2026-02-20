@@ -1,3 +1,11 @@
+import AccountInfoSection from "@/components/store/AccountInfoSection";
+import BankInfoSection from "@/components/store/BankInfoSection";
+import BankPickerModal from "@/components/store/BankPickerModal";
+import BusinessInfoSection from "@/components/store/BusinessInfoSection";
+import OperatingInfoSection from "@/components/store/OperatingInfoSection";
+import PasswordChangeModal from "@/components/store/PasswordChangeModal";
+import StoreInfoSection from "@/components/store/StoreInfoSection";
+import TimePickerModal from "@/components/store/TimePickerModal";
 import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -14,14 +22,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
-import AccountInfoSection from "@/components/store/AccountInfoSection";
-import StoreInfoSection from "@/components/store/StoreInfoSection";
-import BankInfoSection from "@/components/store/BankInfoSection";
-import BusinessInfoSection from "@/components/store/BusinessInfoSection";
-import OperatingInfoSection from "@/components/store/OperatingInfoSection";
-import PasswordChangeModal from "@/components/store/PasswordChangeModal";
-import TimePickerModal from "@/components/store/TimePickerModal";
-import BankPickerModal from "@/components/store/BankPickerModal";
 
 interface StoreInfo {
   approvalStatus: string;
@@ -361,14 +361,18 @@ export default function EditStoreInfoPage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>가맹점 정보 수정</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>가맹점 정보 수정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

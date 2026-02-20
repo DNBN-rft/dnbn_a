@@ -190,13 +190,18 @@ export default function ReportPage() {
         <View style={{ height: insets.top, backgroundColor: "#FFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <View style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </View>
-        </TouchableOpacity>
-        <Text style={styles.title}>신고하기</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>신고하기</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.content}>

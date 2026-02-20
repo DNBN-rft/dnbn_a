@@ -1,11 +1,11 @@
-import { styles } from "./qr-used.styles";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, TouchableOpacity, View } from "react-native";
-import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import * as Brightness from "expo-brightness";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef } from "react";
-import * as Brightness from "expo-brightness";
+import { Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./qr-used.styles";
 
 export default function QrUsedScreen() {
   const insets = useSafeAreaInsets();
@@ -44,16 +44,18 @@ export default function QrUsedScreen() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          QR
-        </Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>QR코드</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.qrContainer}>
@@ -69,7 +71,7 @@ export default function QrUsedScreen() {
       </View>
 
       {insets.bottom > 0 && (
-        <View style={{height: insets.bottom, backgroundColor: "#000"}} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

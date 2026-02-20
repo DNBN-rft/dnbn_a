@@ -44,9 +44,7 @@ export default function ReportListScreen() {
         setLoadingMore(true);
       }
 
-      const response = await apiGet(
-        `/cust/report?page=${pageNum}&size=10`,
-      );
+      const response = await apiGet(`/cust/report?page=${pageNum}&size=10`);
 
       if (!response.ok) {
         throw new Error("신고 목록을 불러오는데 실패했습니다.");
@@ -94,14 +92,18 @@ export default function ReportListScreen() {
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>신고 목록</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>신고 목록</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {loading ? (

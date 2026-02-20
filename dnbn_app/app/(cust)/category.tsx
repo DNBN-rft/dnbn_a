@@ -266,12 +266,20 @@ export default function CategoryScreen() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>관심 카테고리 설정</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>관심 카테고리 설정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {loading ? (
@@ -326,7 +334,7 @@ export default function CategoryScreen() {
                   }
                 >
                   {category.fileMasterResponse?.files &&
-                    category.fileMasterResponse.files.length > 0 ? (
+                  category.fileMasterResponse.files.length > 0 ? (
                     <Image
                       source={{
                         uri: category.fileMasterResponse.files[0].fileUrl,

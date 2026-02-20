@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editemployee.styles";
 
@@ -9,11 +15,11 @@ export default function EditEmployeePage() {
   const insets = useSafeAreaInsets();
 
   // 직원 정보 (실제로는 params로 받아온 데이터를 기반으로 로드)
-  const [employeeId, setEmployeeId] = useState('emp001');
-  const [employeeName, setEmployeeName] = useState('홍길동');
-  const [phoneNumber, setPhoneNumber] = useState('010-1234-5678');
-  const [role, setRole] = useState<'매니저' | '일반'>('매니저');
-  const [newPassword, setNewPassword] = useState('');
+  const [employeeId, setEmployeeId] = useState("emp001");
+  const [employeeName, setEmployeeName] = useState("홍길동");
+  const [phoneNumber, setPhoneNumber] = useState("010-1234-5678");
+  const [role, setRole] = useState<"매니저" | "일반">("매니저");
+  const [newPassword, setNewPassword] = useState("");
 
   const handleUpdate = () => {
     console.log({
@@ -21,7 +27,7 @@ export default function EditEmployeePage() {
       employeeName,
       phoneNumber,
       role,
-      ...(newPassword && { password: newPassword })
+      ...(newPassword && { password: newPassword }),
     });
     router.back();
   };
@@ -31,16 +37,20 @@ export default function EditEmployeePage() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
-      
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>직원 정보 수정</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>직원 정보 수정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -94,16 +104,36 @@ export default function EditEmployeePage() {
             <Text style={styles.label}>권한</Text>
             <View style={styles.toggleGroup}>
               <TouchableOpacity
-                style={[styles.toggleButton, role === '매니저' && styles.toggleButtonActive]}
-                onPress={() => setRole('매니저')}
+                style={[
+                  styles.toggleButton,
+                  role === "매니저" && styles.toggleButtonActive,
+                ]}
+                onPress={() => setRole("매니저")}
               >
-                <Text style={[styles.toggleText, role === '매니저' && styles.toggleTextActive]}>매니저</Text>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    role === "매니저" && styles.toggleTextActive,
+                  ]}
+                >
+                  매니저
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.toggleButton, role === '일반' && styles.toggleButtonActive]}
-                onPress={() => setRole('일반')}
+                style={[
+                  styles.toggleButton,
+                  role === "일반" && styles.toggleButtonActive,
+                ]}
+                onPress={() => setRole("일반")}
               >
-                <Text style={[styles.toggleText, role === '일반' && styles.toggleTextActive]}>일반</Text>
+                <Text
+                  style={[
+                    styles.toggleText,
+                    role === "일반" && styles.toggleTextActive,
+                  ]}
+                >
+                  일반
+                </Text>
               </TouchableOpacity>
             </View>
             <Text style={styles.helpText}>

@@ -14,15 +14,18 @@ export default function DetailNegoProductPage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>네고 상세</Text>
-        <View style={styles.placeholder}></View>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>네고 상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView style={styles.scrollContainer}>
@@ -33,40 +36,44 @@ export default function DetailNegoProductPage() {
                 <Text style={styles.productStatus}>네고 진행 중</Text>
                 <Text style={styles.registrationDate}>등록일: 2024.01.12</Text>
               </View>
-              
+
               <View style={styles.mainImageContainer}>
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/*이전 이미지 함수 */}}
+                  onPress={() => {
+                    /*이전 이미지 함수 */
+                  }}
                 >
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
-                
-                <Image 
+
+                <Image
                   style={styles.productMainImage}
-                  source={{ uri: 'https://via.placeholder.com/300' }}
+                  source={{ uri: "https://via.placeholder.com/300" }}
                 />
-                
+
                 <TouchableOpacity
                   style={styles.mainImageButton}
-                  onPress={() => {/*다음 이미지 함수 */}}
+                  onPress={() => {
+                    /*다음 이미지 함수 */
+                  }}
                 >
                   <Ionicons name="chevron-forward" size={24} color="#666" />
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.productSubImages}>
-                <Image 
+                <Image
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={{ uri: "https://via.placeholder.com/80" }}
                 />
-                <Image 
+                <Image
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={{ uri: "https://via.placeholder.com/80" }}
                 />
-                <Image 
+                <Image
                   style={styles.productSubImage}
-                  source={{ uri: 'https://via.placeholder.com/80' }}
+                  source={{ uri: "https://via.placeholder.com/80" }}
                 />
               </View>
             </View>
@@ -77,8 +84,8 @@ export default function DetailNegoProductPage() {
               <Text style={styles.productPrice}>₩ 89,000</Text>
               <Text style={styles.productStock}>재고: 15개</Text>
               <Text style={styles.productDescription}>
-                고음질 사운드를 제공하는 프리미엄 무선 이어폰입니다.
-                노이즈 캔슬링 기능과 긴 배터리 수명을 자랑합니다.
+                고음질 사운드를 제공하는 프리미엄 무선 이어폰입니다. 노이즈
+                캔슬링 기능과 긴 배터리 수명을 자랑합니다.
               </Text>
             </View>
           </View>
@@ -86,7 +93,9 @@ export default function DetailNegoProductPage() {
           <View style={styles.productStatusContainer}>
             <View style={styles.statusInfoRow}>
               <Text style={styles.statusInfoTitle}>네고 기간</Text>
-              <Text style={styles.statusInfoContent}>2024.01.12 10:00 ~ 2024.01.13 10:00</Text>
+              <Text style={styles.statusInfoContent}>
+                2024.01.12 10:00 ~ 2024.01.13 10:00
+              </Text>
             </View>
 
             <View style={styles.statusInfoRow}>
