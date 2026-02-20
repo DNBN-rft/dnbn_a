@@ -123,7 +123,7 @@ export default function NegoHistory() {
     try {
       setLoading(true);
       const response = await apiGet(
-        `/store/app/nego-log/list?page=${pageNum}&size=10`,
+        `/store/app/nego-log?page=${pageNum}&size=10`,
       );
 
       if (response.ok) {
@@ -172,7 +172,7 @@ export default function NegoHistory() {
     try {
       setRequestLoading(true);
       const response = await apiGet(
-        `/store/app/nego-req-log/list?page=${pageNum}&size=10`,
+        `/store/app/nego-req-log?page=${pageNum}&size=10`,
       );
 
       if (response.ok) {
