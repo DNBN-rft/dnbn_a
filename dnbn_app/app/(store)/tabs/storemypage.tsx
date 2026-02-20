@@ -102,7 +102,10 @@ export default function StoreMypage() {
               <Text style={styles.menuText}>공지사항</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/storeQuestion")}
+            >
               <Text style={styles.menuText}>문의</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>
