@@ -39,10 +39,10 @@ export const styles = StyleSheet.create({
   productDetailContainer: {
     padding: 20,
   },
-  
+
   productMetaContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 12,
     marginLeft: 48,
@@ -57,13 +57,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
   },
-  
+
   contentRow: {
     flexDirection: "column",
     gap: 16,
     marginBottom: 16,
   },
-  
+
   productImagesContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     borderRadius: 16,
   },
-  
+
   productInfoContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -157,7 +157,7 @@ export const styles = StyleSheet.create({
     color: "#444",
     lineHeight: 22,
   },
-  
+
   productStatusContainer: {
     backgroundColor: "#fff",
     borderRadius: 12,

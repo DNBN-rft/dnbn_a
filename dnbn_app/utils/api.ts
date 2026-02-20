@@ -5,6 +5,7 @@ import {
 } from "@/utils/storageUtil";
 
 //소윤: 67, 형운: 68, 진용: 136
+
 const API_BASE_URL = "http://192.168.0.67:8080/api";
 
 // 글로벌 로그아웃 콜백
