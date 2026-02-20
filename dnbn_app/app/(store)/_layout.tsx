@@ -23,6 +23,38 @@ export default function StoreLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="storeQuestion"
+        options={{
+          title: "문의사항",
+          headerShown: false,
+          headerTitle: "문의사항",
+        }}
+      />
+      <Stack.Screen
+        name="storeQuestionReg"
+        options={{
+          title: "문의하기",
+          headerShown: false,
+          headerTitle: "문의하기",
+        }}
+      />
+      <Stack.Screen
+        name="storeQuestion-answer"
+        options={{
+          title: "문의상세",
+          headerShown: false,
+          headerTitle: "문의상세",
+        }}
+      />
+      <Stack.Screen
+        name="storeQuestion-answer-edit"
+        options={{
+          title: "문의 수정",
+          headerShown: false,
+          headerTitle: "문의 수정",
+        }}
+      />
     </Stack>
   );
 }
