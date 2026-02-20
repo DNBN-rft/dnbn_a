@@ -123,8 +123,7 @@ export default function EditEmployeePage() {
         Alert.alert('성공', message);
         router.back();
       } else {
-        const errorText = await response.text();
-        Alert.alert('오류', errorText || '직원 정보 수정에 실패했습니다.');
+        Alert.alert('오류', '직원 정보 수정에 실패했습니다.');
       }
     } catch (error) {
       console.error('직원 정보 수정 실패:', error);
@@ -154,8 +153,9 @@ export default function EditEmployeePage() {
       <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}      
+        >
+
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.loadingContainer}>

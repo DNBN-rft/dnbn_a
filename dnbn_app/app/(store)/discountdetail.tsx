@@ -66,8 +66,7 @@ console.log("할인 상세 API 응답:", data);
 
           setDiscountData(data);
         } else {
-          const errorText = await response.text();
-          Alert.alert("오류", errorText || "할인 상세 정보를 불러오는데 실패했습니다.");
+          Alert.alert("오류", "할인 상세 정보를 불러오는데 실패했습니다.");
           router.back();
         }
       } catch (error) {

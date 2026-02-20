@@ -46,8 +46,7 @@ export default function StoreEmployeeManageScreen() {
         const data = await response.json();
         setEmployees(data);
       } else {
-        const errorText = await response.text();
-        Alert.alert("오류", errorText || "직원 목록을 불러오는데 실패했습니다.");
+        Alert.alert("오류", "직원 목록을 불러오는데 실패했습니다.");
       }
     } catch (error) {
       console.error("직원 목록 조회 실패:", error);
