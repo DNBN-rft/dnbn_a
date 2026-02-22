@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View, Pressable } from "react-native";
+import { FlatList, Text, TouchableOpacity, View, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiGet } from "../../utils/api";
 import { styles } from "./storeQuestion.styles";
@@ -100,14 +100,18 @@ export default function StoreQuestion() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>문의사항</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>문의사항</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.questionListContainer}>
@@ -141,13 +145,16 @@ export default function StoreQuestion() {
             data={sortedQuestionList}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.flatListContentContainer}
+            contentContainerStyle={[
+              styles.flatListContentContainer,
+              { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }
+            ]}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.questionItemContainer}
                 activeOpacity={0.7}
                 onPress={() =>
-                  router.navigate({
+                  router.push({
                     pathname: "/(store)/storeQuestion-answer",
                     params: { questionId: item.id },
                   })
@@ -158,7 +165,7 @@ export default function StoreQuestion() {
                     style={[
                       styles.questionIconContainer,
                       item.status === "답변대기" &&
-                        styles.questionItemStatusPending,
+                      styles.questionItemStatusPending,
                     ]}
                   >
                     {item.status === "답변대기" ? (
@@ -182,14 +189,14 @@ export default function StoreQuestion() {
                         style={[
                           styles.questionItemStatusContainer,
                           item.status === "답변대기" &&
-                            styles.questionItemStatusPending,
+                          styles.questionItemStatusPending,
                         ]}
                       >
                         <Text
                           style={[
                             styles.questionItemStatusText,
                             item.status === "답변대기" &&
-                              styles.questionItemStatusTextPending,
+                            styles.questionItemStatusTextPending,
                           ]}
                         >
                           {item.status}
@@ -225,7 +232,7 @@ export default function StoreQuestion() {
       {sortedQuestionList.length > 0 && (
         <View style={styles.registerButtonContainer}>
           <Pressable
-            onPress={() => router.navigate("/(store)/storeQuestionReg")}
+            onPress={() => router.push("/(store)/storeQuestionReg")}
             style={styles.registerButton}
           >
             <Text style={styles.registerButtonText}>
@@ -236,7 +243,7 @@ export default function StoreQuestion() {
       )}
 
       {insets.bottom > 0 && sortedQuestionList.length === 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#FFFFFF" }} />
       )}
     </View>
   );

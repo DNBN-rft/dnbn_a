@@ -108,7 +108,7 @@ export default function StoreQuestionAnswer() {
                 Alert.alert("성공", "문의가 삭제되었습니다.", [
                   {
                     text: "확인",
-                    onPress: () => router.navigate("/(store)/storeQuestion"),
+                    onPress: () => router.replace("/(store)/storeQuestion"),
                   },
                 ]);
               } else {
@@ -141,8 +141,8 @@ export default function StoreQuestionAnswer() {
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
           <Text style={styles.title}>문의상세</Text>
-          <View style={styles.placeholder} />
         </View>
+        <View style={styles.rightSection} />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -158,14 +158,18 @@ export default function StoreQuestionAnswer() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>문의상세</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>문의상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView
@@ -195,7 +199,7 @@ export default function StoreQuestionAnswer() {
                     <TouchableOpacity
                       style={styles.editButton}
                       onPress={() =>
-                        router.navigate({
+                        router.push({
                           pathname: "/(store)/storeQuestion-answer-edit",
                           params: { questionId: questionId },
                         })
