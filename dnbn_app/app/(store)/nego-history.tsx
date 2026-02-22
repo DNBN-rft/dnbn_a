@@ -369,9 +369,7 @@ export default function NegoHistory() {
                           : styles.statusDelete,
                       ]}
                     >
-                      {item.negoLogStatus === "COMPLETED"
-                        ? "완료"
-                        : item.negoLogStatus}
+                      {item.negoLogStatus === "COMPLETED" ? "완료" : "취소"}
                     </Text>
                   </View>
                 </View>
