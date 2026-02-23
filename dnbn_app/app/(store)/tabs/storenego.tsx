@@ -187,16 +187,15 @@ export default function StoreNego() {
       const response = await apiDelete(`/store/app/nego/cancel/${negoIdx}`);
 
       if (response.ok) {
-        const message = await response.text();
-        Alert.alert("성공", message);
+        Alert.alert("네고 취소에 성공했습니다.");
         // 리스트 새로고침
         handleRefresh();
       } else {
-        Alert.alert("실패", "네고 취소에 실패했습니다.");
+        Alert.alert("네고 취소에 실패했습니다.");
       }
     } catch (error) {
       console.error("네고 취소 API 호출 에러:", error);
-      Alert.alert("오류", "네고 취소 중 오류가 발생했습니다.");
+      Alert.alert("네고 취소 중 오류가 발생했습니다.");
     }
   };
 
