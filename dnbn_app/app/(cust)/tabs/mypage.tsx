@@ -125,7 +125,7 @@ export default function Mypage() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/negoLogList")}
+              onPress={() => router.navigate("/(cust)/nego-acceted")}
             >
               <Text style={styles.menuText}>결제</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />

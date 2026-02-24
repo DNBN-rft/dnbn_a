@@ -113,6 +113,40 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
+  permissionContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 8,
+  },
+  permissionItem: {
+    flex: 1,
+    minWidth: "45%",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#fff",
+  },
+  permissionItemActive: {
+    borderColor: "#EF7810",
+    backgroundColor: "#FFF5ED",
+  },
+  permissionIcon: {
+    marginRight: 8,
+  },
+  permissionText: {
+    fontSize: 14,
+    color: "#666",
+    flex: 1,
+  },
+  permissionTextActive: {
+    color: "#EF7810",
+    fontWeight: "600",
+  },
   submitButton: {
     backgroundColor: "#EF7810",
     borderRadius: 8,
@@ -120,6 +154,9 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
     marginBottom: 40,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
   },
   submitButtonText: {
     color: "#fff",
