@@ -1,92 +1,110 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
+import { Image } from "expo-image";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   FlatList,
-  Image,
   Modal,
+  Platform,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet, apiPut } from "../../utils/api";
 import { styles } from "./review-manage.style";
+
+interface ReviewItem {
+  reviewIdx: number;
+  reviewContent: string;
+  reviewRate: number;
+  reviewRegDateTime: string;
+  reviewAnswered: boolean;
+  reviewAnswerContent: string | null;
+  productNm: string;
+  custNm: string;
+  reviewImgs: any;
+  isHidden: boolean;
+  hiddenExpireAt: string | null;
+}
 
 type ModalState = "hide" | "hideClear" | "noOpen";
 
 export default function ReviewManage() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [hideModal, setHideModal] = useState<ModalState>("noOpen");
-  const [hideText, setHideText] = useState<"숨김" | "숨김 해제">("숨김");
-  const [hideButtonText, setHideButtonText] = useState<"숨김" | "숨김 해제">(
+  const [hideText, setHideText] = useState<"숨김" | "숨김 해제" | "숨김 중">("숨김");
+  const [hideButtonText, setHideButtonText] = useState<"숨김" | "숨김 해제" | "숨김 중">(
     "숨김",
   );
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReviewIdx, setSelectedReviewIdx] = useState<number | null>(null);
 
-  const handleApprove = (status: ModalState) => {
-    if (status === "hide") {
-      // TODO: 숨김 처리 API 호출
-    } else if (status === "hideClear") {
-      // TODO: 숨김 해제 API 호출
+  useFocusEffect(
+    useCallback(() => {
+      fetchReviews();
+    }, [])
+  );
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const response = await apiGet("/store/app/review");
+
+      if (response.ok) {
+        const data = await response.json();
+        const reviewList = data.content || data;
+        setReviews(Array.isArray(reviewList) ? reviewList : []);
+      } else {
+        console.error("리뷰 목록 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("리뷰 조회 에러:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const reviewList = [
-    {
-      id: "1",
-      productImage: require("@/assets/images/image1.jpg"),
-      category: "음료",
-      productName: "아메리카노",
-      rating: 5,
-      date: "2026.01.10",
-      reviewContent:
-        "정말 맛있어요! 커피 향이 진하고 깔끔합니다. 매장 분위기도 좋고 다음에 또 방문하고 싶어요.",
-      userName: "김진용",
-      hiddenExpireAt: "2026-01-10",
-      isHidden: false,
-      hasAnswer: false,
-    },
-    {
-      id: "2",
-      productImage: require("@/assets/images/image1.jpg"),
-      category: "디저트",
-      productName: "초콜릿 케이크",
-      rating: 4,
-      date: "2026.01.09",
-      reviewContent:
-        "달콤하고 부드러운 케이크였습니다. 다만 가격이 조금 비싼 것 같아요.",
-      userName: "박소윤",
-      hiddenExpireAt: "2026-01-12",
-      isHidden: false,
-      hasAnswer: true,
-    },
-    {
-      id: "3",
-      productImage: require("@/assets/images/image1.jpg"),
-      category: "음료",
-      productName: "카페라떼",
-      rating: 3.5,
-      date: "2026.01.08",
-      reviewContent: "보통이었어요. 특별히 나쁘지도 좋지도 않았습니다.",
-      userName: "전형운",
-      hiddenExpireAt: "2026-01-20",
-      isHidden: true,
-      hasAnswer: false,
-    },
-    {
-      id: "4",
-      productImage: require("@/assets/images/image1.jpg"),
-      category: "베이커리",
-      productName: "크루아상",
-      rating: 5.0,
-      date: "2026.01.07",
-      reviewContent:
-        "겉은 바삭하고 속은 촉촉한 완벽한 크루아상입니다. 아침 식사로 최고예요!",
-      userName: "이민준",
-      hiddenExpireAt: null,
-      isHidden: false,
-      hasAnswer: false,
-    },
-  ];
+  const handleApprove = async (status: ModalState) => {
+    if (!selectedReviewIdx) return;
+
+    try {
+      if (status === "hide") {
+        const response = await apiPut(`/store/app/review/hidden/${selectedReviewIdx}`);
+        if (response.ok) {
+          Alert.alert("성공", "리뷰가 숨김 처리되었습니다.");
+          setSelectedReviewIdx(null);
+          fetchReviews();
+        } else {
+          Alert.alert("실패", "리뷰 숨김 처리에 실패했습니다.");
+        }
+      } else if (status === "hideClear") {
+        // 숨김 해제는 API 없음 (메시지만 표시)
+        Alert.alert("안내", "자동으로 숨김이 해제됩니다.");
+      }
+    } catch (error) {
+      console.error("처리 실패:", error);
+      Alert.alert("오류", "처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const formatDateTime = (dateTimeString: string): string => {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    const period = hours >= 12 ? "오후" : "오전";
+    const displayHours = String(hours % 12 || 12).padStart(2, "0");
+
+    return `${year}년 ${month}월 ${day}일 ${period} ${displayHours}시 ${minutes}분`;
+  };
 
   return (
     <View style={styles.container}>
@@ -110,8 +128,23 @@ export default function ReviewManage() {
       </View>
 
       <FlatList
-        data={reviewList}
-        keyExtractor={(item) => item.id}
+        data={reviews}
+        keyExtractor={(item) => item.reviewIdx.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+        }}
+        ListEmptyComponent={
+          loading ? (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 }}>
+              <ActivityIndicator size="large" color="#EF7810" />
+            </View>
+          ) : (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 }}>
+              <Text>리뷰가 없습니다.</Text>
+            </View>
+          )
+        }
         renderItem={({ item }) => {
           // 리뷰 상태 분류
           const isCurrentlyHidden =
@@ -152,44 +185,68 @@ export default function ReviewManage() {
 
           return (
             <View style={styles.reviewContainer}>
-              <View style={styles.reviewInfoContainer}>
-                <View style={styles.reviewImageContainer}>
-                  <Image
-                    source={item.productImage}
-                    style={styles.reviewImage}
-                  />
-                </View>
-
-                <View style={styles.reviewDetails}>
-                  <View>
-                    <Text style={styles.categoryText}>{item.category}</Text>
-                    <Text style={styles.productNameText}>
-                      {item.productName}
-                    </Text>
+              {/* 상단: 상품명, 별점, 날짜 */}
+              <View style={styles.reviewHeaderSection}>
+                <Text style={styles.userNameText}>
+                  {item.custNm}
+                </Text>
+                <View style={styles.ratingDateContainer}>
+                  <View style={styles.ratingContainer}>
+                    {Array.from({ length: Math.floor(item.reviewRate) }).map(
+                      (_, index) => (
+                        <Ionicons
+                          key={index}
+                          name="star"
+                          size={14}
+                          color="#FFD700"
+                        />
+                      )
+                    )}
                   </View>
-
-                  <View>
-                    <View style={styles.reviewHeader}>
-                      <View style={styles.ratingContainer}>
-                        <Ionicons name="star" size={14} color="#FFD700" />
-                        <Text style={styles.ratingText}>{item.rating}</Text>
-                      </View>
-                      <Text style={styles.dateText}>{item.date}</Text>
-                    </View>
-
-                    <View>
-                      <Text style={styles.userNameText}>{item.userName}</Text>
-                      <Text
-                        style={styles.reviewContentText}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                      >
-                        {item.reviewContent}
-                      </Text>
-                    </View>
-                  </View>
+                  <Text style={styles.dateText}>
+                    {formatDateTime(item.reviewRegDateTime)}
+                  </Text>
                 </View>
               </View>
+
+              {/* 리뷰 이미지들 - 가로 3개 배열 */}
+              {item.reviewImgs?.files && item.reviewImgs.files.length > 0 && (
+                <View style={styles.reviewImagesSection}>
+                  {item.reviewImgs.files
+                    .sort((a: any, b: any) => a.order - b.order)
+                    .map((imageFile: any, index: number) => (
+                      <Image
+                        key={index}
+                        source={{ uri: imageFile.fileUrl }}
+                        style={styles.reviewImageItem}
+                        priority="high"
+                        cachePolicy="memory-disk"
+                        contentFit="cover"
+                        transition={200}
+                        placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                      />
+                    ))}
+                </View>
+              )}
+
+              {/* 리뷰 내용 */}
+              <View style={styles.reviewContentSection}>
+                <Text style={styles.reviewContentText}>
+                  {item.reviewContent}
+                </Text>
+              </View>
+
+              {/* 사장님 답변 */}
+              {item.reviewAnswered && item.reviewAnswerContent && (
+                <View style={styles.answerSection}>
+                  <View style={styles.answerHeader}>
+                    <Text style={styles.answerTitle}>사장님</Text>
+                  </View>
+                  <Text style={styles.answerContentText}>
+                    {item.reviewAnswerContent}
+                  </Text>
+                </View>
+              )}
 
               {/* 이미 숨김 처리했던 리뷰 안내 */}
               {wasAlreadyHidden && (
@@ -232,19 +289,22 @@ export default function ReviewManage() {
                 <TouchableOpacity
                   style={[
                     styles.answerButtonContainer,
-                    item.hasAnswer && styles.answeredButton,
+                    item.reviewAnswered && styles.answeredButton,
                   ]}
                   onPress={() => {
-                    router.navigate("/(store)/review-answer");
+                    router.push({
+                      pathname: "/(store)/review-answer",
+                      params: { reviewIdx: item.reviewIdx },
+                    });
                   }}
                 >
                   <Text
                     style={[
                       styles.answerButtonText,
-                      item.hasAnswer && styles.answeredButtonText,
+                      item.reviewAnswered && styles.answeredButtonText,
                     ]}
                   >
-                    {item.hasAnswer ? "답변 완료" : "답변하기"}
+                    {item.reviewAnswered ? "상세" : "답변하기"}
                   </Text>
                 </TouchableOpacity>
 
@@ -256,10 +316,11 @@ export default function ReviewManage() {
                       isCurrentlyHidden && styles.hiddenButton,
                     ]}
                     onPress={() => {
+                      setSelectedReviewIdx(item.reviewIdx);
                       const modalType = isCurrentlyHidden
                         ? "hideClear"
                         : "hide";
-                      const text = isCurrentlyHidden ? "숨김 해제" : "숨김";
+                      const text = isCurrentlyHidden ? "숨김 중" : "숨김";
                       setHideModal(modalType);
                       setHideText(text);
                       setHideButtonText(text);
@@ -271,7 +332,7 @@ export default function ReviewManage() {
                         isCurrentlyHidden && styles.hiddenButtonText,
                       ]}
                     >
-                      {isCurrentlyHidden ? "숨김 해제" : "숨김"}
+                      {isCurrentlyHidden ? "숨김 중" : "숨김"}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -281,7 +342,7 @@ export default function ReviewManage() {
         }}
       />
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
       )}
 
       {/* 숨김/숨김해제 확인 모달 */}

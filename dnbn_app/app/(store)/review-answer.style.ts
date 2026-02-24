@@ -48,12 +48,51 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 15,
-    gap: 15,
+    marginVertical: 10,
+    marginHorizontal: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  reviewHeaderSection: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  ratingDateContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  dateText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  userNameText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+  },
+  reviewContentSection: {
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  reviewContentText: {
+    fontSize: 13,
+    color: "#333",
+    lineHeight: 20,
   },
   reviewInfoContainer: {
     flexDirection: "row",
@@ -75,47 +114,10 @@ export const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
-  categoryText: {
-    fontSize: 12,
-    color: "#999",
-    marginBottom: 2,
-  },
-  productNameText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#222",
-    marginBottom: 8,
-  },
   reviewHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 6,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  dateText: {
-    fontSize: 12,
-    color: "#999",
-  },
-  userNameText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#555",
-    marginBottom: 4,
-  },
-  reviewContentText: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
   },
 
   // 리뷰 이미지 갤러리
@@ -123,8 +125,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 10,
-    paddingTop: 12,
-    paddingBottom: 5,
+    paddingHorizontal: 20,
   },
   reviewImageItem: {
     width: 80,
