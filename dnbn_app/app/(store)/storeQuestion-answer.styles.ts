@@ -1,0 +1,170 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  leftSection: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  qaSection: {
+    marginHorizontal: 20,
+    marginVertical: 8,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  qaHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  qaIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#EF7810",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  answerIconContainer: {
+    backgroundColor: "#EF7810",
+  },
+  qaIconText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  qaHeaderInfo: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  statusBadge: {
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    backgroundColor: "#FFF5ED",
+  },
+  statusBadgePending: {
+    backgroundColor: "#F5F5F5",
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#EF7810",
+  },
+
+  editRemoveButtonContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+
+  statusTextPending: {
+    color: "#999999",
+  },
+  managerName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333333",
+  },
+  qaContent: {
+    paddingLeft: 42,
+  },
+  qaTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 8,
+  },
+  qaText: {
+    fontSize: 14,
+    color: "#333333",
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  qaDate: {
+    fontSize: 13,
+    color: "#999999",
+  },
+
+  questionImageContainer: {
+    flexDirection: "row",
+    gap: 25,
+    borderTopColor: "#E5E5E5",
+    paddingTop: 15,
+  },
+  questionImage: {
+    borderRadius: 8,
+    height: 200,
+    width: 200,
+  },
+  editButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#FFFFFF",
+  },
+  editButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#EF7810",
+  },
+  removeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#999999",
+    backgroundColor: "#FFFFFF",
+  },
+  removeButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#999999",
+  },
+});
