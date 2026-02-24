@@ -87,7 +87,9 @@ export default function StoreProducts() {
   const loadProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await apiGet(`/store/app/product?page=${currentPage}&size=10`);
+      const response = await apiGet(
+        `/store/app/product?page=${currentPage}&size=10`,
+      );
       if (response.ok) {
         const data = await response.json();
         // Page 응답 처리

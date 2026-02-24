@@ -87,6 +87,7 @@ interface StoreInfo {
   ownerNm: string;
 
   bizNm: string;
+  bizType: string;
   storeType: string;
   bizNo: string;
   ownerTelNo: string;
@@ -231,22 +232,51 @@ export default function StoreInfoPage() {
             </View>
 
             <View style={styles.infoContainer}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>가맹점 대표 이미지</Text>
-                <Image
-                  source={{ uri: storeInfo.mainImg.fileUrl }}
-                  style={{ width: 100, height: 100, borderRadius: 8 }}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>가맹점명</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeNm}</Text>
-              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
+              >
+                <View style={{ flex: 1, justifyContent: "space-around" }}>
+                  <View
+                    style={[
+                      styles.infoRow,
+                      { justifyContent: "space-between" },
+                    ]}
+                  >
+                    <Text style={styles.infoLabel}>가맹점명</Text>
+                    <Text
+                      style={[
+                        styles.infoValue,
+                        { flex: 0, flexShrink: 0, minWidth: 120 },
+                      ]}
+                    >
+                      {storeInfo.storeNm}
+                    </Text>
+                  </View>
 
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>전화번호</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeTelNo}</Text>
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>전화번호</Text>
+                    <Text
+                      style={[
+                        styles.infoValue,
+                        { flex: 0, flexShrink: 0, minWidth: 120 },
+                      ]}
+                    >
+                      {storeInfo.storeTelNo}
+                    </Text>
+                  </View>
+                </View>
+
+                <View>
+                  <Image
+                    source={{ uri: storeInfo.mainImg.fileUrl }}
+                    style={{ width: 100, height: 100, borderRadius: 8 }}
+                    resizeMode="cover"
+                  />
+                </View>
               </View>
 
               <View style={styles.infoRow}>
@@ -311,7 +341,7 @@ export default function StoreInfoPage() {
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>업태</Text>
-                <Text style={styles.infoValue}>{storeInfo.storeType}</Text>
+                <Text style={styles.infoValue}>{storeInfo.bizType}</Text>
               </View>
 
               <View style={styles.infoRow}>
