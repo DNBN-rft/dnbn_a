@@ -1,43 +1,233 @@
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, Image, Modal, Platform, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/storenego.styles";
+
+// 네고 리스트 API 응답 타입 정의
+interface NegoImages {
+  files: string[];
+}
+
+interface NegoListItem {
+  negoIdx: number;
+  categoryNm: string;
+  images: NegoImages;
+  startDateTime: string;
+  endDateTime: string;
+  productNm: string;
+  productCode: string;
+  productPrice: number;
+  negoStatus: string;
+}
+
+interface PageableSort {
+  empty: boolean;
+  unsorted: boolean;
+  sorted: boolean;
+}
+
+interface Pageable {
+  pageNumber: number;
+  pageSize: number;
+  sort: PageableSort;
+  offset: number;
+  unpaged: boolean;
+  paged: boolean;
+}
+
+interface NegoListResponse {
+  content: NegoListItem[];
+  pageable: Pageable;
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  size: number;
+  number: number;
+  sort: PageableSort;
+  numberOfElements: number;
+  empty: boolean;
+}
+
+// 네고 요청 API 응답 타입 정의
+interface NegoRequestItem {
+  images: NegoImages;
+  categoryNm: string;
+  custCode: string;
+  custNm: string;
+  custTelNo: string;
+  productCode: string;
+  productNm: string;
+  requestDateTime: string;
+  requestPrice: number;
+  requestStatus: boolean;
+  storeCode: string;
+}
+
+interface NegoRequestResponse {
+  content: NegoRequestItem[];
+  pageable: Pageable;
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  size: number;
+  number: number;
+  sort: PageableSort;
+  numberOfElements: number;
+  empty: boolean;
+}
 
 export default function StoreNego() {
   const insets = useSafeAreaInsets();
   const { tab } = useLocalSearchParams<{ tab?: "list" | "request" }>();
   const [activeTab, setActiveTab] = useState<"list" | "request">("list");
 
+  // 네고 리스트 상태
+  const [negoList, setNegoList] = useState<NegoListItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 네고 요청 리스트 상태
+  const [negoRequestList, setNegoRequestList] = useState<NegoRequestItem[]>([]);
+  const [requestPage, setRequestPage] = useState(0);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestHasMore, setRequestHasMore] = useState(true);
+  const [requestRefreshing, setRequestRefreshing] = useState(false);
+
+  // 네고 리스트 API 호출
+  const fetchNegoList = async (pageNum: number, isRefresh: boolean = false) => {
+    if (loading || (!hasMore && !isRefresh)) return;
+
+    try {
+      setLoading(true);
+      const response = await apiGet(`/store/app/nego?page=${pageNum}&size=10`);
+
+      if (response.ok) {
+        const data: NegoListResponse = await response.json();
+
+        if (isRefresh) {
+          setNegoList(data.content);
+        } else {
+          setNegoList((prev) => [...prev, ...data.content]);
+        }
+
+        setHasMore(!data.last);
+        setPage(pageNum);
+      } else {
+        console.error("네고 리스트 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("네고 리스트 API 호출 에러:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // 새로고침
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setHasMore(true);
+    fetchNegoList(0, true);
+  };
+
+  // 무한 스크롤 - 더 불러오기
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      fetchNegoList(page + 1);
+    }
+  };
+
+  // 네고 요청 리스트 API 호출
+  const fetchNegoRequestList = async (
+    pageNum: number,
+    isRefresh: boolean = false,
+  ) => {
+    if (requestLoading || (!requestHasMore && !isRefresh)) return;
+
+    try {
+      setRequestLoading(true);
+      const response = await apiGet(
+        `/store/app/nego-req?page=${pageNum}&size=10`,
+      );
+
+      if (response.ok) {
+        const data: NegoRequestResponse = await response.json();
+
+        if (isRefresh) {
+          setNegoRequestList(data.content);
+        } else {
+          setNegoRequestList((prev) => [...prev, ...data.content]);
+        }
+
+        setRequestHasMore(!data.last);
+        setRequestPage(pageNum);
+      } else {
+        console.error("네고 요청 리스트 조회 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("네고 요청 리스트 API 호출 에러:", error);
+    } finally {
+      setRequestLoading(false);
+      setRequestRefreshing(false);
+    }
+  };
+
+  // 요청 새로고침
+  const handleRequestRefresh = () => {
+    setRequestRefreshing(true);
+    setRequestHasMore(true);
+    fetchNegoRequestList(0, true);
+  };
+
+  // 요청 무한 스크롤 - 더 불러오기
+  const loadMoreRequest = () => {
+    if (!requestLoading && requestHasMore) {
+      fetchNegoRequestList(requestPage + 1);
+    }
+  };
+
+  // 초기 데이터 로드
   useFocusEffect(
     useCallback(() => {
-      setActiveTab(tab || "list");
-    }, [tab])
+      const newTab = tab || "list";
+      setActiveTab(newTab);
+
+      if (newTab === "list" && negoList.length === 0) {
+        fetchNegoList(0, true);
+      } else if (newTab === "request" && negoRequestList.length === 0) {
+        fetchNegoRequestList(0, true);
+      }
+    }, [tab]),
   );
 
-  const [approveModal, setApproveModal] = useState<"approve" | "reject" | "noOpen">("noOpen");
+  const [approveModal, setApproveModal] = useState<
+    "approve" | "reject" | "noOpen"
+  >("noOpen");
   const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
 
-  const negoList = [
-    { id: "1", uri: require("@/assets/images/image1.jpg"), category: "카테고리 1", productName: "상품 1", status:"진행", price: 9000},
-    { id: "2", uri: require("@/assets/images/image1.jpg"), category: "카테고리 2", productName: "상품 2", status:"대기", price: 18000},
-    { id: "3", uri: require("@/assets/images/image1.jpg"), category: "카테고리 3", productName: "상품 3", status:"진행", price: 25000},
-  ];
-
-  const negoRequest = [
-    { id: "1", uri: require("@/assets/images/image1.jpg"), category: "카테고리 1", productName: "상품 1", price: 9000, offeredPrice: 8500, requestor: "김진용", requestorPhone:"010-1234-5678"},
-    { id: "2", uri: require("@/assets/images/image1.jpg"), category: "카테고리 2", productName: "상품 2", price: 92000,  offeredPrice: 17000, requestor: "전형운", requestorPhone:"010-1234-5678"},
-    { id: "3", uri: require("@/assets/images/image1.jpg"), category: "카테고리 3", productName: "상품 3", price: 90040,  offeredPrice: 24000, requestor: "박소윤", requestorPhone:"010-1234-5678"},
-  ];
-
-  const handleApprove = ((status) => {
+  const handleApprove = (status) => {
     // {
     //   status === "approve" ? 승인 동작 :
     //   status === "reject" ? 거절 동작:
     //   예외처리
     // }
-  })
+  };
 
   return (
     <View style={styles.container}>
@@ -46,176 +236,267 @@ export default function StoreNego() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          네고 관리
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
-
-        <View style={styles.tabContainer}>
-          <TouchableOpacity style={activeTab === "list" ? styles.tabButtonActive : styles.tabButton} onPress={() => {setActiveTab("list");
-            router.setParams({ tab: undefined });
-          }}>
-            <Text style={activeTab === "list" ? styles.tabButtonTextActive : styles.tabButtonText}>목록</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={activeTab === "request" ? styles.tabButtonActive : styles.tabButton} onPress={() => setActiveTab("request")}>
-            <Text style={activeTab === "request" ? styles.tabButtonTextActive : styles.tabButtonText}>요청</Text>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
         </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>네고 관리</Text>
+        </View>
+        <View style={styles.rightSection} />
+      </View>
+
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={
+            activeTab === "list" ? styles.tabButtonActive : styles.tabButton
+          }
+          onPress={() => {
+            setActiveTab("list");
+            router.setParams({ tab: undefined });
+          }}
+        >
+          <Text
+            style={
+              activeTab === "list"
+                ? styles.tabButtonTextActive
+                : styles.tabButtonText
+            }
+          >
+            목록
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={
+            activeTab === "request" ? styles.tabButtonActive : styles.tabButton
+          }
+          onPress={() => {
+            setActiveTab("request");
+            if (negoRequestList.length === 0) {
+              fetchNegoRequestList(0, true);
+            }
+          }}
+        >
+          <Text
+            style={
+              activeTab === "request"
+                ? styles.tabButtonTextActive
+                : styles.tabButtonText
+            }
+          >
+            요청
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {activeTab === "list" ? (
         <FlatList
-          contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+          contentContainerStyle={{
+            paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+          }}
           data={negoList}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading && !refreshing ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color="#000" />
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  <Image
-                    style={styles.productImage}
-                    source={item.uri} />
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  typeof item.images.files[0] === "string" &&
+                  item.images.files[0].trim() !== "" ? (
+                    <Image
+                      style={styles.productImage}
+                      source={{ uri: item.images.files[0] }}
+                    />
+                  ) : (
+                    <Image
+                      style={styles.productImage}
+                      source={require("@/assets/images/logo.png")}
+                    />
+                  )}
                 </View>
-    
+
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.category}</Text>
+                    <Text style={styles.categoryText}>{item.categoryNm}</Text>
 
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
                       style={styles.productNameText}
-                    >{item.productName}</Text>
+                    >
+                      {item.productNm}
+                    </Text>
                   </View>
-                  
+
                   <View style={styles.negoStatusAndPriceContainer}>
                     <Text style={styles.negoPriceText}>
-                      {item.price.toLocaleString()}원
+                      {item.productPrice.toLocaleString()}원
                     </Text>
-                  
-                    <Text style={styles.negoStatusText}>
-                      {item.status}
-                    </Text>
+
+                    <Text style={styles.negoStatusText}>{item.negoStatus}</Text>
                   </View>
                 </View>
               </View>
-    
+
               <View style={styles.detailButtonContainer}>
-                <TouchableOpacity style={styles.detailButton}
-                  onPress={() => router.navigate("/(store)/detailnego")}>
+                <TouchableOpacity
+                  style={styles.detailButton}
+                  onPress={() =>
+                    router.navigate({
+                      pathname: "/(store)/detailnego",
+                      params: { negoIdx: item.negoIdx },
+                    })
+                  }
+                >
                   <Text style={styles.detailButtonText}>상세</Text>
                 </TouchableOpacity>
               </View>
-          </View>
-        )}
-        ></FlatList>
+            </View>
+          )}
+        />
       ) : (
-          <FlatList
-            contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
-            data={negoRequest}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <View style={styles.negoRequestProduct}>
-                <View style={styles.negoRequestProductContainer}>
-                  <View style={styles.negoRequestProductImageContainer}>
+        <FlatList
+          contentContainerStyle={{
+            paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+          }}
+          data={negoRequestList}
+          keyExtractor={(item, index) => `${item.productCode}-${index}`}
+          showsVerticalScrollIndicator={false}
+          onRefresh={handleRequestRefresh}
+          refreshing={requestRefreshing}
+          onEndReached={loadMoreRequest}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            requestLoading && !requestRefreshing ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color="#000" />
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <View style={styles.negoRequestProduct}>
+              <View style={styles.negoRequestProductContainer}>
+                <View style={styles.negoRequestProductImageContainer}>
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  typeof item.images.files[0] === "string" &&
+                  item.images.files[0].trim() !== "" ? (
                     <Image
                       style={styles.negoRequestProductImage}
-                      source={item.uri} />
-                  </View>
-      
-                  <View style={styles.negoRequestproductInfoContainer}>
-                    <View>
-                      <Text style={styles.productNameText}>{item.productName}</Text>
-                    </View>
-                    
-                    <View>
-                      <View>
-                        <Text style={styles.registPriceText}>{item.price.toLocaleString()}원</Text>
-                      </View>
-      
-                      <View>
-                        <Text style={styles.negoPriceText}>
-                          {item.offeredPrice.toLocaleString()}원</Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.requestor}>
-                      <Text>{item.requestor}</Text>
-                      <Text>{item.requestorPhone}</Text>
-                    </View>
-                    
-                  </View>
+                      source={{ uri: item.images.files[0] }}
+                    />
+                  ) : (
+                    <Image
+                      style={styles.negoRequestProductImage}
+                      source={require("@/assets/images/logo.png")}
+                    />
+                  )}
                 </View>
-          
-                <View style={styles.buttonsContainer}>
-                  <View style={styles.requestButtonContainer}>
-                    
-                      <TouchableOpacity
-                        onPress={() => { setApproveModal("approve"); setStatusNm("승인"); }}
-                        style={styles.approveButtonContainer}>
-                          <View>
-                            <Text style={styles.approveButtonText}>승인</Text>
-                          </View>
-                      </TouchableOpacity>
-              
-                    <TouchableOpacity
-                        onPress={() => { setApproveModal("reject"); setStatusNm("거절"); }}
-                        style={styles.rejectButtonContainer}>
-                          <View>
-                            <Text style={styles.rejectButtonText}>거절</Text>
-                          </View>
-                      </TouchableOpacity>
+
+                <View style={styles.negoRequestproductInfoContainer}>
+                  <View>
+                    <Text style={styles.productNameText}>{item.productNm}</Text>
+                  </View>
+
+                  <View>
+                    <View>
+                      <Text style={styles.negoPriceText}>
+                        {item.requestPrice.toLocaleString()}원
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.requestor}>
+                    <Text>{item.custNm}</Text>
+                    <Text>{item.custTelNo}</Text>
                   </View>
                 </View>
               </View>
-            )}
-          >
-          </FlatList>
+
+              <View style={styles.buttonsContainer}>
+                <View style={styles.requestButtonContainer}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setApproveModal("approve");
+                      setStatusNm("승인");
+                    }}
+                    style={styles.approveButtonContainer}
+                  >
+                    <View>
+                      <Text style={styles.approveButtonText}>승인</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setApproveModal("reject");
+                      setStatusNm("거절");
+                    }}
+                    style={styles.rejectButtonContainer}
+                  >
+                    <View>
+                      <Text style={styles.rejectButtonText}>거절</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
+        ></FlatList>
       )}
       <Modal
-              visible={approveModal === "approve" || approveModal === "reject"}
-              transparent={true}
-              animationType="fade"
-              onRequestClose={() => setApproveModal("noOpen")}
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.deleteModalContent}>
-            <Text style={styles.deleteModalTitle}>
-              알림
+        visible={approveModal === "approve" || approveModal === "reject"}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setApproveModal("noOpen")}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.deleteModalTitle}>알림</Text>
+            <Text style={styles.deleteModalMessage}>
+              정말로 이 요청을 {statusNm} 하시겠습니까?
             </Text>
-                  <Text style={styles.deleteModalMessage}>
-                    정말로 이 요청을 {statusNm} 하시겠습니까?
-                  </Text>
-                  
-                  <View style={styles.deleteModalButtons}>
-                    <TouchableOpacity
-                      style={[styles.deleteModalButton, styles.confirmButton]}
-                      onPress={() => {
-                        // 여기서 실제 삭제 로직 구현
-                        setApproveModal("noOpen");
-                        handleApprove(approveModal);
-                        // TODO: 실제 삭제 API 호출
-                      }}>
-                      <Text style={styles.confirmButtonText}>{statusNm}</Text>
-                    </TouchableOpacity>
-              
-                    <TouchableOpacity
-                      style={[styles.deleteModalButton, styles.cancelButton]}
-                      onPress={() => setApproveModal("noOpen")}>
-                      <Text style={styles.modalCancelButtonText}>취소</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </Modal>
+
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={[styles.deleteModalButton, styles.confirmButton]}
+                onPress={() => {
+                  // 여기서 실제 삭제 로직 구현
+                  setApproveModal("noOpen");
+                  handleApprove(approveModal);
+                  // TODO: 실제 삭제 API 호출
+                }}
+              >
+                <Text style={styles.confirmButtonText}>{statusNm}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.deleteModalButton, styles.cancelButton]}
+                onPress={() => setApproveModal("noOpen")}
+              >
+                <Text style={styles.modalCancelButtonText}>취소</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

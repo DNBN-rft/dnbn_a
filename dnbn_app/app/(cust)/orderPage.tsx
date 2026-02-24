@@ -1,6 +1,5 @@
-import { apiGet } from "@/utils/api";
-import { getStorageItem } from "@/utils/storageUtil";
 import PrivacyConsentModal from "@/components/modal/PrivacyConsentModal";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -190,14 +189,18 @@ export default function OrderPage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>구매하기</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>구매하기</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView

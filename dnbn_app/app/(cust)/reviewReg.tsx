@@ -118,7 +118,9 @@ export default function ReviewRegScreen() {
 
     if (!result.canceled) {
       const newUris = result.assets.map((asset) => asset.uri);
-      setImages((prev) => [...prev, ...newUris].slice(0, 3 - existingImages.length));
+      setImages((prev) =>
+        [...prev, ...newUris].slice(0, 3 - existingImages.length),
+      );
     }
   };
 
@@ -288,16 +290,20 @@ export default function ReviewRegScreen() {
         enabled={true}
       >
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>
-            {isEditMode ? "리뷰 수정" : "리뷰쓰기"}
-          </Text>
-          <View style={styles.placeholder} />
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>
+              {isEditMode ? "리뷰 수정" : "리뷰쓰기"}
+            </Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
 
         <View style={styles.productContainer}>

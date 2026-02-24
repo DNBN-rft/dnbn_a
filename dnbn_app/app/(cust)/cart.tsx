@@ -10,7 +10,14 @@ import {
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, Image, Pressable, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./cart.styles";
 
@@ -60,7 +67,6 @@ export default function CartScreen() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("장바구니 데이터:", data);
         setCartData(data);
         setError(false);
       } else {
@@ -86,15 +92,9 @@ export default function CartScreen() {
           quantity: item.quantity,
         }));
 
-      if (selectedItems.length === 0) {
-        console.log("선택된 아이템이 없습니다.");
-        return;
-      }
-
       const response = await apiPut("/cust/cart", selectedItems);
 
       if (response.ok) {
-        console.log("장바구니 변경사항 저장 완료");
       } else {
         console.error("장바구니 저장 실패:", response.status);
       }
@@ -121,8 +121,6 @@ export default function CartScreen() {
       });
 
       if (response.ok) {
-        console.log("상품 삭제 완료");
-        // 삭제 후 데이터 재조회
         fetchCartData();
       } else {
         console.error("상품 삭제 실패:", response.status);
@@ -311,13 +309,19 @@ export default function CartScreen() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
 
-      {/* 헤더 */}
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </Pressable>
-        <Text style={styles.title}>장바구니</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>장바구니</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {/* 전체선택 / 삭제 버튼 영역 */}

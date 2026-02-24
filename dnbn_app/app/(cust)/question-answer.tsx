@@ -1,14 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Image } from "expo-image";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiDelete, apiGet } from "../../utils/api";
 import { styles } from "./question-answer.styles";
@@ -126,14 +120,18 @@ export default function QuestionAnswer() {
           <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>문의상세</Text>
-          <View style={styles.placeholder} />
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>문의상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

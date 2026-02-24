@@ -1,39 +1,40 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
+  },
+  leftSection: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+  rightSection: {
+    flex: 1,
   },
   backButton: {
     width: 44,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    pointerEvents: "none",
-  },
-  placeholder: {
-    width: 40,
-  },
-
-
   line: {
     borderWidth: 1,
     borderColor: "#0000000e",
   },
-
 
   container: {
     flex: 1,
@@ -51,12 +52,8 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#efefefff",
     paddingTop: 12,
-    paddingBottom: 12
+    paddingBottom: 12,
   },
-
-
-
-
 
   // 토글 스타일
 
@@ -64,17 +61,17 @@ export const styles = StyleSheet.create({
     width: 50,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#d1d1d1',
-    justifyContent: 'center',
+    backgroundColor: "#d1d1d1",
+    justifyContent: "center",
     padding: 2,
   },
   toggleOn: {
-    backgroundColor: '#FF6F2B',
+    backgroundColor: "#FF6F2B",
   },
   circle: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
-})
+});

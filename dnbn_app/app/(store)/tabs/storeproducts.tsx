@@ -222,21 +222,29 @@ export default function StoreProducts() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>상품 관리</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.navigate("/(store)/addproduct")}
-        >
-          <Ionicons name="add" size={28} color="#EF7810" />
-        </TouchableOpacity>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>상품 관리</Text>
+        </View>
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.navigate("/(store)/addproduct")}
+          >
+            <Ionicons name="add" size={28} color="#EF7810" />
+          </TouchableOpacity>
+        </View>
       </View>
+
       <FlatList
         data={products}
         keyExtractor={(item) => item.productCode}

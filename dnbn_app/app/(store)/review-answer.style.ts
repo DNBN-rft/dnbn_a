@@ -6,45 +6,43 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
-  
-  // 헤더
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    padding: 20,
     backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-    position: "absolute",
-    left: 0,
-    right: 0,
     textAlign: "center",
-    pointerEvents: "none"
   },
-  placeholder: {
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
     width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  
   // 메인 컨테이너
   reviewAnswerContainer: {
     flex: 1,
     padding: 15,
     gap: 15,
   },
-  
+
   // 리뷰 카드
   reviewContainer: {
     backgroundColor: "#fff",
@@ -119,7 +117,7 @@ export const styles = StyleSheet.create({
     color: "#666",
     lineHeight: 20,
   },
-  
+
   // 리뷰 이미지 갤러리
   reviewImagesContainer: {
     flexDirection: "row",
@@ -206,5 +204,4 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#666",
   },
-
 });

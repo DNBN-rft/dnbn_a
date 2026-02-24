@@ -36,10 +36,7 @@ export default function FindAccountScreen() {
   const [modalMessage, setModalMessage] = useState("");
 
   const { userType } = useLocalSearchParams();
-  
-  
-  
-  
+
   // 에러 메시지 state
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -61,11 +58,9 @@ export default function FindAccountScreen() {
 
     // 아이디 찾기 API 호출
     try {
-      
-      const endPoint = userType === "cust"
-        ? "/cust/search-id"
-        : "/store/search-id";
-      
+      const endPoint =
+        userType === "cust" ? "/cust/search-id" : "/store/search-id";
+
       const response = await apiPost(endPoint, {
         name: name,
         email: email,
@@ -107,11 +102,9 @@ export default function FindAccountScreen() {
 
     // 비밀번호 재설정 API 호출
     try {
-      
-      const endPoint = userType === "cust"
-        ? "/cust/reset-password"
-        : "/store/reset-password";
-      
+      const endPoint =
+        userType === "cust" ? "/cust/reset-password" : "/store/reset-password";
+
       const response = await apiPost(endPoint, {
         loginId: userId,
         email: email,
@@ -149,14 +142,18 @@ export default function FindAccountScreen() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>내 정보 찾기</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>내 정보 찾기</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView

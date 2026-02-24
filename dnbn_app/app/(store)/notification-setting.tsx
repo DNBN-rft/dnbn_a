@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./notification-setting.styles";
 
@@ -12,56 +18,58 @@ export default function NotificationSetting() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-      
+
       <View style={styles.header}>
+        <View style={styles.leftSection}>
           <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.push('/tabs/mypage')}
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-          <Ionicons name="chevron-back" size={24} color="#000" />
+            <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.title}>
-          알림 설정
-          </Text>
-          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>알림 설정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <View style={styles.notificationContainer}>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
         <View style={styles.notificationContent}>
           <Text>알림 설정 페이지임</Text>
-          <CumtomToggle/>
+          <CumtomToggle />
         </View>
       </View>
 
       {insets.bottom > 0 && (
-                <View style={{ height: insets.bottom, backgroundColor: '#000' }} />
-            )}
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
-  )
+  );
 }
 
 function CumtomToggle() {
@@ -84,14 +92,9 @@ function CumtomToggle() {
   return (
     <Pressable
       style={[styles.toggle, isOn && styles.toggleOn]}
-      onPress={() => setIsOn(prev =>!prev)}
+      onPress={() => setIsOn((prev) => !prev)}
     >
-      <Animated.View
-        style={[
-          styles.circle,
-          { transform: [{ translateX }] }
-        ]}
-      />
+      <Animated.View style={[styles.circle, { transform: [{ translateX }] }]} />
     </Pressable>
   );
 }

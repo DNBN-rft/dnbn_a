@@ -63,6 +63,11 @@ export const styles = StyleSheet.create({
     color: "#8E8E93",
     fontWeight: "400",
   },
+  modifiedDateText: {
+    fontSize: 11,
+    color: "#B0B0B0",
+    fontWeight: "400",
+  },
   noticeDetailContentContainer: {
     backgroundColor: "#FFFFFF",
     height: "auto",
@@ -70,7 +75,13 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 20,
     borderRadius: 16,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.06)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 3,
   },
   noticeDetailContentText: {

@@ -34,14 +34,18 @@ export default function StoreMypage() {
       )}
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>마이페이지</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>마이페이지</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView
@@ -98,7 +102,10 @@ export default function StoreMypage() {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>고객지원</Text>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.navigate("/(store)/storeNotice")}
+            >
               <Text style={styles.menuText}>공지사항</Text>
               <Ionicons name="chevron-forward" size={24} color="#666" />
             </TouchableOpacity>

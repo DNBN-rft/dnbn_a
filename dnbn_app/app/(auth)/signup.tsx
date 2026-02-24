@@ -188,15 +188,19 @@ export default function PracticeView() {
       {insets.top > 0 && (
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>동네방네에 오신 것을 환영합니다.</Text>
-        <View style={styles.placeholder} />
+      <View style={styles.header}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>회원가입</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}

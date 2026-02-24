@@ -16,26 +16,26 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
+import { useMapPanels } from "../../../hooks/useMapPanels";
 import {
+  addStoreMarkers,
+  clearAllMarkers,
   ClickedLocation,
+  createStoreDetailPanResponder,
+  createStoreListPanResponder,
   DEFAULT_LOCATION,
   fetchNearbyStores,
   geocodeAddress,
   getUserLocation as getLocation,
+  highlightStoreMarker,
+  moveMapToLocation,
   reverseGeocode,
+  sendMessageToWebView,
+  setUserLocationWithZoom,
   slideDown,
   slideUp,
   Store,
-  sendMessageToWebView,
-  moveMapToLocation,
-  setUserLocationWithZoom,
-  addStoreMarkers,
-  clearAllMarkers,
-  highlightStoreMarker,
-  createStoreDetailPanResponder,
-  createStoreListPanResponder,
 } from "../../../utils/map";
-import { useMapPanels } from "../../../hooks/useMapPanels";
 import { styles } from "../styles/map.styles";
 import { generateMapHTML } from "./mapHtml";
 
@@ -74,10 +74,8 @@ export default function CustMapScreen() {
 
   // 가맹점 상세 PanResponder
   const storeDetailPanResponder = useMemo(() => {
-    return createStoreDetailPanResponder(
-      slideAnim,
-      dragStartValue,
-      () => setSelectedStore(null)
+    return createStoreDetailPanResponder(slideAnim, dragStartValue, () =>
+      setSelectedStore(null),
     );
   }, [slideAnim, dragStartValue]);
 
@@ -87,7 +85,7 @@ export default function CustMapScreen() {
       storeListAnim,
       storeListDragStartValue,
       scrollOffsetY,
-      () => setShowStoreList(false)
+      () => setShowStoreList(false),
     );
   }, [storeListAnim, storeListDragStartValue]);
 
@@ -142,7 +140,7 @@ export default function CustMapScreen() {
         // 가맹점 목록 표시
         setShowStoreList(true);
         slideUp(storeListAnim, 400);
-        
+
         // 모든 작업 완료 후 로딩 종료
         setIsLoading(false);
       } catch (error) {
@@ -171,7 +169,7 @@ export default function CustMapScreen() {
                   setClickedLocation(null);
                   resolve();
                 });
-              })
+              }),
             );
           }
 
@@ -183,7 +181,7 @@ export default function CustMapScreen() {
                   setSelectedStore(null);
                   resolve();
                 });
-              })
+              }),
             );
           }
 
@@ -195,7 +193,7 @@ export default function CustMapScreen() {
                   setShowStoreList(false);
                   resolve();
                 });
-              })
+              }),
             );
           }
 
@@ -215,7 +213,7 @@ export default function CustMapScreen() {
           // 가맹점 목록 표시
           setShowStoreList(true);
           slideUp(storeListAnim, 400);
-          
+
           // 모든 작업 완료 후 로딩 종료
           setIsLoading(false);
         }
@@ -224,7 +222,16 @@ export default function CustMapScreen() {
         setIsLoading(false);
       }
     },
-    [handleMapNavigation, handleFetchNearbyStores, storeListAnim, clickedLocationAnim, slideAnim, clickedLocation, selectedStore, showStoreList],
+    [
+      handleMapNavigation,
+      handleFetchNearbyStores,
+      storeListAnim,
+      clickedLocationAnim,
+      slideAnim,
+      clickedLocation,
+      selectedStore,
+      showStoreList,
+    ],
   );
 
   const getUserLocation = useCallback(async () => {
@@ -291,12 +298,7 @@ export default function CustMapScreen() {
         }
       } catch (error) {}
     },
-    [
-      handleReverseGeocode,
-      storeListAnim,
-      slideAnim,
-      showStoreList,
-    ],
+    [handleReverseGeocode, storeListAnim, slideAnim, showStoreList],
   );
 
   const handleWebViewLoadEnd = useCallback(() => {
@@ -338,7 +340,7 @@ export default function CustMapScreen() {
             setClickedLocation(null);
             resolve();
           });
-        })
+        }),
       );
     }
 
@@ -350,7 +352,7 @@ export default function CustMapScreen() {
             setSelectedStore(null);
             resolve();
           });
-        })
+        }),
       );
     }
 
@@ -362,10 +364,10 @@ export default function CustMapScreen() {
             setShowStoreList(false);
             resolve();
           });
-        })
+        }),
       );
     }
-    
+
     // 패널이 닫힐 때까지 대기
     if (promises.length > 0) {
       await Promise.all(promises);
@@ -531,10 +533,7 @@ export default function CustMapScreen() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [
-    isMapReady,
-    isLocationReady,
-  ])
+  }, [isMapReady, isLocationReady]);
 
   // 가맹점 선택 시 탭 숨기기/보이기
   useLayoutEffect(() => {
@@ -557,15 +556,20 @@ export default function CustMapScreen() {
       {insets.top > 0 && (
         <View style={[styles.statusBar, { height: insets.top }]} />
       )}
+
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>내 위치 설정</Text>
-        <View style={styles.btnContainer}>
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>내 위치 설정</Text>
+        </View>
+        <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.locationButton}
             onPress={handleCenterToUser}
@@ -574,6 +578,7 @@ export default function CustMapScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
       <View style={styles.mapContainer}>
         <WebView
           ref={webViewRef}
@@ -686,7 +691,10 @@ export default function CustMapScreen() {
               { transform: [{ translateY: slideAnim }] },
             ]}
           >
-            <View {...storeDetailPanResponder.panHandlers} style={styles.dragHandle}>
+            <View
+              {...storeDetailPanResponder.panHandlers}
+              style={styles.dragHandle}
+            >
               <View style={styles.dragHandleBar} />
             </View>
             <TouchableOpacity
@@ -755,7 +763,9 @@ export default function CustMapScreen() {
               onScroll={(event: any) => {
                 scrollOffsetY.current = event.nativeEvent.contentOffset.y;
               }}
-              contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }}
+              contentContainerStyle={{
+                paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+              }}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.storeListItem}

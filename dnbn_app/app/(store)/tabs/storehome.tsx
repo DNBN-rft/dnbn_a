@@ -33,7 +33,7 @@ export default function StoreHome() {
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // 가맹점 주소를 저장
         if (data.storeAddress) {
           if (Platform.OS === "web") {
@@ -42,7 +42,7 @@ export default function StoreHome() {
             await SecureStore.setItemAsync("storeAddress", data.storeAddress);
           }
         }
-        
+
         router.push("/(cust)/tabs/custhome");
       } else {
         console.error("API 호출 실패:", response.status);
@@ -97,7 +97,7 @@ export default function StoreHome() {
 
           if (response.ok) {
             const data = await response.json();
-            
+
             // API 응답 데이터를 state에 저장
             setTodayOrderCount(data.todayOrderCount || 0);
             setProgressOrderCount(data.progressOrderCount || 0);
@@ -111,7 +111,7 @@ export default function StoreHome() {
       };
 
       fetchStoreHomeData();
-    }, [])
+    }, []),
   );
   return (
     <View style={styles.container}>
@@ -120,13 +120,18 @@ export default function StoreHome() {
       )}
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>가맹점 홈</Text>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={() => router.push("/(store)/notifications")}
-        >
-          <Ionicons name="notifications-outline" size={24} color="#000" />
-        </TouchableOpacity>
+        <View style={styles.leftSection}></View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>가맹점 홈</Text>
+        </View>
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => router.push("/(store)/notifications")}
+          >
+            <Ionicons name="notifications-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
