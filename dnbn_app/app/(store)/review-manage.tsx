@@ -131,7 +131,7 @@ export default function ReviewManage() {
 
             const diffMs = expireDate.getTime() - now.getTime();
 
-            if (diffMs <= 0) return "";
+            if (diffMs <= 0) return "임시데이터";
 
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             const diffHours = Math.floor(

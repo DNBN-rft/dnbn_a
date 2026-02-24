@@ -370,7 +370,7 @@ export default function EditStoreInfoPage() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>가맹점 정보 수정</Text>
+          <Text style={styles.title}>정보 수정</Text>
         </View>
         <View style={styles.rightSection} />
       </View>

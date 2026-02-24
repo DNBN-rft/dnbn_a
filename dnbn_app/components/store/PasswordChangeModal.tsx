@@ -1,13 +1,9 @@
+import { styles } from "@/app/(store)/editstoreinfo.styles";
+import { apiPost, apiPut } from "@/utils/api";
+import { validatePassword } from "@/utils/signupUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { styles } from "@/app/(store)/editstoreinfo.styles";
+import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 type PasswordModalStep = "none" | "verify" | "change" | "result";
 
@@ -26,29 +22,53 @@ export default function PasswordChangeModal({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(true);
 
-  const handleVerifyPassword = () => {
+  const handleVerifyPassword = async () => {
     if (currentPassword === "") {
       alert("현재 비밀번호를 입력하세요.");
       return;
     }
-    setModalStep("change");
+
+    try {
+      const response = await apiPost("/store/app/password", {
+        password: currentPassword,
+      });
+
+      if (response.ok) {
+        setModalStep("change");
+      } else {
+        alert("비밀번호가 일치하지 않습니다.");
+      }
+    } catch (error) {
+      console.error("비밀번호 확인 오류:", error);
+      alert("비밀번호 확인 중 서버 오류가 발생했습니다.");
+    }
   };
 
-  const handleChangePassword = () => {
-    if (newPassword === "" || confirmPassword === "") {
-      alert("새 비밀번호를 입력하세요.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      alert("새 비밀번호가 일치하지 않습니다.");
+  const handleChangePassword = async () => {
+    // 회원가입과 동일한 비밀번호 validation 적용
+    if (!validatePassword(newPassword, confirmPassword)) {
       return;
     }
 
-    // TODO: 실제 API로 비밀번호 변경
-    console.log("비밀번호 변경:", { currentPassword, newPassword });
+    try {
+      const response = await apiPut("/store/app/password-change", {
+        password: newPassword,
+      });
 
-    setChangeSuccess(true);
-    setModalStep("result");
+      if (response.ok) {
+        setChangeSuccess(true);
+        setModalStep("result");
+      } else {
+        alert("비밀번호 변경에 실패했습니다.");
+        setChangeSuccess(false);
+        setModalStep("result");
+      }
+    } catch (error) {
+      console.error("비밀번호 변경 오류:", error);
+      alert("서버 오류가 발생했습니다. 관리자에게 문의해주세요.");
+      setChangeSuccess(false);
+      setModalStep("result");
+    }
   };
 
   const handleClose = () => {
@@ -79,7 +99,7 @@ export default function PasswordChangeModal({
               </View>
 
               <Text style={styles.modalDescription}>
-                비밀번호 변경을 위해 현재 비밀번호를 입력해주세요
+                본인 확인을 위해 현재 비밀번호를 입력해주세요.
               </Text>
 
               <View style={styles.modalInputGroup}>
@@ -119,7 +139,7 @@ export default function PasswordChangeModal({
               </View>
 
               <Text style={styles.modalDescription}>
-                새로운 비밀번호를 입력해주세요
+                8~16자 영문, 숫자, 특수문자를 사용하세요
               </Text>
 
               <View style={styles.modalInputGroup}>
@@ -128,7 +148,9 @@ export default function PasswordChangeModal({
                   style={styles.modalInput}
                   placeholder="새 비밀번호를 입력하세요"
                   value={newPassword}
-                  onChangeText={setNewPassword}
+                  onChangeText={(text) =>
+                    setNewPassword(text.replace(/\s/g, ""))
+                  }
                   secureTextEntry
                   autoFocus
                 />
@@ -140,7 +162,9 @@ export default function PasswordChangeModal({
                   style={styles.modalInput}
                   placeholder="새 비밀번호를 다시 입력하세요"
                   value={confirmPassword}
-                  onChangeText={setConfirmPassword}
+                  onChangeText={(text) =>
+                    setConfirmPassword(text.replace(/\s/g, ""))
+                  }
                   secureTextEntry
                 />
               </View>

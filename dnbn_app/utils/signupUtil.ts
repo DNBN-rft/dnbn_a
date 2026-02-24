@@ -36,6 +36,7 @@ export const validateLoginId = (
 
 /**
  * 비밀번호 유효성 검사
+ * 정규식: 8~16자 영문 대 소문자, 숫자, 특수문자를 사용
  */
 export const validatePassword = (
   password: string,
@@ -45,6 +46,14 @@ export const validatePassword = (
     Alert.alert("알림", "비밀번호를 입력해주세요.");
     return false;
   }
+
+  // 백엔드와 동일한 정규식 패턴: 8~16자, 영문, 숫자, 특수문자 포함, 공백 없음
+  const passwordRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\W)(?=\S+$).{8,16}$/;
+  if (!passwordRegex.test(password)) {
+    Alert.alert("알림", "비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요.");
+    return false;
+  }
+
   if (password !== passwordConfirm) {
     Alert.alert("알림", "비밀번호가 일치하지 않습니다.");
     return false;

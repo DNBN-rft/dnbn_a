@@ -129,69 +129,80 @@ export default function StoreSale() {
         <View style={styles.rightSection} />
       </View>
 
-      <FlatList
-        contentContainerStyle={{
-          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
-        }}
-        data={saleList}
-        keyExtractor={(item) => item.saleIdx.toString()}
-        showsVerticalScrollIndicator={false}
-        refreshing={loading}
-        onRefresh={fetchSaleList}
-        renderItem={({ item }) => (
-          <View style={styles.saleProduct}>
-            <View style={styles.productContainer}>
-              <View style={styles.productImageContainer}>
-                <Image
-                  style={styles.productImage}
-                  source={{ uri: item.images.files[0]?.fileUrl }}
-                />
-              </View>
-
-              <View style={styles.productInfoContainer}>
-                <View>
-                  <Text style={styles.categoryText}>{item.saleStatus}</Text>
-
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={styles.productNameText}
-                  >
-                    {item.productNm}
-                  </Text>
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>로딩 중...</Text>
+        </View>
+      ) : saleList.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="pricetag-outline" size={64} color="#ccc" />
+          <Text style={styles.emptyText}>등록된 할인 상품이 없습니다</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{
+            paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
+          }}
+          data={saleList}
+          keyExtractor={(item) => item.saleIdx.toString()}
+          showsVerticalScrollIndicator={false}
+          refreshing={loading}
+          onRefresh={fetchSaleList}
+          renderItem={({ item }) => (
+            <View style={styles.saleProduct}>
+              <View style={styles.productContainer}>
+                <View style={styles.productImageContainer}>
+                  <Image
+                    style={styles.productImage}
+                    source={{ uri: item.images.files[0]?.fileUrl }}
+                  />
                 </View>
 
-                <View>
-                  <Text style={styles.originalPriceText}>
-                    {item.originalPrice.toLocaleString()}원
-                  </Text>
-                  <View style={styles.discountContainer}>
-                    <Text style={styles.discountRateText}>
-                      {item.saleValue}
-                      {item.saleType === "할인률" ? "%" : "원"}
+                <View style={styles.productInfoContainer}>
+                  <View>
+                    <Text style={styles.categoryText}>{item.saleStatus}</Text>
+
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={styles.productNameText}
+                    >
+                      {item.productNm}
                     </Text>
-                    <Text style={styles.salePriceText}>
-                      {item.discountedPrice.toLocaleString()}원
+                  </View>
+
+                  <View>
+                    <Text style={styles.originalPriceText}>
+                      {item.originalPrice.toLocaleString()}원
                     </Text>
+                    <View style={styles.discountContainer}>
+                      <Text style={styles.discountRateText}>
+                        {item.saleValue}
+                        {item.saleType === "할인률" ? "%" : "원"}
+                      </Text>
+                      <Text style={styles.salePriceText}>
+                        {item.discountedPrice.toLocaleString()}원
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => {
-                  setSelectedSaleIdx(item.saleIdx);
-                  setDeleteModal(true);
-                }}
-              >
-                <Text style={styles.deleteButtonText}>할인 취소</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => {
+                    setSelectedSaleIdx(item.saleIdx);
+                    setDeleteModal(true);
+                  }}
+                >
+                  <Text style={styles.deleteButtonText}>할인 취소</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
 
       <Modal
         visible={deleteModal}
