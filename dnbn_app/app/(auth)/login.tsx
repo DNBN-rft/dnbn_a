@@ -1,7 +1,9 @@
-import { apiPost } from "@/utils/api";
+import { apiPost, getSocialLoginUrl } from "@/utils/api";
 import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import * as WebBrowser from "expo-web-browser";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -23,7 +25,73 @@ export default function LoginScreen() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
 
-  // 로그인 페이지 접근 시 인증 정보 정리
+  // 소셜 로그인 성공 처리
+  const handleSocialLoginSuccess = useCallback(
+    async (params: any) => {
+      try {
+        const {
+          provider,
+          socialId,
+          email,
+          nickname,
+          accessToken,
+          tokenType,
+          refreshToken,
+          custCode,
+          isExistLocation,
+          isSetActiveCategory,
+        } = params;
+
+        console.log("소셜 로그인 성공:", {
+          provider,
+          socialId,
+          email,
+          nickname,
+        });
+
+        // 토큰 저장
+        const custTokens: Record<string, any> = {
+          userType: "cust",
+          accessToken: accessToken,
+          tokenType: tokenType || "Bearer",
+        };
+
+        if (refreshToken) custTokens.refreshToken = refreshToken;
+        if (custCode) custTokens.custCode = custCode;
+        if (isExistLocation !== undefined)
+          custTokens.hasLocation = isExistLocation === "true";
+        if (isSetActiveCategory !== undefined)
+          custTokens.hasActCategory = isSetActiveCategory === "true";
+
+        await setMultipleItems(custTokens);
+
+        // 주소 정보가 없으면 주소 설정 페이지로 이동
+        if (isExistLocation === "false") {
+          router.replace("/(cust)/address-select");
+          return;
+        }
+
+        // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
+        if (isSetActiveCategory === "false") {
+          router.replace("/(cust)/category");
+          return;
+        }
+
+        // 메인 페이지로 이동
+        router.replace("/(cust)/tabs/custhome");
+      } catch (error) {
+        console.error("소셜 로그인 처리 에러:", error);
+        if (Platform.OS === "web") {
+          window.alert("로그인 처리 중 오류가 발생했습니다.");
+        } else {
+          Alert.alert("오류", "로그인 처리 중 오류가 발생했습니다.");
+        }
+      }
+    },
+    [router],
+  );
+
+  // 로그인 페이지 접근 시 인증 정보 정리 및 딥링크 리스너 등록
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -34,7 +102,24 @@ export default function LoginScreen() {
     };
 
     initAuth();
-  }, []);
+
+    // 딥링크 리스너 등록 (소셜 로그인 결과 받기)
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      console.log("Deep Link received:", url);
+
+      // URL 파싱: dnbnapp://social-login?provider=kakao&socialId=...&accessToken=...
+      const { queryParams } = Linking.parse(url);
+
+      if (queryParams && queryParams.accessToken) {
+        // 소셜 로그인 성공 처리
+        handleSocialLoginSuccess(queryParams);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [handleSocialLoginSuccess]);
 
   const handleLogin = async () => {
     if (!loginId || !password) {
@@ -160,11 +245,24 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSNSLogin = (provider: "kakao" | "naver") => {
-    // SNS 로그인 처리 (나중에 구현)
-    console.log(`${provider} 로그인`);
-    // SNS 로그인은 cust로 처리
-    router.replace("/(cust)/tabs/custhome");
+  const handleSNSLogin = async (provider: "kakao" | "naver") => {
+    try {
+      // Step 1: 백엔드에서 로그인 URL 받기
+      const loginUrl = await getSocialLoginUrl(provider);
+      console.log(`${provider} 로그인 URL:`, loginUrl);
+
+      // Step 2: 브라우저 오픈
+      await WebBrowser.openBrowserAsync(loginUrl);
+
+      // Step 3: 딥링크 결과는 useEffect의 Linking.addEventListener에서 처리
+    } catch (error) {
+      console.error(`${provider} 로그인 에러:`, error);
+      if (Platform.OS === "web") {
+        window.alert("소셜 로그인 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "소셜 로그인 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (

@@ -1,7 +1,7 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./nego-acceted.styles";
+import { styles } from "./nego-accepted.styles";
 
 // 승인된 네고 아이템 타입
 interface ApprovedNegoItem {
@@ -34,6 +34,7 @@ interface ProductImage {
 
 export default function NegoAcceptedScreen() {
   const insets = useSafeAreaInsets();
+  const listRef = useRef<FlatList>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [approvedList, setApprovedList] = useState<ApprovedNegoItem[]>([]);
@@ -119,12 +120,12 @@ export default function NegoAcceptedScreen() {
         `${item.productNm}을(를) ${item.requestPrice.toLocaleString()}원에 결제하시겠습니까?`,
         [
           {
-            text: "취소",
-            style: "cancel",
-          },
-          {
             text: "결제",
             onPress: () => processPayment(item),
+          },
+          {
+            text: "취소",
+            style: "cancel",
           },
         ],
       );
@@ -149,6 +150,11 @@ export default function NegoAcceptedScreen() {
         },
       ]);
     }
+  };
+
+  // 최상단으로 스크롤
+  const scrollToTop = () => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
   const renderItem = ({ item }: { item: ApprovedNegoItem }) => (
@@ -249,24 +255,34 @@ export default function NegoAcceptedScreen() {
           <Text style={styles.emptyText}>승인된 네고 요청이 없습니다</Text>
         </View>
       ) : (
-        <FlatList
-          data={approvedList}
-          keyExtractor={(item) => `approved-${item.requestLogIdx}`}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loading && !refreshing ? (
-              <View style={{ padding: 20, alignItems: "center" }}>
-                <ActivityIndicator size="small" color="#EF7810" />
-              </View>
-            ) : null
-          }
-        />
+        <>
+          <FlatList
+            ref={listRef}
+            data={approvedList}
+            keyExtractor={(item) => `approved-${item.requestLogIdx}`}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              loading && !refreshing ? (
+                <View style={{ padding: 20, alignItems: "center" }}>
+                  <ActivityIndicator size="small" color="#EF7810" />
+                </View>
+              ) : null
+            }
+          />
+
+          <TouchableOpacity
+            style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+            onPress={scrollToTop}
+          >
+            <Ionicons name="chevron-up" size={24} color="#ef7810" />
+          </TouchableOpacity>
+        </>
       )}
 
       {insets.bottom > 0 && (

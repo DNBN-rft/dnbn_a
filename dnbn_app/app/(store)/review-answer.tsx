@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet, apiPost, apiPut, apiDelete } from "../../utils/api";
+import { apiDelete, apiGet, apiPost } from "../../utils/api";
 import { styles } from "./review-answer.style";
 
 interface ReviewDetailData {
@@ -32,7 +32,6 @@ interface ReviewDetailData {
 }
 
 export default function ReviewAnswer() {
-  const router = useRouter();
   const { reviewIdx } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const [reviewData, setReviewData] = useState<ReviewDetailData | null>(null);
@@ -46,7 +45,7 @@ export default function ReviewAnswer() {
       if (reviewIdx) {
         fetchReviewDetail();
       }
-    }, [reviewIdx])
+    }, [reviewIdx]),
   );
 
   const fetchReviewDetail = async () => {
@@ -57,7 +56,9 @@ export default function ReviewAnswer() {
       if (response.ok) {
         const review = await response.json();
         setReviewData(review);
-        setIsRegist(review.reviewAnswered && review.reviewAnswerContent !== null);
+        setIsRegist(
+          review.reviewAnswered && review.reviewAnswerContent !== null,
+        );
         setAnswerText(review.reviewAnswerContent || "");
       } else {
         Alert.alert("오류", "리뷰 정보를 불러오는데 실패했습니다.");
@@ -105,8 +106,7 @@ export default function ReviewAnswer() {
       });
 
       if (response.ok) {
-        const message = await response.text();
-        Alert.alert("성공", message);
+        Alert.alert("등록", "답변이 등록되었습니다.");
         setIsRegist(true);
       } else {
         Alert.alert("실패", "답변 등록에 실패했습니다.");
@@ -176,7 +176,9 @@ export default function ReviewAnswer() {
           </View>
           <View style={styles.rightSection} />
         </View>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#EF7810" />
         </View>
       </View>
@@ -207,31 +209,26 @@ export default function ReviewAnswer() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
-        <ScrollView
-          contentContainerStyle={{
-            paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
-          }}
-        >
+        <ScrollView>
           <View style={styles.reviewAnswerContainer}>
             <View style={styles.reviewContainer}>
               {/* 상단: 상품명, 별점, 날짜 */}
               <View style={styles.reviewHeaderSection}>
-                <Text style={styles.userNameText}>
-                  {reviewData.custNm}
-                </Text>
+                <Text style={styles.userNameText}>{reviewData.custNm}</Text>
                 <View style={styles.ratingDateContainer}>
                   <View style={styles.ratingContainer}>
-                    {Array.from({ length: Math.floor(reviewData.reviewRate) }).map(
-                      (_, index) => (
-                        <Ionicons
-                          key={index}
-                          name="star"
-                          size={14}
-                          color="#FFD700"
-                        />
-                      )
-                    )}
+                    {Array.from({
+                      length: Math.floor(reviewData.reviewRate),
+                    }).map((_, index) => (
+                      <Ionicons
+                        key={index}
+                        name="star"
+                        size={14}
+                        color="#FFD700"
+                      />
+                    ))}
                   </View>
                   <Text style={styles.dateText}>
                     {formatDateTime(reviewData.reviewRegDateTime)}
@@ -254,7 +251,7 @@ export default function ReviewAnswer() {
                         transition={200}
                         placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
                       />
-                    )
+                    ),
                   )}
               </View>
 
@@ -336,7 +333,10 @@ export default function ReviewAnswer() {
                 ) : (
                   // 등록 버튼만 (등록 전 상태)
                   <TouchableOpacity
-                    style={[styles.registerButton, submitting && { opacity: 0.6 }]}
+                    style={[
+                      styles.registerButton,
+                      submitting && { opacity: 0.6 },
+                    ]}
                     onPress={handleRegisterAnswer}
                     disabled={submitting}
                   >

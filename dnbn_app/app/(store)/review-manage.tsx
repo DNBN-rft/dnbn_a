@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useFocusEffect, useRouter } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   Modal,
-  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -33,21 +32,24 @@ interface ReviewItem {
 type ModalState = "hide" | "hideClear" | "noOpen";
 
 export default function ReviewManage() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [hideModal, setHideModal] = useState<ModalState>("noOpen");
-  const [hideText, setHideText] = useState<"숨김" | "숨김 해제" | "숨김 중">("숨김");
-  const [hideButtonText, setHideButtonText] = useState<"숨김" | "숨김 해제" | "숨김 중">(
+  const [hideText, setHideText] = useState<"숨김" | "숨김 해제" | "숨김 중">(
     "숨김",
   );
+  const [hideButtonText, setHideButtonText] = useState<
+    "숨김" | "숨김 해제" | "숨김 중"
+  >("숨김");
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReviewIdx, setSelectedReviewIdx] = useState<number | null>(null);
+  const [selectedReviewIdx, setSelectedReviewIdx] = useState<number | null>(
+    null,
+  );
 
   useFocusEffect(
     useCallback(() => {
       fetchReviews();
-    }, [])
+    }, []),
   );
 
   const fetchReviews = async () => {
@@ -57,8 +59,7 @@ export default function ReviewManage() {
 
       if (response.ok) {
         const data = await response.json();
-        const reviewList = data.content || data;
-        setReviews(Array.isArray(reviewList) ? reviewList : []);
+        setReviews(data.content || []);
       } else {
         console.error("리뷰 목록 조회 실패:", response.status);
       }
@@ -74,7 +75,9 @@ export default function ReviewManage() {
 
     try {
       if (status === "hide") {
-        const response = await apiPut(`/store/app/review/hidden/${selectedReviewIdx}`);
+        const response = await apiPut(
+          `/store/app/review/hidden/${selectedReviewIdx}`,
+        );
         if (response.ok) {
           Alert.alert("성공", "리뷰가 숨김 처리되었습니다.");
           setSelectedReviewIdx(null);
@@ -131,16 +134,27 @@ export default function ReviewManage() {
         data={reviews}
         keyExtractor={(item) => item.reviewIdx.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
-        }}
         ListEmptyComponent={
           loading ? (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 40,
+              }}
+            >
               <ActivityIndicator size="large" color="#EF7810" />
             </View>
           ) : (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 40,
+              }}
+            >
               <Text>리뷰가 없습니다.</Text>
             </View>
           )
@@ -187,9 +201,7 @@ export default function ReviewManage() {
             <View style={styles.reviewContainer}>
               {/* 상단: 상품명, 별점, 날짜 */}
               <View style={styles.reviewHeaderSection}>
-                <Text style={styles.userNameText}>
-                  {item.custNm}
-                </Text>
+                <Text style={styles.userNameText}>{item.custNm}</Text>
                 <View style={styles.ratingDateContainer}>
                   <View style={styles.ratingContainer}>
                     {Array.from({ length: Math.floor(item.reviewRate) }).map(
@@ -200,7 +212,7 @@ export default function ReviewManage() {
                           size={14}
                           color="#FFD700"
                         />
-                      )
+                      ),
                     )}
                   </View>
                   <Text style={styles.dateText}>
@@ -342,7 +354,7 @@ export default function ReviewManage() {
         }}
       />
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
 
       {/* 숨김/숨김해제 확인 모달 */}
