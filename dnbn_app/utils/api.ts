@@ -6,7 +6,7 @@ import {
 
 //소윤: 67, 형운: 68, 진용: 136
 
-const API_BASE_URL = "http://192.168.0.68:8080/api";
+const API_BASE_URL = "http://192.168.0.136:8080/api";
 
 // 글로벌 로그아웃 콜백
 let logoutCallback: (() => void) | null = null;
