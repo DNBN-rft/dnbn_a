@@ -188,15 +188,27 @@ export default function StoreNego() {
       const response = await apiDelete(`/store/app/nego/cancel/${negoIdx}`);
 
       if (response.ok) {
-        Alert.alert("네고 취소에 성공했습니다.");
+        if (Platform.OS === "web") {
+          window.alert("네고 취소에 성공했습니다.");
+        } else {
+          Alert.alert("성공", "네고 취소에 성공했습니다.");
+        }
         // 리스트 새로고침
         handleRefresh();
       } else {
-        Alert.alert("네고 취소에 실패했습니다.");
+        if (Platform.OS === "web") {
+          window.alert("네고 취소에 실패했습니다.");
+        } else {
+          Alert.alert("실패", "네고 취소에 실패했습니다.");
+        }
       }
     } catch (error) {
       console.error("네고 취소 API 호출 에러:", error);
-      Alert.alert("네고 취소 중 오류가 발생했습니다.");
+      if (Platform.OS === "web") {
+        window.alert("네고 취소 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "네고 취소 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -274,7 +286,11 @@ export default function StoreNego() {
   // 네고 요청 승인/거절 API 호출
   const handleApprove = async (status: "approve" | "reject" | "cancel") => {
     if (!selectedNegoRequestIdx) {
-      Alert.alert("오류", "선택된 네고 요청이 없습니다.");
+      if (Platform.OS === "web") {
+        window.alert("선택된 네고 요청이 없습니다.");
+      } else {
+        Alert.alert("선택된 네고 요청이 없습니다.");
+      }
       return;
     }
 
@@ -286,15 +302,27 @@ export default function StoreNego() {
       );
 
       if (response.ok) {
-        Alert.alert(`네고 요청 ${statusNm} 완료`);
+        if (Platform.OS === "web") {
+          window.alert(`네고 요청 ${statusNm} 완료`);
+        } else {
+          Alert.alert(`네고 요청 ${statusNm} 완료`);
+        }
         // 리스트 새로고침
         handleRequestRefresh();
       } else {
-        Alert.alert(`네고 요청 ${statusNm}에 실패했습니다.`);
+        if (Platform.OS === "web") {
+          window.alert(`네고 요청 ${statusNm}에 실패했습니다.`);
+        } else {
+          Alert.alert(`네고 요청 ${statusNm}에 실패했습니다.`);
+        }
       }
     } catch (error) {
       console.error("네고 요청 응답 API 호출 에러:", error);
-      Alert.alert(`네고 요청 ${statusNm} 중 오류가 발생했습니다.`);
+      if (Platform.OS === "web") {
+        window.alert(`네고 요청 ${statusNm} 중 오류가 발생했습니다.`);
+      } else {
+        Alert.alert(`네고 요청 ${statusNm} 중 오류가 발생했습니다.`);
+      }
     } finally {
       setSelectedNegoRequestIdx(null);
     }
