@@ -4,16 +4,16 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    Platform,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./negologlist.styles";
@@ -307,7 +307,7 @@ export default function NegoLogListScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>네고내역</Text>
+          <Text style={styles.title}>네고 요청</Text>
         </View>
         <View style={styles.rightSection} />
       </View>
@@ -327,7 +327,7 @@ export default function NegoLogListScreen() {
               activeTab === "current" && styles.tabButtonTextActive,
             ]}
           >
-            네고요청내역
+            요청 목록
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -343,7 +343,7 @@ export default function NegoLogListScreen() {
               activeTab === "complete" && styles.tabButtonTextActive,
             ]}
           >
-            네고 완료 내역
+            요청 이력
           </Text>
         </TouchableOpacity>
       </View>
