@@ -174,12 +174,15 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
   },
   detailButtonContainer: {
+    flexDirection: "row",
     borderTopWidth: 1,
     borderTopColor: "#F5F5F5",
     paddingVertical: 12,
     paddingHorizontal: 16,
+    gap: 8,
   },
   detailButton: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -190,6 +193,21 @@ export const styles = StyleSheet.create({
   detailButtonText: {
     fontWeight: "600",
     color: "#ef7810",
+    fontSize: 13,
+  },
+  negoCancelButton: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 10,
+    borderColor: "#D1D5DB",
+  },
+  negoCancelButtonText: {
+    fontWeight: "600",
+    color: "#4B5563",
     fontSize: 13,
   },
   buttonsContainer: {
