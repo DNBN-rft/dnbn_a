@@ -172,4 +172,19 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#EF7810",
   },
+  // 최상단 스크롤 버튼
+  scrollToTopButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+  },
 });
