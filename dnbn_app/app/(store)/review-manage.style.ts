@@ -36,47 +36,22 @@ export const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   reviewContainer: {
-    gap: 8,
     marginVertical: 10,
     marginHorizontal: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     borderRadius: 8,
     boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
     backgroundColor: "#fff",
   },
-  reviewInfoContainer: {
+  reviewHeaderSection: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  ratingDateContainer: {
     flexDirection: "row",
-  },
-  reviewImageContainer: {
-    width: 100,
-    height: 100,
-    marginRight: 10,
-  },
-  reviewImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
-  reviewDetails: {
-    flex: 1,
-    justifyContent: "center",
     gap: 10,
-  },
-  categoryText: {
-    fontSize: 12,
-    color: "#999",
-  },
-  productNameText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  reviewHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
   },
   ratingContainer: {
     flexDirection: "row",
@@ -89,18 +64,61 @@ export const styles = StyleSheet.create({
     color: "#333",
   },
   dateText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  reviewImagesSection: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 16,
+    justifyContent: "center",
+  },
+  reviewImageItem: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  reviewContentSection: {
+    gap: 8,
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  userNameText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+  },
+  reviewContentText: {
+    fontSize: 13,
+    color: "#333",
+    lineHeight: 20,
+  },
+  answerSection: {
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  answerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  answerTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+  },
+  answerTime: {
     fontSize: 12,
     color: "#999",
   },
-  userNameText: {
+  answerContentText: {
     fontSize: 13,
-    fontWeight: "500",
     color: "#333",
-    marginBottom: 4,
-  },
-  reviewContentText: {
-    fontSize: 14,
-    color: "#666",
     lineHeight: 20,
   },
   hideInfosContainer: {
@@ -112,6 +130,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFF5F5",
     borderRadius: 4,
     paddingVertical: 8,
+    marginBottom: 12,
   },
   hideInfoHeader: {
     flexDirection: "row",
@@ -135,6 +154,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#f1f1f1",
     borderRadius: 4,
     paddingVertical: 8,
+    marginBottom: 12,
   },
   hideClearInfoText: {
     fontSize: 14,
