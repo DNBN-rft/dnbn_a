@@ -86,21 +86,21 @@ export default function Mypage() {
             <Text style={styles.sectionTitle}>회원 정보</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/my-info")}
+              onPress={() => router.push("/(cust)/my-info")}
             >
               <Text style={styles.menuText}>내 정보</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/category")}
+              onPress={() => router.push("/(cust)/category")}
             >
               <Text style={styles.menuText}>카테고리 설정</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/notification-setting")}
+              onPress={() => router.push("/(cust)/notification-setting")}
             >
               <Text style={styles.menuText}>알림 설정</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
@@ -111,28 +111,35 @@ export default function Mypage() {
             <Text style={styles.sectionTitle}>히스토리</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/orderList")}
+              onPress={() => router.push("/(cust)/orderList")}
             >
               <Text style={styles.menuText}>구매내역</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/negoLogList")}
+              onPress={() => router.push("/(cust)/negoLogList")}
             >
               <Text style={styles.menuText}>네고내역</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/purchase-box")}
+              onPress={() => router.push("/(cust)/nego-accepted")}
+            >
+              <Text style={styles.menuText}>결제</Text>
+              <Ionicons name="chevron-forward" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push("/(cust)/purchase-box")}
             >
               <Text style={styles.menuText}>구매함</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/review")}
+              onPress={() => router.push("/(cust)/review")}
             >
               <Text style={styles.menuText}>리뷰</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
@@ -143,21 +150,21 @@ export default function Mypage() {
             <Text style={styles.sectionTitle}>서비스</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/notice")}
+              onPress={() => router.push("/(cust)/notice")}
             >
               <Text style={styles.menuText}>공지사항</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/faqList")}
+              onPress={() => router.push("/(cust)/faqList")}
             >
               <Text style={styles.menuText}>자주 묻는 질문</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => router.navigate("/(cust)/reportList")}
+              onPress={() => router.push("/(cust)/reportList")}
             >
               <Text style={styles.menuText}>신고 이력</Text>
               <Ionicons name="chevron-forward" size={24} color="black" />

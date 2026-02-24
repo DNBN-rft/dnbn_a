@@ -6,7 +6,7 @@ import {
 
 //소윤: 67, 형운: 68, 진용: 136
 
-const API_BASE_URL = "http://192.168.0.136:8080/api";
+const API_BASE_URL = "http://192.168.0.68:8080/api";
 
 // 글로벌 로그아웃 콜백
 let logoutCallback: (() => void) | null = null;
@@ -306,6 +306,30 @@ export const apiPutFormDataWithImage = async (
   }
 };
 
+/**
+ * 소셜 로그인 URL 받아오기
+ * @param provider 소셜 로그인 제공자 ('kakao' 또는 'naver')
+ * @returns 소셜 로그인 URL
+ */
+export const getSocialLoginUrl = async (
+  provider: "kakao" | "naver",
+): Promise<string> => {
+  const endpoint =
+    provider === "kakao"
+      ? "/api/cust/app/social/kakao/login-url"
+      : "/api/cust/app/social/naver/login-url";
+
+  // 소셜 로그인 URL은 /api가 포함되어 있으므로 BASE_URL만 사용
+  const BASE_URL = API_BASE_URL.replace("/api", "");
+  const response = await fetch(`${BASE_URL}${endpoint}`);
+
+  if (!response.ok) {
+    throw new Error("로그인 URL을 받아오는데 실패했습니다.");
+  }
+
+  return await response.text();
+};
+
 const apiClient = {
   apiGet,
   apiPost,
@@ -313,6 +337,7 @@ const apiClient = {
   apiDelete,
   apiPostFormDataWithImage,
   apiPutFormDataWithImage,
+  getSocialLoginUrl,
   API_BASE_URL,
 };
 

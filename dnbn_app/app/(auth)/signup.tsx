@@ -259,7 +259,7 @@ export default function PracticeView() {
               />
             </View>
             <Text style={styles.descriptionStyle}>
-              8자이상 16자 미만으로 입력
+              8~16자 영문, 숫자, 특수문자를 사용하세요
             </Text>
           </View>
 

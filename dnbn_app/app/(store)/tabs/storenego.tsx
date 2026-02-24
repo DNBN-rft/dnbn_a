@@ -1,10 +1,11 @@
-import { apiGet } from "@/utils/api";
+import { apiDelete, apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   Platform,
@@ -64,6 +65,7 @@ interface NegoListResponse {
 // 네고 요청 API 응답 타입 정의
 interface NegoRequestItem {
   images: NegoImages;
+  negoRequestIdx: number;
   categoryNm: string;
   custCode: string;
   custNm: string;
@@ -153,6 +155,63 @@ export default function StoreNego() {
     }
   };
 
+  // 네고 취소 핸들러
+  const negoCancelHandler = (negoIdx: number) => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("정말 네고 등록 취소를 하시겠습니까?");
+      if (confirmed) {
+        handleCancelNego(negoIdx);
+      }
+    } else {
+      Alert.alert(
+        "네고 취소",
+        "정말 네고 등록 취소를 하시겠습니까?",
+        [
+          {
+            text: "확인",
+            onPress: () => handleCancelNego(negoIdx),
+            style: "destructive",
+          },
+          {
+            text: "취소",
+            style: "cancel",
+          },
+        ],
+        { cancelable: true },
+      );
+    }
+  };
+
+  // 네고 취소 API 호출
+  const handleCancelNego = async (negoIdx: number) => {
+    try {
+      const response = await apiDelete(`/store/app/nego/cancel/${negoIdx}`);
+
+      if (response.ok) {
+        if (Platform.OS === "web") {
+          window.alert("네고가 취소되었습니다.");
+        } else {
+          Alert.alert("성공", "네고가 취소되었습니다.");
+        }
+        // 리스트 새로고침
+        handleRefresh();
+      } else {
+        if (Platform.OS === "web") {
+          window.alert("네고 취소에 실패했습니다.");
+        } else {
+          Alert.alert("실패", "네고 취소에 실패했습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("네고 취소 API 호출 에러:", error);
+      if (Platform.OS === "web") {
+        window.alert("네고 취소 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "네고 취소 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
   // 네고 요청 리스트 API 호출
   const fetchNegoRequestList = async (
     pageNum: number,
@@ -216,17 +275,49 @@ export default function StoreNego() {
     }, [tab]),
   );
 
-  const [approveModal, setApproveModal] = useState<
-    "approve" | "reject" | "noOpen"
-  >("noOpen");
-  const [statusNm, setStatusNm] = useState<"승인" | "거절" | "">("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<{
+    idx: number;
+    isAccept: boolean;
+  } | null>(null);
 
-  const handleApprove = (status) => {
-    // {
-    //   status === "approve" ? 승인 동작 :
-    //   status === "reject" ? 거절 동작:
-    //   예외처리
-    // }
+  // 네고 요청 승인/거절 API 호출
+  const handleApprove = async () => {
+    if (!selectedRequest) return;
+
+    const { idx, isAccept } = selectedRequest;
+    const statusText = isAccept ? "승인" : "거절";
+
+    try {
+      const response = await apiPost(`/store/app/nego-req/${idx}`, {
+        isAccept,
+      });
+
+      if (response.ok) {
+        if (Platform.OS === "web") {
+          window.alert(`네고 요청 ${statusText} 완료`);
+        } else {
+          Alert.alert(`네고 요청 ${statusText} 완료`);
+        }
+        handleRequestRefresh();
+      } else {
+        if (Platform.OS === "web") {
+          window.alert(`네고 요청 ${statusText}에 실패했습니다.`);
+        } else {
+          Alert.alert(`네고 요청 ${statusText}에 실패했습니다.`);
+        }
+      }
+    } catch (error) {
+      console.error("네고 요청 응답 API 호출 에러:", error);
+      if (Platform.OS === "web") {
+        window.alert(`네고 요청 ${statusText} 중 오류가 발생했습니다.`);
+      } else {
+        Alert.alert(`네고 요청 ${statusText} 중 오류가 발생했습니다.`);
+      }
+    } finally {
+      setIsModalVisible(false);
+      setSelectedRequest(null);
+    }
   };
 
   return (
@@ -367,6 +458,12 @@ export default function StoreNego() {
                 >
                   <Text style={styles.detailButtonText}>상세</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.negoCancelButton}
+                  onPress={() => negoCancelHandler(item.negoIdx)}
+                >
+                  <Text style={styles.negoCancelButtonText}>취소</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -434,8 +531,11 @@ export default function StoreNego() {
                 <View style={styles.requestButtonContainer}>
                   <TouchableOpacity
                     onPress={() => {
-                      setApproveModal("approve");
-                      setStatusNm("승인");
+                      setSelectedRequest({
+                        idx: item.negoRequestIdx,
+                        isAccept: true,
+                      });
+                      setIsModalVisible(true);
                     }}
                     style={styles.approveButtonContainer}
                   >
@@ -446,8 +546,11 @@ export default function StoreNego() {
 
                   <TouchableOpacity
                     onPress={() => {
-                      setApproveModal("reject");
-                      setStatusNm("거절");
+                      setSelectedRequest({
+                        idx: item.negoRequestIdx,
+                        isAccept: false,
+                      });
+                      setIsModalVisible(true);
                     }}
                     style={styles.rejectButtonContainer}
                   >
@@ -462,34 +565,38 @@ export default function StoreNego() {
         ></FlatList>
       )}
       <Modal
-        visible={approveModal === "approve" || approveModal === "reject"}
+        visible={isModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setApproveModal("noOpen")}
+        onRequestClose={() => {
+          setIsModalVisible(false);
+          setSelectedRequest(null);
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.deleteModalContent}>
             <Text style={styles.deleteModalTitle}>알림</Text>
             <Text style={styles.deleteModalMessage}>
-              정말로 이 요청을 {statusNm} 하시겠습니까?
+              정말로 이 요청을 {selectedRequest?.isAccept ? "승인" : "거절"}{" "}
+              하시겠습니까?
             </Text>
 
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}
-                onPress={() => {
-                  // 여기서 실제 삭제 로직 구현
-                  setApproveModal("noOpen");
-                  handleApprove(approveModal);
-                  // TODO: 실제 삭제 API 호출
-                }}
+                onPress={handleApprove}
               >
-                <Text style={styles.confirmButtonText}>{statusNm}</Text>
+                <Text style={styles.confirmButtonText}>
+                  {selectedRequest?.isAccept ? "승인" : "거절"}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.cancelButton]}
-                onPress={() => setApproveModal("noOpen")}
+                onPress={() => {
+                  setIsModalVisible(false);
+                  setSelectedRequest(null);
+                }}
               >
                 <Text style={styles.modalCancelButtonText}>취소</Text>
               </TouchableOpacity>

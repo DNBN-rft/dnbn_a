@@ -186,4 +186,15 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 16,
+  },
 });
