@@ -39,7 +39,7 @@ export default function LoginScreen() {
           refreshToken,
           custCode,
           isExistLocation,
-          isSetActiveCategory,
+          isExistCategory,
         } = params;
 
         console.log("소셜 로그인 성공:", {
@@ -47,6 +47,8 @@ export default function LoginScreen() {
           socialId,
           email,
           nickname,
+          isExistLocation,
+          isExistCategory,
         });
 
         // 토큰 저장
@@ -60,8 +62,8 @@ export default function LoginScreen() {
         if (custCode) custTokens.custCode = custCode;
         if (isExistLocation !== undefined)
           custTokens.hasLocation = isExistLocation === "true";
-        if (isSetActiveCategory !== undefined)
-          custTokens.hasActCategory = isSetActiveCategory === "true";
+        if (isExistCategory !== undefined)
+          custTokens.hasActCategory = isExistCategory === "true";
 
         await setMultipleItems(custTokens);
 
@@ -72,7 +74,7 @@ export default function LoginScreen() {
         }
 
         // 카테고리 정보가 없으면 카테고리 설정 페이지로 이동
-        if (isSetActiveCategory === "false") {
+        if (isExistCategory === "false") {
           router.replace("/(cust)/category");
           return;
         }
@@ -103,12 +105,25 @@ export default function LoginScreen() {
 
     initAuth();
 
-    // 딥링크 리스너 등록 (소셜 로그인 결과 받기)
+    // Cold Start 처리: 앱이 딥링크로 새로 실행된 경우 초기 URL 확인
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log("[Cold Start] Raw URL:", url);
+        const { queryParams } = Linking.parse(url);
+        console.log("[Cold Start] Parsed queryParams:", JSON.stringify(queryParams, null, 2));
+        if (queryParams && queryParams.accessToken) {
+          handleSocialLoginSuccess(queryParams);
+        }
+      }
+    });
+
+    // Warm Start 처리: 앱이 이미 실행 중일 때 딥링크 수신
     const subscription = Linking.addEventListener("url", ({ url }) => {
-      console.log("Deep Link received:", url);
+      console.log("[Warm Start] Raw URL:", url);
 
       // URL 파싱: dnbnapp://social-login?provider=kakao&socialId=...&accessToken=...
       const { queryParams } = Linking.parse(url);
+      console.log("[Warm Start] Parsed queryParams:", JSON.stringify(queryParams, null, 2));
 
       if (queryParams && queryParams.accessToken) {
         // 소셜 로그인 성공 처리
