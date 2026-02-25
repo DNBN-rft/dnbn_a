@@ -34,7 +34,7 @@ export default function PaymentFail() {
       </View>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
