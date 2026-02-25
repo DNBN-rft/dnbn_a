@@ -1,17 +1,14 @@
 import { apiPost } from "@/utils/api";
 import {
   checkDuplicateId,
-  checkDuplicateNickNm,
   handleEmailDomainSelect as handleEmailDomainSelectUtil,
   handleLoginIdChange as handleLoginIdChangeUtil,
-  handleNickNmChange as handleNickNmChangeUtil,
   handlePhoneFirstChange as handlePhoneFirstChangeUtil,
   handlePhoneLastChange as handlePhoneLastChangeUtil,
   handlePhoneMiddleChange as handlePhoneMiddleChangeUtil,
   validateEmail,
   validateLoginId,
   validateName,
-  validateNickname,
   validatePassword,
   validatePhoneNumber,
   validateResidentNumber,
@@ -55,9 +52,9 @@ export default function PracticeView() {
   const [custNm, setCustNm] = useState("");
   const [residentNumberFront, setResidentNumberFront] = useState("");
   const [residentNumberBack, setResidentNumberBack] = useState("");
-  const [custNickNm, setCustNickNm] = useState("");
-  const [isNickNmChecked, setIsNickNmChecked] = useState(false);
-  const [isNickNmAvailable, setIsNickNmAvailable] = useState(false);
+  // const [custNickNm, setCustNickNm] = useState("");
+  // const [isNickNmChecked, setIsNickNmChecked] = useState(false);
+  // const [isNickNmAvailable, setIsNickNmAvailable] = useState(false);
   const [phoneFirst, setPhoneFirst] = useState("");
   const [phoneMiddle, setPhoneMiddle] = useState("");
   const [phoneLast, setPhoneLast] = useState("");
@@ -66,7 +63,7 @@ export default function PracticeView() {
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [isSignupLoading, setIsSignupLoading] = useState(false);
   const [isIdCheckLoading, setIsIdCheckLoading] = useState(false);
-  const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
+  // const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
   const [showEmailDomainPicker, setShowEmailDomainPicker] = useState(false);
 
   useEffect(() => {
