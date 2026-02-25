@@ -92,24 +92,24 @@ export default function PracticeView() {
   };
 
   // 닉네임 입력 핸들러
-  const handleNickNmChange = (text: string) => {
-    handleNickNmChangeUtil(
-      text,
-      setCustNickNm,
-      setIsNickNmChecked,
-      setIsNickNmAvailable,
-    );
-  };
+  // const handleNickNmChange = (text: string) => {
+  //   handleNickNmChangeUtil(
+  //     text,
+  //     setCustNickNm,
+  //     setIsNickNmChecked,
+  //     setIsNickNmAvailable,
+  //   );
+  // };
 
   // 닉네임 중복 체크
-  const handleCheckDuplicateNickNm = async () => {
-    await checkDuplicateNickNm(
-      custNickNm,
-      setIsNickNmCheckLoading,
-      setIsNickNmChecked,
-      setIsNickNmAvailable,
-    );
-  };
+  // const handleCheckDuplicateNickNm = async () => {
+  //   await checkDuplicateNickNm(
+  //     custNickNm,
+  //     setIsNickNmCheckLoading,
+  //     setIsNickNmChecked,
+  //     setIsNickNmAvailable,
+  //   );
+  // };
 
   // 핸드폰번호 본인 인증
   const handlePhoneVerification = async () => {
@@ -129,8 +129,8 @@ export default function PracticeView() {
     if (!validateName(custNm)) return;
     if (!validateResidentNumber(residentNumberFront, residentNumberBack))
       return;
-    if (!validateNickname(custNickNm, isNickNmChecked, isNickNmAvailable))
-      return;
+    // if (!validateNickname(custNickNm, isNickNmChecked, isNickNmAvailable))
+    //   return;
     if (
       !validatePhoneNumber(phoneFirst, phoneMiddle, phoneLast, isPhoneVerified)
     )
@@ -151,7 +151,7 @@ export default function PracticeView() {
         custNm,
         residentNumberFront,
         residentNumberBack,
-        custNickNm,
+        // custNickNm,
         custTelNo: telNoWithoutHyphen,
         custGender,
         custMarketAgreed: isMarketingAgreed,
@@ -331,6 +331,7 @@ export default function PracticeView() {
             </View>
           </View>
 
+          {/** 닉네임 처리 막기
           <View style={styles.viewMargin}>
             <Text style={styles.inputTitle}>닉네임 *</Text>
             <View style={styles.inputComponent}>
@@ -363,6 +364,7 @@ export default function PracticeView() {
               </Pressable>
             </View>
           </View>
+         */}
 
           <View style={styles.viewMargin}>
             <Text style={styles.inputTitle}>이메일 *</Text>
