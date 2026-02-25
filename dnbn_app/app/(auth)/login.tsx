@@ -110,7 +110,10 @@ export default function LoginScreen() {
       if (url) {
         console.log("[Cold Start] Raw URL:", url);
         const { queryParams } = Linking.parse(url);
-        console.log("[Cold Start] Parsed queryParams:", JSON.stringify(queryParams, null, 2));
+        console.log(
+          "[Cold Start] Parsed queryParams:",
+          JSON.stringify(queryParams, null, 2),
+        );
         if (queryParams && queryParams.accessToken) {
           handleSocialLoginSuccess(queryParams);
         }
@@ -119,14 +122,9 @@ export default function LoginScreen() {
 
     // Warm Start 처리: 앱이 이미 실행 중일 때 딥링크 수신
     const subscription = Linking.addEventListener("url", ({ url }) => {
-      console.log("[Warm Start] Raw URL:", url);
-
-      // URL 파싱: dnbnapp://social-login?provider=kakao&socialId=...&accessToken=...
       const { queryParams } = Linking.parse(url);
-      console.log("[Warm Start] Parsed queryParams:", JSON.stringify(queryParams, null, 2));
 
       if (queryParams && queryParams.accessToken) {
-        // 소셜 로그인 성공 처리
         handleSocialLoginSuccess(queryParams);
       }
     });
@@ -168,7 +166,6 @@ export default function LoginScreen() {
 
         // 모든 설정이 완료된 경우에만 메인 페이지로 이동
         if (userType === "cust") {
-          // cust 로그인 - 토큰 저장
           const custTokens: Record<string, any> = {
             userType: userType, // 리프레시 시 어느 엔드포인트를 사용할지 판단
           };
