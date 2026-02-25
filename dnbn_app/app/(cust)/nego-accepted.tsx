@@ -1,4 +1,4 @@
-import { apiGet } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -17,7 +17,7 @@ import { styles } from "./nego-accepted.styles";
 
 // 승인된 네고 아이템 타입
 interface ApprovedNegoItem {
-  requestLogIdx: number;
+  orderCode: string;
   responseDateTime: string;
   productImg: ProductImage | null;
   storeNm: string;
@@ -112,7 +112,9 @@ export default function NegoAcceptedScreen() {
         `${item.productNm}을(를) ${item.requestPrice.toLocaleString()}원에 결제하시겠습니까?`,
       );
       if (confirmed) {
-        processPayment(item);
+        processPayment(item, true);
+      } else {
+        processPayment(item, false);
       }
     } else {
       Alert.alert(
@@ -121,11 +123,12 @@ export default function NegoAcceptedScreen() {
         [
           {
             text: "결제",
-            onPress: () => processPayment(item),
+            onPress: () => processPayment(item, true),
           },
           {
             text: "취소",
             style: "cancel",
+            onPress: () => processPayment(item, false),
           },
         ],
       );
@@ -133,22 +136,31 @@ export default function NegoAcceptedScreen() {
   };
 
   // 결제 처리 로직
-  const processPayment = (item: ApprovedNegoItem) => {
-    // TODO: 실제 결제 API 연동
-    if (Platform.OS === "web") {
-      window.alert("결제가 완료되었습니다.");
-      // 리스트 새로고침
-      handleRefresh();
-    } else {
-      Alert.alert("성공", "결제가 완료되었습니다.", [
-        {
-          text: "확인",
-          onPress: () => {
-            // 결제 완료 후 리스트 새로고침
-            handleRefresh();
-          },
-        },
-      ]);
+  const processPayment = async (item: ApprovedNegoItem, status: boolean) => {
+    try {
+      // 결제 확인 API 호출
+      const response = await apiPost("/cust/payment/confirm", {
+        orderCode: item.orderCode,
+        status: status,
+      });
+
+      if (response.ok) {
+        const isSuccess = await response.json();
+
+        if (isSuccess) {
+          // 결제 성공
+          router.push("/payment-complete");
+        } else {
+          // 결제 실패
+          router.push("/payment-fail");
+        }
+      } else {
+        console.error("결제 확인 API 호출 실패:", response.status);
+        router.push("/payment-fail");
+      }
+    } catch (error) {
+      console.error("결제 처리 중 오류:", error);
+      router.push("/payment-fail");
     }
   };
 
@@ -259,7 +271,7 @@ export default function NegoAcceptedScreen() {
           <FlatList
             ref={listRef}
             data={approvedList}
-            keyExtractor={(item) => `approved-${item.requestLogIdx}`}
+            keyExtractor={(item) => `approved-${item.orderCode}`}
             renderItem={renderItem}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
