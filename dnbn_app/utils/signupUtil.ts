@@ -238,16 +238,14 @@ export const checkDuplicateId = async (
     const response = await apiGet(`/cust/check-loginId/${loginId}`);
 
     if (response.ok) {
-      const message = await response.text();
-
-      if (message === "사용가능한 아이디입니다.") {
+      if (response.ok) {
         setIsIdChecked(true);
         setIsIdAvailable(true);
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용가능한 아이디입니다.");
       } else {
         setIsIdChecked(true);
         setIsIdAvailable(false);
-        Alert.alert("알림", message);
+        Alert.alert("알림", "이미 존재하는 아이디입니다.");
       }
     } else {
       Alert.alert("오류", "중복 체크에 실패했습니다.");
@@ -280,16 +278,14 @@ export const checkDuplicateNickNm = async (
     const response = await apiGet(`/cust/check-nickname/${custNickNm}`);
 
     if (response.ok) {
-      const message = await response.text();
-
-      if (message === "사용가능한 닉네임입니다.") {
+      if (response.ok) {
         setIsNickNmChecked(true);
         setIsNickNmAvailable(true);
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용가능한 닉네임입니다.");
       } else {
         setIsNickNmChecked(true);
         setIsNickNmAvailable(false);
-        Alert.alert("알림", message);
+        Alert.alert("알림", "이미 존재하는 닉네임입니다.");
       }
     } else {
       Alert.alert("오류", "중복 체크에 실패했습니다.");
