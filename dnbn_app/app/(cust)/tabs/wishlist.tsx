@@ -3,13 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Platform,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/wishlist.styles";
@@ -131,12 +131,9 @@ export default function WishlistScreen() {
 
         (async () => {
           try {
-            const response = await apiDelete(
-              `/cust/wish`,
-              {
-                body: JSON.stringify({ storeCodes: storeCodesToRemove }),
-              },
-            );
+            const response = await apiDelete(`/cust/wish`, {
+              body: JSON.stringify({ storeCodes: storeCodesToRemove }),
+            });
 
             if (response.ok) {
               unwishSet.current.clear(); // 성공 시 Set 초기화
@@ -152,7 +149,7 @@ export default function WishlistScreen() {
   // 찜 상태 토글 (UI만 즉시 업데이트, API는 페이지 벗어날 때)
   const handleWishToggle = useCallback((storeCode: string) => {
     if (!storeCode) {
-      console.error("storeCode가 없습니다!");
+      console.error("storeCode가 없습니다");
       return;
     }
 
@@ -232,7 +229,7 @@ export default function WishlistScreen() {
           keyExtractor={(item) => item.storeCode || item.id}
           contentContainerStyle={[
             styles.listContainer,
-            { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }
+            { paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0 },
           ]}
           renderItem={({ item }) => (
             <View style={styles.storeItemContainer} key={item.storeCode}>

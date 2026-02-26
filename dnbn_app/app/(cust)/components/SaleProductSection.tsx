@@ -29,7 +29,7 @@ export default function SaleProductSection({
   return (
     <View style={styles.contentSection}>
       <View style={sectionStyles.headerContainer}>
-        <Text style={sectionStyles.headerTitle}>할인상품</Text>
+        <Text style={sectionStyles.headerTitle}>할인</Text>
         <Text style={sectionStyles.headerSubtitle}>
           할인 중인 상품을 만나보세요!
         </Text>

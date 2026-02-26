@@ -153,21 +153,6 @@ export const styles = StyleSheet.create({
   statusBar: {
     backgroundColor: "#fff",
   },
-  dragHandle: {
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-  },
-  dragHandleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#ccc",
-    borderRadius: 2,
-  },
-  storeInfoWhiteOverlay: {
-    backgroundColor: "#fff",
-  },
   modalContent: {
     flex: 1,
     paddingTop: 0,
@@ -178,12 +163,46 @@ export const styles = StyleSheet.create({
   postcodeStyle: {
     flex: 1,
   },
-  storePanelContainer: {
+  storeDetailContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 48,
+    paddingBottom: 20,
     zIndex: 30,
+  },
+  storeDetailContent: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  storeDetailInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  storeDetailImageWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#f5f5f5",
+    flexShrink: 0,
+  },
+  storeDetailImage: {
+    width: "100%",
+    height: "100%",
+  },
+  storeDetailImagePlaceholder: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   clickedLocationContainer: {
     position: "absolute",
@@ -236,35 +255,40 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
   },
-  storeListOuterContainer: {
+  storeListContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: "30%",
-    zIndex: 10,
-    pointerEvents: "auto",
-  },
-  storeListContainer: {
-    flex: 1,
+    height: "40%",
     backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    pointerEvents: "auto",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    zIndex: 10,
   },
-  storeListDragHandle: {
-    height: 32,
-    justifyContent: "center",
+  storeListHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
-  storeListDragBar: {
-    width: 48,
-    height: 4,
-    backgroundColor: "#ddd",
-    borderRadius: 2,
+  storeListTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+  },
+  storeListCloseButton: {
+    padding: 8,
+    marginRight: -8,
   },
   storeListItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -285,13 +309,5 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     color: "#999",
     fontWeight: "500",
-  },
-  storeListWhiteOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    pointerEvents: "auto",
   },
 });

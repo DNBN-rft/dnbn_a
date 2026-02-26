@@ -164,8 +164,7 @@ export default function PracticeView() {
           },
         ]);
       } else {
-        const errorData = await response.json();
-        Alert.alert("실패", errorData.message || "회원가입에 실패했습니다.");
+        Alert.alert("실패", "회원가입에 실패했습니다.");
         setIsSignupLoading(false);
       }
     } catch (error) {

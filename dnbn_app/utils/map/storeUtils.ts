@@ -8,6 +8,7 @@ export interface Store {
   longitude: number;
   phone?: string;
   distance?: number;
+  imageUrl?: string;
 }
 
 export const TEST_STORES: Store[] = [

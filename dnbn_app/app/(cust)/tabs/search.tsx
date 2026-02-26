@@ -75,7 +75,7 @@ export default function SearchView() {
     }, [hasLoadedData]),
   );
 
-  // 검색 데이터 가져오기
+  // 검색 페이지 내부 렌더링 할 데이터 동시 호출
   const fetchSearchData = async () => {
     try {
       setIsLoading(true);

@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { styles } from "../styles/custhome.styles";
 
@@ -30,7 +30,7 @@ export default function RegularProductSection({
       <View style={sectionStyles.headerContainer}>
         <Text style={sectionStyles.headerTitle}>일반 상품</Text>
         <Text style={sectionStyles.headerSubtitle}>
-          여러 상품들을 둘러보세요!
+          동네방네에 등록된 다양한 상품을 둘러보세요!
         </Text>
       </View>
       {products.length === 0 ? (
