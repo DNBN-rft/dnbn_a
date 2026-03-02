@@ -54,22 +54,3 @@ export const slideDown = (
 ) => {
   runAnimation(animValue, { toValue, duration }, callback);
 };
-
-//패널을 확장하는 애니메이션을 실행합니다
-export const expandPanel = (
-  animValue: Animated.Value,
-  toValue: number = -200,
-  duration: number = 200,
-  callback?: () => void
-) => {
-  runAnimation(animValue, { toValue, duration }, callback);
-};
-
-//패널을 기본 위치로 되돌리는 애니메이션을 실행합니다
-export const resetPanel = (
-  animValue: Animated.Value,
-  duration: number = 200,
-  callback?: () => void
-) => {
-  runAnimation(animValue, { toValue: 0, duration }, callback);
-};

@@ -52,10 +52,28 @@ export default function CartScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const cartDataRef = useRef<CartStore[]>([]);
+  const isInitialMount = useRef(true);
+  const skipNextSave = useRef(false);
 
   // cartData 변경 시 ref 업데이트
   useEffect(() => {
     cartDataRef.current = cartData;
+  }, [cartData]);
+
+  // cartData 변경 감지 → 500ms 디바운스로 자동 저장
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      saveCartChanges();
+    }, 500);
+    return () => clearTimeout(timer);
   }, [cartData]);
 
   const fetchCartData = async () => {
@@ -67,6 +85,7 @@ export default function CartScreen() {
 
       if (response.ok) {
         const data = await response.json();
+        skipNextSave.current = true;
         setCartData(data);
         setError(false);
       } else {
@@ -81,18 +100,17 @@ export default function CartScreen() {
     }
   };
 
-  // 선택된 아이템 정보 저장
+  // 아이템 수량 저장
   const saveCartChanges = async () => {
     try {
-      const selectedItems = cartDataRef.current
+      const allItems = cartDataRef.current
         .flatMap((store) => store.items)
-        .filter((item) => item.selected)
         .map((item) => ({
           cartItemIdx: item.cartItemIdx,
           quantity: item.quantity,
         }));
 
-      const response = await apiPut("/cust/cart", selectedItems);
+      const response = await apiPut("/cust/cart", allItems);
 
       if (response.ok) {
       } else {
@@ -133,11 +151,6 @@ export default function CartScreen() {
   // 컴포넌트 마운트 시 API 호출
   useEffect(() => {
     fetchCartData();
-
-    // 페이지를 벗어날 때 저장
-    return () => {
-      saveCartChanges();
-    };
   }, []);
 
   // 포맷팅 함수
@@ -393,6 +406,18 @@ export default function CartScreen() {
                 totalCount === 0 && styles.purchaseButtonDisabled,
               ]}
               disabled={totalCount === 0}
+              onPress={() => {
+                const selectedStores = cartData
+                  .map((store) => ({
+                    storeNm: store.storeNm,
+                    items: store.items.filter((item) => item.selected),
+                  }))
+                  .filter((store) => store.items.length > 0);
+                router.push({
+                  pathname: "/(cust)/orderPage",
+                  params: { cartItems: JSON.stringify(selectedStores) },
+                });
+              }}
             >
               <Text
                 style={[

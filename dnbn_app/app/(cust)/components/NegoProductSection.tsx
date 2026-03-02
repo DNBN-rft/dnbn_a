@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { styles } from "../styles/custhome.styles";
 
@@ -28,7 +29,7 @@ export default function NegoProductSection({
   return (
     <View style={styles.contentSection}>
       <View style={sectionStyles.headerContainer}>
-        <Text style={sectionStyles.headerTitle}>네고왕</Text>
+        <Text style={sectionStyles.headerTitle}>네고</Text>
         <Text style={sectionStyles.headerSubtitle}>
           가격 협상으로 더 저렴하게 구매하세요!
         </Text>
@@ -46,7 +47,7 @@ export default function NegoProductSection({
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
+              <Pressable
                 style={styles.productCard}
                 onPress={() =>
                   router.push(
@@ -71,7 +72,7 @@ export default function NegoProductSection({
                     {item.price.toLocaleString()}원
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             )}
           />
           <TouchableOpacity

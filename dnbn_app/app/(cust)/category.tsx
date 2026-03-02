@@ -274,7 +274,7 @@ export default function CategoryScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>관심 카테고리 설정</Text>
+          <Text style={styles.title}>카테고리 설정</Text>
         </View>
         <View style={styles.rightSection} />
       </View>

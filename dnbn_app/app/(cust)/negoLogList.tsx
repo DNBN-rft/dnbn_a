@@ -1,7 +1,7 @@
 import { apiGet, apiPost } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,7 +9,6 @@ import {
   FlatList,
   Image,
   Modal,
-  Platform,
   Text,
   TextInput,
   TouchableOpacity,
@@ -75,12 +74,7 @@ export default function NegoLogListScreen() {
       setLoading(true);
       setError(false);
 
-      let custCode = "";
-      if (Platform.OS === "web") {
-        custCode = localStorage.getItem("custCode") || "";
-      } else {
-        custCode = (await SecureStore.getItemAsync("custCode")) || "";
-      }
+      const custCode = (await getStorageItem("custCode")) || "";
 
       if (!custCode) {
         setError(true);
@@ -131,8 +125,7 @@ export default function NegoLogListScreen() {
 
   // 네고 요청 취소
   const handleCancelNego = (item: CustNegoCurrentResponse) => {
-    // 앱 환경
-    Alert.alert("협상 취소", "이 협상 요청을 취소하시겠습니까?", [
+    Alert.alert("취소", "네고 요청을 취소하시겠습니까?", [
       { text: "아니오", onPress: () => {} },
       {
         text: "예",
@@ -469,18 +462,21 @@ export default function NegoLogListScreen() {
                     );
 
                     if (response.ok) {
-                      Alert.alert("성공", "협상 금액이 수정되었습니다.");
+                      Alert.alert("성공", "네고 요청 금액이 수정되었습니다.");
                       setEditModalVisible(false);
                       setEditingItem(null);
                       setEditNegoAmount("");
                       // 목록 새로고침
                       fetchNegoList("CURRENT");
                     } else {
-                      Alert.alert("오류", "협상 수정에 실패했습니다.");
+                      Alert.alert("오류", "네고 요청 수정에 실패했습니다.");
                     }
                   } catch (error) {
-                    console.error("협상 수정 실패:", error);
-                    Alert.alert("오류", "협상 수정 중 오류가 발생했습니다.");
+                    console.error("네고 요청 수정 실패:", error);
+                    Alert.alert(
+                      "오류",
+                      "네고 요청 수정 중 오류가 발생했습니다.",
+                    );
                   } finally {
                     setRequesting(false);
                   }

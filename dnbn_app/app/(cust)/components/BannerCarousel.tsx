@@ -166,9 +166,9 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
   return (
     <View style={styles.bannerContainer}>
       <View style={bannerStyles.headerContainer}>
-        <Text style={bannerStyles.headerTitle}>오늘의 특가 상품</Text>
+        <Text style={bannerStyles.headerTitle}>특가</Text>
         <Text style={bannerStyles.headerSubtitle}>
-          지금 놓치면 후회할 할인 상품들
+          동네방네에서 높은 할인 상품을 만나보세요!
         </Text>
       </View>
       <FlatList

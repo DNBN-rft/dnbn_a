@@ -113,6 +113,15 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyRecentSearch: {
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyRecentSearchText: {
+    fontSize: 14,
+    color: "#999",
+  },
 
   categorySection: {
     marginBottom: 25,
