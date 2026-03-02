@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import {
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -46,7 +47,7 @@ export default function NegoProductSection({
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
+              <Pressable
                 style={styles.productCard}
                 onPress={() =>
                   router.push(
@@ -71,7 +72,7 @@ export default function NegoProductSection({
                     {item.price.toLocaleString()}원
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             )}
           />
           <TouchableOpacity

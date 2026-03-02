@@ -196,4 +196,23 @@ export const styles = StyleSheet.create({
   buttonDisabled: {
     opacity: 0.5,
   },
+  validationErrorText: {
+    fontSize: 12,
+    color: "#e53935",
+    marginTop: 4,
+  },
+  sendCodeButton: {
+    marginTop: 8,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sendCodeButtonText: {
+    fontSize: 15,
+    color: "#EF7810",
+  },
 });

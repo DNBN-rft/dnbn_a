@@ -2,7 +2,10 @@ import { apiPost } from "@/utils/api";
 import {
   checkDuplicateId,
   handleEmailDomainSelect as handleEmailDomainSelectUtil,
+  handleEmailDomainDirectInput,
   handleLoginIdChange as handleLoginIdChangeUtil,
+  handlePasswordChange as handlePasswordChangeUtil,
+  handlePasswordConfirmChange as handlePasswordConfirmChangeUtil,
   handlePhoneFirstChange as handlePhoneFirstChangeUtil,
   handlePhoneLastChange as handlePhoneLastChangeUtil,
   handlePhoneMiddleChange as handlePhoneMiddleChangeUtil,
@@ -66,6 +69,12 @@ export default function PracticeView() {
   // const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
   const [showEmailDomainPicker, setShowEmailDomainPicker] = useState(false);
 
+  // 유효성 검사 에러 메시지 state
+  const [loginIdError, setLoginIdError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState("");
+  const [emailDomainError, setEmailDomainError] = useState("");
+
   useEffect(() => {
     // 약관 페이지에서 전달받은 마케팅 동의 상태 설정
     if (marketingAgreed === "true") {
@@ -73,9 +82,31 @@ export default function PracticeView() {
     }
   }, [marketingAgreed]);
 
+  useEffect(() => {
+    // 직접입력이 아닌 도메인 선택 시 에러 초기화
+    if (selectedEmailDomain !== "direct") {
+      setEmailDomainError("");
+    }
+  }, [selectedEmailDomain]);
+
   // 아이디 입력 핸들러
   const handleLoginIdChange = (text: string) => {
-    handleLoginIdChangeUtil(text, setLoginId, setIsIdChecked, setIsIdAvailable);
+    handleLoginIdChangeUtil(text, setLoginId, setIsIdChecked, setIsIdAvailable, setLoginIdError);
+  };
+
+  // 비밀번호 입력 핸들러
+  const handlePasswordChange = (text: string) => {
+    handlePasswordChangeUtil(text, passwordConfirm, setPassword, setPasswordError, setPasswordConfirmError);
+  };
+
+  // 비밀번호 확인 입력 핸들러
+  const handlePasswordConfirmChange = (text: string) => {
+    handlePasswordConfirmChangeUtil(text, password, setPasswordConfirm, setPasswordConfirmError);
+  };
+
+  // 이메일 도메인 직접입력 핸들러
+  const handleEmailDomainDirectInputHandler = (text: string) => {
+    handleEmailDomainDirectInput(text, setEmailDomain, setEmailDomainError);
   };
 
   // 아이디 중복 체크
@@ -85,6 +116,7 @@ export default function PracticeView() {
       setIsIdCheckLoading,
       setIsIdChecked,
       setIsIdAvailable,
+      setLoginIdError,
     );
   };
 
@@ -236,9 +268,13 @@ export default function PracticeView() {
                 </Text>
               </Pressable>
             </View>
-            <Text style={styles.descriptionStyle}>
-              6자리 이상의 영문 또는 영문, 숫자 혼합
-            </Text>
+            {loginIdError ? (
+              <Text style={styles.validationErrorText}>{loginIdError}</Text>
+            ) : (
+              <Text style={styles.descriptionStyle}>
+                6자리 이상의 영문 또는 영문, 숫자 혼합
+              </Text>
+            )}
           </View>
 
           <View style={styles.viewMargin}>
@@ -251,12 +287,16 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 secureTextEntry
                 value={password}
-                onChangeText={(text) => setPassword(text.replace(/\s/g, ""))}
+                onChangeText={handlePasswordChange}
               />
             </View>
-            <Text style={styles.descriptionStyle}>
-              8~16자 영문, 숫자, 특수문자를 사용하세요
-            </Text>
+            {passwordError ? (
+              <Text style={styles.validationErrorText}>{passwordError}</Text>
+            ) : (
+              <Text style={styles.descriptionStyle}>
+                8~16자 영문, 숫자, 특수문자를 사용하세요
+              </Text>
+            )}
           </View>
 
           <View style={styles.viewMargin}>
@@ -269,11 +309,12 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 secureTextEntry
                 value={passwordConfirm}
-                onChangeText={(text) =>
-                  setPasswordConfirm(text.replace(/\s/g, ""))
-                }
+                onChangeText={handlePasswordConfirmChange}
               />
             </View>
+            {passwordConfirmError ? (
+              <Text style={styles.validationErrorText}>{passwordConfirmError}</Text>
+            ) : null}
           </View>
 
           <View style={styles.viewMargin}>
@@ -284,7 +325,7 @@ export default function PracticeView() {
                 placeholder="이름 입력"
                 placeholderTextColor={"#ccc"}
                 value={custNm}
-                onChangeText={(text) => setCustNm(text.replace(/\s/g, ""))}
+                onChangeText={(text) => setCustNm(text.replace(/[^가-힣\u1100-\u11FF\u3130-\u318Fa-zA-Z]/g, ""))}
               />
             </View>
           </View>
@@ -382,7 +423,7 @@ export default function PracticeView() {
                 placeholder="example.com"
                 placeholderTextColor={"#ccc"}
                 value={emailDomain}
-                onChangeText={(text) => setEmailDomain(text.replace(/\s/g, ""))}
+                onChangeText={handleEmailDomainDirectInputHandler}
                 editable={selectedEmailDomain === "direct"}
               />
             </View>
@@ -478,6 +519,9 @@ export default function PracticeView() {
                 </Picker>
               </View>
             )}
+            {selectedEmailDomain === "direct" && emailDomainError ? (
+              <Text style={styles.validationErrorText}>{emailDomainError}</Text>
+            ) : null}
           </View>
 
           <View style={styles.viewMargin}>
@@ -534,13 +578,13 @@ export default function PracticeView() {
                 }
                 maxLength={4}
               />
-              <Pressable
-                style={styles.pressableStyle}
-                onPress={handlePhoneVerification}
-              >
-                <Text style={styles.pressableTextStyle}>본인 인증</Text>
-              </Pressable>
             </View>
+            <Pressable
+              style={styles.sendCodeButton}
+              onPress={handlePhoneVerification}
+            >
+              <Text style={styles.sendCodeButtonText}>인증번호 전송</Text>
+            </Pressable>
           </View>
 
           <View style={styles.viewMargin}>

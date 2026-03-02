@@ -189,18 +189,23 @@ export const handlePhoneLastChange = (
 };
 
 /**
- * 아이디 입력 핸들러
+ * 아이디 입력 핸들러 (특수문자 차단)
  */
 export const handleLoginIdChange = (
   text: string,
   setLoginId: (value: string) => void,
   setIsIdChecked: (value: boolean) => void,
   setIsIdAvailable: (value: boolean) => void,
+  setLoginIdError?: (value: string) => void,
 ) => {
-  const trimmedText = text.replace(/\s/g, "");
+  const trimmedText = text.replace(/[^a-zA-Z0-9]/g, "");
   setLoginId(trimmedText);
   setIsIdChecked(false);
   setIsIdAvailable(false);
+  // 입력 도중 에러는 표시하지 않고, 입력값이 모두 지워진 경우 에러만 초기화
+  if (setLoginIdError && trimmedText.length === 0) {
+    setLoginIdError("");
+  }
 };
 
 /**
@@ -226,11 +231,18 @@ export const checkDuplicateId = async (
   setIsIdCheckLoading: (value: boolean) => void,
   setIsIdChecked: (value: boolean) => void,
   setIsIdAvailable: (value: boolean) => void,
+  setLoginIdError?: (value: string) => void,
 ) => {
   if (!loginId.trim()) {
-    Alert.alert("알림", "아이디를 입력해주세요.");
+    setLoginIdError?.("아이디를 입력해주세요.");
     return;
   }
+  const idRegex = /^[a-zA-Z0-9]{6,}$/;
+  if (!idRegex.test(loginId)) {
+    setLoginIdError?.("6자리 이상의 영문 또는 영문+숫자를 입력해주세요.");
+    return;
+  }
+  setLoginIdError?.("");
 
   setIsIdCheckLoading(true);
 
@@ -316,4 +328,64 @@ export const verifyPhoneNumber = async (
   // 임시로 true로 설정
   setIsPhoneVerified(true);
   Alert.alert("성공", "본인 인증이 완료되었습니다.");
+};
+
+/**
+ * 비밀번호 입력 핸들러 (형식 검사 + 비밀번호 확인 동기화)
+ */
+export const handlePasswordChange = (
+  text: string,
+  passwordConfirm: string,
+  setPassword: (value: string) => void,
+  setPasswordError: (value: string) => void,
+  setPasswordConfirmError: (value: string) => void,
+) => {
+  const cleaned = text.replace(/\s/g, "");
+  setPassword(cleaned);
+  const passwordRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\W)(?=\S+$).{8,16}$/;
+  if (cleaned.length > 0 && !passwordRegex.test(cleaned)) {
+    setPasswordError("8~16자 영문, 숫자, 특수문자를 사용하세요.");
+  } else {
+    setPasswordError("");
+  }
+  if (passwordConfirm.length > 0) {
+    setPasswordConfirmError(
+      cleaned !== passwordConfirm ? "비밀번호가 일치하지 않습니다." : "",
+    );
+  }
+};
+
+/**
+ * 비밀번호 확인 입력 핸들러
+ */
+export const handlePasswordConfirmChange = (
+  text: string,
+  password: string,
+  setPasswordConfirm: (value: string) => void,
+  setPasswordConfirmError: (value: string) => void,
+) => {
+  const cleaned = text.replace(/\s/g, "");
+  setPasswordConfirm(cleaned);
+  if (cleaned.length > 0 && cleaned !== password) {
+    setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+  } else {
+    setPasswordConfirmError("");
+  }
+};
+
+/**
+ * 이메일 도메인 직접입력 핸들러 (형식 검사)
+ */
+export const handleEmailDomainDirectInput = (
+  text: string,
+  setEmailDomain: (value: string) => void,
+  setEmailDomainError: (value: string) => void,
+) => {
+  const cleaned = text.replace(/\s/g, "");
+  setEmailDomain(cleaned);
+  if (cleaned.length > 0 && !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(cleaned)) {
+    setEmailDomainError("올바른 이메일 도메인을 입력해주세요.");
+  } else {
+    setEmailDomainError("");
+  }
 };

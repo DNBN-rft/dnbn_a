@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import {
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -47,7 +48,7 @@ export default function SaleProductSection({
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
+              <Pressable
                 style={styles.productCard}
                 onPress={() =>
                   router.push(
@@ -70,7 +71,7 @@ export default function SaleProductSection({
                     </Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             )}
           />
           <TouchableOpacity

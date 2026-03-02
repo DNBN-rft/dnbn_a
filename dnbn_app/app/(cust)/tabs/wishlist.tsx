@@ -235,12 +235,27 @@ export default function WishlistScreen() {
             <View style={styles.storeItemContainer} key={item.storeCode}>
               <TouchableOpacity
                 style={styles.storeContentContainer}
-                onPress={() =>
+                onPress={async () => {
+                  // 찜 해제 상태인 경우 이동 전 API 먼저 호출
+                  if (unwishSet.current.has(item.storeCode)) {
+                    try {
+                      const response = await apiDelete(`/cust/wish`, {
+                        body: JSON.stringify({
+                          storeCodes: [item.storeCode],
+                        }),
+                      });
+                      if (response.ok) {
+                        unwishSet.current.delete(item.storeCode);
+                      }
+                    } catch (error) {
+                      console.error("찜 해제 API 오류:", error);
+                    }
+                  }
                   router.push({
                     pathname: "/(cust)/storeInfo",
                     params: { storeCode: item.storeCode },
-                  })
-                }
+                  });
+                }}
                 activeOpacity={0.7}
               >
                 {item.imageUrl ? (

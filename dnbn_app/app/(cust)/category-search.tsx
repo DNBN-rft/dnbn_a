@@ -165,7 +165,7 @@ export default function SearchView() {
             </TouchableOpacity>
           </View>
           <View style={styles.centerSection}>
-            <Text style={styles.title}>카테고리 검색 결과</Text>
+            <Text style={styles.title}>검색 결과</Text>
           </View>
           <View style={styles.rightSection} />
         </View>
@@ -211,7 +211,12 @@ export default function SearchView() {
               contentContainerStyle={styles.listContent}
               renderItem={({ item: product }) => (
                 <TouchableOpacity
-                  onPress={() => router.push("/(cust)/product-detail")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(cust)/product-detail",
+                      params: { productCode: product.productCode },
+                    })
+                  }
                   style={styles.gridItem}
                 >
                   <View style={styles.imageContainer}>
@@ -332,6 +337,9 @@ export default function SearchView() {
           </View>
         </Modal>
       </View>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
   );
 }

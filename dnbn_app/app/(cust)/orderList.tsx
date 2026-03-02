@@ -301,7 +301,7 @@ export default function PurchaseScreen() {
                         <Pressable
                           style={styles.orderDetailButton}
                           onPress={() =>
-                            router.navigate({
+                            router.push({
                               pathname: "/(cust)/orderDetail",
                               params: { orderCode: item.orderCode },
                             })
