@@ -131,11 +131,12 @@ export default function NegoLogListScreen() {
 
   // 네고 요청 취소
   const handleCancelNego = (item: CustNegoCurrentResponse) => {
-    if (Platform.OS === "web") {
-      // 웹 환경
-      const confirmed = window.confirm("이 협상 요청을 취소하시겠습니까?");
-      if (confirmed) {
-        (async () => {
+    // 앱 환경
+    Alert.alert("협상 취소", "이 협상 요청을 취소하시겠습니까?", [
+      { text: "아니오", onPress: () => {} },
+      {
+        text: "예",
+        onPress: async () => {
           try {
             const response = await apiPost(
               `/cust/nego/cancel/${item.requestIdx}`,
@@ -143,44 +144,18 @@ export default function NegoLogListScreen() {
             );
 
             if (response.ok) {
-              window.alert("네고 요청이 취소되었습니다.");
+              Alert.alert("성공", "네고 요청이 취소되었습니다.");
               fetchNegoList("CURRENT");
             } else {
-              window.alert("네고 취소에 실패했습니다.");
+              Alert.alert("오류", "네고 취소에 실패했습니다.");
             }
           } catch (error) {
             console.error("네고 취소 실패:", error);
-            window.alert("네고 취소 중 오류가 발생했습니다.");
+            Alert.alert("오류", "네고 취소 중 오류가 발생했습니다.");
           }
-        })();
-      }
-    } else {
-      // 앱 환경
-      Alert.alert("협상 취소", "이 협상 요청을 취소하시겠습니까?", [
-        { text: "아니오", onPress: () => {} },
-        {
-          text: "예",
-          onPress: async () => {
-            try {
-              const response = await apiPost(
-                `/cust/nego/cancel/${item.requestIdx}`,
-                {},
-              );
-
-              if (response.ok) {
-                Alert.alert("성공", "네고 요청이 취소되었습니다.");
-                fetchNegoList("CURRENT");
-              } else {
-                Alert.alert("오류", "네고 취소에 실패했습니다.");
-              }
-            } catch (error) {
-              console.error("네고 취소 실패:", error);
-              Alert.alert("오류", "네고 취소 중 오류가 발생했습니다.");
-            }
-          },
         },
-      ]);
-    }
+      },
+    ]);
   };
 
   const renderCurrentItem = ({ item }: { item: CustNegoCurrentResponse }) => (
