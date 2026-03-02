@@ -75,7 +75,7 @@ export default function SearchView() {
     }, [hasLoadedData]),
   );
 
-  // 검색 데이터 가져오기
+  // 검색 페이지 내부 렌더링 할 데이터 동시 호출
   const fetchSearchData = async () => {
     try {
       setIsLoading(true);
@@ -255,7 +255,7 @@ export default function SearchView() {
                   <Text style={styles.deleteAllText}>전체삭제</Text>
                 </TouchableOpacity>
               </View>
-              {recentSearches.length > 0 && (
+              {recentSearches.length > 0 ? (
                 <FlatList
                   data={recentSearches}
                   keyExtractor={(item, index) => `recent-${index}`}
@@ -277,6 +277,12 @@ export default function SearchView() {
                   horizontal={true}
                   showsHorizontalScrollIndicator={false}
                 />
+              ) : (
+                <View style={styles.emptyRecentSearch}>
+                  <Text style={styles.emptyRecentSearchText}>
+                    최근 검색어가 없습니다.
+                  </Text>
+                </View>
               )}
             </View>
 

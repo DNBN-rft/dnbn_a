@@ -71,17 +71,17 @@ export default function FindAccountScreen() {
         setModalVisible(true);
       } else {
         if (Platform.OS === "web") {
-          window.alert("아이디 찾기에 실패했습니다.");
+          window.alert("정보를 찾을 수 없습니다.");
         } else {
-          Alert.alert("실패", "아이디 찾기에 실패했습니다.");
+          Alert.alert("실패", "정보를 찾을 수 없습니다.");
         }
       }
     } catch (error) {
       console.error("아이디 찾기 오류:", error);
       if (Platform.OS === "web") {
-        window.alert("아이디 찾기 중 오류가 발생했습니다.");
+        window.alert("오류가 발생했습니다.");
       } else {
-        Alert.alert("오류", "아이디 찾기 중 오류가 발생했습니다.");
+        Alert.alert("오류", "오류가 발생했습니다.");
       }
     }
   };
