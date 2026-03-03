@@ -38,52 +38,59 @@ export default function TermsModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>{title}</Text>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={onClose}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="close" size={28} color="#000" />
-          </TouchableOpacity>
+          <View style={styles.leftSection} />
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
+          <View style={styles.rightSection}>
+            <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+              <Ionicons name="close" size={28} color="#000" />
+            </TouchableOpacity>
+          </View>
         </View>
-        <WebView
-          source={getHtmlSource()}
-          style={styles.webview}
-          originWhitelist={["*"]}
-          startInLoadingState={true}
-          scalesPageToFit={true}
-        />
       </View>
+      <WebView
+        source={getHtmlSource()}
+        style={styles.webview}
+        originWhitelist={["*"]}
+        startInLoadingState={true}
+        scalesPageToFit={true}
+      />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
   },
   header: {
-    height: 56,
     flexDirection: "row",
     alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  leftSection: {
+    flex: 1,
+  },
+  centerSection: {
+    flex: 2,
+    alignItems: "center",
     justifyContent: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
-    paddingHorizontal: 16,
   },
-  headerTitle: {
+  rightSection: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  title: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 16,
-    padding: 4,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
   webview: {
     flex: 1,
