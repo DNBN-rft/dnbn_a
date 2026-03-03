@@ -1,6 +1,31 @@
+import { apiPut } from "@/utils/api";
+import { getFcmTokenSilently } from "@/utils/notificationUtil";
 import { Stack } from "expo-router";
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
 
 export default function CustLayout() {
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", async (nextState) => {
+      // background/inactive → active (설정에서 돌아올 때)
+      if (appState.current !== "active" && nextState === "active") {
+        try {
+          const token = await getFcmTokenSilently();
+          if (token) {
+            await apiPut("/cust/fcm-token", { token });
+          }
+        } catch (e) {
+          // 조용히 실패 처리
+        }
+      }
+      appState.current = nextState;
+    });
+
+    return () => subscription.remove();
+  }, []);
+
   return (
     <Stack
       screenOptions={{

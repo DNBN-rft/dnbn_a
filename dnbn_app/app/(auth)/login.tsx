@@ -1,4 +1,5 @@
-import { apiPost, getSocialLoginUrl } from "@/utils/api";
+import { apiPost, apiPut, getSocialLoginUrl } from "@/utils/api";
+import { getFcmToken } from "@/utils/notificationUtil";
 import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -184,6 +185,18 @@ export default function LoginScreen() {
           }
 
           await setMultipleItems(custTokens);
+
+          // 서버에 FCM 토큰이 없는 경우에만 발급 시도
+          if (!data.fcmGranted) {
+            try {
+              const fcmToken = await getFcmToken();
+              if (fcmToken) {
+                await apiPut("/cust/fcm-token", { token: fcmToken });
+              }
+            } catch (e) {
+              console.warn("FCM 토큰 업데이트 실패:", e);
+            }
+          }
 
           // 주소 정보가 없으면 주소 설정 페이지로 이동
           if (data.isExistLocation === false) {
