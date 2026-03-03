@@ -9,7 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "postinstall": "node ./fix-kakao-map-version.js"
+    "postinstall": "node ./fix-kakao-map-version.js",
+    "generate-terms": "node ./scripts/generate-terms-content.js"
   },
   "dependencies": {
     "@actbase/react-daum-postcode": "^1.0.4",
