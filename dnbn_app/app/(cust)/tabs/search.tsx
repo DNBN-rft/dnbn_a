@@ -342,7 +342,12 @@ export default function SearchView() {
                     if (item.isMore) {
                       return (
                         <TouchableOpacity
-                          onPress={() => router.push("/(cust)/saleProductList")}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/(cust)/saleProductList",
+                              params: { from: "search" },
+                            })
+                          }
                           style={styles.moreButton}
                         >
                           <Ionicons
@@ -418,7 +423,12 @@ export default function SearchView() {
                     if (item.isMore) {
                       return (
                         <TouchableOpacity
-                          onPress={() => router.push("/(cust)/negoList")}
+                          onPress={() =>
+                            router.push({
+                              pathname: "/(cust)/negoList",
+                              params: { from: "search" },
+                            })
+                          }
                           style={styles.moreButton}
                         >
                           <Ionicons
