@@ -79,14 +79,26 @@ export const styles = StyleSheet.create({
   },
   explanationTab: {
     flexDirection: "row",
-    justifyContent: "space-around",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    paddingBottom: 10,
+  },
+  explanationTabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  explanationTabButtonActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#FF6B6B",
+    marginBottom: -1,
   },
   explanationTabText: {
     fontSize: 16,
+    color: "#999",
+  },
+  explanationTabTextActive: {
     color: "#333",
+    fontWeight: "600",
   },
   explanationContent: {
     marginTop: 15,
