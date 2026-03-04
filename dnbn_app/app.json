@@ -10,6 +10,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/images/iosIcon.png",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -26,9 +27,9 @@
       // "googleServicesFile": "process.env.GOOGLE_SERVICES_JSON",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/iosIcon.png",
-        "backgroundImage": "./assets/images/iosIcon.png",
-        "monochromeImage": "./assets/images/iosIcon.png"
+        "foregroundImage": "./assets/images/androidIcon.png",
+        "backgroundImage": "./assets/images/androidIcon.png",
+        "monochromeImage": "./assets/images/androidIcon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
