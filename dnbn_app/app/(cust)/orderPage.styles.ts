@@ -283,6 +283,14 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
+  privacyConsentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  privacyConsentLinkTouchable: {
+    flex: 1,
+    overflow: "hidden",
+  },
   privacyConsentText: {
     fontSize: 13,
     color: "#333",

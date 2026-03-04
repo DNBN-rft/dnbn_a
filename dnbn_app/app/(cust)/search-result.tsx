@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -44,6 +44,7 @@ export default function SearchView() {
   const [searchKeyword, setSearchKeyword] = useState(
     (params.keyword as string) || "",
   );
+  const flatListRef = useRef<import("react-native").FlatList>(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [products, setProducts] = useState<SearchProduct[]>([]);
@@ -126,6 +127,10 @@ export default function SearchView() {
     fetchProducts(searchKeyword, "LATEST", 0);
   };
 
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   //필터 선택
   const handleFilterSelect = (value: string) => {
     setSortType(value);
@@ -204,6 +209,7 @@ export default function SearchView() {
             </View>
           ) : (
             <FlatList
+              ref={flatListRef}
               data={products}
               keyExtractor={(item) => item.productCode}
               numColumns={2}
@@ -211,7 +217,12 @@ export default function SearchView() {
               contentContainerStyle={styles.listContent}
               renderItem={({ item: product }) => (
                 <TouchableOpacity
-                  onPress={() => router.push("/(cust)/product-detail")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(cust)/product-detail",
+                      params: { productCode: product.productCode },
+                    })
+                  }
                   style={styles.gridItem}
                 >
                   <View style={styles.imageContainer}>
@@ -277,6 +288,14 @@ export default function SearchView() {
             />
           )}
         </View>
+        {/* 최상단 스크롤 버튼 */}
+        <TouchableOpacity
+          style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#EF7810" />
+        </TouchableOpacity>
+
         {/* 필터 모달 */}
         {isOverlayVisible && (
           <TouchableOpacity
@@ -332,6 +351,9 @@ export default function SearchView() {
           </View>
         </Modal>
       </View>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </View>
   );
 }

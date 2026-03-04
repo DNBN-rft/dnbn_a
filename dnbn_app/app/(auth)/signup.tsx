@@ -15,7 +15,6 @@ import {
   validatePassword,
   validatePhoneNumber,
   validateResidentNumber,
-  verifyPhoneNumber,
 } from "@/utils/signupUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -64,6 +63,12 @@ export default function PracticeView() {
   const phoneMiddleRef = useRef<TextInput>(null);
   const phoneLastRef = useRef<TextInput>(null);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isSmsSent, setIsSmsSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isSmsLoading, setIsSmsLoading] = useState(false);
+  const [isVerifyLoading, setIsVerifyLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isSignupLoading, setIsSignupLoading] = useState(false);
   const [isIdCheckLoading, setIsIdCheckLoading] = useState(false);
   // const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
@@ -140,14 +145,82 @@ export default function PracticeView() {
   //   );
   // };
 
-  // 핸드폰번호 본인 인증
+  // 카운트다운 시작 (5분)
+  const startCountdown = () => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setCountdown(300);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!);
+          countdownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // 핸드폰번호 인증번호 전송
   const handlePhoneVerification = async () => {
-    await verifyPhoneNumber(
-      phoneFirst,
-      phoneMiddle,
-      phoneLast,
-      setIsPhoneVerified,
-    );
+    if (!phoneFirst || !phoneMiddle || !phoneLast) {
+      Alert.alert("알림", "핸드폰번호를 입력해주세요.");
+      return;
+    }
+
+    const phone = `${phoneFirst}${phoneMiddle}${phoneLast}`;
+    setIsSmsLoading(true);
+
+    try {
+      const response = await apiPost("/cust/mms/send", { phone });
+
+      if (response.ok) {
+        setIsSmsSent(true);
+        setVerificationCode("");
+        startCountdown();
+        Alert.alert("성공", "인증번호가 전송되었습니다.");
+      } else {
+        Alert.alert("실패", "인증번호 전송에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("인증번호 전송 에러:", error);
+      Alert.alert("오류", "인증번호 전송 중 오류가 발생했습니다.");
+    } finally {
+      setIsSmsLoading(false);
+    }
+  };
+
+  // 인증번호 확인
+  const handleVerifyCode = async () => {
+    if (!verificationCode) {
+      Alert.alert("알림", "인증번호를 입력해주세요.");
+      return;
+    }
+
+    const phone = `${phoneFirst}${phoneMiddle}${phoneLast}`;
+    setIsVerifyLoading(true);
+
+    try {
+      const response = await apiPost("/cust/mms/verify", { phone, code: verificationCode });
+
+      if (response.ok) {
+        setIsPhoneVerified(true);
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
+        setCountdown(0);
+        Alert.alert("성공", "본인 인증이 완료되었습니다.");
+      } else {
+        setIsPhoneVerified(false);
+        Alert.alert("실패", "인증번호가 올바르지 않습니다.");
+      }
+    } catch (error) {
+      console.error("인증번호 확인 에러:", error);
+      Alert.alert("오류", "인증번호 확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsVerifyLoading(false);
+    }
   };
 
   const handleSignup = async () => {
@@ -533,14 +606,18 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneFirst}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneFirstChangeUtil(
                     text,
                     setPhoneFirst,
                     setIsPhoneVerified,
                     phoneMiddleRef,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={3}
               />
               <Text>-</Text>
@@ -551,14 +628,18 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneMiddle}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneMiddleChangeUtil(
                     text,
                     setPhoneMiddle,
                     setIsPhoneVerified,
                     phoneLastRef,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={4}
               />
               <Text>-</Text>
@@ -569,22 +650,69 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneLast}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneLastChangeUtil(
                     text,
                     setPhoneLast,
                     setIsPhoneVerified,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={4}
               />
             </View>
-            <Pressable
-              style={styles.sendCodeButton}
-              onPress={handlePhoneVerification}
-            >
-              <Text style={styles.sendCodeButtonText}>인증번호 전송</Text>
-            </Pressable>
+            {!isPhoneVerified && (
+              <Pressable
+                style={[styles.sendCodeButton, isSmsLoading && styles.buttonDisabled]}
+                onPress={handlePhoneVerification}
+                disabled={isSmsLoading}
+              >
+                <Text style={styles.sendCodeButtonText}>
+                  {isSmsLoading ? "전송 중..." : isSmsSent ? "재전송" : "인증번호 전송"}
+                </Text>
+              </Pressable>
+            )}
+            {isSmsSent && (
+              <>
+                <View style={styles.verifyCodeRow}>
+                  <TextInput
+                    style={styles.verifyCodeInput}
+                    placeholder="인증번호 입력"
+                    placeholderTextColor={"#ccc"}
+                    keyboardType="numeric"
+                    value={verificationCode}
+                    onChangeText={setVerificationCode}
+                    maxLength={6}
+                    editable={!isPhoneVerified}
+                  />
+                  <Pressable
+                    style={[
+                      styles.verifyCodeButton,
+                      (isVerifyLoading || isPhoneVerified) && styles.buttonDisabled,
+                    ]}
+                    onPress={handleVerifyCode}
+                    disabled={isVerifyLoading || isPhoneVerified}
+                  >
+                    <Text style={styles.verifyCodeButtonText}>
+                      {isPhoneVerified ? "인증완료" : isVerifyLoading ? "확인 중..." : "확인"}
+                    </Text>
+                  </Pressable>
+                </View>
+                {!isPhoneVerified && countdown > 0 && (
+                  <Text style={styles.countdownText}>
+                    {`${String(Math.floor(countdown / 60)).padStart(2, "0")}:${String(countdown % 60).padStart(2, "0")} 내에 입력해주세요`}
+                  </Text>
+                )}
+                {!isPhoneVerified && countdown === 0 && (
+                  <Text style={[styles.countdownText, styles.countdownExpired]}>
+                    인증 시간이 만료되었습니다. 재전송해주세요.
+                  </Text>
+                )}
+              </>
+            )}
           </View>
 
           <View style={styles.viewMargin}>

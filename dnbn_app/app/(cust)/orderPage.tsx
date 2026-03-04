@@ -39,8 +39,9 @@ export default function OrderPage() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 장바구니에서 넘어온 경우 파싱
-  const parsedCartStores: { storeNm: string; items: any[] }[] | null =
-    cartItems ? JSON.parse(cartItems as string) : null;
+  const parsedCartStores: { storeNm: string; items: any[] }[] | null = cartItems
+    ? JSON.parse(cartItems as string)
+    : null;
   const isCartMode = !!parsedCartStores;
 
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function OrderPage() {
       )
         .slice(0, 5)
         .map((product: any, index: number) => ({
-          productCode: `OTHER_${index}`,
+          productCode: product.productCode || `P${index + 1}`,
           productName: product.productNm,
           imageUrl:
             product.fileMasterResponse?.files?.[0]?.fileUrl ||
@@ -277,9 +278,15 @@ export default function OrderPage() {
                       <Text style={styles.productName} numberOfLines={2}>
                         {item.productNm}
                       </Text>
-                      <Text style={styles.quantity}>수량: {item.quantity}개</Text>
+                      <Text style={styles.quantity}>
+                        수량: {item.quantity}개
+                      </Text>
                       <Text style={styles.unitPrice}>
-                        {((item.price - item.discountPrice) * item.quantity).toLocaleString()}원
+                        {(
+                          (item.price - item.discountPrice) *
+                          item.quantity
+                        ).toLocaleString()}
+                        원
                       </Text>
                     </View>
                   </View>
@@ -449,17 +456,20 @@ export default function OrderPage() {
         {/* 개인정보 제공 동의 */}
         <View style={styles.section}>
           <View style={styles.privacyConsentCard}>
-            <Text style={styles.privacyConsentText}>
-              개인정보 제공 동의 :{" "}
-              <TouchableOpacity onPress={handlePrivacyInfo}>
-                <Text style={styles.privacyConsentLink}>
+            <View style={styles.privacyConsentRow}>
+              <Text style={styles.privacyConsentText}>
+                개인정보 제공 동의 :{" "}
+              </Text>
+              <TouchableOpacity style={styles.privacyConsentLinkTouchable} onPress={handlePrivacyInfo}>
+                <Text style={styles.privacyConsentLink} numberOfLines={1} ellipsizeMode="tail">
                   {displayStoreName}
                 </Text>
-              </TouchableOpacity>{" "}
+              </TouchableOpacity>
+              <Text style={styles.privacyConsentText}>{" "}</Text>
               <TouchableOpacity onPress={handlePrivacyInfo}>
                 <Text style={styles.privacyConsentDetail}>상세보기</Text>
               </TouchableOpacity>
-            </Text>
+            </View>
           </View>
         </View>
 

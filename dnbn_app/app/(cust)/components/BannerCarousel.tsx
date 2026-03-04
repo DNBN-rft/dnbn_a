@@ -42,15 +42,11 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
       : [
           {
             id: "1",
-            uri: require("@/assets/images/normalproduct/bread.jpg"),
+            uri: require("@/assets/images/mainbanner/dnbn_app.png"),
           },
           {
             id: "2",
-            uri: require("@/assets/images/favicon.png"),
-          },
-          {
-            id: "3",
-            uri: require("@/assets/images/react-logo.png"),
+            uri: require("@/assets/images/mainbanner/dnbn_sale.png"),
           },
         ];
 
@@ -209,7 +205,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
             <Image
               source={item.uri}
               style={styles.bannerImage}
-              resizeMode="stretch"
+              resizeMode={item.productName ? "cover" : "stretch"}
             />
             {/* 상품 정보가 있는 경우에만 오버레이 표시 */}
             {item.productName && (

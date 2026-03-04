@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "@/utils/api";
+import { apiDelete, apiGet, apiPut } from "@/utils/api";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -131,7 +131,7 @@ export default function NegoLogListScreen() {
         text: "예",
         onPress: async () => {
           try {
-            const response = await apiPost(
+            const response = await apiDelete(
               `/cust/nego/cancel/${item.requestIdx}`,
               {},
             );
@@ -453,7 +453,7 @@ export default function NegoLogListScreen() {
 
                   try {
                     setRequesting(true);
-                    const response = await apiPost(
+                    const response = await apiPut(
                       `/cust/nego/${editingItem.requestIdx}`,
                       {
                         price: parseInt(editNegoAmount),
@@ -462,14 +462,14 @@ export default function NegoLogListScreen() {
                     );
 
                     if (response.ok) {
-                      Alert.alert("성공", "네고 요청 금액이 수정되었습니다.");
+                      Alert.alert("성공", "요청 금액이 수정되었습니다.");
                       setEditModalVisible(false);
                       setEditingItem(null);
                       setEditNegoAmount("");
                       // 목록 새로고침
                       fetchNegoList("CURRENT");
                     } else {
-                      Alert.alert("오류", "네고 요청 수정에 실패했습니다.");
+                      Alert.alert("오류", "금액 수정에 실패했습니다.");
                     }
                   } catch (error) {
                     console.error("네고 요청 수정 실패:", error);

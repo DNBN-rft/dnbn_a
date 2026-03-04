@@ -2,12 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./cardreg.styles";
@@ -62,6 +62,11 @@ export default function CardRegScreen() {
   };
 
   const formatExpiryDate = (text: string) => {
+    // 백스페이스로 '/' 를 지우는 경우: "12/" → "12" 가 들어오면 "1" 로 줄여줌
+    if (expiryDate.endsWith("/") && text === expiryDate.slice(0, -1)) {
+      setExpiryDate(expiryDate.slice(0, -2));
+      return;
+    }
     const cleaned = text.replace(/\D/g, "");
     if (cleaned.length >= 2) {
       setExpiryDate(cleaned.slice(0, 2) + "/" + cleaned.slice(2, 4));
@@ -130,7 +135,7 @@ export default function CardRegScreen() {
                 value={cvc}
                 onChangeText={setCvc}
                 keyboardType="numeric"
-                maxLength={4}
+                maxLength={3}
                 secureTextEntry
               />
             </View>
