@@ -33,6 +33,7 @@ export default function DiscountRegistrationModal({
   const [discountValue, setDiscountValue] = useState("");
   const [saleStartDate, setSaleStartDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // 초기 시간 계산
   const getInitialTime = () => {
@@ -204,46 +205,130 @@ export default function DiscountRegistrationModal({
             <View style={styles.saleInputGroup}>
               <Text style={styles.saleLabel}>할인 시작 시간</Text>
               <View style={styles.saleDateTimeRow}>
-                <TouchableOpacity
-                  style={styles.saleDateButtonHalf}
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <Ionicons name="calendar-outline" size={20} color="#ef7810" />
-                  <Text style={styles.saleDateText}>
-                    {saleStartDate.toLocaleDateString("ko-KR")}
-                  </Text>
-                </TouchableOpacity>
-                <View style={styles.salePickerWrapper}>
-                  <Ionicons
-                    name="time-outline"
-                    size={20}
-                    color="#ef7810"
-                    style={styles.salePickerIcon}
-                  />
-                  <Picker
-                    selectedValue={selectedTime}
-                    onValueChange={(value) => setSelectedTime(value)}
-                    style={styles.salePicker}
+                {Platform.OS === "ios" ? (
+                  <>
+                    <TouchableOpacity
+                      style={styles.saleDateButtonHalf}
+                      onPress={() => setShowDatePicker(true)}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                      <Text style={styles.saleDateText}>
+                        {saleStartDate.toLocaleDateString("ko-KR")}
+                      </Text>
+                    </TouchableOpacity>
+                    <Modal
+                      visible={showDatePicker}
+                      transparent={true}
+                      animationType="slide"
+                      onRequestClose={() => setShowDatePicker(false)}
+                    >
+                      <View style={styles.iosTimePickerOverlay}>
+                        <View style={styles.iosTimePickerContainer}>
+                          <View style={styles.iosTimePickerHeader}>
+                            <Text style={styles.iosTimePickerTitle}>날짜 선택</Text>
+                            <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                              <Text style={styles.iosTimePickerDoneText}>완료</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <View style={{ alignItems: "center" }}>
+                          <DateTimePicker
+                            value={saleStartDate}
+                            mode="date"
+                            display="spinner"
+                            minimumDate={new Date()}
+                            locale="ko-KR"
+                            onChange={(event, selectedDate?: Date) => {
+                              handleDateChange(selectedDate);
+                            }}
+                          />
+                          </View>
+                        </View>
+                      </View>
+                    </Modal>
+                  </>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.saleDateButtonHalf}
+                    onPress={() => setShowDatePicker(true)}
                   >
-                    {timeOptions.map((option) => (
-                      <Picker.Item
-                        key={option.value}
-                        label={option.label}
-                        value={option.value}
-                      />
-                    ))}
-                  </Picker>
-                </View>
+                    <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                    <Text style={styles.saleDateText}>
+                      {saleStartDate.toLocaleDateString("ko-KR")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {Platform.OS === "ios" ? (
+                  <>
+                    <TouchableOpacity
+                      style={styles.saleDateButtonHalf}
+                      onPress={() => setShowTimePicker(true)}
+                    >
+                      <Ionicons name="time-outline" size={20} color="#ef7810" />
+                      <Text style={styles.saleDateText}>{selectedTime}</Text>
+                    </TouchableOpacity>
+                    <Modal
+                      visible={showTimePicker}
+                      transparent={true}
+                      animationType="slide"
+                      onRequestClose={() => setShowTimePicker(false)}
+                    >
+                      <View style={styles.iosTimePickerOverlay}>
+                        <View style={styles.iosTimePickerContainer}>
+                          <View style={styles.iosTimePickerHeader}>
+                            <Text style={styles.iosTimePickerTitle}>시간 선택</Text>
+                            <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                              <Text style={styles.iosTimePickerDoneText}>완료</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <Picker
+                            selectedValue={selectedTime}
+                            onValueChange={(value) => setSelectedTime(value)}
+                          >
+                            {timeOptions.map((option) => (
+                              <Picker.Item
+                                key={option.value}
+                                label={option.label}
+                                value={option.value}
+                              />
+                            ))}
+                          </Picker>
+                        </View>
+                      </View>
+                    </Modal>
+                  </>
+                ) : (
+                  <View style={styles.salePickerWrapper}>
+                    <Ionicons
+                      name="time-outline"
+                      size={20}
+                      color="#ef7810"
+                      style={styles.salePickerIcon}
+                    />
+                    <Picker
+                      selectedValue={selectedTime}
+                      onValueChange={(value) => setSelectedTime(value)}
+                      style={styles.salePicker}
+                    >
+                      {timeOptions.map((option) => (
+                        <Picker.Item
+                          key={option.value}
+                          label={option.label}
+                          value={option.value}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
               </View>
 
-              {showDatePicker && (
+              {Platform.OS !== "ios" && showDatePicker && (
                 <DateTimePicker
                   value={saleStartDate}
                   mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  display="default"
                   minimumDate={new Date()}
                   onChange={(event, selectedDate?: Date) => {
-                    setShowDatePicker(Platform.OS === "ios");
+                    setShowDatePicker(false);
                     handleDateChange(selectedDate);
                   }}
                 />

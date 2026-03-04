@@ -84,15 +84,14 @@ export default function StoreProducts() {
   };
 
   // 상품 목록 조회 함수
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (page: number = currentPage) => {
     try {
       setIsLoading(true);
       const response = await apiGet(
-        `/store/app/product?page=${currentPage}&size=10`,
+        `/store/app/product?page=${page}&size=10`,
       );
       if (response.ok) {
         const data = await response.json();
-        // Page 응답 처리
         const productList = data.content || [];
         setProducts(productList);
       } else {
@@ -103,11 +102,11 @@ export default function StoreProducts() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage]);
+  }, []);
 
   // 페이지 변경 시 상품 조회
   useEffect(() => {
-    loadProducts();
+    loadProducts(currentPage);
   }, [currentPage, loadProducts]);
 
   // 상품 삭제 함수
@@ -115,7 +114,10 @@ export default function StoreProducts() {
     try {
       const response = await apiDelete(`/store/app/regular/${productCode}`);
       if (response.ok) {
-        await loadProducts();
+        // 로컬 state에서 즉시 제거
+        setProducts((prev) =>
+          prev.filter((p) => p.productCode !== productCode),
+        );
         return true;
       } else {
         console.error("상품 삭제 실패:", response.status);

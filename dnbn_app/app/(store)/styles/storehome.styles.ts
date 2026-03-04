@@ -38,6 +38,16 @@ export const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 8,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF3B30",
   },
   content: {
     flex: 1,

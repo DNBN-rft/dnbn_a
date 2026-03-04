@@ -182,4 +182,36 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
+  iosTimePickerOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "transparent",
+  },
+  iosTimePickerContainer: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingBottom: 20,
+  },
+  iosTimePickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  iosTimePickerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  iosTimePickerDoneText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ef7810",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
 });

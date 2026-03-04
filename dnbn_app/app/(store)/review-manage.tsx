@@ -327,6 +327,7 @@ export default function ReviewManage() {
                       styles.hideButtonContainer,
                       isCurrentlyHidden && styles.hiddenButton,
                     ]}
+                    disabled={isCurrentlyHidden}
                     onPress={() => {
                       setSelectedReviewIdx(item.reviewIdx);
                       const modalType = isCurrentlyHidden

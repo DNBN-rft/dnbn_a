@@ -64,6 +64,8 @@ export default function StoreQuestionAnswerEdit() {
   const [questionTitle, setQuestionTitle] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
   const [questionFiles, setQuestionFiles] = useState<string[]>([]);
+  // 기존 서버 이미지 URL 추적 (삭제 여부 판단용)
+  const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (questionId) {
@@ -94,6 +96,7 @@ export default function StoreQuestionAnswerEdit() {
             .sort((a, b) => a.order - b.order)
             .map((img) => img.fileUrl);
           setQuestionFiles(imageUrls);
+          setOriginalImageUrls(imageUrls);
         }
       } else {
         console.error("문의 상세 조회 실패:", response.status);
@@ -171,43 +174,63 @@ export default function StoreQuestionAnswerEdit() {
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
 
-      // 이미지 파일들 추가 (모든 이미지 전송)
-      for (let i = 0; i < questionFiles.length; i++) {
-        const imageUri = questionFiles[i];
+      // 이미지 파일들 추가
+      // 기존 서버 URL: keepImageUrls로 전송 (유지할 URL 목록)
+      // 새로 추가한 로컬 파일: questionFiles로 업로드
+      const keptUrls = questionFiles.filter((uri) => uri.startsWith("http"));
+      const newLocalFiles = questionFiles.filter(
+        (uri) => !uri.startsWith("http"),
+      );
 
-        // 파일명 생성 (확장자 포함)
-        let filename =
-          imageUri.split("/").pop() || `question_${Date.now()}_${i}.jpg`;
+      // 유지할 기존 이미지 URL 전송 (비어있으면 백엔드가 전체 삭제로 처리)
+      for (const url of keptUrls) {
+        formData.append("keepImageUrls", url);
+      }
 
-        // 확장자 확인 및 MIME 타입 설정
-        const fileExtension = filename.toLowerCase().split(".").pop();
-        let mimeType = "image/jpeg";
+      // 새로 추가한 로컬 파일만 업로드
+      if (newLocalFiles.length > 0) {
+        for (let i = 0; i < newLocalFiles.length; i++) {
+          const imageUri = newLocalFiles[i];
 
-        if (fileExtension === "png") {
-          mimeType = "image/png";
-        } else if (fileExtension === "jpg" || fileExtension === "jpeg") {
-          mimeType = "image/jpeg";
-        } else {
-          // 확장자가 없거나 이상한 경우 기본값 설정
-          filename = `question_${Date.now()}_${i}.jpg`;
-          mimeType = "image/jpeg";
+          // 파일명 생성 (확장자 포함)
+          let filename =
+            imageUri.split("/").pop() || `question_${Date.now()}_${i}.jpg`;
+
+          // 확장자 확인 및 MIME 타입 설정
+          const fileExtension = filename.toLowerCase().split(".").pop();
+          let mimeType = "image/jpeg";
+
+          if (fileExtension === "png") {
+            mimeType = "image/png";
+          } else if (fileExtension === "jpg" || fileExtension === "jpeg") {
+            mimeType = "image/jpeg";
+          } else {
+            // 확장자가 없거나 이상한 경우 기본값 설정
+            filename = `question_${Date.now()}_${i}.jpg`;
+            mimeType = "image/jpeg";
+          }
+
+          // 웹과 네이티브 환경에 따라 다르게 처리
+          if (Platform.OS === "web") {
+            // 웹: Blob으로 변환하여 전송 (URL이든 로컬이든 동일)
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+            const typedBlob = new Blob([blob], { type: mimeType });
+            formData.append("questionFiles", typedBlob as any, filename);
+          } else {
+            // 네이티브: URI를 직접 FormData에 추가
+            formData.append("questionFiles", {
+              uri: imageUri,
+              type: mimeType,
+              name: filename,
+            } as any);
+          }
         }
-
-        // 웹과 네이티브 환경에 따라 다르게 처리
-        if (Platform.OS === "web") {
-          // 웹: Blob으로 변환하여 전송 (URL이든 로컬이든 동일)
-          const response = await fetch(imageUri);
-          const blob = await response.blob();
-          const typedBlob = new Blob([blob], { type: mimeType });
-          formData.append("questionFiles", typedBlob as any, filename);
-        } else {
-          // 네이티브: URI를 직접 FormData에 추가
-          formData.append("questionFiles", {
-            uri: imageUri,
-            type: mimeType,
-            name: filename,
-          } as any);
-        }
+      } else if (keptUrls.length === 0) {
+        // 이미지가 하나도 없음 = 전체 삭제 의도
+        // 빈 Blob을 전송해서 백엔드가 전체 삭제로 감지하게 처리
+        const emptyBlob = new Blob([], { type: "image/jpeg" });
+        formData.append("questionFiles", emptyBlob as any, "empty.jpg");
       }
 
       const response = await apiPutFormDataWithImage(
