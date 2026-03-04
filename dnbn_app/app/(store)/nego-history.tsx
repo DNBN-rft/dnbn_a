@@ -336,10 +336,18 @@ export default function NegoHistory() {
                       source={{ uri: item.images.files[0].fileUrl }}
                     />
                   ) : (
-                    <Image
-                      style={styles.productImage}
-                      source={require("@/assets/images/image1.jpg")}
-                    />
+                    <View
+                      style={[
+                        styles.productImage,
+                        {
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: "#f5f5f5",
+                        },
+                      ]}
+                    >
+                      <Ionicons name="image-outline" size={32} color="#ccc" />
+                    </View>
                   )}
                 </View>
 
@@ -433,10 +441,18 @@ export default function NegoHistory() {
                       source={{ uri: item.images.files[0].fileUrl }}
                     />
                   ) : (
-                    <Image
-                      style={styles.requestImage}
-                      source={require("@/assets/images/image1.jpg")}
-                    />
+                    <View
+                      style={[
+                        styles.requestImage,
+                        {
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: "#f5f5f5",
+                        },
+                      ]}
+                    >
+                      <Ionicons name="image-outline" size={32} color="#ccc" />
+                    </View>
                   )}
                 </View>
 

@@ -569,28 +569,89 @@ export default function PracticeView() {
                 </Modal>
               </>
             ) : (
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedEmailDomain}
-                  onValueChange={(domain) =>
-                    handleEmailDomainSelectUtil(
-                      domain,
-                      setSelectedEmailDomain,
-                      setEmailDomain,
-                    )
-                  }
-                  style={styles.picker}
-                  itemStyle={styles.pickerItem}
+              <>
+                <Pressable
+                  style={styles.pickerButton}
+                  onPress={() => setShowEmailDomainPicker(true)}
                 >
-                  <Picker.Item label="직접 입력" value="direct" />
-                  <Picker.Item label="네이버" value="naver.com" />
-                  <Picker.Item label="지메일" value="gmail.com" />
-                  <Picker.Item label="다음" value="daum.net" />
-                  <Picker.Item label="카카오" value="kakao.com" />
-                  <Picker.Item label="네이트" value="nate.com" />
-                  <Picker.Item label="한메일" value="hanmail.net" />
-                </Picker>
-              </View>
+                  <Text style={styles.pickerButtonText}>
+                    {selectedEmailDomain === "direct"
+                      ? "직접 입력"
+                      : selectedEmailDomain === "naver.com"
+                        ? "네이버"
+                        : selectedEmailDomain === "gmail.com"
+                          ? "지메일"
+                          : selectedEmailDomain === "daum.net"
+                            ? "다음"
+                            : selectedEmailDomain === "kakao.com"
+                              ? "카카오"
+                              : selectedEmailDomain === "nate.com"
+                                ? "네이트"
+                                : "한메일"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#666" />
+                </Pressable>
+
+                <Modal
+                  visible={showEmailDomainPicker}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setShowEmailDomainPicker(false)}
+                >
+                  <View style={styles.modalOverlay}>
+                    <Pressable
+                      style={styles.modalBackdrop}
+                      onPress={() => setShowEmailDomainPicker(false)}
+                    />
+                    <View style={styles.modalContent}>
+                      <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>이메일 선택</Text>
+                        <TouchableOpacity
+                          onPress={() => setShowEmailDomainPicker(false)}
+                        >
+                          <Text style={styles.modalDoneButton}>완료</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {[
+                        { label: "직접 입력", value: "direct" },
+                        { label: "네이버", value: "naver.com" },
+                        { label: "지메일", value: "gmail.com" },
+                        { label: "다음", value: "daum.net" },
+                        { label: "카카오", value: "kakao.com" },
+                        { label: "네이트", value: "nate.com" },
+                        { label: "한메일", value: "hanmail.net" },
+                      ].map((item) => (
+                        <TouchableOpacity
+                          key={item.value}
+                          style={[
+                            styles.androidPickerItem,
+                            selectedEmailDomain === item.value &&
+                              styles.androidPickerItemSelected,
+                          ]}
+                          onPress={() => {
+                            handleEmailDomainSelectUtil(
+                              item.value,
+                              setSelectedEmailDomain,
+                              setEmailDomain,
+                            );
+                            setShowEmailDomainPicker(false);
+                          }}
+                        >
+                          <Text
+                            style={[
+                              styles.androidPickerItemText,
+                              selectedEmailDomain === item.value &&
+                                styles.androidPickerItemTextSelected,
+                            ]}
+                          >
+                            {item.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </Modal>
+              </>
             )}
             {selectedEmailDomain === "direct" && emailDomainError ? (
               <Text style={styles.validationErrorText}>{emailDomainError}</Text>
