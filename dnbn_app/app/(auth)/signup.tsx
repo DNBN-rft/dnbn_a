@@ -262,12 +262,14 @@ export default function PracticeView() {
       const response = await apiPost("/cust/signup", requestBody);
 
       if (response.ok) {
-        Alert.alert("성공", "회원가입이 완료되었습니다.", [
-          {
-            text: "확인",
-            onPress: () => router.replace("/(auth)/login"),
-          },
-        ]);
+        setTimeout(() => {
+          Alert.alert("성공", "회원가입이 완료되었습니다.", [
+            {
+              text: "확인",
+              onPress: () => router.replace("/(auth)/login"),
+            },
+          ]);
+        }, 300);
       } else {
         Alert.alert("실패", "회원가입에 실패했습니다.");
         setIsSignupLoading(false);
@@ -603,7 +605,7 @@ export default function PracticeView() {
                       style={styles.modalBackdrop}
                       onPress={() => setShowEmailDomainPicker(false)}
                     />
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { paddingBottom: Math.max(20, insets.bottom + 8) }]}>
                       <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>이메일 선택</Text>
                         <TouchableOpacity
