@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Pressable,
   Image,
 } from "react-native";
 import { styles } from "@/app/(store)/editstoreinfo.styles";
@@ -26,6 +27,12 @@ interface StoreInfoSectionProps {
   onAddressChange: (value: string) => void;
   onDetailedAddressChange: (value: string) => void;
   onImagePick: () => void;
+  onAddressSearch: () => void;
+  errors?: {
+    storeName?: string;
+    phoneNumber?: string;
+    address?: string;
+  };
 }
 
 export default function StoreInfoSection({
@@ -39,6 +46,8 @@ export default function StoreInfoSection({
   onAddressChange,
   onDetailedAddressChange,
   onImagePick,
+  onAddressSearch,
+  errors = {},
 }: StoreInfoSectionProps) {
   return (
     <View style={styles.section}>
@@ -72,32 +81,52 @@ export default function StoreInfoSection({
       <View style={styles.formGroup}>
         <Text style={styles.label}>가맹점명</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, !!errors.storeName && styles.inputErrorBorder]}
           placeholder="가맹점명을 입력하세요"
           value={storeName}
           onChangeText={onStoreNameChange}
         />
+        {!!errors.storeName && (
+          <Text style={styles.inputError}>{errors.storeName}</Text>
+        )}
       </View>
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>전화번호</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, !!errors.phoneNumber && styles.inputErrorBorder]}
           placeholder="전화번호를 입력하세요"
           value={phoneNumber}
           onChangeText={onPhoneNumberChange}
           keyboardType="phone-pad"
         />
+        {!!errors.phoneNumber && (
+          <Text style={styles.inputError}>{errors.phoneNumber}</Text>
+        )}
       </View>
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>주소</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="주소를 입력하세요"
-          value={address}
-          onChangeText={onAddressChange}
-        />
+        <Pressable
+          style={[
+            styles.addressInputContainer,
+            !!errors.address && styles.inputErrorBorder,
+          ]}
+          onPress={onAddressSearch}
+        >
+          <Text
+            style={[
+              styles.addressInputText,
+              !address && styles.addressInputPlaceholder,
+            ]}
+          >
+            {address || "주소를 검색해주세요"}
+          </Text>
+          <Ionicons name="search" size={20} color="#666" />
+        </Pressable>
+        {!!errors.address && (
+          <Text style={styles.inputError}>{errors.address}</Text>
+        )}
       </View>
 
       <View style={styles.formGroup}>

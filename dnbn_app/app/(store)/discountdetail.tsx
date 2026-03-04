@@ -164,9 +164,8 @@ export default function DiscountDetailPage() {
     );
   }
 
-  const displayImages = discountData.files?.files?.map(
-    (file) => file.fileUrl,
-  ) || ["https://via.placeholder.com/300"];
+  const displayImages =
+    discountData.files?.files?.map((file) => file.fileUrl) || [];
   const finalPrice = discountData.originalPrice - discountData.discountedPrice;
   const discountRate =
     discountData.saleType === "할인률"
@@ -224,10 +223,25 @@ export default function DiscountDetailPage() {
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
 
-                <Image
-                  style={styles.productMainImage}
-                  source={{ uri: displayImages[currentImageIndex] }}
-                />
+                {displayImages.length > 0 ? (
+                  <Image
+                    style={styles.productMainImage}
+                    source={{ uri: displayImages[currentImageIndex] }}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.productMainImage,
+                      {
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "#f5f5f5",
+                      },
+                    ]}
+                  >
+                    <Ionicons name="image-outline" size={48} color="#ccc" />
+                  </View>
+                )}
 
                 <TouchableOpacity
                   style={styles.mainImageButton}
@@ -282,14 +296,17 @@ export default function DiscountDetailPage() {
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>할인 금액:</Text>
                   <Text style={styles.discountAmount}>
-                    -₩ {discountData.discountedPrice.toLocaleString()}
+                    -₩{" "}
+                    {(
+                      discountData.originalPrice - discountData.discountedPrice
+                    ).toLocaleString()}
                   </Text>
                 </View>
 
                 <View style={[styles.priceRow, styles.finalPriceRow]}>
                   <Text style={styles.finalPriceLabel}>최종 금액:</Text>
                   <Text style={styles.finalPrice}>
-                    ₩ {finalPrice.toLocaleString()}
+                    ₩ {discountData.discountedPrice.toLocaleString()}
                   </Text>
                 </View>
               </View>

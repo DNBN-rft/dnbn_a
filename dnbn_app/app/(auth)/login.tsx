@@ -355,7 +355,7 @@ export default function LoginScreen() {
                 autoCapitalize="none"
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { fontFamily: undefined }]}
                 placeholder="비밀번호"
                 placeholderTextColor="#999"
                 secureTextEntry

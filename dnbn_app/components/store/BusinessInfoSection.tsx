@@ -1,11 +1,7 @@
+import { styles } from "@/app/(store)/editstoreinfo.styles";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-} from "react-native";
-import { styles } from "@/app/(store)/editstoreinfo.styles";
+import { Text, TextInput, View } from "react-native";
 
 interface BusinessInfoSectionProps {
   businessName: string;
@@ -13,7 +9,7 @@ interface BusinessInfoSectionProps {
   representativeName: string;
   representativePhone: string;
   businessType: string;
-  registrationDate: string;
+  bizRegDateTime: string;
 }
 
 export default function BusinessInfoSection({
@@ -22,7 +18,7 @@ export default function BusinessInfoSection({
   representativeName,
   representativePhone,
   businessType,
-  registrationDate,
+  bizRegDateTime,
 }: BusinessInfoSectionProps) {
   return (
     <View style={styles.section}>
@@ -85,7 +81,7 @@ export default function BusinessInfoSection({
         <Text style={styles.label}>사업자 등록일</Text>
         <TextInput
           style={[styles.input, styles.inputDisabled]}
-          value={registrationDate}
+          value={bizRegDateTime}
           editable={false}
         />
       </View>

@@ -254,4 +254,21 @@ export const styles = StyleSheet.create({
   countdownExpired: {
     color: "#e53935",
   },
+  androidPickerItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  androidPickerItemSelected: {
+    backgroundColor: "#fff5ee",
+  },
+  androidPickerItemText: {
+    fontSize: 15,
+    color: "#333",
+  },
+  androidPickerItemTextSelected: {
+    color: "#EF7810",
+    fontWeight: "600",
+  },
 });
