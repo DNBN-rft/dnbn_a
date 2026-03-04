@@ -61,8 +61,6 @@ export default function NegoHistoryDetailPage() {
     return status === "COMPLETED" ? "완료" : status;
   };
 
-
-
   // 네고 이력 상세 API 호출
   const fetchNegoLogDetail = async () => {
     if (!negoLogIdx) return;
@@ -95,7 +93,9 @@ export default function NegoHistoryDetailPage() {
   const handlePrevImage = () => {
     const images = negoHistoryDetail?.files?.files || [];
     if (images.length > 1) {
-      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? images.length - 1 : prev - 1,
+      );
     }
   };
 
@@ -103,22 +103,37 @@ export default function NegoHistoryDetailPage() {
   const handleNextImage = () => {
     const images = negoHistoryDetail?.files?.files || [];
     if (images.length > 1) {
-      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+      setCurrentImageIndex((prev) =>
+        prev === images.length - 1 ? 0 : prev + 1,
+      );
     }
   };
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={styles.container}>
         {insets.top > 0 && (
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
-        <ActivityIndicator size="large" color="#000" />
+        <View style={styles.header}>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>네고 이력 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
+        </View>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#000" />
+        </View>
       </View>
     );
   }
@@ -130,14 +145,18 @@ export default function NegoHistoryDetailPage() {
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>네고 이력 상세</Text>
-          <View style={styles.placeholder}></View>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>네고 이력 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

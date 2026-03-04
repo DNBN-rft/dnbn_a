@@ -18,6 +18,7 @@ export default function NegoRegistrationModal({
 }: NegoRegistrationModalProps) {
   const [negoStartDate, setNegoStartDate] = useState(new Date());
   const [showNegoDatePicker, setShowNegoDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // 초기 시간 계산
   const getInitialTime = () => {
@@ -122,46 +123,130 @@ export default function NegoRegistrationModal({
             <View style={styles.saleInputGroup}>
               <Text style={styles.saleLabel}>네고 시작 시간</Text>
               <View style={styles.saleDateTimeRow}>
-                <TouchableOpacity
-                  style={styles.saleDateButtonHalf}
-                  onPress={() => setShowNegoDatePicker(true)}
-                >
-                  <Ionicons name="calendar-outline" size={20} color="#ef7810" />
-                  <Text style={styles.saleDateText}>
-                    {negoStartDate.toLocaleDateString("ko-KR")}
-                  </Text>
-                </TouchableOpacity>
-                <View style={styles.salePickerWrapper}>
-                  <Ionicons
-                    name="time-outline"
-                    size={20}
-                    color="#ef7810"
-                    style={styles.salePickerIcon}
-                  />
-                  <Picker
-                    selectedValue={selectedTime}
-                    onValueChange={(value) => setSelectedTime(value)}
-                    style={styles.salePicker}
+                {Platform.OS === "ios" ? (
+                  <>
+                    <TouchableOpacity
+                      style={styles.saleDateButtonHalf}
+                      onPress={() => setShowNegoDatePicker(true)}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                      <Text style={styles.saleDateText}>
+                        {negoStartDate.toLocaleDateString("ko-KR")}
+                      </Text>
+                    </TouchableOpacity>
+                    <Modal
+                      visible={showNegoDatePicker}
+                      transparent={true}
+                      animationType="slide"
+                      onRequestClose={() => setShowNegoDatePicker(false)}
+                    >
+                      <View style={styles.iosTimePickerOverlay}>
+                        <View style={styles.iosTimePickerContainer}>
+                          <View style={styles.iosTimePickerHeader}>
+                            <Text style={styles.iosTimePickerTitle}>날짜 선택</Text>
+                            <TouchableOpacity onPress={() => setShowNegoDatePicker(false)}>
+                              <Text style={styles.iosTimePickerDoneText}>완료</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <View style={{ alignItems: "center" }}>
+                          <DateTimePicker
+                            value={negoStartDate}
+                            mode="date"
+                            display="spinner"
+                            minimumDate={new Date()}
+                            locale="ko-KR"
+                            onChange={(event, selectedDate?: Date) => {
+                              handleDateChange(selectedDate);
+                            }}
+                          />
+                          </View>
+                        </View>
+                      </View>
+                    </Modal>
+                  </>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.saleDateButtonHalf}
+                    onPress={() => setShowNegoDatePicker(true)}
                   >
-                    {timeOptions.map((option) => (
-                      <Picker.Item
-                        key={option.value}
-                        label={option.label}
-                        value={option.value}
-                      />
-                    ))}
-                  </Picker>
-                </View>
+                    <Ionicons name="calendar-outline" size={20} color="#ef7810" />
+                    <Text style={styles.saleDateText}>
+                      {negoStartDate.toLocaleDateString("ko-KR")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {Platform.OS === "ios" ? (
+                  <>
+                    <TouchableOpacity
+                      style={styles.saleDateButtonHalf}
+                      onPress={() => setShowTimePicker(true)}
+                    >
+                      <Ionicons name="time-outline" size={20} color="#ef7810" />
+                      <Text style={styles.saleDateText}>{selectedTime}</Text>
+                    </TouchableOpacity>
+                    <Modal
+                      visible={showTimePicker}
+                      transparent={true}
+                      animationType="slide"
+                      onRequestClose={() => setShowTimePicker(false)}
+                    >
+                      <View style={styles.iosTimePickerOverlay}>
+                        <View style={styles.iosTimePickerContainer}>
+                          <View style={styles.iosTimePickerHeader}>
+                            <Text style={styles.iosTimePickerTitle}>시간 선택</Text>
+                            <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                              <Text style={styles.iosTimePickerDoneText}>완료</Text>
+                            </TouchableOpacity>
+                          </View>
+                          <Picker
+                            selectedValue={selectedTime}
+                            onValueChange={(value) => setSelectedTime(value)}
+                          >
+                            {timeOptions.map((option) => (
+                              <Picker.Item
+                                key={option.value}
+                                label={option.label}
+                                value={option.value}
+                              />
+                            ))}
+                          </Picker>
+                        </View>
+                      </View>
+                    </Modal>
+                  </>
+                ) : (
+                  <View style={styles.salePickerWrapper}>
+                    <Ionicons
+                      name="time-outline"
+                      size={20}
+                      color="#ef7810"
+                      style={styles.salePickerIcon}
+                    />
+                    <Picker
+                      selectedValue={selectedTime}
+                      onValueChange={(value) => setSelectedTime(value)}
+                      style={styles.salePicker}
+                    >
+                      {timeOptions.map((option) => (
+                        <Picker.Item
+                          key={option.value}
+                          label={option.label}
+                          value={option.value}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
               </View>
 
-              {showNegoDatePicker && (
+              {Platform.OS !== "ios" && showNegoDatePicker && (
                 <DateTimePicker
                   value={negoStartDate}
                   mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  display="default"
                   minimumDate={new Date()}
                   onChange={(event, selectedDate?: Date) => {
-                    setShowNegoDatePicker(Platform.OS === "ios");
+                    setShowNegoDatePicker(false);
                     handleDateChange(selectedDate);
                   }}
                 />

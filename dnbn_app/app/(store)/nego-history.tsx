@@ -1,7 +1,7 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -26,13 +26,13 @@ interface NegoLogImages {
 
 interface NegoLogItem {
   negoLogIdx: number;
-  categoryNm: string;
+  categoryNm: string | null;
   images: NegoLogImages;
   startDateTime: string;
   endDateTime: string;
-  productNm: string;
+  productNm: string | null;
   productCode: string;
-  productPrice: number;
+  productPrice: number | null;
   negoLogStatus: string;
 }
 
@@ -68,16 +68,16 @@ interface NegoLogResponse {
 // 네고 요청 로그 API 응답 타입 정의
 interface NegoRequestLogItem {
   images: NegoLogImages;
-  categoryNm: string;
+  categoryNm: string | null;
   productCode: string;
-  productNm: string;
-  originalPrice: number;
-  requestPrice: number;
+  productNm: string | null;
+  originalPrice: number | null;
+  requestPrice: number | null;
   custCode: string;
-  custNm: string;
-  custTelNo: string;
+  custNm: string | null;
+  custTelNo: string | null;
   requestDateTime: string;
-  requestStatus: string;
+  requestLogStatus: string;
   storeCode: string;
 }
 
@@ -112,6 +112,17 @@ export default function NegoHistory() {
   const [requestLoading, setRequestLoading] = useState(false);
   const [requestHasMore, setRequestHasMore] = useState(true);
   const [requestRefreshing, setRequestRefreshing] = useState(false);
+
+  const productListRef = useRef<FlatList>(null);
+  const requestListRef = useRef<FlatList>(null);
+
+  const scrollToTop = () => {
+    if (activeTab === "product") {
+      productListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    } else {
+      requestListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }
+  };
 
   // 네고 로그 API 호출
   const fetchNegoLogList = async (
@@ -223,8 +234,10 @@ export default function NegoHistory() {
   // 요청 상태 텍스트 변환
   const getRequestStatusText = (status: string) => {
     switch (status) {
-      case "COMPLETED":
-        return "완료";
+      case "APPROVED":
+        return "승인";
+      case "REJECTED":
+        return "거절";
       case "CANCELED":
         return "취소";
       default:
@@ -312,6 +325,7 @@ export default function NegoHistory() {
 
       {activeTab === "product" ? (
         <FlatList
+          ref={productListRef}
           data={productList}
           keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
@@ -353,20 +367,20 @@ export default function NegoHistory() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.categoryNm}</Text>
+                    <Text style={styles.categoryText}>{item.categoryNm ?? "-"}</Text>
 
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
                       style={styles.productNameText}
                     >
-                      {item.productNm}
+                      {item.productNm ?? "상품명 없음"}
                     </Text>
                   </View>
 
                   <View>
                     <Text style={styles.priceText}>
-                      {item.productPrice.toLocaleString()}원
+                      {item.productPrice != null ? item.productPrice.toLocaleString() + "원" : "-"}
                     </Text>
 
                     <Text
@@ -401,6 +415,7 @@ export default function NegoHistory() {
         />
       ) : (
         <FlatList
+          ref={requestListRef}
           data={requestList}
           keyExtractor={(item, index) => `${item.productCode}-${index}`}
           showsVerticalScrollIndicator={false}
@@ -421,12 +436,12 @@ export default function NegoHistory() {
                 <Text
                   style={[
                     styles.requestResultText,
-                    item.requestStatus === "COMPLETED"
+                    item.requestLogStatus === "APPROVED"
                       ? styles.requestResultApprove
                       : styles.requestResultCancel,
                   ]}
                 >
-                  {getRequestStatusText(item.requestStatus)}
+                  {getRequestStatusText(item.requestLogStatus)}
                 </Text>
                 <Text style={styles.processDateText}>
                   처리일: {formatDate(item.requestDateTime)}
@@ -458,30 +473,30 @@ export default function NegoHistory() {
 
                 <View style={styles.requestInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.categoryNm}</Text>
+                    <Text style={styles.categoryText}>{item.categoryNm ?? "-"}</Text>
 
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
                       style={styles.productNameText}
                     >
-                      {item.productNm}
+                      {item.productNm ?? "삭제된 상품"}
                     </Text>
                   </View>
 
                   <View style={styles.priceContainer}>
                     <Text style={styles.originalPriceText}>
-                      {item.originalPrice.toLocaleString()}원
+                      {item.originalPrice != null ? item.originalPrice.toLocaleString() + "원" : "-"}
                     </Text>
                     <Text style={styles.negoPriceText}>
-                      {item.requestPrice.toLocaleString()}원
+                      {item.requestPrice != null ? item.requestPrice.toLocaleString() + "원" : "-"}
                     </Text>
                   </View>
 
                   <View style={styles.requestorContainer}>
-                    <Text style={styles.requestorText}>{item.custNm}</Text>
+                    <Text style={styles.requestorText}>{item.custNm ?? "-"}</Text>
                     <Text style={styles.requestorPhoneText}>
-                      {item.custTelNo}
+                      {item.custTelNo ?? "-"}
                     </Text>
                   </View>
                 </View>
@@ -494,6 +509,16 @@ export default function NegoHistory() {
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
+
+      <TouchableOpacity
+          style={[
+            styles.scrollTopButton,
+            { bottom: insets.bottom + 20 },
+          ]}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#fff" />
+        </TouchableOpacity>
     </View>
   );
 }

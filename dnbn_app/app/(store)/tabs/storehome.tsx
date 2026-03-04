@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   Text,
@@ -20,6 +21,7 @@ export default function StoreHome() {
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
   const [progressOrderCount, setProgressOrderCount] = useState<number>(0);
   const [completeOrderCount, setCompleteOrderCount] = useState<number>(0);
+  const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
 
   // 권한 확인 함수
   const hasAuthority = (requiredAuth: string): boolean => {
@@ -27,30 +29,30 @@ export default function StoreHome() {
   };
 
   // 고객 화면 전환 함수
-  const handleCustomerView = async () => {
-    try {
-      const response = await apiGet("/store/app/cross");
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // 가맹점 주소를 저장
-        if (data.storeAddress) {
-          if (Platform.OS === "web") {
-            localStorage.setItem("storeAddress", data.storeAddress);
-          } else {
-            await SecureStore.setItemAsync("storeAddress", data.storeAddress);
-          }
-        }
-
-        router.push("/(cust)/tabs/custhome");
-      } else {
-        console.error("API 호출 실패:", response.status);
-      }
-    } catch (error) {
-      console.error("고객 화면 전환 중 오류:", error);
-    }
+  const handleCustomerView = () => {
+    Alert.alert("알림", "기능 준비중입니다.");
   };
+  // const handleCustomerView = async () => {
+  //   try {
+  //     const response = await apiGet("/store/app/cross");
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       // 가맹점 주소를 저장
+  //       if (data.storeAddress) {
+  //         if (Platform.OS === "web") {
+  //           localStorage.setItem("storeAddress", data.storeAddress);
+  //         } else {
+  //           await SecureStore.setItemAsync("storeAddress", data.storeAddress);
+  //         }
+  //       }
+  //       router.push("/(cust)/tabs/custhome");
+  //     } else {
+  //       console.error("API 호출 실패:", response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error("고객 화면 전환 중 오류:", error);
+  //   }
+  // };
 
   useEffect(() => {
     const loadStoreInfo = async () => {
@@ -88,9 +90,34 @@ export default function StoreHome() {
     loadStoreInfo();
   }, []);
 
+  // 읽지 않은 알림 확인
+  const checkUnreadAlarm = async () => {
+    try {
+      let memberId: string | null = null;
+      if (Platform.OS === "web") {
+        memberId = localStorage.getItem("memberId");
+      } else {
+        memberId = await SecureStore.getItemAsync("memberId");
+      }
+      if (!memberId) return;
+
+      const response = await apiGet(
+        `/store/app/alarm/list?memberId=${memberId}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const alarms = Array.isArray(data) ? data : [];
+        setHasUnreadAlarm(alarms.some((a: any) => a.readDateTime === null));
+      }
+    } catch (error) {
+      console.error("알림 확인 오류:", error);
+    }
+  };
+
   // 페이지 접근 시 API 호출
   useFocusEffect(
     useCallback(() => {
+      checkUnreadAlarm();
       const fetchStoreHomeData = async () => {
         try {
           const response = await apiGet("/store/app/home");
@@ -130,6 +157,7 @@ export default function StoreHome() {
             onPress={() => router.push("/(store)/notifications")}
           >
             <Ionicons name="notifications-outline" size={24} color="#000" />
+            {hasUnreadAlarm && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
         </View>
       </View>

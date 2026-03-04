@@ -1,4 +1,5 @@
 import { apiPost } from "@/utils/api";
+import { formatPhoneNumber } from "@/utils/find-accountUtil";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -66,6 +67,12 @@ export default function AddEmployeePage() {
 
     if (password !== passwordConfirm) {
       Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    const phoneRegex = /^010-\d{4}-\d{4}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      Alert.alert("오류", "전화번호는 010-0000-0000 형식으로 입력해주세요.");
       return;
     }
 
@@ -171,8 +178,9 @@ export default function AddEmployeePage() {
                 style={styles.input}
                 placeholder="전화번호를 입력하세요"
                 value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                onChangeText={(text) => setPhoneNumber(formatPhoneNumber(text))}
                 keyboardType="phone-pad"
+                maxLength={13}
               />
             </View>
 

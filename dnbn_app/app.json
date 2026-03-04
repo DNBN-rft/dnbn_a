@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "dnbn_app",
-    "slug": "dnbn_app",
+    "slug": "dnbn_rn",
+    "owner": "dnbn_rn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,6 +10,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/images/iosIcon.png",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -20,12 +22,14 @@
       "bundleIdentifier": "com.neoclue.dnbnapp"
     },
     "android": {
-      "googleServicesFile": "./google-services.json",
+      // "googleServicesFile": "./google-services.json",
+      // "googleServicesFile": "${GOOGLE_SERVICES_JSON}",
+      // "googleServicesFile": "process.env.GOOGLE_SERVICES_JSON",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/androidIcon.png",
+        "backgroundImage": "./assets/images/androidIcon.png",
+        "monochromeImage": "./assets/images/androidIcon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -90,7 +94,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "10941f6f-ada4-447e-943b-e5d8a8d86589"
+        "projectId": "58504ef4-0eec-4643-88ee-66bcc547377c"
       }
     }
   }

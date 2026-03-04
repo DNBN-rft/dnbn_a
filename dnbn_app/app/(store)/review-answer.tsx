@@ -23,6 +23,7 @@ interface ReviewDetailData {
   reviewRate: number;
   reviewRegDateTime: string;
   reviewAnswered: boolean;
+  isMod: boolean;
   reviewAnswerContent: string | null;
   productNm: string;
   custNm: string;
@@ -108,6 +109,19 @@ export default function ReviewAnswer() {
       if (response.ok) {
         Alert.alert("등록", "답변이 등록되었습니다.");
         setIsRegist(true);
+        // 이미 등록된 답변을 수정한 경우 → isMod: true로 수정 버튼 숨김
+        // 첫 등록인 경우 → isMod 유지, answerContent만 업데이트하여 수정/삭제 버튼 즉시 표시
+        const wasAlreadyAnswered = reviewData?.reviewAnswered ?? false;
+        setReviewData((prev) =>
+          prev
+            ? {
+                ...prev,
+                reviewAnswered: true,
+                reviewAnswerContent: answerText,
+                isMod: wasAlreadyAnswered ? true : prev.isMod,
+              }
+            : prev,
+        );
       } else {
         Alert.alert("실패", "답변 등록에 실패했습니다.");
       }
@@ -311,12 +325,14 @@ export default function ReviewAnswer() {
                 {isRegist ? (
                   // 수정 & 삭제 버튼 (등록된 상태)
                   <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                      style={styles.registerButton}
-                      onPress={() => setIsRegist(false)}
-                    >
-                      <Text style={styles.registerButtonText}>수정</Text>
-                    </TouchableOpacity>
+                    {!reviewData?.isMod && (
+                      <TouchableOpacity
+                        style={styles.registerButton}
+                        onPress={() => setIsRegist(false)}
+                      >
+                        <Text style={styles.registerButtonText}>수정</Text>
+                      </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity
                       style={styles.button}
