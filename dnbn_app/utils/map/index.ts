@@ -38,8 +38,6 @@ export {
   animateFromTo,
   slideUp,
   slideDown,
-  expandPanel,
-  resetPanel,
 } from "./animationUtils";
 export type { AnimationConfig } from "./animationUtils";
 
@@ -53,12 +51,6 @@ export {
   highlightStoreMarker,
 } from "./webViewUtils";
 export type { WebViewMessageType } from "./webViewUtils";
-
-// Panel Gesture Utils
-export {
-  createStoreDetailPanResponder,
-  createStoreListPanResponder,
-} from "./panelGestureUtils";
 
 export interface ClickedLocation {
   latitude: number;

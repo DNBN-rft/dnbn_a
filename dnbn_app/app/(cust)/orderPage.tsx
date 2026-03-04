@@ -29,7 +29,7 @@ interface RecommendedProduct {
 
 export default function OrderPage() {
   const insets = useSafeAreaInsets();
-  const { productCode, orderQty } = useLocalSearchParams();
+  const { productCode, orderQty, cartItems } = useLocalSearchParams();
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,18 @@ export default function OrderPage() {
   const purchaseButtonRef = useRef<View>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // 장바구니에서 넘어온 경우 파싱
+  const parsedCartStores: { storeNm: string; items: any[] }[] | null =
+    cartItems ? JSON.parse(cartItems as string) : null;
+  const isCartMode = !!parsedCartStores;
+
   useEffect(() => {
+    // 장바구니 모드일 경우 API 호출 불필요
+    if (isCartMode) {
+      setLoading(false);
+      return;
+    }
+
     const fetchOrderData = async () => {
       try {
         setLoading(true);
@@ -67,7 +78,7 @@ export default function OrderPage() {
     if (productCode) {
       fetchOrderData();
     }
-  }, [productCode, orderQty]);
+  }, [productCode, orderQty, isCartMode]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -127,7 +138,22 @@ export default function OrderPage() {
         unitPrice: 2500,
       };
 
-  const totalPrice = productInfo.quantity * productInfo.unitPrice;
+  const totalPrice = isCartMode
+    ? parsedCartStores!.reduce(
+        (sum, store) =>
+          sum +
+          store.items.reduce(
+            (s, item) => s + (item.price - item.discountPrice) * item.quantity,
+            0,
+          ),
+        0,
+      )
+    : productInfo.quantity * productInfo.unitPrice;
+
+  // 진열할 스토어명
+  const displayStoreName = isCartMode
+    ? parsedCartStores!.map((s) => s.storeNm).join(", ")
+    : productInfo.storeName;
 
   // 추천 상품 데이터 (최대 5개)
   const recommendedProducts: RecommendedProduct[] = orderData?.storeOtherProduct
@@ -231,28 +257,60 @@ export default function OrderPage() {
         {/* 구매 상품 정보 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>구매 상품</Text>
-          <View style={styles.productCard}>
-            <Text style={styles.storeName}>{productInfo.storeName}</Text>
-            <View style={styles.productInfoRow}>
-              <Image
-                source={{ uri: productInfo.imageUrl }}
-                style={styles.productImage}
-              />
-              <View style={styles.productTextContainer}>
-                <Text style={styles.productName} numberOfLines={2}>
-                  {productInfo.productName}
-                </Text>
-                <Text style={styles.quantity}>
-                  수량: {productInfo.quantity}개
+
+          {isCartMode ? (
+            // 장바구니 모드: 가맹점별 여러 상품 표시
+            parsedCartStores!.map((store, storeIdx) => (
+              <View key={storeIdx} style={styles.productCard}>
+                <Text style={styles.storeName}>{store.storeNm}</Text>
+                {store.items.map((item: any) => (
+                  <View key={item.cartItemIdx} style={styles.productInfoRow}>
+                    <Image
+                      source={{
+                        uri:
+                          item.itemImg?.fileUrl ||
+                          "https://via.placeholder.com/80",
+                      }}
+                      style={styles.productImage}
+                    />
+                    <View style={styles.productTextContainer}>
+                      <Text style={styles.productName} numberOfLines={2}>
+                        {item.productNm}
+                      </Text>
+                      <Text style={styles.quantity}>수량: {item.quantity}개</Text>
+                      <Text style={styles.unitPrice}>
+                        {((item.price - item.discountPrice) * item.quantity).toLocaleString()}원
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ))
+          ) : (
+            // 기존 단일 상품 모드
+            <View style={styles.productCard}>
+              <Text style={styles.storeName}>{productInfo.storeName}</Text>
+              <View style={styles.productInfoRow}>
+                <Image
+                  source={{ uri: productInfo.imageUrl }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productTextContainer}>
+                  <Text style={styles.productName} numberOfLines={2}>
+                    {productInfo.productName}
+                  </Text>
+                  <Text style={styles.quantity}>
+                    수량: {productInfo.quantity}개
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.priceRow}>
+                <Text style={styles.unitPrice}>
+                  {productInfo.unitPrice.toLocaleString()}원
                 </Text>
               </View>
             </View>
-            <View style={styles.priceRow}>
-              <Text style={styles.unitPrice}>
-                {productInfo.unitPrice.toLocaleString()}원
-              </Text>
-            </View>
-          </View>
+          )}
 
           {/* 총 주문금액 */}
           <View style={styles.totalCard}>
@@ -263,11 +321,11 @@ export default function OrderPage() {
           </View>
         </View>
 
-        {/* 추천 상품 */}
-        {recommendedProducts.length > 0 && (
+        {/* 추천 상품 - 장바구니 모드에서는 숨김 */}
+        {!isCartMode && recommendedProducts.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
-              {productInfo.storeName}에서 판매하는 다른 상품들이에요
+              {displayStoreName}에서 판매하는 다른 상품들이에요
             </Text>
             <ScrollView
               horizontal
@@ -395,7 +453,7 @@ export default function OrderPage() {
               개인정보 제공 동의 :{" "}
               <TouchableOpacity onPress={handlePrivacyInfo}>
                 <Text style={styles.privacyConsentLink}>
-                  {productInfo.storeName}
+                  {displayStoreName}
                 </Text>
               </TouchableOpacity>{" "}
               <TouchableOpacity onPress={handlePrivacyInfo}>
@@ -435,7 +493,7 @@ export default function OrderPage() {
       {/* 개인정보 제공 동의 모달 */}
       <PrivacyConsentModal
         visible={privacyModalVisible}
-        storeName={productInfo.storeName}
+        storeName={displayStoreName}
         onClose={() => setPrivacyModalVisible(false)}
       />
 

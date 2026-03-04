@@ -56,7 +56,7 @@ export default function AddressScreen() {
 
   // 새 주소 추가 페이지로 이동
   const handleAddNewAddress = useCallback(() => {
-    router.push("/(cust)/address-select");
+    router.replace("/(cust)/address-select");
   }, []);
 
   const handleSelectAddress = useCallback((selectedId: number) => {
@@ -65,7 +65,7 @@ export default function AddressScreen() {
 
   // 주소 수정 페이지로 이동
   const handleEditAddress = useCallback((addressData: AddressData) => {
-    router.push({
+    router.replace({
       pathname: "/(cust)/address-select",
       params: {
         locationIdx: addressData.locationIdx.toString(),
@@ -190,7 +190,7 @@ export default function AddressScreen() {
         <View style={styles.leftSection}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.navigate("/(cust)/tabs/custhome")}
+            onPress={() => router.back()}
           >
             <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>

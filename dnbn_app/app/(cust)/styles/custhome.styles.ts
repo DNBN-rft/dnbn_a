@@ -82,7 +82,8 @@ export const styles = StyleSheet.create({
   },
   arrowButton: {
     width: 50,
-    height: 270,
+    height: 60,
+    marginHorizontal: 8,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",

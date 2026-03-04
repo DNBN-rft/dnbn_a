@@ -215,7 +215,11 @@ export default function MyInfoScreen() {
                     ? "로딩 중..."
                     : custInfo?.locationTitle || "위치 이름"}
                 </Text>
-                <Text style={styles.infoValue}>
+                <Text
+                  style={styles.infoValue}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {loading ? "로딩 중..." : custInfo?.locationAddr || "-"}
                 </Text>
               </View>

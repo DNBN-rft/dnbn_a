@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -40,7 +41,7 @@ export default function NotificationSetting() {
 
   const saveNotificationSettings = async () => {
     try {
-      const custCode = "CUST_001";
+      const custCode = await getStorageItem("custCode");
 
       const response = await apiPost("/cust/alarm", {
         pushSet: appPushEnabled,

@@ -144,15 +144,15 @@ export default function OrderDetailScreen() {
                       style={styles.productSection}
                     >
                       <View style={styles.productStatusRow}>
-                        <Text style={styles.orderStatusText}>
-                          {product.status}
-                        </Text>
-
-                        <Text style={styles.timestampText}>
-                          {product.usedAt
-                            ? ` 사용일시: ${product.usedAt}`
-                            : " 사용일시: 미사용"}
-                        </Text>
+                        {product.status === "미사용" ? (
+                          <Text style={styles.orderStatusText}>
+                            {product.status}
+                          </Text>
+                        ) : (
+                          <Text style={styles.timestampText}>
+                            사용일시: {product.usedAt}
+                          </Text>
+                        )}
                       </View>
 
                       <View style={styles.productRow}>
