@@ -20,6 +20,7 @@ export default function StoreHome() {
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
   const [progressOrderCount, setProgressOrderCount] = useState<number>(0);
   const [completeOrderCount, setCompleteOrderCount] = useState<number>(0);
+  const [hasUnreadAlarm, setHasUnreadAlarm] = useState(false);
 
   // 권한 확인 함수
   const hasAuthority = (requiredAuth: string): boolean => {
@@ -88,9 +89,34 @@ export default function StoreHome() {
     loadStoreInfo();
   }, []);
 
+  // 읽지 않은 알림 확인
+  const checkUnreadAlarm = async () => {
+    try {
+      let memberId: string | null = null;
+      if (Platform.OS === "web") {
+        memberId = localStorage.getItem("memberId");
+      } else {
+        memberId = await SecureStore.getItemAsync("memberId");
+      }
+      if (!memberId) return;
+
+      const response = await apiGet(
+        `/store/app/alarm/list?memberId=${memberId}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const alarms = Array.isArray(data) ? data : [];
+        setHasUnreadAlarm(alarms.some((a: any) => a.readDateTime === null));
+      }
+    } catch (error) {
+      console.error("알림 확인 오류:", error);
+    }
+  };
+
   // 페이지 접근 시 API 호출
   useFocusEffect(
     useCallback(() => {
+      checkUnreadAlarm();
       const fetchStoreHomeData = async () => {
         try {
           const response = await apiGet("/store/app/home");
@@ -130,6 +156,7 @@ export default function StoreHome() {
             onPress={() => router.push("/(store)/notifications")}
           >
             <Ionicons name="notifications-outline" size={24} color="#000" />
+            {hasUnreadAlarm && <View style={styles.notificationBadge} />}
           </TouchableOpacity>
         </View>
       </View>
