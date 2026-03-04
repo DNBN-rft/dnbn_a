@@ -188,7 +188,7 @@ export default function LoginScreen() {
             try {
               const fcmToken = await getFcmToken();
               if (fcmToken) {
-                await apiPut("/cust/fcm-token", { token: fcmToken });
+                await apiPut("/cust/fcm-token", { fcmToken: fcmToken });
               }
             } catch (e) {
               console.warn("FCM 토큰 업데이트 실패:", e);

@@ -1,5 +1,6 @@
 import { apiPut } from "@/utils/api";
 import { getFcmTokenSilently } from "@/utils/notificationUtil";
+import { getStorageItem } from "@/utils/storageUtil";
 import { Stack } from "expo-router";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
@@ -14,7 +15,7 @@ export default function CustLayout() {
         try {
           const token = await getFcmTokenSilently();
           if (token) {
-            await apiPut("/cust/fcm-token", { token });
+            await apiPut("/cust/fcm-token", { fcmToken: token });
           }
         } catch (e) {
           // 조용히 실패 처리
