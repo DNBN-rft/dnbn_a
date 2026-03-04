@@ -55,7 +55,7 @@ interface SaleListResponse {
 export default function StoreSale() {
   const insets = useSafeAreaInsets();
   const [deleteModal, setDeleteModal] = useState(false);
-  const [selectedSaleIdx, setSelectedSaleIdx] = useState<number | null>(null);
+  const [selectedProductCode, setSelectedProductCode] = useState<string | null>(null);
   const [saleList, setSaleList] = useState<SaleItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -87,10 +87,10 @@ export default function StoreSale() {
   }, []);
 
   const handleDelete = async () => {
-    if (!selectedSaleIdx) return;
+    if (!selectedProductCode) return;
 
     try {
-      const response = await apiDelete(`/store/app/sale/${selectedSaleIdx}`);
+      const response = await apiDelete(`/store/app/sale/${selectedProductCode}`);
 
       if (response.ok) {
         Alert.alert("성공", "할인이 삭제되었습니다.");
@@ -104,7 +104,7 @@ export default function StoreSale() {
       Alert.alert("오류", "네트워크 오류가 발생했습니다.");
     } finally {
       setDeleteModal(false);
-      setSelectedSaleIdx(null);
+      setSelectedProductCode(null);
     }
   };
 
@@ -192,7 +192,7 @@ export default function StoreSale() {
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => {
-                    setSelectedSaleIdx(item.saleIdx);
+                    setSelectedProductCode(item.productCode);
                     setDeleteModal(true);
                   }}
                 >
