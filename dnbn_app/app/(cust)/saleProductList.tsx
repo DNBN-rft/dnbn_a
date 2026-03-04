@@ -2,7 +2,7 @@ import { apiGet } from "@/utils/api";
 import { formatDistance } from "@/utils/distance";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -78,6 +78,11 @@ export default function SaleProductListScreen() {
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
   const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const flatListRef = useRef<import("react-native").FlatList>(null);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   useEffect(() => {
     fetchSaleProducts();
@@ -263,6 +268,7 @@ export default function SaleProductListScreen() {
         </View>
       ) : (
         <FlatList
+          ref={flatListRef}
           data={getSortedProducts()}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
@@ -334,7 +340,7 @@ export default function SaleProductListScreen() {
                       <Text style={styles.discountBadgeText}>
                         {item.saleType === "할인률"
                           ? `${item.discount}%`
-                          : "정가할인"}
+                          : `${item.price.toLocaleString()}원`}
                       </Text>
                     </View>
                   </View>
@@ -374,6 +380,13 @@ export default function SaleProductListScreen() {
           }}
         ></FlatList>
       )}
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
