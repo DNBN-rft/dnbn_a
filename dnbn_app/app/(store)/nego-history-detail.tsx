@@ -61,10 +61,9 @@ export default function NegoHistoryDetailPage() {
     return status === "COMPLETED" ? "완료" : status;
   };
 
-  // 이미지 배열 생성 (3개 미만일 때 logo.png로 채우기)
+  // 이미지 배열 생성 (3개 미만일 때 null로 채우기)
   const getImages = () => {
-    const logoImage = require("@/assets/images/logo.png");
-    const images = [];
+    const images: ({ uri: string } | null)[] = [];
 
     if (
       negoHistoryDetail?.files?.files &&
@@ -76,9 +75,9 @@ export default function NegoHistoryDetailPage() {
       });
     }
 
-    // 3개 미만이면 logo.png로 채우기
+    // 3개 미만이면 null로 채우기
     while (images.length < 3) {
-      images.push(logoImage);
+      images.push(null);
     }
 
     return images;
@@ -126,16 +125,27 @@ export default function NegoHistoryDetailPage() {
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={styles.container}>
         {insets.top > 0 && (
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
-        <ActivityIndicator size="large" color="#000" />
+        <View style={styles.header}>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>네고 이력 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
+        </View>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#000" />
+        </View>
       </View>
     );
   }
@@ -147,18 +157,20 @@ export default function NegoHistoryDetailPage() {
           <View style={{ height: insets.top, backgroundColor: "#fff" }} />
         )}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>네고 이력 상세</Text>
-          <View style={styles.placeholder}></View>
+          <View style={styles.leftSection}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.title}>네고 이력 상세</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <Text>데이터를 불러올 수 없습니다.</Text>
         </View>
       </View>
@@ -206,19 +218,15 @@ export default function NegoHistoryDetailPage() {
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
 
-                <Image
-                  style={styles.productMainImage}
-                  source={images[currentImageIndex]}
-                  contentFit="contain"
-                />
-
-                <TouchableOpacity
-                  style={styles.mainImageButton}
-                  onPress={handleNextImage}
-                >
-                  <Ionicons name="chevron-forward" size={24} color="#666" />
-                </TouchableOpacity>
-              </View>
+                {images[currentImageIndex] ? (
+                  <Image
+                    style={styles.productMainImage}
+                    source={images[currentImageIndex]!}
+                    contentFit="contain"
+                  />
+                ) : (
+                  <View style={[styles.productMainImage, { backgroundColor: "#F3F4F6" }]} />
+                )}
 
               <View style={styles.productSubImages}>
                 {images.map((image, index) => (
@@ -226,16 +234,29 @@ export default function NegoHistoryDetailPage() {
                     key={index}
                     onPress={() => setCurrentImageIndex(index)}
                   >
-                    <Image
-                      style={[
-                        styles.productSubImage,
-                        currentImageIndex === index && {
-                          borderWidth: 2,
-                          borderColor: "#007AFF",
-                        },
-                      ]}
-                      source={image}
-                    />
+                    {image ? (
+                      <Image
+                        style={[
+                          styles.productSubImage,
+                          currentImageIndex === index && {
+                            borderWidth: 2,
+                            borderColor: "#007AFF",
+                          },
+                        ]}
+                        source={image}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.productSubImage,
+                          { backgroundColor: "#F3F4F6" },
+                          currentImageIndex === index && {
+                            borderWidth: 2,
+                            borderColor: "#007AFF",
+                          },
+                        ]}
+                      />
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
