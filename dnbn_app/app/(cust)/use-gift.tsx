@@ -174,32 +174,44 @@ export default function UseGift() {
               </Text>
             </View>
           )}
-
           <Text style={styles.storeName}>{purchaseData.storeNm}</Text>
           <Text style={styles.productName}>{purchaseData.productNm}</Text>
-          {purchaseData.qrImg && (
-            <Image
-              source={purchaseData.qrImg.fileUrl}
-              style={styles.qrImage}
-              contentFit="contain"
-            />
-          )}
         </View>
 
         <View style={styles.explanationContainer}>
           <View style={styles.explanationTab}>
-            <Text
-              style={styles.explanationTabText}
+            <TouchableOpacity
+              style={[
+                styles.explanationTabButton,
+                activeTab === "useinfo" && styles.explanationTabButtonActive,
+              ]}
               onPress={() => setActiveTab("useinfo")}
             >
-              이용안내
-            </Text>
-            <Text
-              style={styles.explanationTabText}
+              <Text
+                style={[
+                  styles.explanationTabText,
+                  activeTab === "useinfo" && styles.explanationTabTextActive,
+                ]}
+              >
+                이용안내
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.explanationTabButton,
+                activeTab === "detailinfo" && styles.explanationTabButtonActive,
+              ]}
               onPress={() => setActiveTab("detailinfo")}
             >
-              상세정보
-            </Text>
+              <Text
+                style={[
+                  styles.explanationTabText,
+                  activeTab === "detailinfo" && styles.explanationTabTextActive,
+                ]}
+              >
+                상세정보
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.explanationContent}>

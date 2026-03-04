@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   infoContainer: {
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
     boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
     borderRadius: 10,
@@ -44,17 +44,18 @@ export const styles = StyleSheet.create({
     width: "90%",
     paddingVertical: 15,
     paddingHorizontal: 10,
+    paddingTop: 5,
   },
   giftImage: {
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
     resizeMode: "contain",
-    marginTop: 5,
+    marginTop: 0,
   },
   storeName: {
     fontSize: 14,
     color: "rgba(0, 0, 0, 0.5)",
-    marginTop: 8,
+    marginTop: 20,
   },
   productName: {
     fontSize: 20,
@@ -81,14 +82,26 @@ export const styles = StyleSheet.create({
   },
   explanationTab: {
     flexDirection: "row",
-    justifyContent: "space-around",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    paddingBottom: 10,
+  },
+  explanationTabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  explanationTabButtonActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#FF6B6B",
+    marginBottom: -1,
   },
   explanationTabText: {
     fontSize: 16,
+    color: "#999",
+  },
+  explanationTabTextActive: {
     color: "#333",
+    fontWeight: "600",
   },
   explanationContent: {
     marginTop: 15,
