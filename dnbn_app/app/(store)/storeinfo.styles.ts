@@ -97,6 +97,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "500",
+    marginRight: 8,
   },
   infoValue: {
     fontSize: 14,

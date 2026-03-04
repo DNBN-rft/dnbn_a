@@ -91,7 +91,7 @@ interface StoreInfo {
   storeType: string;
   bizNo: string;
   ownerTelNo: string;
-  requestedDateTime: string;
+  bizRegDateTime: string;
 
   storeOpenDate: string[];
   storeOpenTime: string;
@@ -281,7 +281,7 @@ export default function StoreInfoPage() {
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>주소</Text>
-                <Text style={styles.infoValue}>
+                <Text style={styles.infoValue} numberOfLines={1} ellipsizeMode="tail">
                   {storeInfo.storeAddr} {storeInfo.storeAddrDetail}
                 </Text>
               </View>
@@ -345,10 +345,8 @@ export default function StoreInfoPage() {
               </View>
 
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>가입 신청일</Text>
-                <Text style={styles.infoValue}>
-                  {dateFormatter(storeInfo.requestedDateTime)}
-                </Text>
+                <Text style={styles.infoLabel}>사업자 등록일</Text>
+                <Text style={styles.infoValue}>{storeInfo.bizRegDateTime}</Text>
               </View>
             </View>
           </View>
