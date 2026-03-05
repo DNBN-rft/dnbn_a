@@ -123,7 +123,7 @@ export default function PurchaseBox() {
                   data={unusedProducts}
                   numColumns={2}
                   columnWrapperStyle={{ justifyContent: "space-between" }}
-                  keyExtractor={(item) => item.productCode}
+                  keyExtractor={(item) => item.orderDetailIdx.toString()}
                   renderItem={({ item: notUsed }) => (
                     <TouchableOpacity
                       style={styles.products}
@@ -188,7 +188,7 @@ export default function PurchaseBox() {
                 data={usedProducts}
                 numColumns={2}
                 columnWrapperStyle={{ justifyContent: "space-between" }}
-                keyExtractor={(item) => item.productCode}
+                keyExtractor={(item) => item.orderDetailIdx.toString()}
                 renderItem={({ item: used }) => (
                   <TouchableOpacity
                     style={styles.products}
