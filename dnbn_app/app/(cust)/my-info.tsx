@@ -260,11 +260,9 @@ export default function MyInfoScreen() {
                         resizeMode="contain"
                       />
                     ) : (
-                      <Image
-                        source={require("@/assets/images/qr.png")}
-                        style={styles.purchaseImage}
-                        resizeMode="contain"
-                      />
+                      <View style={[styles.purchaseImage, styles.noImageBox]}>
+                        <Ionicons name="image-outline" size={32} color="#ccc" />
+                      </View>
                     )}
                     <Text style={styles.infoValue}>
                       {product.orderDateTime.split(" ")[0]}

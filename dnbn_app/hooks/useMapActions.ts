@@ -226,6 +226,19 @@ export function useMapActions({
           setTimeout(() => {
             setIsLoading(false);
           }, 100);
+        } else if (data.type === "kakaoLoadError") {
+          // 카카오 SDK 로드 실패 (네트워크 오류, API 키 제한 등)
+          setIsLoading(false);
+          Alert.alert(
+            "지도 로드 오류",
+            "카카오 지도를 불러오지 못했습니다.\n네트워크 상태를 확인하거나 잠시 후 다시 시도해 주세요.",
+            [
+              {
+                text: "돌아가기",
+                onPress: () => router.back(),
+              },
+            ],
+          );
         } else if (data.type === "storeSelected") {
           // 지도에서 마커 클릭 시 해당 마커를 주황색으로 강조
           highlightStoreMarker(webViewRef, data.store.id);

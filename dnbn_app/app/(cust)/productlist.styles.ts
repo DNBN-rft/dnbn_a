@@ -112,6 +112,11 @@ export const styles = StyleSheet.create({
     borderColor: "#eee",
     marginBottom: 8,
   },
+  noImageBox: {
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   productInfo: {
     marginLeft: 12,
     marginRight: 12,

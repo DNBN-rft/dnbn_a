@@ -8,14 +8,14 @@ import { useMapActions } from "../../../hooks/useMapActions";
 import { useMapState } from "../../../hooks/useMapState";
 import { usePanelManager } from "../../../hooks/usePanelManager";
 import { DEFAULT_LOCATION, slideUp } from "../../../utils/map";
+import { generateMapHTML } from "../../../utils/map/mapHtml";
 import AddressSearchModal from "../mapcomponent/AddressSearchModal";
 import ClickedLocationPanel from "../mapcomponent/ClickedLocationPanel";
 import StoreDetailPanel from "../mapcomponent/StoreDetailPanel";
 import StoreListPanel from "../mapcomponent/StoreListPanel";
 import { styles } from "../styles/map.styles";
-import { generateMapHTML } from "../../../utils/map/mapHtml";
 
-const KAKAO_JAVASCRIPT_KEY = "46f0bc8ab705f2263a98ee3adeebd719";
+const KAKAO_JAVASCRIPT_KEY = "bbbf21a6976b000c1889068c4e6564f7";
 
 export default function CustMapScreen() {
   const { searchAddress } = useLocalSearchParams();
@@ -46,19 +46,15 @@ export default function CustMapScreen() {
   } = useMapState();
 
   // 패널 관리 훅
-  const {
-    slideAnim,
-    clickedLocationAnim,
-    storeListAnim,
-    closeAllPanels,
-  } = usePanelManager({
-    clickedLocation,
-    selectedStore,
-    showStoreList,
-    setClickedLocation,
-    setSelectedStore,
-    setShowStoreList,
-  });
+  const { slideAnim, clickedLocationAnim, storeListAnim, closeAllPanels } =
+    usePanelManager({
+      clickedLocation,
+      selectedStore,
+      showStoreList,
+      setClickedLocation,
+      setSelectedStore,
+      setShowStoreList,
+    });
 
   // 액션 핸들러 훅
   const {
@@ -126,6 +122,7 @@ export default function CustMapScreen() {
         }
       } catch (error) {
         console.error("Map initialization error:", error);
+        setIsLoading(false);
       }
     };
 
@@ -136,6 +133,16 @@ export default function CustMapScreen() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapReady, isLocationReady, searchAddress]);
+
+  // isMapReady 타임아웃 폴백: 15초 내에 지도가 준비되지 않으면 강제로 기본 위치로 진행
+  useLayoutEffect(() => {
+    if (isMapReady) return;
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 15000);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMapReady]);
 
   // 가맹점 선택 시 패널 애니메이션
   useLayoutEffect(() => {
@@ -175,7 +182,7 @@ export default function CustMapScreen() {
       <View style={styles.mapContainer}>
         <WebView
           ref={webViewRef}
-          source={{ html: mapHTML }}
+          source={{ html: mapHTML, baseUrl: "https://dnbn-x5or.onrender.com" }}
           style={styles.webView}
           scrollEnabled={true}
           scalesPageToFit={true}
