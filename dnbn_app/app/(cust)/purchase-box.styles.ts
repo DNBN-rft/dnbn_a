@@ -184,4 +184,15 @@ export const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 16,
+  },
 });

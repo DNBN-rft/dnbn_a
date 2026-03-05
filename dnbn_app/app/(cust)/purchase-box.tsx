@@ -103,137 +103,161 @@ export default function PurchaseBox() {
           </TouchableOpacity>
         </View>
         <View style={styles.giftContainer}>
-          <View style={styles.infoContainer}>
-            <Text style={styles.countText}>
-              총{" "}
-              {activeTab === "notUsed"
-                ? unusedProducts.length
-                : usedProducts.length}
-              개
-            </Text>
-          </View>
-
           {activeTab === "notUsed" ? (
-            <FlatList
-              ref={listRef}
-              data={unusedProducts}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
-              keyExtractor={(item) => item.productCode}
-              renderItem={({ item: notUsed }) => (
-                <TouchableOpacity
-                  style={styles.products}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(cust)/use-gift",
-                      params: {
-                        orderDetailIdx: notUsed.orderDetailIdx.toString(),
-                      },
-                    })
-                  }
-                >
-                  <View style={styles.productImageContainer}>
-                    <Image
-                      source={
-                        notUsed.productImageUrl
-                          ? { uri: notUsed.productImageUrl }
-                          : require("@/assets/images/logo.png")
+            unusedProducts.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="cart-outline" size={64} color="#ccc" />
+                <Text style={styles.emptyText}>
+                  사용 가능한 상품이 없습니다
+                </Text>
+              </View>
+            ) : (
+              <>
+                <View style={styles.infoContainer}>
+                  <Text style={styles.countText}>
+                    총 {unusedProducts.length}개
+                  </Text>
+                </View>
+                <FlatList
+                  ref={listRef}
+                  data={unusedProducts}
+                  numColumns={2}
+                  columnWrapperStyle={{ justifyContent: "space-between" }}
+                  keyExtractor={(item) => item.productCode}
+                  renderItem={({ item: notUsed }) => (
+                    <TouchableOpacity
+                      style={styles.products}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(cust)/use-gift",
+                          params: {
+                            orderDetailIdx: notUsed.orderDetailIdx.toString(),
+                          },
+                        })
                       }
-                      style={styles.productImage}
-                    />
-                  </View>
+                    >
+                      <View style={styles.productImageContainer}>
+                        <Image
+                          source={
+                            notUsed.productImageUrl
+                              ? { uri: notUsed.productImageUrl }
+                              : require("@/assets/images/logo.png")
+                          }
+                          style={styles.productImage}
+                        />
+                      </View>
 
-                  <View style={styles.productInfoContainer}>
-                    <Text style={styles.storeNameText}>{notUsed.storeNm}</Text>
-                    <Text
-                      style={styles.productNameText}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {notUsed.productNm}
-                    </Text>
-                    <Text style={styles.datetimeText}>
-                      {notUsed.orderDateTime}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={true}
-            />
+                      <View style={styles.productInfoContainer}>
+                        <Text style={styles.storeNameText}>
+                          {notUsed.storeNm}
+                        </Text>
+                        <Text
+                          style={styles.productNameText}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {notUsed.productNm}
+                        </Text>
+                        <Text style={styles.datetimeText}>
+                          {notUsed.orderDateTime}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                  showsVerticalScrollIndicator={false}
+                  scrollEnabled={true}
+                />
+              </>
+            )
+          ) : usedProducts.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={64}
+                color="#ccc"
+              />
+              <Text style={styles.emptyText}>사용 완료된 상품이 없습니다</Text>
+            </View>
           ) : (
-            <FlatList
-              ref={listRef}
-              data={usedProducts}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
-              keyExtractor={(item) => item.productCode}
-              renderItem={({ item: used }) => (
-                <TouchableOpacity
-                  style={styles.products}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(cust)/used-gift",
-                      params: {
-                        orderDetailIdx: used.orderDetailIdx.toString(),
-                      },
-                    })
-                  }
-                >
-                  <View style={styles.productImageContainer}>
-                    <Image
-                      source={
-                        used.productImageUrl
-                          ? { uri: used.productImageUrl }
-                          : require("@/assets/images/logo.png")
-                      }
-                      style={styles.productImage}
-                    />
-                    <View
-                      style={[
-                        styles.statusOverlayBg,
-                        used.state === "사용완료"
-                          ? styles.bgUsed
-                          : styles.bgCanceled,
-                      ]}
-                    />
-                    <View
-                      style={[
-                        styles.statusStamp,
-                        used.state === "사용완료"
-                          ? styles.stampUsed
-                          : styles.stampCanceled,
-                      ]}
-                    >
-                      <Text
+            <>
+              <View style={styles.infoContainer}>
+                <Text style={styles.countText}>총 {usedProducts.length}개</Text>
+              </View>
+              <FlatList
+                ref={listRef}
+                data={usedProducts}
+                numColumns={2}
+                columnWrapperStyle={{ justifyContent: "space-between" }}
+                keyExtractor={(item) => item.productCode}
+                renderItem={({ item: used }) => (
+                  <TouchableOpacity
+                    style={styles.products}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(cust)/used-gift",
+                        params: {
+                          orderDetailIdx: used.orderDetailIdx.toString(),
+                        },
+                      })
+                    }
+                  >
+                    <View style={styles.productImageContainer}>
+                      <Image
+                        source={
+                          used.productImageUrl
+                            ? { uri: used.productImageUrl }
+                            : require("@/assets/images/logo.png")
+                        }
+                        style={styles.productImage}
+                      />
+                      <View
                         style={[
-                          styles.statusText,
+                          styles.statusOverlayBg,
                           used.state === "사용완료"
-                            ? styles.textUsed
-                            : styles.textCanceled,
+                            ? styles.bgUsed
+                            : styles.bgCanceled,
+                        ]}
+                      />
+                      <View
+                        style={[
+                          styles.statusStamp,
+                          used.state === "사용완료"
+                            ? styles.stampUsed
+                            : styles.stampCanceled,
                         ]}
                       >
-                        {used.state}
+                        <Text
+                          style={[
+                            styles.statusText,
+                            used.state === "사용완료"
+                              ? styles.textUsed
+                              : styles.textCanceled,
+                          ]}
+                        >
+                          {used.state}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.productInfoContainer}>
+                      <Text style={styles.storeNameText}>{used.storeNm}</Text>
+                      <Text
+                        style={styles.productNameText}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {used.productNm}
+                      </Text>
+                      <Text style={styles.datetimeText}>
+                        {used.usedDateTime}
                       </Text>
                     </View>
-                  </View>
-
-                  <View style={styles.productInfoContainer}>
-                    <Text style={styles.storeNameText}>{used.storeNm}</Text>
-                    <Text
-                      style={styles.productNameText}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {used.productNm}
-                    </Text>
-                    <Text style={styles.datetimeText}>{used.usedDateTime}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={true}
-            />
+                  </TouchableOpacity>
+                )}
+                showsVerticalScrollIndicator={false}
+                scrollEnabled={true}
+              />
+            </>
           )}
         </View>
       </View>
