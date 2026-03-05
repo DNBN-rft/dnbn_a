@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -89,7 +90,7 @@ export default function CartAddModal({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
@@ -97,85 +98,99 @@ export default function CartAddModal({
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
         style={{ flex: 1 }}
       >
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>장바구니에 추가</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>장바구니에 추가</Text>
+                  <TouchableOpacity
+                    onPress={onClose}
+                    style={styles.closeButton}
+                  >
+                    <Ionicons name="close" size={24} color="#000" />
+                  </TouchableOpacity>
+                </View>
 
-            <View style={styles.productInfoSection}>
-              <Text style={styles.productNameText}>{productName}</Text>
-              <Text style={styles.priceText}>
-                {price.toLocaleString()}원 / 개
-              </Text>
-              <Text style={styles.stockText}>
-                재고: {stock.toLocaleString()}개
-              </Text>
-            </View>
+                <View style={styles.productInfoSection}>
+                  <Text style={styles.productNameText}>{productName}</Text>
+                  <Text style={styles.priceText}>
+                    {price.toLocaleString()}원 / 개
+                  </Text>
+                  <Text style={styles.stockText}>
+                    재고: {stock.toLocaleString()}개
+                  </Text>
+                </View>
 
-            <View style={styles.quantitySection}>
-              <Text style={styles.quantityLabel}>수량</Text>
-              <View style={styles.quantityControl}>
-                <TouchableOpacity
-                  style={styles.quantityButton}
-                  onPress={handleDecrement}
-                  disabled={loading}
-                >
-                  <Ionicons name="remove" size={20} color="#333" />
-                </TouchableOpacity>
+                <View style={styles.quantitySection}>
+                  <Text style={styles.quantityLabel}>수량</Text>
+                  <View style={styles.quantityControl}>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={handleDecrement}
+                      disabled={loading}
+                    >
+                      <Ionicons name="remove" size={20} color="#333" />
+                    </TouchableOpacity>
 
-                <TextInput
-                  style={styles.quantityInput}
-                  value={quantity}
-                  onChangeText={handleQuantityChange}
-                  keyboardType="number-pad"
-                  placeholder="1"
-                  editable={!loading}
-                />
+                    <TextInput
+                      style={styles.quantityInput}
+                      value={quantity}
+                      onChangeText={handleQuantityChange}
+                      keyboardType="number-pad"
+                      placeholder="1"
+                      editable={!loading}
+                    />
+
+                    <TouchableOpacity
+                      style={[
+                        styles.quantityButton,
+                        parseInt(quantity) >= stock && styles.addButtonDisabled,
+                      ]}
+                      onPress={handleIncrement}
+                      disabled={loading || parseInt(quantity) >= stock}
+                    >
+                      <Ionicons
+                        name="add"
+                        size={20}
+                        color={parseInt(quantity) >= stock ? "#ccc" : "#333"}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.totalSection}>
+                  <Text style={styles.totalLabel}>총 금액</Text>
+                  <Text style={styles.totalPrice}>
+                    {totalPrice.toLocaleString()}원
+                  </Text>
+                </View>
 
                 <TouchableOpacity
                   style={[
-                    styles.quantityButton,
-                    parseInt(quantity) >= stock && styles.addButtonDisabled,
+                    styles.addButton,
+                    loading && styles.addButtonDisabled,
                   ]}
-                  onPress={handleIncrement}
-                  disabled={loading || parseInt(quantity) >= stock}
+                  onPress={handleAddToCart}
+                  disabled={loading}
                 >
-                  <Ionicons
-                    name="add"
-                    size={20}
-                    color={parseInt(quantity) >= stock ? "#ccc" : "#333"}
-                  />
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.addButtonText}>장바구니 추가</Text>
+                  )}
                 </TouchableOpacity>
               </View>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.totalSection}>
-              <Text style={styles.totalLabel}>총 금액</Text>
-              <Text style={styles.totalPrice}>
-                {totalPrice.toLocaleString()}원
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.addButton, loading && styles.addButtonDisabled]}
-              onPress={handleAddToCart}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.addButtonText}>장바구니 추가</Text>
-              )}
-            </TouchableOpacity>
+            </TouchableWithoutFeedback>
           </View>
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
     </Modal>
   );
 }
