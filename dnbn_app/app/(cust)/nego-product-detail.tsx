@@ -264,7 +264,7 @@ export default function ProductDetailScreen() {
                 style={styles.imageModalCloseButton}
                 onPress={() => setImageModalVisible(false)}
               >
-                <Ionicons name="close" size={32} color="#fff" />
+                <Ionicons name="close" size={32} color="#FFF" />
               </TouchableOpacity>
 
               {product.productImgs?.files &&
@@ -289,12 +289,7 @@ export default function ProductDetailScreen() {
                       })}
                       keyExtractor={(item, index) => `modal-image-${index}`}
                       renderItem={({ item }) => (
-                        <View
-                          style={[
-                            styles.imageModalSlide,
-                            { width: screenWidth, height: screenWidth },
-                          ]}
-                        >
+                        <View style={[styles.imageModalSlide]}>
                           <Image
                             source={
                               item.fileUrl ||

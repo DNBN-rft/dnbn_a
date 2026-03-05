@@ -251,7 +251,15 @@ export default function ProductDetailScreen() {
                     />
                   ) : (
                     <View
-                      style={[styles.productImage, { width: screenWidth, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                      style={[
+                        styles.productImage,
+                        {
+                          width: screenWidth,
+                          backgroundColor: "#f5f5f5",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        },
+                      ]}
                     >
                       <Ionicons name="image-outline" size={64} color="#ccc" />
                     </View>
@@ -261,7 +269,16 @@ export default function ProductDetailScreen() {
             />
           ) : (
             <View
-              style={[styles.productImage, { width: screenWidth, height: 350, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+              style={[
+                styles.productImage,
+                {
+                  width: screenWidth,
+                  height: 350,
+                  backgroundColor: "#f5f5f5",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              ]}
             >
               <Ionicons name="image-outline" size={64} color="#ccc" />
             </View>
@@ -321,12 +338,7 @@ export default function ProductDetailScreen() {
                     })}
                     keyExtractor={(item, index) => `modal-image-${index}`}
                     renderItem={({ item }) => (
-                      <View
-                        style={[
-                          styles.imageModalSlide,
-                          { width: screenWidth, height: screenWidth },
-                        ]}
-                      >
+                      <View style={[styles.imageModalSlide]}>
                         {item.fileUrl ? (
                           <Image
                             source={{ uri: item.fileUrl }}
@@ -339,9 +351,20 @@ export default function ProductDetailScreen() {
                           />
                         ) : (
                           <View
-                            style={[styles.imageModalImage, { backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                            style={[
+                              styles.imageModalImage,
+                              {
+                                backgroundColor: "#f5f5f5",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              },
+                            ]}
                           >
-                            <Ionicons name="image-outline" size={64} color="#ccc" />
+                            <Ionicons
+                              name="image-outline"
+                              size={64}
+                              color="#ccc"
+                            />
                           </View>
                         )}
                       </View>
