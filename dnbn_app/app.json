@@ -1,18 +1,17 @@
 {
   "expo": {
-    "name": "dnbn_app",
+    "name": "동네방네",
     "slug": "dnbn_rn",
-    "owner": "dnbn_rn",
+    "owner": "neoclue",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/appStoreIcon.png",
     "scheme": "dnbnapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "icon": "./assets/images/iosIcon.png",
       "supportsTablet": true,
-      // "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSCameraUsageDescription": "카메라 접근 권한이 필요합니다.",
         "NSPhotoLibraryUsageDescription": "라이브러리 접근 권한이 필요합니다.",
@@ -22,9 +21,6 @@
       "bundleIdentifier": "com.neoclue.dnbnapp"
     },
     "android": {
-      // "googleServicesFile": "./google-services.json",
-      // "googleServicesFile": "${GOOGLE_SERVICES_JSON}",
-      // "googleServicesFile": "process.env.GOOGLE_SERVICES_JSON",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/androidIcon.png",
@@ -60,10 +56,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/appStoreIcon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FFFFFF",
           "dark": {
             "backgroundColor": "#000000"
           }
@@ -80,8 +76,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/notification-icon.png",
-          "color": "#ffffff",
+          "icon": "./assets/images/appStoreIcon.png",
+          "color": "#FFFFFF",
           "defaultChannel": "default",
           "sounds": []
         }
