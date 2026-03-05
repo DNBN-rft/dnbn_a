@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { Alert, Platform } from "react-native";
 
 export const DEFAULT_LOCATION = { latitude: 37.4979, longitude: 127.0276 };
 
@@ -52,6 +53,16 @@ export const getUserLocation = async (): Promise<Location.LocationObject | null>
   if (status !== "granted") {
     const newStatus = await requestLocationPermission();
     if (newStatus !== "granted") {
+      // Android에서 권한이 거부된 경우 설정으로 유도
+      if (Platform.OS === "android") {
+        await new Promise<void>((resolve) => {
+          Alert.alert(
+            "위치 권한 필요",
+            "지도 서비스를 이용하려면 위치 권한이 필요합니다. 기본 위치(서울)로 지도를 표시합니다.",
+            [{ text: "확인", onPress: () => resolve() }],
+          );
+        });
+      }
       return null;
     }
   }

@@ -175,6 +175,14 @@ export const styles = StyleSheet.create({
     height: 80,
     marginBottom: 8,
   },
+  noImageBox: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   purchaseBox: {
     padding: 5,
     justifyContent: "center",

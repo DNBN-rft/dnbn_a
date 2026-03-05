@@ -186,9 +186,7 @@ export default function ProductDetailScreen() {
 
   // 첫 번째 이미지 또는 기본 이미지
   const mainImageSource =
-    productImages.length > 0
-      ? { uri: productImages[0] }
-      : require("@/assets/images/products_soyun/cow.png");
+    productImages.length > 0 ? { uri: productImages[0] } : null;
 
   return (
     <View style={styles.container}>
@@ -241,33 +239,32 @@ export default function ProductDetailScreen() {
                   }}
                   style={{ width: screenWidth, height: 350 }}
                 >
-                  <Image
-                    source={
-                      item.fileUrl ||
-                      require("@/assets/images/products_soyun/cow.png")
-                    }
-                    style={[styles.productImage, { width: screenWidth }]}
-                    priority="high"
-                    cachePolicy="memory-disk"
-                    contentFit="cover"
-                    transition={200}
-                    placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-                  />
+                  {item.fileUrl ? (
+                    <Image
+                      source={{ uri: item.fileUrl }}
+                      style={[styles.productImage, { width: screenWidth }]}
+                      priority="high"
+                      cachePolicy="memory-disk"
+                      contentFit="cover"
+                      transition={200}
+                      placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                    />
+                  ) : (
+                    <View
+                      style={[styles.productImage, { width: screenWidth, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                    >
+                      <Ionicons name="image-outline" size={64} color="#ccc" />
+                    </View>
+                  )}
                 </Pressable>
               )}
             />
           ) : (
-            <Pressable style={{ width: screenWidth, height: 350 }}>
-              <Image
-                source={require("@/assets/images/products_soyun/cow.png")}
-                style={[styles.productImage, { width: screenWidth }]}
-                priority="high"
-                cachePolicy="memory-disk"
-                contentFit="cover"
-                transition={200}
-                placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-              />
-            </Pressable>
+            <View
+              style={[styles.productImage, { width: screenWidth, height: 350, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+            >
+              <Ionicons name="image-outline" size={64} color="#ccc" />
+            </View>
           )}
 
           {/* 페이지네이션 인디케이터 */}
@@ -330,18 +327,23 @@ export default function ProductDetailScreen() {
                           { width: screenWidth, height: screenWidth },
                         ]}
                       >
-                        <Image
-                          source={
-                            item.fileUrl ||
-                            require("@/assets/images/products_soyun/cow.png")
-                          }
-                          style={styles.imageModalImage}
-                          priority="high"
-                          cachePolicy="memory-disk"
-                          contentFit="contain"
-                          transition={200}
-                          placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-                        />
+                        {item.fileUrl ? (
+                          <Image
+                            source={{ uri: item.fileUrl }}
+                            style={styles.imageModalImage}
+                            priority="high"
+                            cachePolicy="memory-disk"
+                            contentFit="contain"
+                            transition={200}
+                            placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                          />
+                        ) : (
+                          <View
+                            style={[styles.imageModalImage, { backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                          >
+                            <Ionicons name="image-outline" size={64} color="#ccc" />
+                          </View>
+                        )}
                       </View>
                     )}
                   />
