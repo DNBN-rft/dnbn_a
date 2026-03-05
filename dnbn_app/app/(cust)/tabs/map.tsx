@@ -15,7 +15,7 @@ import StoreDetailPanel from "../mapcomponent/StoreDetailPanel";
 import StoreListPanel from "../mapcomponent/StoreListPanel";
 import { styles } from "../styles/map.styles";
 
-const KAKAO_JAVASCRIPT_KEY = "bbbf21a6976b000c1889068c4e6564f7";
+const KAKAO_JAVASCRIPT_KEY = process.env.EXPO_PUBLIC_KAKAO_JAVASCRIPT_KEY!;
 
 export default function CustMapScreen() {
   const { searchAddress } = useLocalSearchParams();
