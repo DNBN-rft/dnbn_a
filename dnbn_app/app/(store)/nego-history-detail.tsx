@@ -228,6 +228,14 @@ export default function NegoHistoryDetailPage() {
                   <View style={[styles.productMainImage, { backgroundColor: "#F3F4F6" }]} />
                 )}
 
+                <TouchableOpacity
+                  style={styles.mainImageButton}
+                  onPress={handleNextImage}
+                >
+                  <Ionicons name="chevron-forward" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+
               <View style={styles.productSubImages}>
                 {images.map((image, index) => (
                   <TouchableOpacity

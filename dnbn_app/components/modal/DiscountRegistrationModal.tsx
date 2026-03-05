@@ -3,11 +3,13 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 import {
+    Keyboard,
     Modal,
     Platform,
     Text,
     TextInput,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     View,
 } from "react-native";
 import { styles } from "./DiscountRegistrationModal.styles";
@@ -122,17 +124,11 @@ export default function DiscountRegistrationModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View style={styles.saleModalWrapper}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-            style={styles.saleModalContent}
-          >
+      <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); onClose(); }}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.saleModalWrapper}>
+              <View style={styles.saleModalContent}>
             <View style={styles.saleModalHeader}>
               <Text style={styles.saleModalTitle}>할인 등록</Text>
             </View>
@@ -370,9 +366,11 @@ export default function DiscountRegistrationModal({
                 <Text style={styles.saleCancelButtonText}>취소</Text>
               </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </TouchableOpacity>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
