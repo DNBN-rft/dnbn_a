@@ -134,11 +134,7 @@ export default function ProductDetailScreen() {
           },
         ]);
       } else {
-        const errorData = await response.json();
-        Alert.alert(
-          "오류",
-          errorData.message || "장바구니 추가에 실패했습니다.",
-        );
+        Alert.alert("오류", "장바구니 추가에 실패했습니다.");
       }
     } catch (error) {
       console.error("장바구니 추가 오류:", error);
