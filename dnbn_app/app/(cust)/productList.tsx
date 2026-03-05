@@ -149,15 +149,17 @@ export default function ProductListScreen() {
                 })
               }
             >
-              <Image
-                resizeMode="stretch"
-                source={
-                  item.productImg?.fileUrl
-                    ? { uri: item.productImg.fileUrl }
-                    : require("@/assets/images/image1.jpg")
-                }
-                style={styles.productImage}
-              />
+              {item.productImg?.fileUrl ? (
+                <Image
+                  resizeMode="stretch"
+                  source={{ uri: item.productImg.fileUrl }}
+                  style={styles.productImage}
+                />
+              ) : (
+                <View style={[styles.productImage, styles.noImageBox]}>
+                  <Ionicons name="image-outline" size={40} color="#ccc" />
+                </View>
+              )}
               <View style={styles.productInfo}>
                 <Text
                   style={styles.storeName}
