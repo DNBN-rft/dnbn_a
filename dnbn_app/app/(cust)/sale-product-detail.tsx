@@ -4,7 +4,7 @@ import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -73,7 +73,12 @@ export default function ProductDetailScreen() {
   const [cartModalVisible, setCartModalVisible] = useState(false);
   const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const screenWidth = Dimensions.get("window").width;
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -210,7 +215,7 @@ export default function ProductDetailScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView style={styles.productDetailContainer}>
+        <ScrollView ref={scrollViewRef} style={styles.productDetailContainer}>
           {/* 이미지 슬라이더 */}
           <View style={styles.imageSliderContainer}>
             {product.productImgs?.files &&
@@ -594,6 +599,16 @@ export default function ProductDetailScreen() {
             <Text style={styles.purchaseButtonText}>구매하기</Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {/* FloatingButton - 최상단 이동 */}
+      {!loading && !error && (
+        <TouchableOpacity
+          style={[styles.scrollToTopButton, { bottom: 90 + insets.bottom }]}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#ef7810" />
+        </TouchableOpacity>
       )}
 
       {/* 장바구니 추가 모달 */}
