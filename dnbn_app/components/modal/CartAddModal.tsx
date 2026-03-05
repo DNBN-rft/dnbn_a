@@ -100,7 +100,6 @@ export default function CartAddModal({
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPress={onClose}
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
