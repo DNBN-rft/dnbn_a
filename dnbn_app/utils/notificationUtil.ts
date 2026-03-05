@@ -9,12 +9,11 @@ import { Alert, Linking, Platform } from "react-native";
  * - Android의 경우 알림 채널을 함께 생성합니다.
  * - 권한이 거부되면 null을 반환합니다.
  *
- * [토큰 종류]
- * - Expo Go 환경: Expo Push Token (ExponentPushToken[...]) 반환
- * - EAS 커스텀 빌드: 네이티브 FCM 토큰 반환
+ * Expo Go, EAS 빌드 모두 getExpoPushTokenAsync()로 통일.
+ * 반환 형식: ExponentPushToken[...]
  */
 export async function getFcmToken(): Promise<string | null> {
-  if (!Device.isDevice) {
+  if (Platform.OS === "web" || !Device.isDevice) {
     return null;
   }
 
@@ -54,23 +53,13 @@ export async function getFcmToken(): Promise<string | null> {
     });
   }
 
-  // Expo Go: Expo Push Token 발급 (Expo 서버 → FCM 중계 방식)
-  // EAS 빌드: 네이티브 FCM 토큰 발급
-  const isExpoGo = Constants.appOwnership === "expo";
-
-  if (isExpoGo) {
-    const projectId =
-      Constants.expoConfig?.extra?.eas?.projectId;
-    if (!projectId) {
-      return null;
-    }
-    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-    return tokenData.data;
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  if (!projectId) {
+    return null;
   }
 
-  // 프로덕션 빌드: 네이티브 FCM 토큰
-  const tokenData = await Notifications.getDevicePushTokenAsync();
-  return tokenData.data as string;
+  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+  return tokenData.data;
 }
 
 /**
@@ -78,7 +67,7 @@ export async function getFcmToken(): Promise<string | null> {
  * 설정에서 돌아왔을 때 조용히 재시도할 때 사용.
  */
 export async function getFcmTokenSilently(): Promise<string | null> {
-  if (!Device.isDevice) return null;
+  if (Platform.OS === "web" || !Device.isDevice) return null;
 
   const { status } = await Notifications.getPermissionsAsync();
   if (status !== "granted") return null;
@@ -92,14 +81,9 @@ export async function getFcmTokenSilently(): Promise<string | null> {
     });
   }
 
-  const isExpoGo = Constants.appOwnership === "expo";
-  if (isExpoGo) {
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    if (!projectId) return null;
-    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
-    return tokenData.data;
-  }
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+  if (!projectId) return null;
 
-  const tokenData = await Notifications.getDevicePushTokenAsync();
-  return tokenData.data as string;
+  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+  return tokenData.data;
 }
