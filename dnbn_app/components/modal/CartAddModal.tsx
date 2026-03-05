@@ -10,8 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "./CartAddModal.styles"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./CartAddModal.styles";
 
 interface CartAddModalProps {
   visible: boolean;
@@ -97,10 +97,7 @@ export default function CartAddModal({
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
         style={{ flex: 1 }}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-        >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>장바구니에 추가</Text>
@@ -140,11 +137,18 @@ export default function CartAddModal({
                 />
 
                 <TouchableOpacity
-                  style={styles.quantityButton}
+                  style={[
+                    styles.quantityButton,
+                    parseInt(quantity) >= stock && styles.addButtonDisabled,
+                  ]}
                   onPress={handleIncrement}
-                  disabled={loading}
+                  disabled={loading || parseInt(quantity) >= stock}
                 >
-                  <Ionicons name="add" size={20} color="#333" />
+                  <Ionicons
+                    name="add"
+                    size={20}
+                    color={parseInt(quantity) >= stock ? "#ccc" : "#333"}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
