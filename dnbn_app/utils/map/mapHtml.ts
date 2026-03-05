@@ -22,8 +22,28 @@ export const generateMapHTML = (appKey: string) => `
           
           window.kakaoLoaded = false;
           window.kakaoError = false;
+          window.onerror = function(msg, src, line, col, err) {
+              if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'jsError',
+                      message: msg,
+                      source: src,
+                      line: line
+                  }));
+              }
+          };
       </script>
-      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}" onload="window.kakaoLoaded = true;" onerror="window.kakaoError = true;"></script>
+      <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false"
+          onload="window.kakaoLoaded = true;"
+          onerror="(function(){
+              window.kakaoError = true;
+              if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'kakaoLoadError',
+                      reason: 'script_load_failed'
+                  }));
+              }
+          })();"></script>
       <style>
           * {
               margin: 0;
@@ -77,34 +97,37 @@ export const generateMapHTML = (appKey: string) => `
           let kakaoWaitMaxAttempts = 100; // 최대 10초 대기 (100 * 100ms)
           let kakaoWaitAttempts = 0;
           
-          // Kakao SDK 로딩 확인 함수
+          // Kakao SDK 로딩 확인 함수 (스크립트 onload/onerror 이후 호출)
           function waitForKakao() {
               if (window.kakaoError) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'kakaoLoadError' }));
+                  if (window.ReactNativeWebView) {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'kakaoLoadError', reason: 'script_load_failed' }));
+                  }
                   return;
               }
               
-              if (typeof kakao === 'undefined' || !kakao.maps) {
+              if (!window.kakaoLoaded || typeof kakao === 'undefined') {
                   kakaoWaitAttempts++;
-                  
-                  // 최대 대기 시간 초과
                   if (kakaoWaitAttempts >= kakaoWaitMaxAttempts) {
-                      window.ReactNativeWebView.postMessage(JSON.stringify({ 
-                          type: 'kakaoLoadError',
-                          reason: 'timeout'
-                      }));
+                      if (window.ReactNativeWebView) {
+                          window.ReactNativeWebView.postMessage(JSON.stringify({ 
+                              type: 'kakaoLoadError',
+                              reason: 'timeout'
+                          }));
+                      }
                       return;
                   }
-                  
                   if (kakaoWaitTimeout) clearTimeout(kakaoWaitTimeout);
                   kakaoWaitTimeout = setTimeout(waitForKakao, 100);
                   return;
               }
               
-              // Kakao SDK 로드 완료
-              if (window.ReactNativeWebView) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'kakaoLoaded' }));
-              }
+              // autoload=false이므로 kakao.maps.load()로 비동기 초기화
+              kakao.maps.load(function() {
+                  if (window.ReactNativeWebView) {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'kakaoLoaded' }));
+                  }
+              });
           }
           
           // SDK 로딩 시작
@@ -119,6 +142,13 @@ export const generateMapHTML = (appKey: string) => `
               switch(data.type) {
                   case 'init':
                       try {
+                          if (typeof kakao === 'undefined' || !kakao.maps) {
+                              window.ReactNativeWebView.postMessage(JSON.stringify({
+                                  type: 'kakaoLoadError',
+                                  reason: 'kakao_not_ready'
+                              }));
+                              return;
+                          }
                           initMap();
                       } catch (e) {
                           window.ReactNativeWebView.postMessage(JSON.stringify({

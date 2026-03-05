@@ -4,19 +4,19 @@ import { RefObject, useCallback } from "react";
 import { Alert, Animated } from "react-native";
 import { WebView } from "react-native-webview";
 import {
-    addStoreMarkers,
-    clearAllMarkers,
-    fetchNearbyStores,
-    geocodeAddress,
-    getUserLocation as getLocation,
-    highlightStoreMarker,
-    moveMapToLocation,
-    reverseGeocode,
-    sendMessageToWebView,
-    setUserLocationWithZoom,
-    slideDown,
-    slideUp,
-    Store,
+  addStoreMarkers,
+  clearAllMarkers,
+  fetchNearbyStores,
+  geocodeAddress,
+  getUserLocation as getLocation,
+  highlightStoreMarker,
+  moveMapToLocation,
+  reverseGeocode,
+  sendMessageToWebView,
+  setUserLocationWithZoom,
+  slideDown,
+  slideUp,
+  Store,
 } from "../utils/map";
 
 interface UseMapActionsParams {
@@ -48,6 +48,7 @@ interface UseMapActionsParams {
     showStoreList?: boolean;
     additionalDelay?: number;
   }) => Promise<void>;
+  reloadWebView: () => void;
 }
 
 export function useMapActions({
@@ -70,6 +71,7 @@ export function useMapActions({
   clickedLocationAnim,
   storeListAnim,
   closeAllPanels,
+  reloadWebView,
 }: UseMapActionsParams) {
   const handleFetchNearbyStores = useCallback(
     async (latitude: number, longitude: number) => {
@@ -220,7 +222,17 @@ export function useMapActions({
       try {
         const data = JSON.parse(event.nativeEvent.data);
 
-        if (data.type === "ready") {
+        if (data.type === "jsError") {
+          console.warn(
+            "[MapWebView JS Error]",
+            data.message,
+            data.source,
+            data.line,
+          );
+        } else if (data.type === "kakaoLoaded") {
+          // Kakao SDK + kakao.maps.load() 완료 → 안전하게 init 전송
+          sendMessageToWebView(webViewRef, { type: "init" });
+        } else if (data.type === "ready") {
           setIsMapReady(true);
         } else if (data.type === "mapReady") {
           setTimeout(() => {
@@ -229,13 +241,30 @@ export function useMapActions({
         } else if (data.type === "kakaoLoadError") {
           // 카카오 SDK 로드 실패 (네트워크 오류, API 키 제한 등)
           setIsLoading(false);
+          const errorParts: string[] = [];
+          if (data.reason) errorParts.push(`reason: ${data.reason}`);
+          if (data.httpStatus) errorParts.push(`HTTP: ${data.httpStatus}`);
+          if (data.error) errorParts.push(`error: ${data.error}`);
+          const errorDetail = errorParts.length
+            ? `\n[${errorParts.join(", ")}]`
+            : "";
           Alert.alert(
             "지도 로드 오류",
-            "카카오 지도를 불러오지 못했습니다.\n네트워크 상태를 확인하거나 잠시 후 다시 시도해 주세요.",
+            `카카오 지도를 불러오지 못했습니다.${errorDetail}\n네트워크 상태를 확인하거나 잠시 후 다시 시도해 주세요.`,
             [
               {
                 text: "돌아가기",
+                style: "cancel",
                 onPress: () => router.back(),
+              },
+              {
+                text: "다시 시도",
+                onPress: () => {
+                  setIsLoading(true);
+                  setIsMapReady(false);
+                  setIsLocationReady(false);
+                  reloadWebView();
+                },
               },
             ],
           );
@@ -327,18 +356,18 @@ export function useMapActions({
       webViewRef,
       setIsMapReady,
       setIsLoading,
+      setIsLocationReady,
       setClickedLocation,
       setSelectedStore,
       setShowStoreList,
+      reloadWebView,
     ],
   );
 
   const handleWebViewLoadEnd = useCallback(() => {
-    // WebView가 완전히 준비될 때까지 대기
-    setTimeout(() => {
-      sendMessageToWebView(webViewRef, { type: "init" });
-    }, 500);
-  }, [webViewRef]);
+    // kakaoLoaded 메시지를 받은 후 init을 전송하므로 여기서는 아무것도 하지 않음
+    // (waitForKakao → kakao.maps.load() 완료 → kakaoLoaded 수신 → init 전송)
+  }, []);
 
   // WebView 에러 핸들러
   const handleWebViewError = useCallback(
