@@ -13,7 +13,7 @@ import ClickedLocationPanel from "../mapcomponent/ClickedLocationPanel";
 import StoreDetailPanel from "../mapcomponent/StoreDetailPanel";
 import StoreListPanel from "../mapcomponent/StoreListPanel";
 import { styles } from "../styles/map.styles";
-import { generateMapHTML } from "./mapHtml";
+import { generateMapHTML } from "../../../utils/map/mapHtml";
 
 const KAKAO_JAVASCRIPT_KEY = "46f0bc8ab705f2263a98ee3adeebd719";
 

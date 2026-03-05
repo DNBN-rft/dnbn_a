@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import TermsModal from "../../components/modal/TermsModal";
 import { styles } from "./terms-page.styles";
 
 export default function TermsPage() {
@@ -13,6 +14,11 @@ export default function TermsPage() {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [marketingAgreed, setMarketingAgreed] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTerms, setSelectedTerms] = useState<{
+    title: string;
+    htmlPath: string;
+  } | null>(null);
 
   const handleAllAgree = () => {
     const newValue = !allAgreed;
@@ -42,6 +48,16 @@ export default function TermsPage() {
   };
 
   const canProceed = ageAgreed && termsAgreed && privacyAgreed;
+
+  const handleViewTerms = (title: string, htmlPath: string) => {
+    setSelectedTerms({ title, htmlPath });
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedTerms(null);
+  };
 
   const handleStartButton = () => {
     // 필수 약관 검증
@@ -149,7 +165,15 @@ export default function TermsPage() {
               <Text style={styles.termItemText}>서비스 이용약관</Text>
               <Text style={styles.requiredBadge}>(필수)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.viewDetailButton}>
+            <TouchableOpacity
+              style={styles.viewDetailButton}
+              onPress={() =>
+                handleViewTerms(
+                  "서비스 이용약관",
+                  "동네방네_서비스_통합_정책_가이드라인_V1.html",
+                )
+              }
+            >
               <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
             </TouchableOpacity>
           </View>
@@ -173,7 +197,15 @@ export default function TermsPage() {
               <Text style={styles.termItemText}>개인정보 처리방침</Text>
               <Text style={styles.requiredBadge}>(필수)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.viewDetailButton}>
+            <TouchableOpacity
+              style={styles.viewDetailButton}
+              onPress={() =>
+                handleViewTerms(
+                  "개인정보 처리방침",
+                  "개인정보_처리방침_소비자_V2.html",
+                )
+              }
+            >
               <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
             </TouchableOpacity>
           </View>
@@ -197,7 +229,15 @@ export default function TermsPage() {
               <Text style={styles.termItemText}>마케팅 정보 수신 동의</Text>
               <Text style={styles.optionalBadge}>(선택)</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.viewDetailButton}>
+            <TouchableOpacity
+              style={styles.viewDetailButton}
+              onPress={() =>
+                handleViewTerms(
+                  "마케팅 정보 수신 동의",
+                  "동네방네_마케팅_수신_동의_약관_V1.html",
+                )
+              }
+            >
               <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
             </TouchableOpacity>
           </View>
@@ -227,6 +267,15 @@ export default function TermsPage() {
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
+
+      {selectedTerms && (
+        <TermsModal
+          visible={modalVisible}
+          onClose={handleCloseModal}
+          title={selectedTerms.title}
+          htmlPath={selectedTerms.htmlPath}
+        />
       )}
     </View>
   );

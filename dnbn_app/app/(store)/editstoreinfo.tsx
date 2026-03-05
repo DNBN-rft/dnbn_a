@@ -7,6 +7,7 @@ import PasswordChangeModal from "@/components/store/PasswordChangeModal";
 import StoreInfoSection from "@/components/store/StoreInfoSection";
 import TimePickerModal from "@/components/store/TimePickerModal";
 import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
+import Postcode from "@actbase/react-daum-postcode";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -14,6 +15,7 @@ import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Modal,
   Platform,
   ScrollView,
   Text,
@@ -41,7 +43,7 @@ interface StoreInfo {
   storeType: string;
   bizNo: string;
   ownerTelNo: string;
-  bizRegDate: string;
+  bizRegDateTime: string;
 
   storeOpenDate: string[];
   storeOpenTime: string;
@@ -122,6 +124,57 @@ export default function EditStoreInfoPage() {
   const [accountNumber, setAccountNumber] = useState(
     initialStoreInfo?.storeAccNo || "",
   );
+
+  // 입력 에러 상태
+  const [errors, setErrors] = useState<{
+    storeName?: string;
+    phoneNumber?: string;
+    address?: string;
+    accountNumber?: string;
+  }>({});
+
+  // 전화번호 자동 하이픈 포맷
+  const formatPhoneNumber = (digits: string): string => {
+    if (digits.startsWith("02")) {
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 5) return `02-${digits.slice(2)}`;
+      if (digits.length <= 9)
+        return `02-${digits.slice(2, 5)}-${digits.slice(5)}`;
+      return `02-${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+    } else {
+      if (digits.length <= 3) return digits;
+      if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+      return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+    }
+  };
+
+  // 핸들러: 가맹점명 (한글, 영문, 숫자, 공백만 허용)
+  const handleStoreNameChange = (value: string) => {
+    const filtered = value.replace(/[^가-힣a-zA-Z0-9 ]/g, "");
+    setStoreName(filtered);
+    if (filtered.trim()) {
+      setErrors((prev) => ({ ...prev, storeName: undefined }));
+    }
+  };
+
+  // 핸들러: 전화번호 (자동 하이픈 + 최대 11자리)
+  const handlePhoneChange = (value: string) => {
+    const digits = value.replace(/[^0-9]/g, "").slice(0, 11);
+    const formatted = formatPhoneNumber(digits);
+    setPhoneNumber(formatted);
+    if (digits.length >= 9) {
+      setErrors((prev) => ({ ...prev, phoneNumber: undefined }));
+    }
+  };
+
+  // 핸들러: 계좌번호 (숫자만, 최대 15자리)
+  const handleAccountNumberChange = (value: string) => {
+    const digits = value.replace(/[^0-9]/g, "").slice(0, 15);
+    setAccountNumber(digits);
+    if (digits.trim()) {
+      setErrors((prev) => ({ ...prev, accountNumber: undefined }));
+    }
+  };
   const [businessOpenTime, setBusinessOpenTime] = useState(
     initialStoreInfo?.storeOpenTime || "09:00",
   );
@@ -175,6 +228,7 @@ export default function EditStoreInfoPage() {
   const [mainImage, setMainImage] = useState<any>(
     initialStoreInfo?.mainImg || null,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 은행 목록 및 선택 modal 관련 state
   const [banks, setBanks] = useState<{ bankIdx: number; bankNm: string }[]>([]);
@@ -203,6 +257,7 @@ export default function EditStoreInfoPage() {
 
   // 모달 관련 state
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [showAddressSearch, setShowAddressSearch] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [activeTimePicker, setActiveTimePicker] = useState<
     "open" | "close" | null
@@ -215,11 +270,17 @@ export default function EditStoreInfoPage() {
   const representativeName = initialStoreInfo?.ownerNm || "";
   const representativePhone = initialStoreInfo?.ownerTelNo || "";
   const businessType = initialStoreInfo?.storeType || "";
-  const registrationDate = initialStoreInfo?.bizRegDate || "";
+  const registrationDate = initialStoreInfo?.bizRegDateTime || "";
 
   const openTimePicker = (type: "open" | "close") => {
     setActiveTimePicker(type);
     setTimePickerVisible(true);
+  };
+
+  const handleAddressSelect = (data: any) => {
+    const selected = data.roadAddress || data.address;
+    setAddress(selected);
+    setShowAddressSearch(false);
   };
 
   const handleTimeConfirm = (time: string) => {
@@ -275,17 +336,39 @@ export default function EditStoreInfoPage() {
   };
 
   const handleUpdate = async () => {
-    // 필수 값 검증
+    // validation
+    const newErrors: typeof errors = {};
+
     if (!storeName.trim()) {
-      Alert.alert("알림", "가맹점명을 입력해주세요.");
+      newErrors.storeName = "가맹점명을 입력해주세요.";
+    } else if (!/^[가-힣a-zA-Z0-9 ]+$/.test(storeName.trim())) {
+      newErrors.storeName = "한글, 영문, 숫자, 공백만 입력 가능합니다.";
+    }
+
+    const phoneDigits = phoneNumber.replace(/[^0-9]/g, "");
+    if (!phoneDigits) {
+      newErrors.phoneNumber = "전화번호를 입력해주세요.";
+    } else if (phoneDigits.length < 9 || phoneDigits.length > 11) {
+      newErrors.phoneNumber = "유효한 전화번호를 입력해주세요.";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "주소를 검색해주세요.";
+    }
+
+    if (!accountNumber.trim()) {
+      newErrors.accountNumber = "계좌번호를 입력해주세요.";
+    } else if (!/^[0-9]+$/.test(accountNumber)) {
+      newErrors.accountNumber = "계좌번호는 숫자만 입력 가능합니다.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+
     if (!bankIdx) {
       Alert.alert("알림", "은행을 선택해주세요.");
-      return;
-    }
-    if (!accountNumber.trim()) {
-      Alert.alert("알림", "계좌번호를 입력해주세요.");
       return;
     }
     if (businessDays.length === 0) {
@@ -293,6 +376,7 @@ export default function EditStoreInfoPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // FormData 생성
       const formData = new FormData();
@@ -314,8 +398,13 @@ export default function EditStoreInfoPage() {
         formData.append("storeOpenDate", day);
       });
 
-      // 이미지가 새로 선택된 경우 추가
-      if (mainImage && mainImage.fileUrl) {
+      // 이미지가 새로 선택된 경우(로컬 URI)에만 추가
+      // 기존 서버 URL(http/https)은 MultipartFile로 전송 불가 → 제외
+      if (
+        mainImage &&
+        mainImage.fileUrl &&
+        !mainImage.fileUrl.startsWith("http")
+      ) {
         const filename =
           mainImage.fileUrl.split("/").pop() || "store-image.jpg";
         const match = /\.(\w+)$/.exec(filename);
@@ -347,10 +436,12 @@ export default function EditStoreInfoPage() {
       } else {
         const error = await response.text();
         Alert.alert("오류", error || "수정 중 오류가 발생했습니다.");
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("수정 오류:", error);
       Alert.alert("오류", "수정 중 오류가 발생했습니다.");
+      setIsSubmitting(false);
     }
   };
 
@@ -387,11 +478,16 @@ export default function EditStoreInfoPage() {
           phoneNumber={phoneNumber}
           address={address}
           detailedAddress={detailedAddress}
-          onStoreNameChange={setStoreName}
-          onPhoneNumberChange={setPhoneNumber}
+          onStoreNameChange={handleStoreNameChange}
+          onPhoneNumberChange={handlePhoneChange}
           onAddressChange={setAddress}
           onDetailedAddressChange={setDetailedAddress}
           onImagePick={pickImage}
+          onAddressSearch={() => {
+            setShowAddressSearch(true);
+            setErrors((prev) => ({ ...prev, address: undefined }));
+          }}
+          errors={errors}
         />
 
         <BankInfoSection
@@ -399,7 +495,8 @@ export default function EditStoreInfoPage() {
           accountNumber={accountNumber}
           accountHolder={accountHolder}
           onBankSelect={() => setBankPickerVisible(true)}
-          onAccountNumberChange={setAccountNumber}
+          onAccountNumberChange={handleAccountNumberChange}
+          accountNumberError={errors.accountNumber}
         />
 
         <BusinessInfoSection
@@ -408,7 +505,7 @@ export default function EditStoreInfoPage() {
           representativeName={representativeName}
           representativePhone={representativePhone}
           businessType={businessType}
-          registrationDate={registrationDate}
+          bizRegDateTime={registrationDate}
         />
 
         <OperatingInfoSection
@@ -422,8 +519,14 @@ export default function EditStoreInfoPage() {
           onToggleBusinessDay={toggleBusinessDay}
         />
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
-          <Text style={styles.submitButtonText}>수정 완료</Text>
+        <TouchableOpacity
+          style={[styles.submitButton, isSubmitting && { opacity: 0.5 }]}
+          onPress={handleUpdate}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.submitButtonText}>
+            {isSubmitting ? "처리 중..." : "수정 완료"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -455,6 +558,39 @@ export default function EditStoreInfoPage() {
         }}
         onClose={() => setBankPickerVisible(false)}
       />
+
+      {/* 다음 우편번호 검색 모달 */}
+      <Modal
+        visible={showAddressSearch}
+        animationType="slide"
+        onRequestClose={() => setShowAddressSearch(false)}
+      >
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
+        <View style={styles.postcodeModalContent}>
+          <View style={styles.postcodeModalHeader}>
+            <TouchableOpacity
+              style={styles.postcodeModalCloseButton}
+              onPress={() => setShowAddressSearch(false)}
+            >
+              <Ionicons name="close" size={28} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.postcodeModalTitle}>주소 검색</Text>
+            <View style={styles.postcodeModalEmptyView} />
+          </View>
+          <Postcode
+            style={styles.postcodeStyle}
+            onSelected={handleAddressSelect}
+            onError={() =>
+              Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.")
+            }
+          />
+        </View>
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        )}
+      </Modal>
 
       {insets.bottom > 0 && (
         <View style={[styles.safeAreaBottom, { height: insets.bottom }]} />

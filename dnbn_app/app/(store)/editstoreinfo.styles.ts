@@ -87,6 +87,14 @@ export const styles = StyleSheet.create({
     color: "#999",
     marginTop: 6,
   },
+  inputError: {
+    fontSize: 12,
+    color: "#e53935",
+    marginTop: 4,
+  },
+  inputErrorBorder: {
+    borderColor: "#e53935",
+  },
   input: {
     backgroundColor: "#fff",
     borderRadius: 8,
@@ -417,5 +425,52 @@ export const styles = StyleSheet.create({
   },
   safeAreaBottom: {
     backgroundColor: "#000",
+  },
+  // 주소 검색 필드
+  addressInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  addressInputText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+  },
+  addressInputPlaceholder: {
+    color: "#999",
+  },
+  // 다음 우편번호 모달
+  postcodeModalContent: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  postcodeModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  postcodeModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  postcodeModalCloseButton: {
+    padding: 4,
+  },
+  postcodeModalEmptyView: {
+    width: 28,
+  },
+  postcodeStyle: {
+    flex: 1,
   },
 });

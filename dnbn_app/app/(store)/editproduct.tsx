@@ -182,11 +182,24 @@ export default function EditProductPage() {
 
     if (!result.canceled) {
       const asset = result.assets[0];
+
+      // mimeType에서 확장자 추출 (image/jpeg → jpg, image/png → png 등)
+      const extFromMime = asset.mimeType
+        ? asset.mimeType.split("/").pop()?.replace("jpeg", "jpg") || "jpg"
+        : "jpg";
+
+      // asset.fileName이 있고 확장자가 포함된 경우 우선 사용, 없으면 URI 마지막 세그먼트 사용
+      const rawName = asset.fileName || asset.uri.split("/").pop() || "";
+      const hasExt = rawName.includes(".");
+      const name = hasExt
+        ? rawName
+        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+
       setImages([
         ...images,
         {
           uri: asset.uri,
-          name: asset.uri.split("/").pop() || "image.jpg",
+          name,
           isNew: true,
         },
       ]);
@@ -215,10 +228,14 @@ export default function EditProductPage() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
+    if (!description.trim()) {
+      Alert.alert("알림", "상품 상세정보를 입력하세요");
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
-      setIsSaving(true);
-
       // FormData 생성
       const formData = new FormData();
       formData.append("categoryIdx", category.categoryIdx.toString());
@@ -233,16 +250,24 @@ export default function EditProductPage() {
       );
       formData.append("productDetailDescription", description);
 
-      // 새로운 이미지만 추가 (isNew === true)
-      images.forEach((img) => {
-        if (img.isNew) {
-          formData.append("productImgs", {
-            uri: img.uri,
-            type: "image/jpeg",
-            name: img.name,
-          } as any);
-        }
-      });
+      // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
+      // 유지할 기존 이미지(isNew: false) + 새 이미지(isNew: true) 모두 전송
+      for (const img of images) {
+        const ext = img.name.split(".").pop()?.toLowerCase() || "jpg";
+        const mimeType =
+          ext === "png"
+            ? "image/png"
+            : ext === "gif"
+              ? "image/gif"
+              : ext === "webp"
+                ? "image/webp"
+                : "image/jpeg";
+
+        // URI → Blob 변환 후 MultipartFile로 전송 (기존 서버 URL도 동일하게 처리)
+        const fileResponse = await fetch(img.uri);
+        const blob = await fileResponse.blob();
+        formData.append("productImgs", blob, img.name);
+      }
 
       // API 요청
       const response = await apiPutFormDataWithImage(
@@ -446,7 +471,9 @@ export default function EditProductPage() {
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 상세정보</Text>
+          <Text style={styles.label}>
+            상품 상세정보 <Text style={{ color: "#EF7810" }}>*</Text>
+          </Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="상품에 대한 상세 설명을 입력하세요"

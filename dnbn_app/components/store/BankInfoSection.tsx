@@ -14,6 +14,7 @@ interface BankInfoSectionProps {
   accountHolder: string;
   onBankSelect: () => void;
   onAccountNumberChange: (value: string) => void;
+  accountNumberError?: string;
 }
 
 export default function BankInfoSection({
@@ -22,6 +23,7 @@ export default function BankInfoSection({
   accountHolder,
   onBankSelect,
   onAccountNumberChange,
+  accountNumberError,
 }: BankInfoSectionProps) {
   return (
     <View style={styles.section}>
@@ -51,12 +53,15 @@ export default function BankInfoSection({
       <View style={styles.formGroup}>
         <Text style={styles.label}>계좌번호</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, !!accountNumberError && styles.inputErrorBorder]}
           placeholder="계좌번호를 입력하세요"
           value={accountNumber}
           onChangeText={onAccountNumberChange}
           keyboardType="numeric"
         />
+        {!!accountNumberError && (
+          <Text style={styles.inputError}>{accountNumberError}</Text>
+        )}
       </View>
 
       <View style={styles.formGroup}>

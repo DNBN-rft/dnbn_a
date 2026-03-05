@@ -15,7 +15,6 @@ import {
   validatePassword,
   validatePhoneNumber,
   validateResidentNumber,
-  verifyPhoneNumber,
 } from "@/utils/signupUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -64,6 +63,12 @@ export default function PracticeView() {
   const phoneMiddleRef = useRef<TextInput>(null);
   const phoneLastRef = useRef<TextInput>(null);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isSmsSent, setIsSmsSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isSmsLoading, setIsSmsLoading] = useState(false);
+  const [isVerifyLoading, setIsVerifyLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isSignupLoading, setIsSignupLoading] = useState(false);
   const [isIdCheckLoading, setIsIdCheckLoading] = useState(false);
   // const [isNickNmCheckLoading, setIsNickNmCheckLoading] = useState(false);
@@ -140,14 +145,82 @@ export default function PracticeView() {
   //   );
   // };
 
-  // 핸드폰번호 본인 인증
+  // 카운트다운 시작 (5분)
+  const startCountdown = () => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setCountdown(300);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!);
+          countdownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // 핸드폰번호 인증번호 전송
   const handlePhoneVerification = async () => {
-    await verifyPhoneNumber(
-      phoneFirst,
-      phoneMiddle,
-      phoneLast,
-      setIsPhoneVerified,
-    );
+    if (!phoneFirst || !phoneMiddle || !phoneLast) {
+      Alert.alert("알림", "핸드폰번호를 입력해주세요.");
+      return;
+    }
+
+    const phone = `${phoneFirst}${phoneMiddle}${phoneLast}`;
+    setIsSmsLoading(true);
+
+    try {
+      const response = await apiPost("/cust/mms/send", { phone });
+
+      if (response.ok) {
+        setIsSmsSent(true);
+        setVerificationCode("");
+        startCountdown();
+        Alert.alert("성공", "인증번호가 전송되었습니다.");
+      } else {
+        Alert.alert("실패", "인증번호 전송에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("인증번호 전송 에러:", error);
+      Alert.alert("오류", "인증번호 전송 중 오류가 발생했습니다.");
+    } finally {
+      setIsSmsLoading(false);
+    }
+  };
+
+  // 인증번호 확인
+  const handleVerifyCode = async () => {
+    if (!verificationCode) {
+      Alert.alert("알림", "인증번호를 입력해주세요.");
+      return;
+    }
+
+    const phone = `${phoneFirst}${phoneMiddle}${phoneLast}`;
+    setIsVerifyLoading(true);
+
+    try {
+      const response = await apiPost("/cust/mms/verify", { phone, code: verificationCode });
+
+      if (response.ok) {
+        setIsPhoneVerified(true);
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
+        setCountdown(0);
+        Alert.alert("성공", "본인 인증이 완료되었습니다.");
+      } else {
+        setIsPhoneVerified(false);
+        Alert.alert("실패", "인증번호가 올바르지 않습니다.");
+      }
+    } catch (error) {
+      console.error("인증번호 확인 에러:", error);
+      Alert.alert("오류", "인증번호 확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsVerifyLoading(false);
+    }
   };
 
   const handleSignup = async () => {
@@ -189,12 +262,14 @@ export default function PracticeView() {
       const response = await apiPost("/cust/signup", requestBody);
 
       if (response.ok) {
-        Alert.alert("성공", "회원가입이 완료되었습니다.", [
-          {
-            text: "확인",
-            onPress: () => router.replace("/(auth)/login"),
-          },
-        ]);
+        setTimeout(() => {
+          Alert.alert("성공", "회원가입이 완료되었습니다.", [
+            {
+              text: "확인",
+              onPress: () => router.replace("/(auth)/login"),
+            },
+          ]);
+        }, 300);
       } else {
         Alert.alert("실패", "회원가입에 실패했습니다.");
         setIsSignupLoading(false);
@@ -496,28 +571,89 @@ export default function PracticeView() {
                 </Modal>
               </>
             ) : (
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedEmailDomain}
-                  onValueChange={(domain) =>
-                    handleEmailDomainSelectUtil(
-                      domain,
-                      setSelectedEmailDomain,
-                      setEmailDomain,
-                    )
-                  }
-                  style={styles.picker}
-                  itemStyle={styles.pickerItem}
+              <>
+                <Pressable
+                  style={styles.pickerButton}
+                  onPress={() => setShowEmailDomainPicker(true)}
                 >
-                  <Picker.Item label="직접 입력" value="direct" />
-                  <Picker.Item label="네이버" value="naver.com" />
-                  <Picker.Item label="지메일" value="gmail.com" />
-                  <Picker.Item label="다음" value="daum.net" />
-                  <Picker.Item label="카카오" value="kakao.com" />
-                  <Picker.Item label="네이트" value="nate.com" />
-                  <Picker.Item label="한메일" value="hanmail.net" />
-                </Picker>
-              </View>
+                  <Text style={styles.pickerButtonText}>
+                    {selectedEmailDomain === "direct"
+                      ? "직접 입력"
+                      : selectedEmailDomain === "naver.com"
+                        ? "네이버"
+                        : selectedEmailDomain === "gmail.com"
+                          ? "지메일"
+                          : selectedEmailDomain === "daum.net"
+                            ? "다음"
+                            : selectedEmailDomain === "kakao.com"
+                              ? "카카오"
+                              : selectedEmailDomain === "nate.com"
+                                ? "네이트"
+                                : "한메일"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#666" />
+                </Pressable>
+
+                <Modal
+                  visible={showEmailDomainPicker}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setShowEmailDomainPicker(false)}
+                >
+                  <View style={styles.modalOverlay}>
+                    <Pressable
+                      style={styles.modalBackdrop}
+                      onPress={() => setShowEmailDomainPicker(false)}
+                    />
+                    <View style={[styles.modalContent, { paddingBottom: Math.max(20, insets.bottom + 8) }]}>
+                      <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>이메일 선택</Text>
+                        <TouchableOpacity
+                          onPress={() => setShowEmailDomainPicker(false)}
+                        >
+                          <Text style={styles.modalDoneButton}>완료</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {[
+                        { label: "직접 입력", value: "direct" },
+                        { label: "네이버", value: "naver.com" },
+                        { label: "지메일", value: "gmail.com" },
+                        { label: "다음", value: "daum.net" },
+                        { label: "카카오", value: "kakao.com" },
+                        { label: "네이트", value: "nate.com" },
+                        { label: "한메일", value: "hanmail.net" },
+                      ].map((item) => (
+                        <TouchableOpacity
+                          key={item.value}
+                          style={[
+                            styles.androidPickerItem,
+                            selectedEmailDomain === item.value &&
+                              styles.androidPickerItemSelected,
+                          ]}
+                          onPress={() => {
+                            handleEmailDomainSelectUtil(
+                              item.value,
+                              setSelectedEmailDomain,
+                              setEmailDomain,
+                            );
+                            setShowEmailDomainPicker(false);
+                          }}
+                        >
+                          <Text
+                            style={[
+                              styles.androidPickerItemText,
+                              selectedEmailDomain === item.value &&
+                                styles.androidPickerItemTextSelected,
+                            ]}
+                          >
+                            {item.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </Modal>
+              </>
             )}
             {selectedEmailDomain === "direct" && emailDomainError ? (
               <Text style={styles.validationErrorText}>{emailDomainError}</Text>
@@ -533,14 +669,18 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneFirst}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneFirstChangeUtil(
                     text,
                     setPhoneFirst,
                     setIsPhoneVerified,
                     phoneMiddleRef,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={3}
               />
               <Text>-</Text>
@@ -551,14 +691,18 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneMiddle}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneMiddleChangeUtil(
                     text,
                     setPhoneMiddle,
                     setIsPhoneVerified,
                     phoneLastRef,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={4}
               />
               <Text>-</Text>
@@ -569,22 +713,69 @@ export default function PracticeView() {
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
                 value={phoneLast}
-                onChangeText={(text) =>
+                onChangeText={(text) => {
                   handlePhoneLastChangeUtil(
                     text,
                     setPhoneLast,
                     setIsPhoneVerified,
-                  )
-                }
+                  );
+                  setIsSmsSent(false);
+                  setVerificationCode("");
+                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  setCountdown(0);
+                }}
                 maxLength={4}
               />
             </View>
-            <Pressable
-              style={styles.sendCodeButton}
-              onPress={handlePhoneVerification}
-            >
-              <Text style={styles.sendCodeButtonText}>인증번호 전송</Text>
-            </Pressable>
+            {!isPhoneVerified && (
+              <Pressable
+                style={[styles.sendCodeButton, isSmsLoading && styles.buttonDisabled]}
+                onPress={handlePhoneVerification}
+                disabled={isSmsLoading}
+              >
+                <Text style={styles.sendCodeButtonText}>
+                  {isSmsLoading ? "전송 중..." : isSmsSent ? "재전송" : "인증번호 전송"}
+                </Text>
+              </Pressable>
+            )}
+            {isSmsSent && (
+              <>
+                <View style={styles.verifyCodeRow}>
+                  <TextInput
+                    style={styles.verifyCodeInput}
+                    placeholder="인증번호 입력"
+                    placeholderTextColor={"#ccc"}
+                    keyboardType="numeric"
+                    value={verificationCode}
+                    onChangeText={setVerificationCode}
+                    maxLength={6}
+                    editable={!isPhoneVerified}
+                  />
+                  <Pressable
+                    style={[
+                      styles.verifyCodeButton,
+                      (isVerifyLoading || isPhoneVerified) && styles.buttonDisabled,
+                    ]}
+                    onPress={handleVerifyCode}
+                    disabled={isVerifyLoading || isPhoneVerified}
+                  >
+                    <Text style={styles.verifyCodeButtonText}>
+                      {isPhoneVerified ? "인증완료" : isVerifyLoading ? "확인 중..." : "확인"}
+                    </Text>
+                  </Pressable>
+                </View>
+                {!isPhoneVerified && countdown > 0 && (
+                  <Text style={styles.countdownText}>
+                    {`${String(Math.floor(countdown / 60)).padStart(2, "0")}:${String(countdown % 60).padStart(2, "0")} 내에 입력해주세요`}
+                  </Text>
+                )}
+                {!isPhoneVerified && countdown === 0 && (
+                  <Text style={[styles.countdownText, styles.countdownExpired]}>
+                    인증 시간이 만료되었습니다. 재전송해주세요.
+                  </Text>
+                )}
+              </>
+            )}
           </View>
 
           <View style={styles.viewMargin}>

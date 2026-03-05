@@ -2,7 +2,7 @@ import { apiGet } from "@/utils/api";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -52,7 +52,7 @@ interface SaleHistoryContent {
 interface DiscountHistoryItem {
   id: string;
   saleLogIdx: number;
-  uri: any;
+  uri: { uri: string } | null;
   category: string;
   productName: string;
   originalPrice: number;
@@ -67,6 +67,7 @@ interface DiscountHistoryItem {
 
 export default function DiscountHistoryPage() {
   const insets = useSafeAreaInsets();
+  const flatListRef = useRef<FlatList>(null);
   const [discountHistory, setDiscountHistory] = useState<DiscountHistoryItem[]>(
     [],
   );
@@ -100,9 +101,7 @@ export default function DiscountHistoryPage() {
         return {
           id: item.productCode,
           saleLogIdx: item.saleLogIdx,
-          uri: imageUrl
-            ? { uri: imageUrl }
-            : require("@/assets/images/image1.jpg"),
+          uri: imageUrl ? { uri: imageUrl } : null,
           category: "", // API에서 제공하지 않으므로 빈 값
           productName: item.productNm,
           originalPrice: item.originalPrice,
@@ -204,6 +203,10 @@ export default function DiscountHistoryPage() {
     [transformApiData],
   );
 
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   // 다음 페이지 로드
   const loadMore = useCallback(() => {
     if (hasNext && !loadingMore && !loading) {
@@ -274,6 +277,7 @@ export default function DiscountHistoryPage() {
             </View>
           )}
           <FlatList
+            ref={flatListRef}
             data={discountHistory}
             keyExtractor={(item, index) => `${item.id}-${index}`}
             showsVerticalScrollIndicator={false}
@@ -307,7 +311,22 @@ export default function DiscountHistoryPage() {
               <View style={styles.discountProduct}>
                 <View style={styles.productContainer}>
                   <View style={styles.productImageContainer}>
-                    <Image style={styles.productImage} source={item.uri} />
+                    {item.uri ? (
+                      <Image style={styles.productImage} source={item.uri} />
+                    ) : (
+                      <View
+                        style={[
+                          styles.productImage,
+                          {
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#f5f5f5",
+                          },
+                        ]}
+                      >
+                        <Ionicons name="image-outline" size={32} color="#ccc" />
+                      </View>
+                    )}
                   </View>
 
                   <View style={styles.productInfoContainer}>
@@ -371,6 +390,13 @@ export default function DiscountHistoryPage() {
               </View>
             )}
           />
+
+          <TouchableOpacity
+            style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+            onPress={scrollToTop}
+          >
+            <Ionicons name="chevron-up" size={24} color="#ef7810" />
+          </TouchableOpacity>
         </>
       )}
 

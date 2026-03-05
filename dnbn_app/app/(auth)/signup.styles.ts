@@ -215,4 +215,60 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     color: "#EF7810",
   },
+  verifyCodeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+  },
+  verifyCodeInput: {
+    flex: 1,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    fontSize: 15,
+    color: "#919191ff",
+    backgroundColor: "#fff",
+  },
+  verifyCodeButton: {
+    height: 44,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  verifyCodeButtonText: {
+    fontSize: 15,
+    color: "#EF7810",
+  },
+  countdownText: {
+    marginTop: 6,
+    fontSize: 13,
+    color: "#EF7810",
+  },
+  countdownExpired: {
+    color: "#e53935",
+  },
+  androidPickerItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  androidPickerItemSelected: {
+    backgroundColor: "#fff5ee",
+  },
+  androidPickerItemText: {
+    fontSize: 15,
+    color: "#333",
+  },
+  androidPickerItemTextSelected: {
+    color: "#EF7810",
+    fontWeight: "600",
+  },
 });

@@ -55,21 +55,14 @@ export default function DetailNegoProductPage() {
     return `${year}.${month}.${day} ${hours}:${minutes}`;
   };
 
-  // 이미지 배열 생성 (3개 미만일 때 logo.png로 채우기)
+  // 이미지 배열 생성 (실제 이미지만 반환)
   const getImages = () => {
-    const logoImage = require("@/assets/images/logo.png");
-    const images = [];
+    const images: { uri: string }[] = [];
 
     if (negoDetail?.files?.files && negoDetail.files.files.length > 0) {
-      // API에서 받은 이미지 추가
       negoDetail.files.files.forEach((file) => {
         images.push({ uri: file.fileUrl });
       });
-    }
-
-    // 3개 미만이면 logo.png로 채우기
-    while (images.length < 3) {
-      images.push(logoImage);
     }
 
     return images;
@@ -197,11 +190,15 @@ export default function DetailNegoProductPage() {
                   <Ionicons name="chevron-back" size={24} color="#666" />
                 </TouchableOpacity>
 
-                <Image
-                  style={styles.productMainImage}
-                  source={images[currentImageIndex]}
-                  contentFit="contain"
-                />
+                {images[currentImageIndex] ? (
+                  <Image
+                    style={styles.productMainImage}
+                    source={images[currentImageIndex]}
+                    contentFit="contain"
+                  />
+                ) : (
+                  <View style={styles.productMainImage} />
+                )}
 
                 <TouchableOpacity
                   style={styles.mainImageButton}
@@ -212,23 +209,27 @@ export default function DetailNegoProductPage() {
               </View>
 
               <View style={styles.productSubImages}>
-                {images.map((image, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => setCurrentImageIndex(index)}
-                  >
-                    <Image
-                      style={[
-                        styles.productSubImage,
-                        currentImageIndex === index && {
-                          borderWidth: 2,
-                          borderColor: "#007AFF",
-                        },
-                      ]}
-                      source={image}
-                    />
-                  </TouchableOpacity>
-                ))}
+                {[0, 1, 2].map((index) =>
+                  images[index] ? (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setCurrentImageIndex(index)}
+                    >
+                      <Image
+                        style={[
+                          styles.productSubImage,
+                          currentImageIndex === index && {
+                            borderWidth: 2,
+                            borderColor: "#007AFF",
+                          },
+                        ]}
+                        source={images[index]}
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <View key={index} style={styles.productSubImage} />
+                  )
+                )}
               </View>
             </View>
 

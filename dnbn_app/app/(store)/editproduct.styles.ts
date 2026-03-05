@@ -167,6 +167,13 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
   },
+  disabledButton: {
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ddd",
+  },
+  disabledText: {
+    color: "#ccc",
+  },
   submitButton: {
     backgroundColor: "#000",
     borderRadius: 8,

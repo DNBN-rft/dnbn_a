@@ -1,8 +1,8 @@
 import { apiGet } from "@/utils/api";
-import { calculateDistance, formatDistance } from "@/utils/distance";
+import { formatDistance } from "@/utils/distance";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -36,6 +36,7 @@ interface NegoProduct {
   storeCode: string;
   latitude: number;
   longitude: number;
+  distanceM: number;
   reviewCount: number;
   reviewAvg: number;
 }
@@ -127,18 +128,25 @@ const formatCountdown = (seconds: number): string => {
 
 export default function NegoListScreen() {
   const insets = useSafeAreaInsets();
+  const { from } = useLocalSearchParams<{ from?: string }>();
   const [sortBy, setSortBy] = useState<SortType>("distance");
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
   const [negoProducts, setNegoProducts] = useState<NegoProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userLocation] = useState({ latitude: 37.7749, longitude: 122.4194 }); // 기본값
+  const flatListRef = useRef<import("react-native").FlatList>(null);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   // 초기 timeLeft 설정 및 카운트다운
   useEffect(() => {
     const fetchNegoProducts = async () => {
       try {
         setLoading(true);
-        const response = await apiGet(`/cust/negoproducts`);
+        const apiUrl =
+          from === "search" ? `/cust/search/nego-list` : `/cust/negoproducts`;
+        const response = await apiGet(apiUrl);
         const data = await response.json();
 
         setNegoProducts(data);
@@ -187,13 +195,7 @@ export default function NegoListScreen() {
   const getSortedProducts = () => {
     const sorted = [...negoProducts].map((product) => ({
       ...product,
-      distance:
-        calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-          product.latitude,
-          product.longitude,
-        ) / 1000, // 미터를 km로 변환
+      distance: product.distanceM / 1000, // 백엔드 distanceM(미터) → km 환산
     }));
 
     switch (sortBy) {
@@ -278,20 +280,13 @@ export default function NegoListScreen() {
         </View>
       ) : (
         <FlatList
+          ref={flatListRef}
           data={getSortedProducts()}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.productCode}
           contentContainerStyle={{ paddingVertical: 8 }}
           renderItem={({ item }) => {
-            const distanceInMeters =
-              item.distance !== undefined
-                ? item.distance * 1000 // km를 미터로 변환
-                : calculateDistance(
-                    userLocation.latitude,
-                    userLocation.longitude,
-                    item.latitude,
-                    item.longitude,
-                  );
+            const distanceInMeters = item.distanceM;
 
             return (
               <NegoProductCard
@@ -304,6 +299,13 @@ export default function NegoListScreen() {
           }}
         ></FlatList>
       )}
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

@@ -12,12 +12,19 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "GOOGLE_SERVICES_JSON": "${GOOGLE_SERVICES_JSON}"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {},
+      "env": {
+        "GOOGLE_SERVICES_JSON": "${GOOGLE_SERVICES_JSON}"
       }
     }
   },

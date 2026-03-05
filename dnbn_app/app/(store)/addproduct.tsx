@@ -117,6 +117,10 @@ export default function AddProduct() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
+    if (!description.trim()) {
+      Alert.alert("알림", "상품 상세 정보를 입력하세요");
+      return;
+    }
 
     try {
       setIsLoading(true);

@@ -1,8 +1,8 @@
 import { apiGet } from "@/utils/api";
-import { calculateDistance } from "@/utils/distance";
+import { formatDistance } from "@/utils/distance";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,13 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./saleproductlist.styles";
 
 type SortType = "distance" | "price" | "rating" | "new";
-
-// 내 위치 하드코딩 (서울 강남역 좌표 예시)
-// 나중에는 내 위치 정보를 수정할 때마다 local storage에 저장된 값을 불러오도록 변경 필요
-const MY_LOCATION = {
-  latitude: 37.288095,
-  longitude: 127.02761,
-};
 
 interface FileItem {
   originalName: string;
@@ -49,6 +42,7 @@ interface CustSaleListResponse {
   storeNm: string;
   latitude: number; // 위도 (Y)
   longitude: number; // 경도 (X)
+  distanceM: number;
   reviewCount: number;
   reviewAvg: number;
 }
@@ -70,13 +64,6 @@ interface SaleProduct {
   saleType: SaleType;
 }
 
-const formatDistance = (distanceKm: number): string => {
-  if (distanceKm >= 1) {
-    return `${distanceKm.toFixed(1)}km`;
-  }
-  return `${Math.round(distanceKm * 1000)}m`;
-};
-
 const formatCountdown = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -86,10 +73,16 @@ const formatCountdown = (seconds: number): string => {
 
 export default function SaleProductListScreen() {
   const insets = useSafeAreaInsets();
+  const { from } = useLocalSearchParams<{ from?: string }>();
   const [sortBy, setSortBy] = useState<SortType>("distance");
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
   const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const flatListRef = useRef<import("react-native").FlatList>(null);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   useEffect(() => {
     fetchSaleProducts();
@@ -98,7 +91,9 @@ export default function SaleProductListScreen() {
   const fetchSaleProducts = async () => {
     try {
       setLoading(true);
-      const response = await apiGet(`/cust/sales`);
+      const apiUrl =
+        from === "search" ? `/cust/search/sale-list` : `/cust/sales`;
+      const response = await apiGet(apiUrl);
 
       if (!response.ok) {
         throw new Error("Failed to fetch sale products");
@@ -120,14 +115,8 @@ export default function SaleProductListScreen() {
             ? item.saleValue
             : Math.round((item.saleValue / item.originalPrice) * 100);
 
-        // 거리 계산 (미터 단위)
-        const distanceInMeters = calculateDistance(
-          MY_LOCATION.latitude,
-          MY_LOCATION.longitude,
-          item.latitude, // 위도
-          item.longitude, // 경도
-        );
-        const distanceInKm = distanceInMeters / 1000;
+        // 백엔드에서 제공된 거리(M) 그대로 저장
+        const distanceM = item.distanceM;
 
         // 첫 번째 이미지 URL 가져오기 (order 기준 정렬)
         const firstImage =
@@ -146,7 +135,7 @@ export default function SaleProductListScreen() {
           discount: discount,
           price: item.discountPrice,
           originalPrice: item.originalPrice,
-          distance: distanceInKm,
+          distance: distanceM,
           rating: item.reviewAvg,
           reviewCount: item.reviewCount,
           category: "",
@@ -279,6 +268,7 @@ export default function SaleProductListScreen() {
         </View>
       ) : (
         <FlatList
+          ref={flatListRef}
           data={getSortedProducts()}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
@@ -350,7 +340,7 @@ export default function SaleProductListScreen() {
                       <Text style={styles.discountBadgeText}>
                         {item.saleType === "할인률"
                           ? `${item.discount}%`
-                          : "정가할인"}
+                          : `${item.price.toLocaleString()}원`}
                       </Text>
                     </View>
                   </View>
@@ -390,6 +380,13 @@ export default function SaleProductListScreen() {
           }}
         ></FlatList>
       )}
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

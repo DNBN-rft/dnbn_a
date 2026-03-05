@@ -1,3 +1,4 @@
+import { apiPost } from "@/utils/api";
 import { clearAuthData } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -40,6 +41,11 @@ export default function Mypage() {
   };
 
   const handleLogout = async () => {
+    try {
+      await apiPost("/cust/logout", {});
+    } catch (error) {
+      // 서버 로그아웃 실패 시 무시하고 로컬 정리 진행
+    }
     try {
       await clearAuthData("cust");
     } catch (error) {

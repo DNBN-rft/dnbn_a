@@ -56,6 +56,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: "#333",
   },
   loginButton: {
     width: "100%",

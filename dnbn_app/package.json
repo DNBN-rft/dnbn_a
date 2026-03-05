@@ -9,7 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "postinstall": "node ./fix-kakao-map-version.js"
+    "postinstall": "node ./fix-kakao-map-version.js",
+    "generate-terms": "node ./scripts/generate-terms-content.js"
   },
   "dependencies": {
     "@actbase/react-daum-postcode": "^1.0.4",
@@ -26,6 +27,7 @@
     "@react-navigation/native": "^7.1.8",
     "expo": "^54.0.33",
     "expo-brightness": "~14.0.8",
+    "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.12",
     "expo-dev-client": "~6.0.20",
     "expo-device": "~8.0.10",
