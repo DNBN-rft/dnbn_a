@@ -1,6 +1,6 @@
 /**
  * 스토어 회원가입 Step 2: 사업자 정보 입력 화면
- * 
+ *
  * 기능:
  * - 대표자 정보 입력
  * - 사업자 등록번호 입력 및 중복 체크
@@ -8,36 +8,37 @@
  * - 업종/업태 입력
  * - 정산 계좌 정보 입력
  */
-import React, { useState } from 'react';
+import { useStoreSignup } from "@/contexts/StoreSignupContext";
+import { apiGet } from "@/utils/api";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
+  formatBusinessNumber,
+  formatPhone,
+  restrictAccountNumber,
+  restrictBusinessName,
+  restrictBusinessNumber,
+  restrictBusinessType,
+  restrictName,
+  restrictPhone,
+} from "@/utils/storeInputRestrictions";
+import { validateBizInfo } from "@/utils/storeSignupValidation";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useStoreSignup } from '@/contexts/StoreSignupContext';
-import { validateBizInfo } from '@/utils/storeSignupValidation';
-import {
-  restrictName,
-  restrictPhone,
-  formatPhone,
-  restrictBusinessName,
-  restrictBusinessNumber,
-  formatBusinessNumber,
-  restrictBusinessType,
-  restrictAccountNumber,
-} from '@/utils/storeInputRestrictions';
-import { apiPost } from '@/utils/api';
-import { styles } from './store-signup-biz-info.styles';
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Modal,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./store-signup-biz-info.styles";
 
 export default function StoreSignupBizInfoScreen() {
   const { formData, updateBizInfo, setCurrentStep } = useStoreSignup();
@@ -52,28 +53,27 @@ export default function StoreSignupBizInfoScreen() {
    * 사업자번호 중복 체크
    */
   const handleCheckBizNo = async () => {
-    if (!bizInfo.bizNo || bizInfo.bizNo.replace(/-/g, '').length !== 10) {
-      Alert.alert('알림', '사업자번호 10자리를 입력해주세요.');
+    if (!bizInfo.bizNo || bizInfo.bizNo.replace(/-/g, "").length !== 10) {
+      Alert.alert("알림", "사업자번호 10자리를 입력해주세요.");
       return;
     }
 
     setIsCheckingBizNo(true);
     try {
-      const response = await apiPost('/store/check-biz-no', { 
-        bizNo: bizInfo.bizNo.replace(/-/g, '') 
-      });
-      const data = await response.json();
+      const bizNoClean = bizInfo.bizNo.replace(/-/g, "");
+      const response = await apiGet(`/store/check-bizNo/${bizNoClean}`);
+      const message = await response.text();
 
-      if (response.ok && !data.exists) {
+      if (response.ok && message.includes("사용가능")) {
         setBizNoDuplicate(false);
-        Alert.alert('성공', '사용 가능한 사업자번호입니다.');
+        Alert.alert("성공", message);
       } else {
         setBizNoDuplicate(true);
-        Alert.alert('알림', '이미 등록된 사업자번호입니다.');
+        Alert.alert("알림", message);
       }
     } catch (error) {
-      console.error('사업자번호 중복 체크 에러:', error);
-      Alert.alert('오류', '사업자번호 확인 중 오류가 발생했습니다.');
+      console.error("사업자번호 중복 체크 에러:", error);
+      Alert.alert("오류", "사업자번호 확인 중 오류가 발생했습니다.");
     } finally {
       setIsCheckingBizNo(false);
     }
@@ -83,12 +83,57 @@ export default function StoreSignupBizInfoScreen() {
    * 날짜 선택 핸들러
    */
   const handleDateChange = (event: any, date?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
+    if (Platform.OS !== 'web') {
+      setShowDatePicker(Platform.OS === "ios");
+    }
     if (date) {
       setSelectedDate(date);
-      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      // 로컬 시간 기준으로 날짜 포맷 (타임존 이슈 방지)
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
       updateBizInfo({ bizRegDate: formattedDate });
     }
+  };
+
+  /**
+   * 웹용 날짜 선택 핸들러
+   */
+  const handleWebDateChange = (text: string) => {
+    // 숫자만 추출
+    const digitsOnly = text.replace(/\D/g, '');
+    
+    // 최대 8자리까지만 허용
+    const limited = digitsOnly.slice(0, 8);
+    
+    // YYYY-MM-DD 포맷 적용
+    let formatted = limited;
+    if (limited.length >= 5) {
+      formatted = `${limited.slice(0, 4)}-${limited.slice(4, 6)}`;
+      if (limited.length > 6) {
+        formatted += `-${limited.slice(6, 8)}`;
+      }
+    } else if (limited.length > 4) {
+      formatted = `${limited.slice(0, 4)}-${limited.slice(4)}`;
+    }
+    
+    updateBizInfo({ bizRegDate: formatted });
+    
+    // 완전한 날짜가 입력되면 Date 객체 업데이트
+    if (limited.length === 8) {
+      const year = parseInt(limited.slice(0, 4));
+      const month = parseInt(limited.slice(4, 6)) - 1;
+      const day = parseInt(limited.slice(6, 8));
+      setSelectedDate(new Date(year, month, day));
+    }
+  };
+
+  /**
+   * 날짜 선택 모달 닫기
+   */
+  const closeDatePicker = () => {
+    setShowDatePicker(false);
   };
 
   /**
@@ -97,15 +142,15 @@ export default function StoreSignupBizInfoScreen() {
   const handleNext = () => {
     const validation = validateBizInfo(bizInfo, bizNoDuplicate);
     if (!validation.isValid) {
-      Alert.alert('알림', validation.message);
+      Alert.alert("알림", validation.message);
       return;
     }
     setCurrentStep(3);
-    router.push('/store-signup-store-info' as any);
+    router.push("/store-signup-store-info" as any);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -120,7 +165,7 @@ export default function StoreSignupBizInfoScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
@@ -138,7 +183,9 @@ export default function StoreSignupBizInfoScreen() {
               placeholder="홍길동"
               placeholderTextColor="#ccc"
               value={bizInfo.ownerNm}
-              onChangeText={(text) => updateBizInfo({ ownerNm: restrictName(text) })}
+              onChangeText={(text) =>
+                updateBizInfo({ ownerNm: restrictName(text) })
+              }
             />
           </View>
 
@@ -171,7 +218,9 @@ export default function StoreSignupBizInfoScreen() {
               placeholder="동네방네 본점"
               placeholderTextColor="#ccc"
               value={bizInfo.bizNm}
-              onChangeText={(text) => updateBizInfo({ bizNm: restrictBusinessName(text) })}
+              onChangeText={(text) =>
+                updateBizInfo({ bizNm: restrictBusinessName(text) })
+              }
             />
           </View>
 
@@ -197,7 +246,8 @@ export default function StoreSignupBizInfoScreen() {
               <TouchableOpacity
                 style={[
                   styles.checkButton,
-                  (isCheckingBizNo || bizNoDuplicate === false) && styles.checkButtonDisabled,
+                  (isCheckingBizNo || bizNoDuplicate === false) &&
+                    styles.checkButtonDisabled,
                 ]}
                 onPress={handleCheckBizNo}
                 disabled={isCheckingBizNo || bizNoDuplicate === false}
@@ -206,7 +256,7 @@ export default function StoreSignupBizInfoScreen() {
                   <ActivityIndicator size="small" color="#FF6F2B" />
                 ) : (
                   <Text style={styles.checkButtonText}>
-                    {bizNoDuplicate === false ? '확인완료' : '중복확인'}
+                    {bizNoDuplicate === false ? "확인완료" : "중복확인"}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -218,23 +268,93 @@ export default function StoreSignupBizInfoScreen() {
             <Text style={styles.label}>
               개업일 <Text style={styles.required}>*</Text>
             </Text>
-            <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={bizInfo.bizRegDate ? styles.dateText : styles.datePlaceholder}>
-                {bizInfo.bizRegDate || '날짜 선택'}
-              </Text>
-              <Ionicons name="calendar-outline" size={20} color="#999" />
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handleDateChange}
-                maximumDate={new Date()}
+            {Platform.OS === 'web' ? (
+              // 웹용 HTML input
+              <TextInput
+                style={styles.input}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor="#ccc"
+                value={bizInfo.bizRegDate}
+                onChangeText={handleWebDateChange}
+                maxLength={10}
               />
+            ) : (
+              // 앱용 DateTimePicker
+              <>
+                <TouchableOpacity
+                  style={styles.dateInput}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text
+                    style={
+                      bizInfo.bizRegDate ? styles.dateText : styles.datePlaceholder
+                    }
+                  >
+                    {bizInfo.bizRegDate || "날짜 선택"}
+                  </Text>
+                  <Ionicons name="calendar-outline" size={20} color="#999" />
+                </TouchableOpacity>
+                
+                {/* iOS용 Modal + DateTimePicker */}
+                {Platform.OS === 'ios' && showDatePicker && (
+                  <Modal
+                    transparent={true}
+                    animationType="slide"
+                    visible={showDatePicker}
+                    onRequestClose={closeDatePicker}
+                  >
+                    <View style={{
+                      flex: 1,
+                      justifyContent: 'flex-end',
+                      backgroundColor: 'rgba(0,0,0,0.5)',
+                    }}>
+                      <View style={{
+                        backgroundColor: '#fff',
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        paddingBottom: 40,
+                      }}>
+                        <View style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: 16,
+                          borderBottomWidth: 1,
+                          borderBottomColor: '#eee',
+                        }}>
+                          <TouchableOpacity onPress={closeDatePicker}>
+                            <Text style={{ color: '#FF6F2B', fontSize: 16 }}>취소</Text>
+                          </TouchableOpacity>
+                          <Text style={{ fontSize: 16, fontWeight: '600' }}>개업일 선택</Text>
+                          <TouchableOpacity onPress={closeDatePicker}>
+                            <Text style={{ color: '#FF6F2B', fontSize: 16, fontWeight: '600' }}>완료</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <DateTimePicker
+                          value={selectedDate}
+                          mode="date"
+                          display="spinner"
+                          onChange={handleDateChange}
+                          maximumDate={new Date()}
+                          textColor="#000"
+                          locale="ko-KR"
+                        />
+                      </View>
+                    </View>
+                  </Modal>
+                )}
+                
+                {/* Android용 DateTimePicker */}
+                {Platform.OS === 'android' && showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                    maximumDate={new Date()}
+                  />
+                )}
+              </>
             )}
           </View>
 
@@ -248,7 +368,9 @@ export default function StoreSignupBizInfoScreen() {
               placeholder="예: 식품, 음료, 소매업"
               placeholderTextColor="#ccc"
               value={bizInfo.bizType}
-              onChangeText={(text) => updateBizInfo({ bizType: restrictBusinessType(text) })}
+              onChangeText={(text) =>
+                updateBizInfo({ bizType: restrictBusinessType(text) })
+              }
             />
           </View>
 
@@ -262,11 +384,15 @@ export default function StoreSignupBizInfoScreen() {
               placeholder="계좌번호 입력 (숫자만)"
               placeholderTextColor="#ccc"
               value={bizInfo.storeAccNo}
-              onChangeText={(text) => updateBizInfo({ storeAccNo: restrictAccountNumber(text) })}
+              onChangeText={(text) =>
+                updateBizInfo({ storeAccNo: restrictAccountNumber(text) })
+              }
               keyboardType="number-pad"
               maxLength={15}
             />
-            <Text style={styles.helperText}>정산금이 입금될 계좌번호입니다.</Text>
+            <Text style={styles.helperText}>
+              정산금이 입금될 계좌번호입니다.
+            </Text>
           </View>
         </ScrollView>
 

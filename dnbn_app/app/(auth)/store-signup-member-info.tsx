@@ -1,44 +1,53 @@
 /**
  * 스토어 회원가입 Step 1: 회원 정보 입력 화면
- * 
+ *
  * 기능:
  * - 아이디 입력 및 중복 체크
  * - 비밀번호 입력 및 확인
  * - 이메일 입력
  * - 실시간 유효성 검사
  */
-import React, { useState } from 'react';
+import { useStoreSignup } from "@/contexts/StoreSignupContext";
+import { apiGet } from "@/utils/api";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
+  restrictEmail,
+  restrictLoginId,
+  restrictPassword,
+} from "@/utils/storeInputRestrictions";
+import {
+  getPasswordCheckMessage,
+  validateMemberInfo,
+} from "@/utils/storeSignupValidation";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useStoreSignup } from '@/contexts/StoreSignupContext';
-import { validateMemberInfo, getPasswordCheckMessage } from '@/utils/storeSignupValidation';
-import { restrictLoginId, restrictPassword, restrictEmail } from '@/utils/storeInputRestrictions';
-import { apiPost } from '@/utils/api';
-import { styles } from './store-signup-member-info.styles';
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./store-signup-member-info.styles";
 
 export default function StoreSignupMemberInfoScreen() {
   const { formData, updateMemberInfo, setCurrentStep } = useStoreSignup();
   const { memberInfo } = formData;
 
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [idCheckStatus, setIdCheckStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [idCheckStatus, setIdCheckStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const [isCheckingId, setIsCheckingId] = useState(false);
 
   // 에러 메시지
-  const [loginIdError, setLoginIdError] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [loginIdError, setLoginIdError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   /**
    * 아이디 입력 핸들러
@@ -46,8 +55,8 @@ export default function StoreSignupMemberInfoScreen() {
   const handleLoginIdChange = (text: string) => {
     const restricted = restrictLoginId(text);
     updateMemberInfo({ loginId: restricted });
-    setIdCheckStatus('idle');
-    setLoginIdError('');
+    setIdCheckStatus("idle");
+    setLoginIdError("");
   };
 
   /**
@@ -64,7 +73,7 @@ export default function StoreSignupMemberInfoScreen() {
   const handleEmailChange = (text: string) => {
     const restricted = restrictEmail(text);
     updateMemberInfo({ email: restricted });
-    setEmailError('');
+    setEmailError("");
   };
 
   /**
@@ -72,27 +81,29 @@ export default function StoreSignupMemberInfoScreen() {
    */
   const handleCheckDuplicateId = async () => {
     if (!memberInfo.loginId || memberInfo.loginId.length < 6) {
-      Alert.alert('알림', '아이디는 6자 이상 입력해주세요.');
+      Alert.alert("알림", "아이디는 6자 이상 입력해주세요.");
       return;
     }
 
     setIsCheckingId(true);
     try {
-      const response = await apiPost('/store/check-login-id', { loginId: memberInfo.loginId });
-      const data = await response.json();
+      const response = await apiGet(
+        `/store/check-loginId/${memberInfo.loginId}`,
+      );
+      const message = await response.text();
 
-      if (response.ok && !data.exists) {
-        setIdCheckStatus('success');
-        setLoginIdError('');
-        Alert.alert('성공', '사용 가능한 아이디입니다.');
+      if (response.ok && message.includes("사용가능")) {
+        setIdCheckStatus("success");
+        setLoginIdError("");
+        Alert.alert("성공", message);
       } else {
-        setIdCheckStatus('error');
-        setLoginIdError('이미 사용 중인 아이디입니다.');
-        Alert.alert('알림', '이미 사용 중인 아이디입니다.');
+        setIdCheckStatus("error");
+        setLoginIdError("이미 사용 중인 아이디입니다.");
+        Alert.alert("알림", message);
       }
     } catch (error) {
-      console.error('아이디 중복 체크 에러:', error);
-      Alert.alert('오류', '아이디 중복 확인 중 오류가 발생했습니다.');
+      console.error("아이디 중복 체크 에러:", error);
+      Alert.alert("오류", "아이디 중복 확인 중 오류가 발생했습니다.");
     } finally {
       setIsCheckingId(false);
     }
@@ -102,19 +113,23 @@ export default function StoreSignupMemberInfoScreen() {
    * 다음 단계로 이동
    */
   const handleNext = () => {
-    const validation = validateMemberInfo(memberInfo, idCheckStatus, passwordConfirm);
+    const validation = validateMemberInfo(
+      memberInfo,
+      idCheckStatus,
+      passwordConfirm,
+    );
     if (!validation.isValid) {
-      Alert.alert('알림', validation.message);
+      Alert.alert("알림", validation.message);
       return;
     }
     setCurrentStep(2);
-    router.push('/store-signup-biz-info' as any);
+    router.push("/store-signup-biz-info" as any);
   };
 
-  const passwordCheck = getPasswordCheckMessage(memberInfo.password || '');
+  const passwordCheck = getPasswordCheckMessage(memberInfo.password || "");
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -129,7 +144,7 @@ export default function StoreSignupMemberInfoScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
@@ -155,16 +170,17 @@ export default function StoreSignupMemberInfoScreen() {
               <TouchableOpacity
                 style={[
                   styles.checkButton,
-                  (isCheckingId || idCheckStatus === 'success') && styles.checkButtonDisabled,
+                  (isCheckingId || idCheckStatus === "success") &&
+                    styles.checkButtonDisabled,
                 ]}
                 onPress={handleCheckDuplicateId}
-                disabled={isCheckingId || idCheckStatus === 'success'}
+                disabled={isCheckingId || idCheckStatus === "success"}
               >
                 {isCheckingId ? (
                   <ActivityIndicator size="small" color="#FF6F2B" />
                 ) : (
                   <Text style={styles.checkButtonText}>
-                    {idCheckStatus === 'success' ? '확인완료' : '중복확인'}
+                    {idCheckStatus === "success" ? "확인완료" : "중복확인"}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -172,7 +188,9 @@ export default function StoreSignupMemberInfoScreen() {
             {loginIdError ? (
               <Text style={styles.errorText}>{loginIdError}</Text>
             ) : (
-              <Text style={styles.helperText}>6자 이상의 영문 또는 영문, 숫자 혼합</Text>
+              <Text style={styles.helperText}>
+                6자 이상의 영문 또는 영문, 숫자 혼합
+              </Text>
             )}
           </View>
 
@@ -195,14 +213,16 @@ export default function StoreSignupMemberInfoScreen() {
               <Text
                 style={[
                   styles.helperText,
-                  passwordCheck.status === 'error' && styles.errorText,
-                  passwordCheck.status === 'success' && styles.successText,
+                  passwordCheck.status === "error" && styles.errorText,
+                  passwordCheck.status === "success" && styles.successText,
                 ]}
               >
                 {passwordCheck.message}
               </Text>
             ) : (
-              <Text style={styles.helperText}>8~16자 영문, 숫자, 특수문자를 사용하세요</Text>
+              <Text style={styles.helperText}>
+                8~16자 영문, 숫자, 특수문자를 사용하세요
+              </Text>
             )}
           </View>
 
@@ -216,13 +236,17 @@ export default function StoreSignupMemberInfoScreen() {
               placeholder="비밀번호 재입력"
               placeholderTextColor="#ccc"
               value={passwordConfirm}
-              onChangeText={(text) => setPasswordConfirm(restrictPassword(text))}
+              onChangeText={(text) =>
+                setPasswordConfirm(restrictPassword(text))
+              }
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
             />
             {passwordConfirm && memberInfo.password !== passwordConfirm && (
-              <Text style={styles.errorText}>비밀번호가 일치하지 않습니다.</Text>
+              <Text style={styles.errorText}>
+                비밀번호가 일치하지 않습니다.
+              </Text>
             )}
             {passwordConfirm && memberInfo.password === passwordConfirm && (
               <Text style={styles.successText}>비밀번호가 일치합니다.</Text>

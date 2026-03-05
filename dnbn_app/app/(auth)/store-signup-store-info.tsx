@@ -17,6 +17,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,7 +64,9 @@ export default function StoreSignupStoreInfoScreen() {
    * 영업 시작 시간 설정
    */
   const handleOpenTimeChange = (event: any, date?: Date) => {
-    setShowOpenTimePicker(Platform.OS === 'ios');
+    if (Platform.OS !== 'web') {
+      setShowOpenTimePicker(Platform.OS === 'ios');
+    }
     if (date) {
       setTempOpenTime(date);
       const hours = String(date.getHours()).padStart(2, '0');
@@ -73,16 +76,32 @@ export default function StoreSignupStoreInfoScreen() {
   };
 
   /**
+   * 시작 시간 모달 닫기
+   */
+  const closeOpenTimePicker = () => {
+    setShowOpenTimePicker(false);
+  };
+
+  /**
    * 영업 종료 시간 설정
    */
   const handleCloseTimeChange = (event: any, date?: Date) => {
-    setShowCloseTimePicker(Platform.OS === 'ios');
+    if (Platform.OS !== 'web') {
+      setShowCloseTimePicker(Platform.OS === 'ios');
+    }
     if (date) {
       setTempCloseTime(date);
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       updateStoreInfo({ storeCloseTime: `${hours}:${minutes}` });
     }
+  };
+
+  /**
+   * 종료 시간 모달 닫기
+   */
+  const closeCloseTimePicker = () => {
+    setShowCloseTimePicker(false);
   };
 
   /**
@@ -98,6 +117,7 @@ export default function StoreSignupStoreInfoScreen() {
       storeZipCode: data.zonecode,
       storeAddr: data.address,
     });
+    setShowPostcode(false); // 모달 닫기
   };
 
   /**
@@ -244,11 +264,61 @@ export default function StoreSignupStoreInfoScreen() {
               </Text>
               <Ionicons name="time-outline" size={20} color="#999" />
             </TouchableOpacity>
-            {showOpenTimePicker && (
+            
+            {/* iOS용 Modal + DateTimePicker */}
+            {Platform.OS === 'ios' && showOpenTimePicker && (
+              <Modal
+                transparent={true}
+                animationType="slide"
+                visible={showOpenTimePicker}
+                onRequestClose={closeOpenTimePicker}
+              >
+                <View style={{
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                }}>
+                  <View style={{
+                    backgroundColor: '#fff',
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
+                    paddingBottom: 40,
+                  }}>
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: 16,
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#eee',
+                    }}>
+                      <TouchableOpacity onPress={closeOpenTimePicker}>
+                        <Text style={{ color: '#FF6F2B', fontSize: 16 }}>취소</Text>
+                      </TouchableOpacity>
+                      <Text style={{ fontSize: 16, fontWeight: '600' }}>영업 시작 시간</Text>
+                      <TouchableOpacity onPress={closeOpenTimePicker}>
+                        <Text style={{ color: '#FF6F2B', fontSize: 16, fontWeight: '600' }}>완료</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <DateTimePicker
+                      value={tempOpenTime}
+                      mode="time"
+                      display="spinner"
+                      onChange={handleOpenTimeChange}
+                      textColor="#000"
+                      locale="ko-KR"
+                    />
+                  </View>
+                </View>
+              </Modal>
+            )}
+            
+            {/* Android용 DateTimePicker */}
+            {Platform.OS === 'android' && showOpenTimePicker && (
               <DateTimePicker
                 value={tempOpenTime}
                 mode="time"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 onChange={handleOpenTimeChange}
               />
             )}
@@ -268,11 +338,61 @@ export default function StoreSignupStoreInfoScreen() {
               </Text>
               <Ionicons name="time-outline" size={20} color="#999" />
             </TouchableOpacity>
-            {showCloseTimePicker && (
+            
+            {/* iOS용 Modal + DateTimePicker */}
+            {Platform.OS === 'ios' && showCloseTimePicker && (
+              <Modal
+                transparent={true}
+                animationType="slide"
+                visible={showCloseTimePicker}
+                onRequestClose={closeCloseTimePicker}
+              >
+                <View style={{
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                }}>
+                  <View style={{
+                    backgroundColor: '#fff',
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
+                    paddingBottom: 40,
+                  }}>
+                    <View style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: 16,
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#eee',
+                    }}>
+                      <TouchableOpacity onPress={closeCloseTimePicker}>
+                        <Text style={{ color: '#FF6F2B', fontSize: 16 }}>취소</Text>
+                      </TouchableOpacity>
+                      <Text style={{ fontSize: 16, fontWeight: '600' }}>영업 종료 시간</Text>
+                      <TouchableOpacity onPress={closeCloseTimePicker}>
+                        <Text style={{ color: '#FF6F2B', fontSize: 16, fontWeight: '600' }}>완료</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <DateTimePicker
+                      value={tempCloseTime}
+                      mode="time"
+                      display="spinner"
+                      onChange={handleCloseTimeChange}
+                      textColor="#000"
+                      locale="ko-KR"
+                    />
+                  </View>
+                </View>
+              </Modal>
+            )}
+            
+            {/* Android용 DateTimePicker */}
+            {Platform.OS === 'android' && showCloseTimePicker && (
               <DateTimePicker
                 value={tempCloseTime}
                 mode="time"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 onChange={handleCloseTimeChange}
               />
             )}
