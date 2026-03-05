@@ -1,4 +1,5 @@
 import CartAddModal from "@/components/modal/CartAddModal";
+import PurchaseModal from "@/components/modal/PurchaseModal";
 import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -70,6 +71,7 @@ export default function ProductDetailScreen() {
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [cartModalVisible, setCartModalVisible] = useState(false);
+  const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
 
   const screenWidth = Dimensions.get("window").width;
 
@@ -141,6 +143,18 @@ export default function ProductDetailScreen() {
       Alert.alert("오류", "장바구니 추가 중 오류가 발생했습니다.");
       throw error;
     }
+  };
+
+  // 구매하기 핸들러
+  const handlePurchase = (quantity: number) => {
+    setPurchaseModalVisible(false);
+    router.push({
+      pathname: "/(cust)/orderPage",
+      params: {
+        productCode: productData?.response.productCode,
+        orderQty: quantity.toString(),
+      },
+    });
   };
 
   // API 데이터가 없으면 렌더링하지 않음
@@ -573,7 +587,10 @@ export default function ProductDetailScreen() {
             <Ionicons name="cart-outline" size={24} color="#EF7810" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.purchaseButton}>
+          <TouchableOpacity
+            style={styles.purchaseButton}
+            onPress={() => setPurchaseModalVisible(true)}
+          >
             <Text style={styles.purchaseButtonText}>구매하기</Text>
           </TouchableOpacity>
         </View>
@@ -590,6 +607,19 @@ export default function ProductDetailScreen() {
           stock={productData.response.productAmount}
           onClose={() => setCartModalVisible(false)}
           onAddToCart={handleAddToCart}
+        />
+      )}
+
+      {/* 구매하기 모달 */}
+      {productData && (
+        <PurchaseModal
+          visible={purchaseModalVisible}
+          productName={productData.response.productNm}
+          productCode={productData.response.productCode}
+          price={productData.discountPrice}
+          stock={productData.response.productAmount}
+          onClose={() => setPurchaseModalVisible(false)}
+          onPurchase={handlePurchase}
         />
       )}
 
