@@ -67,6 +67,28 @@ export const styles = StyleSheet.create({
   inputFlex: {
     flex: 1,
   },
+  phoneInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  phoneInput: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: "#333",
+    backgroundColor: "#fff",
+    textAlign: "center",
+  },
+  phoneSeparator: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "500",
+  },
   checkButton: {
     paddingHorizontal: 16,
     height: 50,

@@ -12,13 +12,11 @@ import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiGet, apiPost } from "@/utils/api";
 import {
   formatBusinessNumber,
-  formatPhone,
   restrictAccountNumber,
   restrictBusinessName,
   restrictBusinessNumber,
   restrictBusinessType,
   restrictName,
-  restrictPhone,
 } from "@/utils/storeInputRestrictions";
 import { validateBizInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
@@ -59,6 +57,20 @@ export default function StoreSignupBizInfoScreen() {
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
+
+  // 전화번호 입력 state 및 ref
+  const [phoneFirst, setPhoneFirst] = useState(
+    bizInfo.ownerTelNo.substring(0, 3) || "",
+  );
+  const [phoneMiddle, setPhoneMiddle] = useState(
+    bizInfo.ownerTelNo.substring(3, 7) || "",
+  );
+  const [phoneLast, setPhoneLast] = useState(
+    bizInfo.ownerTelNo.substring(7, 11) || "",
+  );
+  const phoneFirstRef = useRef<TextInput>(null);
+  const phoneMiddleRef = useRef<TextInput>(null);
+  const phoneLastRef = useRef<TextInput>(null);
 
   /**
    * DatePicker/BankPicker 애니메이션
@@ -294,18 +306,74 @@ export default function StoreSignupBizInfoScreen() {
             <Text style={styles.label}>
               대표 전화번호 <Text style={styles.required}>*</Text>
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="010-1234-5678"
-              placeholderTextColor="#ccc"
-              value={formatPhone(bizInfo.ownerTelNo)}
-              onChangeText={(text) => {
-                const digitsOnly = restrictPhone(text);
-                updateBizInfo({ ownerTelNo: digitsOnly });
-              }}
-              keyboardType="phone-pad"
-              maxLength={13}
-            />
+            <View style={styles.phoneInputRow}>
+              <TextInput
+                ref={phoneFirstRef}
+                style={styles.phoneInput}
+                placeholder="010"
+                placeholderTextColor="#ccc"
+                keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
+                value={phoneFirst}
+                onChangeText={(text) => {
+                  const numbers = text.replace(/[^0-9]/g, "");
+                  setPhoneFirst(numbers.slice(0, 3));
+                  if (numbers.length === 3) {
+                    phoneMiddleRef.current?.focus();
+                  }
+                  updateBizInfo({
+                    ownerTelNo: numbers.slice(0, 3) + phoneMiddle + phoneLast,
+                  });
+                }}
+                maxLength={3}
+              />
+              <Text style={styles.phoneSeparator}>-</Text>
+              <TextInput
+                ref={phoneMiddleRef}
+                style={styles.phoneInput}
+                placeholder="1234"
+                placeholderTextColor="#ccc"
+                keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
+                value={phoneMiddle}
+                onChangeText={(text) => {
+                  const numbers = text.replace(/[^0-9]/g, "");
+                  setPhoneMiddle(numbers.slice(0, 4));
+                  if (numbers.length === 4) {
+                    phoneLastRef.current?.focus();
+                  }
+                  updateBizInfo({
+                    ownerTelNo: phoneFirst + numbers.slice(0, 4) + phoneLast,
+                  });
+                }}
+                onKeyPress={({ nativeEvent }) => {
+                  if (nativeEvent.key === "Backspace" && phoneMiddle === "") {
+                    phoneFirstRef.current?.focus();
+                  }
+                }}
+                maxLength={4}
+              />
+              <Text style={styles.phoneSeparator}>-</Text>
+              <TextInput
+                ref={phoneLastRef}
+                style={styles.phoneInput}
+                placeholder="5678"
+                placeholderTextColor="#ccc"
+                keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
+                value={phoneLast}
+                onChangeText={(text) => {
+                  const numbers = text.replace(/[^0-9]/g, "");
+                  setPhoneLast(numbers.slice(0, 4));
+                  updateBizInfo({
+                    ownerTelNo: phoneFirst + phoneMiddle + numbers.slice(0, 4),
+                  });
+                }}
+                onKeyPress={({ nativeEvent }) => {
+                  if (nativeEvent.key === "Backspace" && phoneLast === "") {
+                    phoneMiddleRef.current?.focus();
+                  }
+                }}
+                maxLength={4}
+              />
+            </View>
           </View>
 
           {/* 사업명 */}
