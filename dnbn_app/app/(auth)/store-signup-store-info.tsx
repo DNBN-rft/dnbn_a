@@ -30,7 +30,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { styles } from "./store-signup-store-info.styles";
 
 const WEEK_DAYS = [
@@ -46,6 +49,7 @@ const WEEK_DAYS = [
 export default function StoreSignupStoreInfoScreen() {
   const { formData, updateStoreInfo, setCurrentStep } = useStoreSignup();
   const { storeInfo } = formData;
+  const insets = useSafeAreaInsets();
 
   const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
   const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
@@ -325,10 +329,10 @@ export default function StoreSignupStoreInfoScreen() {
         animationType="slide"
         onRequestClose={() => setShowPostcode(false)}
       >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#fff" }}
-          edges={["top"]}
-        >
+        <View style={{ flex: 1, backgroundColor: "#fff" }}>
+          {insets.top > 0 && (
+            <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+          )}
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.modalCloseButton}
@@ -344,7 +348,7 @@ export default function StoreSignupStoreInfoScreen() {
             onSelected={handleAddressComplete}
             onError={handlePostcodeError}
           />
-        </SafeAreaView>
+        </View>
       </Modal>
 
       <TimePickerModal
