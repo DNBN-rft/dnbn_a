@@ -317,14 +317,14 @@ export default function StoreSignupFileUploadScreen() {
             </View>
           )}
 
-          {fileUpload.businessDocs.length < 5 && (
+          {fileUpload.businessDocs.length < 3 && (
             <TouchableOpacity
               style={styles.addDocButton}
               onPress={handlePickBusinessDoc}
             >
               <Ionicons name="add-circle-outline" size={24} color="#FF6F2B" />
               <Text style={styles.addDocButtonText}>
-                사업자등록증 추가 ({fileUpload.businessDocs.length}/5)
+                사업자등록증 추가 ({fileUpload.businessDocs.length}/3)
               </Text>
             </TouchableOpacity>
           )}
