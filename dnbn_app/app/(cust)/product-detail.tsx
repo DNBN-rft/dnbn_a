@@ -4,7 +4,7 @@ import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -67,7 +67,12 @@ export default function ProductDetailScreen() {
   const insets = useSafeAreaInsets();
   const { productCode } = useLocalSearchParams();
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const screenWidth = Dimensions.get("window").width;
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -213,7 +218,7 @@ export default function ProductDetailScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.productDetailContainer}>
+      <ScrollView ref={scrollViewRef} style={styles.productDetailContainer}>
         {/* 이미지 슬라이더 */}
         <View style={styles.imageSliderContainer}>
           {productData.productImgs?.files &&
@@ -251,7 +256,15 @@ export default function ProductDetailScreen() {
                     />
                   ) : (
                     <View
-                      style={[styles.productImage, { width: screenWidth, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                      style={[
+                        styles.productImage,
+                        {
+                          width: screenWidth,
+                          backgroundColor: "#f5f5f5",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        },
+                      ]}
                     >
                       <Ionicons name="image-outline" size={64} color="#ccc" />
                     </View>
@@ -261,7 +274,16 @@ export default function ProductDetailScreen() {
             />
           ) : (
             <View
-              style={[styles.productImage, { width: screenWidth, height: 350, backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+              style={[
+                styles.productImage,
+                {
+                  width: screenWidth,
+                  height: 350,
+                  backgroundColor: "#f5f5f5",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              ]}
             >
               <Ionicons name="image-outline" size={64} color="#ccc" />
             </View>
@@ -321,12 +343,7 @@ export default function ProductDetailScreen() {
                     })}
                     keyExtractor={(item, index) => `modal-image-${index}`}
                     renderItem={({ item }) => (
-                      <View
-                        style={[
-                          styles.imageModalSlide,
-                          { width: screenWidth, height: screenWidth },
-                        ]}
-                      >
+                      <View style={[styles.imageModalSlide]}>
                         {item.fileUrl ? (
                           <Image
                             source={{ uri: item.fileUrl }}
@@ -339,9 +356,20 @@ export default function ProductDetailScreen() {
                           />
                         ) : (
                           <View
-                            style={[styles.imageModalImage, { backgroundColor: "#f5f5f5", alignItems: "center", justifyContent: "center" }]}
+                            style={[
+                              styles.imageModalImage,
+                              {
+                                backgroundColor: "#f5f5f5",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              },
+                            ]}
                           >
-                            <Ionicons name="image-outline" size={64} color="#ccc" />
+                            <Ionicons
+                              name="image-outline"
+                              size={64}
+                              color="#ccc"
+                            />
                           </View>
                         )}
                       </View>
@@ -591,6 +619,16 @@ export default function ProductDetailScreen() {
           <Text style={styles.purchaseButtonText}>구매하기</Text>
         </TouchableOpacity>
       </View>
+
+      {/* FloatingButton - 최상단 이동 */}
+      {!loading && (
+        <TouchableOpacity
+          style={[styles.scrollToTopButton, { bottom: 90 + insets.bottom }]}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#ef7810" />
+        </TouchableOpacity>
+      )}
 
       {/* 장바구니 추가 모달 */}
       {productData && (

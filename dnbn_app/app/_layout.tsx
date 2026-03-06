@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/contexts/AuthContext';
+import { StoreSignupProvider } from '@/contexts/StoreSignupContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { setLogoutCallback } from '@/utils/api';
 
@@ -46,7 +47,9 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutContent />
+      <StoreSignupProvider>
+        <RootLayoutContent />
+      </StoreSignupProvider>
     </AuthProvider>
   );
 }

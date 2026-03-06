@@ -386,16 +386,18 @@ export default function LoginScreen() {
               >
                 <Text style={styles.linkText}>아이디 · 비밀번호 찾기</Text>
               </TouchableOpacity>
-              {userType === "cust" && (
-                <>
-                  <View style={styles.separator} />
-                  <TouchableOpacity
-                    onPress={() => router.push("/(auth)/terms-page")}
-                  >
-                    <Text style={styles.linkText}>회원가입</Text>
-                  </TouchableOpacity>
-                </>
-              )}
+              <View style={styles.separator} />
+              <TouchableOpacity
+                onPress={() => {
+                  if (userType === "cust") {
+                    router.push("/(auth)/terms-page");
+                  } else {
+                    router.push("/store-signup-agreement" as any);
+                  }
+                }}
+              >
+                <Text style={styles.linkText}>회원가입</Text>
+              </TouchableOpacity>
             </View>
 
             {userType === "cust" && (

@@ -1,4 +1,5 @@
 import { apiPostFormDataWithImage } from "@/utils/api";
+import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -85,10 +86,22 @@ export default function NoticeDetailScreen() {
     }
 
     try {
+      // custCode 가져오기
+      const custCode = await getStorageItem("custCode");
+
+      if (!custCode) {
+        if (Platform.OS === "web") {
+          window.alert("로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+        } else {
+          Alert.alert("로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+        }
+        return;
+      }
+
       const formData = new FormData();
 
       // 문의 정보 추가
-      formData.append("custCode", "CUST_001");
+      formData.append("custCode", custCode);
       formData.append("questionRequestType", selectedQuestionTypeValue);
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
