@@ -190,7 +190,7 @@ export default function LoginScreen() {
           await setMultipleItems(custTokens);
 
           // 서버에 FCM 토큰이 없는 경우에만 발급 시도
-          if (!data.fcmGranted) {
+          if (data.fcmGranted === false) {
             try {
               const fcmToken = await getFcmToken();
               if (fcmToken) {
@@ -282,10 +282,21 @@ export default function LoginScreen() {
       const loginUrl = await getSocialLoginUrl(provider);
       console.log(`${provider} 로그인 URL:`, loginUrl);
 
-      // Step 2: 브라우저 오픈
-      await WebBrowser.openBrowserAsync(loginUrl);
+      // Step 2: openAuthSessionAsync 사용 → iOS ASWebAuthenticationSession / Android Custom Tabs
+      // 새 앱 인스턴스를 열지 않고 동일 앱 내에서 리다이렉트를 가로챔
+      const result = await WebBrowser.openAuthSessionAsync(
+        loginUrl,
+        "dnbnapp://social-login",
+      );
 
-      // Step 3: 딥링크 결과는 app/social-login.tsx 라우트에서 처리
+      // Step 3: 브라우저가 리다이렉트 URL을 가로챈 경우 직접 파싱하여 처리
+      if (result.type === "success" && result.url) {
+        const { queryParams } = Linking.parse(result.url);
+        if (queryParams && queryParams.accessToken) {
+          await handleSocialLoginSuccess(queryParams);
+        }
+      }
+      // result.type === 'cancel' 이면 사용자가 직접 닫은 것이므로 아무것도 하지 않음
     } catch (error) {
       console.error(`${provider} 로그인 에러:`, error);
       if (Platform.OS === "web") {

@@ -4,6 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
+
+// 소셜 로그인 후 초기 설정 흐름에서 알림이 중복으로 뜨지 않도록 방지
+let _addressInitAlertShown = false;
 import {
   Alert,
   BackHandler,
@@ -64,7 +67,8 @@ export default function AddressSelectScreen() {
           hasLocation = value === "true";
         }
 
-        if (!hasLocation) {
+        if (!hasLocation && !_addressInitAlertShown) {
+          _addressInitAlertShown = true;
           setIsInitialSetup(true);
           if (Platform.OS === "web") {
             window.alert("주소 정보가 없어요 기본 주소지를 설정해주세요");

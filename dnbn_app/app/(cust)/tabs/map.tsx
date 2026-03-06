@@ -169,7 +169,7 @@ export default function CustMapScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>내 위치 설정</Text>
+          <Text style={styles.title}>지도</Text>
         </View>
         <View style={styles.rightSection}>
           <TouchableOpacity
