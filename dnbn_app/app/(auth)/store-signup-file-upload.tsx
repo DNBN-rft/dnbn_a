@@ -1,6 +1,6 @@
 /**
  * 스토어 회원가입 Step 4: 파일 업로드 및 최종 제출
- * 
+ *
  * 기능:
  * - 가게 대표 이미지 업로드 (1장)
  * - 사업자등록증 업로드 (여러 장)
@@ -8,24 +8,24 @@
  * - 전체 데이터 검증
  * - API 제출
  */
-import React, { useState } from 'react';
+import { useStoreSignup } from "@/contexts/StoreSignupContext";
+import { apiPostFormDataWithImage } from "@/utils/api";
+import { validateFileInfo } from "@/utils/storeSignupValidation";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { useStoreSignup } from '@/contexts/StoreSignupContext';
-import { validateFileInfo } from '@/utils/storeSignupValidation';
-import { apiPostFormDataWithImage } from '@/utils/api';
-import { styles } from './store-signup-file-upload.styles';
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./store-signup-file-upload.styles";
 
 export default function StoreSignupFileUploadScreen() {
   const { formData, updateFileUpload, resetFormData } = useStoreSignup();
@@ -38,8 +38,8 @@ export default function StoreSignupFileUploadScreen() {
    */
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('권한 필요', '갤러리 접근 권한이 필요합니다.');
+    if (status !== "granted") {
+      Alert.alert("권한 필요", "갤러리 접근 권한이 필요합니다.");
       return false;
     }
     return true;
@@ -64,7 +64,7 @@ export default function StoreSignupFileUploadScreen() {
       updateFileUpload({
         storeImage: {
           uri: asset.uri,
-          type: 'image/jpeg',
+          type: "image/jpeg",
           name: `store_${Date.now()}.jpg`,
         },
       });
@@ -79,7 +79,7 @@ export default function StoreSignupFileUploadScreen() {
     if (!hasPermission) return;
 
     if (fileUpload.businessDocs.length >= 5) {
-      Alert.alert('알림', '사업자등록증은 최대 5장까지 등록 가능합니다.');
+      Alert.alert("알림", "사업자등록증은 최대 5장까지 등록 가능합니다.");
       return;
     }
 
@@ -93,7 +93,7 @@ export default function StoreSignupFileUploadScreen() {
       const asset = result.assets[0];
       const newDoc = {
         uri: asset.uri,
-        type: 'image/jpeg',
+        type: "image/jpeg",
         name: `biz_doc_${Date.now()}.jpg`,
       };
       updateFileUpload({
@@ -124,21 +124,21 @@ export default function StoreSignupFileUploadScreen() {
     const validation = validateFileInfo(
       allData,
       fileUpload.storeImage,
-      fileUpload.businessDocs
+      fileUpload.businessDocs,
     );
 
     if (!validation.isValid) {
-      Alert.alert('알림', validation.message);
+      Alert.alert("알림", validation.message);
       return;
     }
 
     Alert.alert(
-      '회원가입 제출',
-      '입력하신 정보로 회원가입을 진행하시겠습니까?',
+      "회원가입 제출",
+      "입력하신 정보로 회원가입을 진행하시겠습니까?",
       [
-        { text: '취소', style: 'cancel' },
-        { text: '확인', onPress: submitSignup },
-      ]
+        { text: "취소", style: "cancel" },
+        { text: "확인", onPress: submitSignup },
+      ],
     );
   };
 
@@ -153,79 +153,88 @@ export default function StoreSignupFileUploadScreen() {
       const formData = new FormData();
 
       // 회원 정보
-      formData.append('loginId', memberInfo.loginId);
-      formData.append('password', memberInfo.password);
-      formData.append('email', memberInfo.email);
+      formData.append("loginId", memberInfo.loginId);
+      formData.append("password", memberInfo.password);
+      formData.append("email", memberInfo.email);
 
       // 사업자 정보
-      formData.append('ownerNm', bizInfo.ownerNm);
-      formData.append('ownerTelNo', bizInfo.ownerTelNo.replace(/-/g, ''));
-      formData.append('bizNm', bizInfo.bizNm);
-      formData.append('bizNo', bizInfo.bizNo.replace(/-/g, ''));
-      formData.append('bizRegDate', bizInfo.bizRegDate);
-      formData.append('bizType', bizInfo.bizType);
-      formData.append('storeAccNo', bizInfo.storeAccNo);
+      formData.append("ownerNm", bizInfo.ownerNm);
+      formData.append("ownerTelNo", bizInfo.ownerTelNo.replace(/-/g, ""));
+      formData.append("bizNm", bizInfo.bizNm);
+      formData.append("bizNo", bizInfo.bizNo.replace(/-/g, ""));
+      formData.append("bizRegDate", bizInfo.bizRegDate);
+      formData.append("bizType", bizInfo.bizType || "");
+      formData.append("storeAccNo", bizInfo.storeAccNo);
       if (bizInfo.bankId) {
-        formData.append('bankId', bizInfo.bankId);
+        formData.append("bankId", bizInfo.bankId);
       }
 
       // 가게 정보
-      formData.append('storeNm', storeInfo.storeNm);
-      formData.append('storeTelNo', storeInfo.storeTelNo.replace(/-/g, ''));
-      formData.append('storeZipCode', storeInfo.storeZipCode);
-      formData.append('storeAddr', storeInfo.storeAddr);
-      formData.append('storeDetailAddr', storeInfo.storeDetailAddr);
-      formData.append('storeOpenDate', JSON.stringify(storeInfo.storeOpenDate));
-      formData.append('storeOpenTime', storeInfo.storeOpenTime);
-      formData.append('storeCloseTime', storeInfo.storeCloseTime);
-      if (storeInfo.storeType) {
-        formData.append('storeType', storeInfo.storeType);
-      }
+      formData.append("storeNm", storeInfo.storeNm);
+      formData.append("storeTelNo", storeInfo.storeTelNo.replace(/-/g, ""));
+      formData.append("storeZipCode", storeInfo.storeZipCode);
+      formData.append("storeAddr", storeInfo.storeAddr);
+      formData.append("storeAddrDetail", storeInfo.storeDetailAddr || "");
 
-      // 가게 대표 이미지
+      // 영업일 (List<OpenDay>로 전송)
+      storeInfo.storeOpenDate?.forEach((day) => {
+        formData.append("storeOpenDate", day);
+      });
+
+      formData.append("storeOpenTime", storeInfo.storeOpenTime);
+      formData.append("storeCloseTime", storeInfo.storeCloseTime);
+      formData.append("storeType", "가맹점");
+
+      // 약관 동의
+      formData.append("agreed", "true");
+
+      // 가게 대표 이미지 (List<MultipartFile>로 전송)
       if (fileUpload.storeImage) {
-        formData.append('storeImage', {
+        formData.append("storeImgFile", {
           uri: fileUpload.storeImage.uri,
           type: fileUpload.storeImage.type,
           name: fileUpload.storeImage.name,
         } as any);
       }
 
-      // 사업자등록증 (여러 개)
-      fileUpload.businessDocs.forEach((doc, index) => {
-        formData.append('businessDocs', {
+      // 사업자등록증 (List<MultipartFile>로 전송)
+      fileUpload.businessDocs.forEach((doc) => {
+        formData.append("bzFile", {
           uri: doc.uri,
           type: doc.type,
           name: doc.name,
         } as any);
       });
 
-      const response = await apiPostFormDataWithImage('/store/signup', formData);
+      const response = await apiPostFormDataWithImage(
+        "/store/register",
+        formData,
+      );
 
       if (response.ok) {
-        Alert.alert('성공', '회원가입이 완료되었습니다.', [
+        Alert.alert("성공", "회원가입이 완료되었습니다.", [
           {
-            text: '확인',
+            text: "확인",
             onPress: () => {
               resetFormData();
-              router.replace('/(auth)/login');
+              router.replace("/(auth)/login");
             },
           },
         ]);
       } else {
         const errorData = await response.json();
-        Alert.alert('실패', errorData.message || '회원가입에 실패했습니다.');
+        Alert.alert("실패", errorData.message || "회원가입에 실패했습니다.");
       }
     } catch (error) {
-      console.error('회원가입 에러:', error);
-      Alert.alert('오류', '회원가입 중 오류가 발생했습니다.');
+      console.error("회원가입 에러:", error);
+      Alert.alert("오류", "회원가입 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -248,7 +257,9 @@ export default function StoreSignupFileUploadScreen() {
           <Text style={styles.label}>
             가게 대표 이미지 <Text style={styles.required}>*</Text>
           </Text>
-          <Text style={styles.helperText}>고객에게 보여질 가게 대표 사진입니다.</Text>
+          <Text style={styles.helperText}>
+            고객에게 보여질 가게 대표 사진입니다.
+          </Text>
 
           {fileUpload.storeImage ? (
             <View style={styles.imagePreview}>
@@ -280,7 +291,9 @@ export default function StoreSignupFileUploadScreen() {
           <Text style={styles.label}>
             사업자등록증 <Text style={styles.required}>*</Text>
           </Text>
-          <Text style={styles.helperText}>최소 1장, 최대 5장까지 등록 가능합니다.</Text>
+          <Text style={styles.helperText}>
+            최소 1장, 최대 5장까지 등록 가능합니다.
+          </Text>
 
           {fileUpload.businessDocs.length > 0 && (
             <View style={styles.docGrid}>
@@ -319,7 +332,10 @@ export default function StoreSignupFileUploadScreen() {
       {/* 하단 버튼 */}
       <View style={styles.bottomButton}>
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            isSubmitting && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
           disabled={isSubmitting}
           activeOpacity={0.8}

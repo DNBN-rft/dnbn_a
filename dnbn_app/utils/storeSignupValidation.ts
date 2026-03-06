@@ -1,6 +1,6 @@
 /**
  * 스토어 회원가입 유효성 검사 로직
- * 
+ *
  * 각 단계별 validation 함수
  * - Step 0: 약관 동의
  * - Step 1: 회원 정보
@@ -8,7 +8,7 @@
  * - Step 3: 가맹점 정보
  * - Step 4: 파일 업로드 및 전체 검증
  */
-import { ValidationResult } from '@/types/store-signup.types';
+import { ValidationResult } from "@/types/store-signup.types";
 
 // 정규식 패턴
 const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
@@ -18,7 +18,9 @@ const phoneRegex = /^[0-9]+$/;
 /**
  * 비밀번호 검증 상태 메시지 생성
  */
-export const getPasswordCheckMessage = (password: string): { message: string; status: 'success' | 'error' | null } => {
+export const getPasswordCheckMessage = (
+  password: string,
+): { message: string; status: "success" | "error" | null } => {
   if (!password) {
     return { message: "", status: null };
   }
@@ -37,7 +39,10 @@ export const getPasswordCheckMessage = (password: string): { message: string; st
   if (errors.length === 0) {
     return { message: "사용 가능한 비밀번호입니다.", status: "success" };
   } else {
-    return { message: `비밀번호는 ${errors.join(", ")}을(를) 포함해야 합니다.`, status: "error" };
+    return {
+      message: `비밀번호는 ${errors.join(", ")}을(를) 포함해야 합니다.`,
+      status: "error",
+    };
   }
 };
 
@@ -67,8 +72,8 @@ export const validateMemberInfo = (
     password?: string;
     email?: string;
   },
-  idCheckStatus: 'idle' | 'success' | 'error',
-  passwordConfirm: string
+  idCheckStatus: "idle" | "success" | "error",
+  passwordConfirm: string,
 ): ValidationResult => {
   if (!formData.loginId || !formData.loginId.trim()) {
     return { isValid: false, message: "아이디를 입력해주세요." };
@@ -83,7 +88,10 @@ export const validateMemberInfo = (
   }
 
   if (!passwordRegex.test(formData.password)) {
-    return { isValid: false, message: "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요." };
+    return {
+      isValid: false,
+      message: "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.",
+    };
   }
 
   if (!passwordConfirm || !passwordConfirm.trim()) {
@@ -99,7 +107,10 @@ export const validateMemberInfo = (
   }
 
   if (!emailRegex.test(formData.email)) {
-    return { isValid: false, message: "유효한 이메일 형식이 아닙니다. (예: user@example.com)" };
+    return {
+      isValid: false,
+      message: "유효한 이메일 형식이 아닙니다. (예: user@example.com)",
+    };
   }
 
   return { isValid: true, message: "" };
@@ -119,20 +130,8 @@ export const validateBizInfo = (
     bizRegDate?: string;
     bankId?: string;
   },
-  bizNoDuplicate: boolean | null = null
+  bizNoDuplicate: boolean | null = null,
 ): ValidationResult => {
-  if (!formData.bizType || !formData.bizType.trim()) {
-    return { isValid: false, message: "업종/업태를 입력해주세요." };
-  }
-
-  if (!formData.storeAccNo || !formData.storeAccNo.trim()) {
-    return { isValid: false, message: "계좌번호를 입력해주세요." };
-  }
-
-  if (bizNoDuplicate !== false) {
-    return { isValid: false, message: "사업자번호 중복 확인을 해주세요." };
-  }
-
   if (!formData.ownerNm || !formData.ownerNm.trim()) {
     return { isValid: false, message: "대표 이름을 입력해주세요." };
   }
@@ -141,7 +140,7 @@ export const validateBizInfo = (
     return { isValid: false, message: "대표 전화번호를 입력해주세요." };
   }
 
-  if (!phoneRegex.test(formData.ownerTelNo.replace(/-/g, ''))) {
+  if (!phoneRegex.test(formData.ownerTelNo.replace(/-/g, ""))) {
     return { isValid: false, message: "대표 전화번호는 숫자만 입력해주세요." };
   }
 
@@ -153,8 +152,24 @@ export const validateBizInfo = (
     return { isValid: false, message: "사업자 번호를 입력해주세요." };
   }
 
+  if (bizNoDuplicate !== false) {
+    return { isValid: false, message: "사업자번호 중복 확인을 해주세요." };
+  }
+
   if (!formData.bizRegDate) {
     return { isValid: false, message: "개업일을 입력해주세요." };
+  }
+
+  if (!formData.bizType || !formData.bizType.trim()) {
+    return { isValid: false, message: "업종/업태를 입력해주세요." };
+  }
+
+  if (!formData.bankId) {
+    return { isValid: false, message: "은행을 선택해주세요." };
+  }
+
+  if (!formData.storeAccNo || !formData.storeAccNo.trim()) {
+    return { isValid: false, message: "계좌번호를 입력해주세요." };
   }
 
   return { isValid: true, message: "" };
@@ -180,8 +195,11 @@ export const validateStoreInfo = (formData: {
     return { isValid: false, message: "가게 전화번호를 입력해주세요." };
   }
 
-  if (!phoneRegex.test(formData.storeTelNo.replace(/-/g, ''))) {
-    return { isValid: false, message: "가게 전화번호는 숫자만 입력해주시기 바랍니다." };
+  if (!phoneRegex.test(formData.storeTelNo.replace(/-/g, ""))) {
+    return {
+      isValid: false,
+      message: "가게 전화번호는 숫자만 입력해주시기 바랍니다.",
+    };
   }
 
   // 주소 검증
@@ -225,7 +243,7 @@ export const validateFileInfo = (
     storeType?: string;
   },
   storeImage: { uri: string } | null,
-  businessDocs: { uri: string }[]
+  businessDocs: { uri: string }[],
 ): ValidationResult => {
   // Step 1 검증 (회원 정보)
   if (!formData.loginId || !formData.loginId.trim()) {
@@ -241,7 +259,10 @@ export const validateFileInfo = (
   }
 
   if (!passwordRegex.test(formData.password)) {
-    return { isValid: false, message: "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요." };
+    return {
+      isValid: false,
+      message: "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.",
+    };
   }
 
   if (!formData.email || !formData.email.trim()) {
@@ -261,7 +282,7 @@ export const validateFileInfo = (
     return { isValid: false, message: "대표 전화번호를 입력해주세요." };
   }
 
-  if (!phoneRegex.test(formData.ownerTelNo.replace(/-/g, ''))) {
+  if (!phoneRegex.test(formData.ownerTelNo.replace(/-/g, ""))) {
     return { isValid: false, message: "대표 전화번호는 숫자만 입력해주세요." };
   }
 
@@ -290,8 +311,11 @@ export const validateFileInfo = (
     return { isValid: false, message: "가게 전화번호를 입력해주세요." };
   }
 
-  if (!phoneRegex.test(formData.storeTelNo.replace(/-/g, ''))) {
-    return { isValid: false, message: "가게 전화번호는 숫자만 입력해주시기 바랍니다." };
+  if (!phoneRegex.test(formData.storeTelNo.replace(/-/g, ""))) {
+    return {
+      isValid: false,
+      message: "가게 전화번호는 숫자만 입력해주시기 바랍니다.",
+    };
   }
 
   if (!formData.storeZipCode || !formData.storeAddr) {
@@ -314,17 +338,16 @@ export const validateFileInfo = (
     return { isValid: false, message: "영업시간을 입력해주세요." };
   }
 
-  if (!formData.storeType || !formData.storeType.trim()) {
-    return { isValid: false, message: "사업유형을 선택해주세요." };
-  }
-
   // Step 4 검증 (파일)
   if (!storeImage) {
     return { isValid: false, message: "가게 대표 이미지를 등록해주세요." };
   }
 
   if (businessDocs.length === 0) {
-    return { isValid: false, message: "사업자 증명 문서를 최소 1개 이상 등록해주세요." };
+    return {
+      isValid: false,
+      message: "사업자 증명 문서를 최소 1개 이상 등록해주세요.",
+    };
   }
 
   return { isValid: true, message: "" };

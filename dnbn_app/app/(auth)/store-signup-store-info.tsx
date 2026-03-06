@@ -1,42 +1,46 @@
 /**
  * 스토어 회원가입 Step 3: 가게 정보 입력 화면
- * 
+ *
  * 기능:
  * - 가게 이름, 전화번호 입력
  * - 주소 검색 (Daum Postcode API)
  * - 영업일 선택
  * - 영업시간 설정
  */
-import React, { useState } from 'react';
+import TimePickerModal from "@/components/TimePickerModal";
+import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
+  formatPhone,
+  restrictBusinessName,
+  restrictPhone,
+} from "@/utils/storeInputRestrictions";
+import { validateStoreInfo } from "@/utils/storeSignupValidation";
+import Postcode from "@actbase/react-daum-postcode";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Modal,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useStoreSignup } from '@/contexts/StoreSignupContext';
-import { validateStoreInfo } from '@/utils/storeSignupValidation';
-import { restrictBusinessName, restrictPhone, formatPhone } from '@/utils/storeInputRestrictions';
-import DaumPostcode from '@/components/daum-postcode';
-import { styles } from './store-signup-store-info.styles';
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./store-signup-store-info.styles";
 
 const WEEK_DAYS = [
-  { label: '월', value: 'MON' },
-  { label: '화', value: 'TUE' },
-  { label: '수', value: 'WED' },
-  { label: '목', value: 'THU' },
-  { label: '금', value: 'FRI' },
-  { label: '토', value: 'SAT' },
-  { label: '일', value: 'SUN' },
+  { label: "월", value: "MON" },
+  { label: "화", value: "TUE" },
+  { label: "수", value: "WED" },
+  { label: "목", value: "THU" },
+  { label: "금", value: "FRI" },
+  { label: "토", value: "SAT" },
+  { label: "일", value: "SUN" },
 ];
 
 export default function StoreSignupStoreInfoScreen() {
@@ -45,8 +49,9 @@ export default function StoreSignupStoreInfoScreen() {
 
   const [showOpenTimePicker, setShowOpenTimePicker] = useState(false);
   const [showCloseTimePicker, setShowCloseTimePicker] = useState(false);
-  const [tempOpenTime, setTempOpenTime] = useState(new Date());
-  const [tempCloseTime, setTempCloseTime] = useState(new Date());
+  const [activeTimePicker, setActiveTimePicker] = useState<
+    "open" | "close" | null
+  >(null);
   const [showPostcode, setShowPostcode] = useState(false);
 
   /**
@@ -63,68 +68,63 @@ export default function StoreSignupStoreInfoScreen() {
   /**
    * 영업 시작 시간 설정
    */
-  const handleOpenTimeChange = (event: any, date?: Date) => {
-    if (Platform.OS !== 'web') {
-      setShowOpenTimePicker(Platform.OS === 'ios');
-    }
-    if (date) {
-      setTempOpenTime(date);
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      updateStoreInfo({ storeOpenTime: `${hours}:${minutes}` });
+  const openTimePicker = (type: "open" | "close") => {
+    setActiveTimePicker(type);
+    if (type === "open") {
+      setShowOpenTimePicker(true);
+    } else {
+      setShowCloseTimePicker(true);
     }
   };
 
   /**
-   * 시작 시간 모달 닫기
+   * 시간 선택 확인
    */
-  const closeOpenTimePicker = () => {
-    setShowOpenTimePicker(false);
-  };
-
-  /**
-   * 영업 종료 시간 설정
-   */
-  const handleCloseTimeChange = (event: any, date?: Date) => {
-    if (Platform.OS !== 'web') {
-      setShowCloseTimePicker(Platform.OS === 'ios');
+  const handleTimeConfirm = (time: string) => {
+    if (activeTimePicker === "open") {
+      updateStoreInfo({ storeOpenTime: time });
+      setShowOpenTimePicker(false);
+    } else if (activeTimePicker === "close") {
+      updateStoreInfo({ storeCloseTime: time });
+      setShowCloseTimePicker(false);
     }
-    if (date) {
-      setTempCloseTime(date);
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      updateStoreInfo({ storeCloseTime: `${hours}:${minutes}` });
-    }
-  };
-
-  /**
-   * 종료 시간 모달 닫기
-   */
-  const closeCloseTimePicker = () => {
-    setShowCloseTimePicker(false);
+    setActiveTimePicker(null);
   };
 
   /**
    * 주소 검색 완료 핸들러
    */
-  const handleAddressComplete = (data: {
-    zonecode: string;
-    address: string;
-    addressType: string;
-    buildingName?: string;
-  }) => {
+  const handleAddressComplete = (data: any) => {
+    const address = data.roadAddress || data.address;
     updateStoreInfo({
       storeZipCode: data.zonecode,
-      storeAddr: data.address,
+      storeAddr: address,
     });
-    setShowPostcode(false); // 모달 닫기
+    setShowPostcode(false);
   };
 
   /**
-   * 주소 검색 (Phase 4에서 구현 예정)
+   * 주소 검색
    */
   const handleSearchAddress = () => {
     setShowPostcode(true);
+  };
+
+  /**
+   * 주소 검색 에러 핸들러
+   */
+  const handlePostcodeError = (error: any) => {
+    console.error("주소 검색 오류:", error);
+    Alert.alert("오류", "주소 검색 중 오류가 발생했습니다.");
+  };
+
+  /**
+   * 시간 선택 모달 닫기
+   */
+  const handleTimePickerClose = () => {
+    setShowOpenTimePicker(false);
+    setShowCloseTimePicker(false);
+    setActiveTimePicker(null);
   };
 
   /**
@@ -133,15 +133,15 @@ export default function StoreSignupStoreInfoScreen() {
   const handleNext = () => {
     const validation = validateStoreInfo(storeInfo);
     if (!validation.isValid) {
-      Alert.alert('알림', validation.message);
+      Alert.alert("알림", validation.message);
       return;
     }
     setCurrentStep(4);
-    router.push('/store-signup-file-upload' as any);
+    router.push("/store-signup-file-upload" as any);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -156,7 +156,7 @@ export default function StoreSignupStoreInfoScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
@@ -174,7 +174,9 @@ export default function StoreSignupStoreInfoScreen() {
               placeholder="동네방네 본점"
               placeholderTextColor="#ccc"
               value={storeInfo.storeNm}
-              onChangeText={(text) => updateStoreInfo({ storeNm: restrictBusinessName(text) })}
+              onChangeText={(text) =>
+                updateStoreInfo({ storeNm: restrictBusinessName(text) })
+              }
             />
           </View>
 
@@ -206,8 +208,14 @@ export default function StoreSignupStoreInfoScreen() {
               style={styles.addressButton}
               onPress={handleSearchAddress}
             >
-              <Text style={storeInfo.storeAddr ? styles.addressText : styles.addressPlaceholder}>
-                {storeInfo.storeAddr || '주소 검색'}
+              <Text
+                style={
+                  storeInfo.storeAddr
+                    ? styles.addressText
+                    : styles.addressPlaceholder
+                }
+              >
+                {storeInfo.storeAddr || "주소 검색"}
               </Text>
               <Ionicons name="search" size={20} color="#999" />
             </TouchableOpacity>
@@ -217,7 +225,9 @@ export default function StoreSignupStoreInfoScreen() {
                 placeholder="상세 주소 입력"
                 placeholderTextColor="#ccc"
                 value={storeInfo.storeDetailAddr}
-                onChangeText={(text) => updateStoreInfo({ storeDetailAddr: text })}
+                onChangeText={(text) =>
+                  updateStoreInfo({ storeDetailAddr: text })
+                }
               />
             )}
           </View>
@@ -233,14 +243,16 @@ export default function StoreSignupStoreInfoScreen() {
                   key={day.value}
                   style={[
                     styles.dayButton,
-                    storeInfo.storeOpenDate?.includes(day.value) && styles.dayButtonActive,
+                    storeInfo.storeOpenDate?.includes(day.value) &&
+                      styles.dayButtonActive,
                   ]}
                   onPress={() => toggleOpenDate(day.value)}
                 >
                   <Text
                     style={[
                       styles.dayButtonText,
-                      storeInfo.storeOpenDate?.includes(day.value) && styles.dayButtonTextActive,
+                      storeInfo.storeOpenDate?.includes(day.value) &&
+                        styles.dayButtonTextActive,
                     ]}
                   >
                     {day.label}
@@ -257,71 +269,19 @@ export default function StoreSignupStoreInfoScreen() {
             </Text>
             <TouchableOpacity
               style={styles.timeInput}
-              onPress={() => setShowOpenTimePicker(true)}
+              onPress={() => openTimePicker("open")}
             >
-              <Text style={storeInfo.storeOpenTime ? styles.timeText : styles.timePlaceholder}>
-                {storeInfo.storeOpenTime || '시간 선택'}
+              <Text
+                style={
+                  storeInfo.storeOpenTime
+                    ? styles.timeText
+                    : styles.timePlaceholder
+                }
+              >
+                {storeInfo.storeOpenTime || "시간 선택"}
               </Text>
               <Ionicons name="time-outline" size={20} color="#999" />
             </TouchableOpacity>
-            
-            {/* iOS용 Modal + DateTimePicker */}
-            {Platform.OS === 'ios' && showOpenTimePicker && (
-              <Modal
-                transparent={true}
-                animationType="slide"
-                visible={showOpenTimePicker}
-                onRequestClose={closeOpenTimePicker}
-              >
-                <View style={{
-                  flex: 1,
-                  justifyContent: 'flex-end',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                }}>
-                  <View style={{
-                    backgroundColor: '#fff',
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                    paddingBottom: 40,
-                  }}>
-                    <View style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: 16,
-                      borderBottomWidth: 1,
-                      borderBottomColor: '#eee',
-                    }}>
-                      <TouchableOpacity onPress={closeOpenTimePicker}>
-                        <Text style={{ color: '#FF6F2B', fontSize: 16 }}>취소</Text>
-                      </TouchableOpacity>
-                      <Text style={{ fontSize: 16, fontWeight: '600' }}>영업 시작 시간</Text>
-                      <TouchableOpacity onPress={closeOpenTimePicker}>
-                        <Text style={{ color: '#FF6F2B', fontSize: 16, fontWeight: '600' }}>완료</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <DateTimePicker
-                      value={tempOpenTime}
-                      mode="time"
-                      display="spinner"
-                      onChange={handleOpenTimeChange}
-                      textColor="#000"
-                      locale="ko-KR"
-                    />
-                  </View>
-                </View>
-              </Modal>
-            )}
-            
-            {/* Android용 DateTimePicker */}
-            {Platform.OS === 'android' && showOpenTimePicker && (
-              <DateTimePicker
-                value={tempOpenTime}
-                mode="time"
-                display="default"
-                onChange={handleOpenTimeChange}
-              />
-            )}
           </View>
 
           {/* 영업 종료 시간 */}
@@ -331,71 +291,19 @@ export default function StoreSignupStoreInfoScreen() {
             </Text>
             <TouchableOpacity
               style={styles.timeInput}
-              onPress={() => setShowCloseTimePicker(true)}
+              onPress={() => openTimePicker("close")}
             >
-              <Text style={storeInfo.storeCloseTime ? styles.timeText : styles.timePlaceholder}>
-                {storeInfo.storeCloseTime || '시간 선택'}
+              <Text
+                style={
+                  storeInfo.storeCloseTime
+                    ? styles.timeText
+                    : styles.timePlaceholder
+                }
+              >
+                {storeInfo.storeCloseTime || "시간 선택"}
               </Text>
               <Ionicons name="time-outline" size={20} color="#999" />
             </TouchableOpacity>
-            
-            {/* iOS용 Modal + DateTimePicker */}
-            {Platform.OS === 'ios' && showCloseTimePicker && (
-              <Modal
-                transparent={true}
-                animationType="slide"
-                visible={showCloseTimePicker}
-                onRequestClose={closeCloseTimePicker}
-              >
-                <View style={{
-                  flex: 1,
-                  justifyContent: 'flex-end',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                }}>
-                  <View style={{
-                    backgroundColor: '#fff',
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                    paddingBottom: 40,
-                  }}>
-                    <View style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: 16,
-                      borderBottomWidth: 1,
-                      borderBottomColor: '#eee',
-                    }}>
-                      <TouchableOpacity onPress={closeCloseTimePicker}>
-                        <Text style={{ color: '#FF6F2B', fontSize: 16 }}>취소</Text>
-                      </TouchableOpacity>
-                      <Text style={{ fontSize: 16, fontWeight: '600' }}>영업 종료 시간</Text>
-                      <TouchableOpacity onPress={closeCloseTimePicker}>
-                        <Text style={{ color: '#FF6F2B', fontSize: 16, fontWeight: '600' }}>완료</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <DateTimePicker
-                      value={tempCloseTime}
-                      mode="time"
-                      display="spinner"
-                      onChange={handleCloseTimeChange}
-                      textColor="#000"
-                      locale="ko-KR"
-                    />
-                  </View>
-                </View>
-              </Modal>
-            )}
-            
-            {/* Android용 DateTimePicker */}
-            {Platform.OS === 'android' && showCloseTimePicker && (
-              <DateTimePicker
-                value={tempCloseTime}
-                mode="time"
-                display="default"
-                onChange={handleCloseTimeChange}
-              />
-            )}
           </View>
         </ScrollView>
 
@@ -411,11 +319,45 @@ export default function StoreSignupStoreInfoScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Daum Postcode Modal */}
-      <DaumPostcode
+      {/* 주소 검색 모달 */}
+      <Modal
         visible={showPostcode}
-        onClose={() => setShowPostcode(false)}
-        onComplete={handleAddressComplete}
+        animationType="slide"
+        onRequestClose={() => setShowPostcode(false)}
+      >
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#fff" }}
+          edges={["top"]}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowPostcode(false)}
+            >
+              <Ionicons name="close" size={28} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>주소 검색</Text>
+            <View style={{ width: 28 }} />
+          </View>
+          <Postcode
+            style={{ flex: 1 }}
+            onSelected={handleAddressComplete}
+            onError={handlePostcodeError}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <TimePickerModal
+        visible={showOpenTimePicker || showCloseTimePicker}
+        type={activeTimePicker}
+        currentTime={
+          activeTimePicker === "open"
+            ? storeInfo.storeOpenTime || "09:00"
+            : storeInfo.storeCloseTime || "18:00"
+        }
+        businessOpenTime={storeInfo.storeOpenTime || "09:00"}
+        onConfirm={handleTimeConfirm}
+        onClose={handleTimePickerClose}
       />
     </SafeAreaView>
   );

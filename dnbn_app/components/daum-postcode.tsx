@@ -1,15 +1,15 @@
 /**
  * Daum Postcode API WebView 컴포넌트
- * 
+ *
  * 주소 검색을 위한 WebView 모달
  * - react-native-webview 사용
  * - postMessage로 주소 데이터 전달
  */
-import React from 'react';
-import { Modal, View, TouchableOpacity, Text, Platform } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { Ionicons } from '@expo/vector-icons';
-import { styles } from './daum-postcode.styles';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Modal, Platform, Text, TouchableOpacity, View } from "react-native";
+import { WebView } from "react-native-webview";
+import { styles } from "./daum-postcode.styles";
 
 interface DaumPostcodeProps {
   visible: boolean;
@@ -22,22 +22,29 @@ interface DaumPostcodeProps {
   }) => void;
 }
 
-export default function DaumPostcode({ visible, onClose, onComplete }: DaumPostcodeProps) {
+export default function DaumPostcode({
+  visible,
+  onClose,
+  onComplete,
+}: DaumPostcodeProps) {
   /**
    * WebView에서 메시지 수신
    */
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
+      // 도로명 주소 우선, 없으면 지번 주소 사용
+      const fullAddress = data.roadAddress || data.jibunAddress || data.address;
+
       onComplete({
         zonecode: data.zonecode,
-        address: data.address,
+        address: fullAddress,
         addressType: data.addressType,
         buildingName: data.buildingName,
       });
       onClose();
     } catch (error) {
-      console.error('주소 데이터 파싱 에러:', error);
+      console.error("주소 데이터 파싱 에러:", error);
     }
   };
 
@@ -75,9 +82,14 @@ export default function DaumPostcode({ visible, onClose, onComplete }: DaumPostc
     new daum.Postcode({
       oncomplete: function(data) {
         // 주소 정보를 React Native로 전달
+        // 도로명 주소 우선, 없으면 지번 주소
+        var fullAddress = data.roadAddress || data.jibunAddress || data.address;
+        
         window.ReactNativeWebView.postMessage(JSON.stringify({
           zonecode: data.zonecode,
-          address: data.address,
+          address: fullAddress,
+          roadAddress: data.roadAddress,
+          jibunAddress: data.jibunAddress,
           addressType: data.addressType,
           buildingName: data.buildingName || ''
         }));
@@ -118,7 +130,7 @@ export default function DaumPostcode({ visible, onClose, onComplete }: DaumPostc
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
-          scalesPageToFit={Platform.OS === 'android'}
+          scalesPageToFit={Platform.OS === "android"}
         />
       </View>
     </Modal>

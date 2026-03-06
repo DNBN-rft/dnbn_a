@@ -1,35 +1,39 @@
 /**
  * 스토어 회원가입 Step 0: 약관 동의 화면
- * 
+ *
  * 기능:
  * - 전체 약관 동의 체크박스
  * - 개별 약관 동의 (필수 3개 + 선택 1개)
  * - 약관 상세보기 (Modal/새 스크린)
  * - 필수 약관 동의 여부 검증
  */
-import React from 'react';
+import { useStoreSignup } from "@/contexts/StoreSignupContext";
+import { validateAgreement } from "@/utils/storeSignupValidation";
+import { Ionicons } from "@expo/vector-icons";
+import Checkbox from "expo-checkbox";
+import { router } from "expo-router";
+import React from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   Alert,
   Pressable,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Checkbox from 'expo-checkbox';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useStoreSignup } from '@/contexts/StoreSignupContext';
-import { validateAgreement } from '@/utils/storeSignupValidation';
-import { styles } from './store-signup-agreement.styles';
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styles } from "./store-signup-agreement.styles";
 
 export default function StoreSignupAgreementScreen() {
   const { formData, updateAgreement, setCurrentStep } = useStoreSignup();
   const { agreement } = formData;
 
   // 전체 약관 체크 여부 (marketing 포함)
-  const allChecked = agreement.terms && agreement.privacy && agreement.seller && agreement.marketing;
+  const allChecked =
+    agreement.terms &&
+    agreement.privacy &&
+    agreement.seller &&
+    agreement.marketing;
 
   /**
    * 전체 약관 동의 핸들러
@@ -46,11 +50,12 @@ export default function StoreSignupAgreementScreen() {
   /**
    * 개별 약관 동의 핸들러
    */
-  const handleIndividualCheck = (field: keyof typeof agreement) => (isChecked: boolean) => {
-    updateAgreement({
-      [field]: isChecked,
-    });
-  };
+  const handleIndividualCheck =
+    (field: keyof typeof agreement) => (isChecked: boolean) => {
+      updateAgreement({
+        [field]: isChecked,
+      });
+    };
 
   /**
    * 다음 단계로 이동
@@ -58,11 +63,11 @@ export default function StoreSignupAgreementScreen() {
   const handleNext = () => {
     const validation = validateAgreement(agreement);
     if (!validation.isValid) {
-      Alert.alert('알림', validation.message);
+      Alert.alert("알림", validation.message);
       return;
     }
     setCurrentStep(1);
-    router.push('/store-signup-member-info' as any);
+    router.push("/store-signup-member-info" as any);
   };
 
   /**
@@ -70,11 +75,11 @@ export default function StoreSignupAgreementScreen() {
    */
   const handleShowTerms = (type: string) => {
     // TODO: Modal 또는 새 스크린으로 약관 상세 내용 표시
-    Alert.alert('약관 상세', `${type} 약관 내용을 표시합니다.`);
+    Alert.alert("약관 상세", `${type} 약관 내용을 표시합니다.`);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -105,7 +110,7 @@ export default function StoreSignupAgreementScreen() {
           <Checkbox
             value={allChecked}
             onValueChange={handleAllCheck}
-            color={allChecked ? '#FF6F2B' : undefined}
+            color={allChecked ? "#FF6F2B" : undefined}
             style={styles.checkbox}
           />
           <Text style={styles.allAgreeText}>약관 전체 동의</Text>
@@ -121,8 +126,8 @@ export default function StoreSignupAgreementScreen() {
           <View style={[styles.agreeItem, styles.agreeItemFirst]}>
             <Checkbox
               value={agreement.terms}
-              onValueChange={handleIndividualCheck('terms')}
-              color={agreement.terms ? '#FF6F2B' : undefined}
+              onValueChange={handleIndividualCheck("terms")}
+              color={agreement.terms ? "#FF6F2B" : undefined}
               style={styles.checkbox}
             />
             <Text style={styles.agreeItemText}>
@@ -130,7 +135,7 @@ export default function StoreSignupAgreementScreen() {
             </Text>
             <Pressable
               style={styles.arrowButton}
-              onPress={() => handleShowTerms('이용약관')}
+              onPress={() => handleShowTerms("이용약관")}
             >
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </Pressable>
@@ -140,8 +145,8 @@ export default function StoreSignupAgreementScreen() {
           <View style={styles.agreeItem}>
             <Checkbox
               value={agreement.privacy}
-              onValueChange={handleIndividualCheck('privacy')}
-              color={agreement.privacy ? '#FF6F2B' : undefined}
+              onValueChange={handleIndividualCheck("privacy")}
+              color={agreement.privacy ? "#FF6F2B" : undefined}
               style={styles.checkbox}
             />
             <Text style={styles.agreeItemText}>
@@ -149,7 +154,7 @@ export default function StoreSignupAgreementScreen() {
             </Text>
             <Pressable
               style={styles.arrowButton}
-              onPress={() => handleShowTerms('개인정보 수집이용')}
+              onPress={() => handleShowTerms("개인정보 수집이용")}
             >
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </Pressable>
@@ -159,8 +164,8 @@ export default function StoreSignupAgreementScreen() {
           <View style={styles.agreeItem}>
             <Checkbox
               value={agreement.seller}
-              onValueChange={handleIndividualCheck('seller')}
-              color={agreement.seller ? '#FF6F2B' : undefined}
+              onValueChange={handleIndividualCheck("seller")}
+              color={agreement.seller ? "#FF6F2B" : undefined}
               style={styles.checkbox}
             />
             <Text style={styles.agreeItemText}>
@@ -168,7 +173,7 @@ export default function StoreSignupAgreementScreen() {
             </Text>
             <Pressable
               style={styles.arrowButton}
-              onPress={() => handleShowTerms('판매회원 이용약관')}
+              onPress={() => handleShowTerms("판매회원 이용약관")}
             >
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </Pressable>
@@ -178,8 +183,8 @@ export default function StoreSignupAgreementScreen() {
           <View style={[styles.agreeItem, styles.agreeItemLast]}>
             <Checkbox
               value={agreement.marketing}
-              onValueChange={handleIndividualCheck('marketing')}
-              color={agreement.marketing ? '#FF6F2B' : undefined}
+              onValueChange={handleIndividualCheck("marketing")}
+              color={agreement.marketing ? "#FF6F2B" : undefined}
               style={styles.checkbox}
             />
             <Text style={styles.agreeItemText}>
@@ -187,7 +192,7 @@ export default function StoreSignupAgreementScreen() {
             </Text>
             <Pressable
               style={styles.arrowButton}
-              onPress={() => handleShowTerms('마케팅 정보 수신')}
+              onPress={() => handleShowTerms("마케팅 정보 수신")}
             >
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </Pressable>

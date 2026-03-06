@@ -1,20 +1,20 @@
 /**
  * 스토어 회원가입 Context
- * 
+ *
  * 5단계 회원가입 플로우의 전역 상태 관리
  * - 각 단계별 formData 저장
  * - 단계 간 데이터 공유
  * - 초기화 기능
  */
-import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   AgreementData,
-  MemberInfoData,
   BizInfoData,
-  StoreInfoData,
   FileUploadData,
+  MemberInfoData,
+  StoreInfoData,
   StoreSignupFormData,
-} from '@/types/store-signup.types';
+} from "@/types/store-signup.types";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface StoreSignupContextType {
   formData: StoreSignupFormData;
@@ -39,30 +39,30 @@ const initialFormData: StoreSignupFormData = {
     marketing: false,
   },
   memberInfo: {
-    loginId: '',
-    password: '',
-    email: '',
+    loginId: "",
+    password: "",
+    email: "",
   },
   bizInfo: {
-    ownerNm: '',
-    ownerTelNo: '',
-    bizNm: '',
-    bizNo: '',
-    bizRegDate: '',
-    bizType: '',
-    storeAccNo: '',
-    bankId: '',
+    ownerNm: "",
+    ownerTelNo: "",
+    bizNm: "",
+    bizNo: "",
+    bizRegDate: "",
+    bizType: "",
+    storeAccNo: "",
+    bankId: "",
   },
   storeInfo: {
-    storeNm: '',
-    storeTelNo: '',
-    storeZipCode: '',
-    storeAddr: '',
-    storeDetailAddr: '',
+    storeNm: "",
+    storeTelNo: "",
+    storeZipCode: "",
+    storeAddr: "",
+    storeDetailAddr: "",
     storeOpenDate: [],
-    storeOpenTime: '',
-    storeCloseTime: '',
-    storeType: '',
+    storeOpenTime: "",
+    storeCloseTime: "",
+    storeType: "",
   },
   fileUpload: {
     storeImage: null,
@@ -70,13 +70,16 @@ const initialFormData: StoreSignupFormData = {
   },
 };
 
-const StoreSignupContext = createContext<StoreSignupContextType | undefined>(undefined);
+const StoreSignupContext = createContext<StoreSignupContextType | undefined>(
+  undefined,
+);
 
 /**
  * StoreSignupProvider 컴포넌트
  */
 export function StoreSignupProvider({ children }: { children: ReactNode }) {
-  const [formData, setFormData] = useState<StoreSignupFormData>(initialFormData);
+  const [formData, setFormData] =
+    useState<StoreSignupFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState<number>(0);
 
   /**
@@ -177,7 +180,7 @@ export function StoreSignupProvider({ children }: { children: ReactNode }) {
 export function useStoreSignup() {
   const context = useContext(StoreSignupContext);
   if (context === undefined) {
-    throw new Error('useStoreSignup must be used within a StoreSignupProvider');
+    throw new Error("useStoreSignup must be used within a StoreSignupProvider");
   }
   return context;
 }
