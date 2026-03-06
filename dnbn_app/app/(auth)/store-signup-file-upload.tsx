@@ -258,7 +258,7 @@ export default function StoreSignupFileUploadScreen() {
             가게 대표 이미지 <Text style={styles.required}>*</Text>
           </Text>
           <Text style={styles.helperText}>
-            고객에게 보여질 가게 대표 사진입니다.
+            가게 대표 이미지를 올려주세요. (jpg, png / 파일당 10MB 이하)
           </Text>
 
           {fileUpload.storeImage ? (
@@ -289,10 +289,12 @@ export default function StoreSignupFileUploadScreen() {
         {/* 사업자등록증 */}
         <View style={styles.section}>
           <Text style={styles.label}>
-            사업자등록증 <Text style={styles.required}>*</Text>
+            사업자등록증, 영업신고증, 통장사본{" "}
+            <Text style={styles.required}>*</Text>
           </Text>
           <Text style={styles.helperText}>
-            최소 1장, 최대 5장까지 등록 가능합니다.
+            사업자 증명, 영업신고증, 통장사본을 올려주세요. (jpg, png / 파일당
+            10MB 이하)
           </Text>
 
           {fileUpload.businessDocs.length > 0 && (

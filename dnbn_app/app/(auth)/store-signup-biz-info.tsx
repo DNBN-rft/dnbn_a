@@ -647,11 +647,7 @@ export default function StoreSignupBizInfoScreen() {
 
       {/* 검증 로딩 오버레이 */}
       {isValidating && (
-        <Modal
-          transparent={true}
-          animationType="fade"
-          visible={isValidating}
-        >
+        <Modal transparent={true} animationType="fade" visible={isValidating}>
           <View
             style={{
               flex: 1,
