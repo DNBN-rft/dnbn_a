@@ -60,10 +60,10 @@ export default function StoreSignupBizInfoScreen() {
   const slideAnim = useRef(new Animated.Value(300)).current;
 
   /**
-   * DatePicker 애니메이션
+   * DatePicker/BankPicker 애니메이션
    */
   useEffect(() => {
-    if (showDatePicker) {
+    if (showDatePicker || showBankPicker) {
       slideAnim.setValue(300);
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -73,7 +73,7 @@ export default function StoreSignupBizInfoScreen() {
       }).start();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDatePicker]);
+  }, [showDatePicker, showBankPicker]);
 
   /**
    * 은행 목록 조회
@@ -536,25 +536,28 @@ export default function StoreSignupBizInfoScreen() {
       {/* 은행 선택 모달 */}
       <Modal
         visible={showBankPicker}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowBankPicker(false)}
       >
-        <View
+        <TouchableOpacity
           style={{
             flex: 1,
             justifyContent: "flex-end",
             backgroundColor: "rgba(0,0,0,0.5)",
           }}
+          activeOpacity={1}
+          onPress={() => setShowBankPicker(false)}
         >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              maxHeight: "70%",
-            }}
-          >
+          <TouchableOpacity activeOpacity={1}>
+            <Animated.View
+              style={{
+                backgroundColor: "#fff",
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                transform: [{ translateY: slideAnim }],
+              }}
+            >
             <View
               style={{
                 flexDirection: "row",
@@ -570,7 +573,7 @@ export default function StoreSignupBizInfoScreen() {
                 <Ionicons name="close" size={28} color="#000" />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{ maxHeight: 400 }}>
+            <ScrollView style={{ maxHeight: 500 }}>
               {banks.map((bank) => (
                 <TouchableOpacity
                   key={bank.bankIdx}
@@ -603,8 +606,9 @@ export default function StoreSignupBizInfoScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-        </View>
+          </Animated.View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
