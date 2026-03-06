@@ -24,10 +24,11 @@ import { validateBizInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -56,6 +57,23 @@ export default function StoreSignupBizInfoScreen() {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [showBankPicker, setShowBankPicker] = useState(false);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  /**
+   * DatePicker 애니메이션
+   */
+  useEffect(() => {
+    if (showDatePicker) {
+      slideAnim.setValue(300);
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 10,
+      }).start();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDatePicker]);
 
   /**
    * 은행 목록 조회
@@ -351,66 +369,78 @@ export default function StoreSignupBizInfoScreen() {
                 {Platform.OS === "ios" && showDatePicker && (
                   <Modal
                     transparent={true}
-                    animationType="slide"
+                    animationType="fade"
                     visible={showDatePicker}
                     onRequestClose={closeDatePicker}
                   >
-                    <View
+                    <TouchableOpacity
                       style={{
                         flex: 1,
                         justifyContent: "flex-end",
                         backgroundColor: "rgba(0,0,0,0.5)",
                       }}
+                      activeOpacity={1}
+                      onPress={closeDatePicker}
                     >
-                      <View
-                        style={{
-                          backgroundColor: "#fff",
-                          borderTopLeftRadius: 20,
-                          borderTopRightRadius: 20,
-                          paddingBottom: 40,
-                        }}
-                      >
-                        <View
+                      <TouchableOpacity activeOpacity={1}>
+                        <Animated.View
                           style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: 16,
-                            borderBottomWidth: 1,
-                            borderBottomColor: "#eee",
+                            backgroundColor: "#fff",
+                            borderTopLeftRadius: 20,
+                            borderTopRightRadius: 20,
+                            paddingBottom: 40,
+                            transform: [{ translateY: slideAnim }],
                           }}
                         >
-                          <TouchableOpacity onPress={closeDatePicker}>
-                            <Text style={{ color: "#FF6F2B", fontSize: 16 }}>
-                              취소
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: 16,
+                              borderBottomWidth: 1,
+                              borderBottomColor: "#eee",
+                            }}
+                          >
+                            <TouchableOpacity onPress={closeDatePicker}>
+                              <Text style={{ color: "#FF6F2B", fontSize: 16 }}>
+                                취소
+                              </Text>
+                            </TouchableOpacity>
+                            <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                              개업일 선택
                             </Text>
-                          </TouchableOpacity>
-                          <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                            개업일 선택
-                          </Text>
-                          <TouchableOpacity onPress={closeDatePicker}>
-                            <Text
-                              style={{
-                                color: "#FF6F2B",
-                                fontSize: 16,
-                                fontWeight: "600",
-                              }}
-                            >
-                              완료
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                        <DateTimePicker
-                          value={selectedDate}
-                          mode="date"
-                          display="spinner"
-                          onChange={handleDateChange}
-                          maximumDate={new Date()}
-                          textColor="#000"
-                          locale="ko-KR"
-                        />
-                      </View>
-                    </View>
+                            <TouchableOpacity onPress={closeDatePicker}>
+                              <Text
+                                style={{
+                                  color: "#FF6F2B",
+                                  fontSize: 16,
+                                  fontWeight: "600",
+                                }}
+                              >
+                                완료
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                          <View
+                            style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <DateTimePicker
+                              value={selectedDate}
+                              mode="date"
+                              display="spinner"
+                              onChange={handleDateChange}
+                              maximumDate={new Date()}
+                              textColor="#000"
+                              locale="ko-KR"
+                            />
+                          </View>
+                        </Animated.View>
+                      </TouchableOpacity>
+                    </TouchableOpacity>
                   </Modal>
                 )}
 
