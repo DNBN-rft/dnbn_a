@@ -82,12 +82,12 @@ export const styles = StyleSheet.create({
   },
   daySelector: {
     flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   dayButton: {
-    width: 44,
+    flex: 1,
     height: 44,
+    marginHorizontal: 2,
     borderWidth: 1,
     borderColor: "#e0e0e0",
     borderRadius: 8,
