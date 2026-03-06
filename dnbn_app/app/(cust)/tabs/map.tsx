@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
@@ -8,20 +8,21 @@ import { useMapActions } from "../../../hooks/useMapActions";
 import { useMapState } from "../../../hooks/useMapState";
 import { usePanelManager } from "../../../hooks/usePanelManager";
 import { DEFAULT_LOCATION, slideUp } from "../../../utils/map";
-import { generateMapHTML } from "../../../utils/map/mapHtml";
 import AddressSearchModal from "../mapcomponent/AddressSearchModal";
 import ClickedLocationPanel from "../mapcomponent/ClickedLocationPanel";
 import StoreDetailPanel from "../mapcomponent/StoreDetailPanel";
 import StoreListPanel from "../mapcomponent/StoreListPanel";
 import { styles } from "../styles/map.styles";
 
-const KAKAO_JAVASCRIPT_KEY = process.env.EXPO_PUBLIC_KAKAO_JAVASCRIPT_KEY!;
-
 export default function CustMapScreen() {
   const { searchAddress } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<WebView>(null);
-  const mapHTML = useMemo(() => generateMapHTML(KAKAO_JAVASCRIPT_KEY), []);
+  const [webViewKey, setWebViewKey] = useState(0);
+
+  const reloadWebView = useCallback(() => {
+    setWebViewKey((k) => k + 1);
+  }, []);
 
   // 상태 관리 훅
   const {
@@ -72,6 +73,7 @@ export default function CustMapScreen() {
     handleLocationSelection,
     initLocation,
   } = useMapActions({
+    reloadWebView,
     webViewRef,
     selectedStore,
     stores,
@@ -181,14 +183,18 @@ export default function CustMapScreen() {
 
       <View style={styles.mapContainer}>
         <WebView
+          key={webViewKey}
           ref={webViewRef}
-          source={{ html: mapHTML, baseUrl: "https://dnbn-x5or.onrender.com" }}
+          source={{ uri: "https://dnbn-x5or.onrender.com/map-view" }}
           style={styles.webView}
           scrollEnabled={true}
           scalesPageToFit={true}
           javaScriptEnabled={true}
+          domStorageEnabled={true}
+          mixedContentMode="always"
           onLoadEnd={handleWebViewLoadEnd}
           onError={handleWebViewError}
+          onHttpError={handleWebViewError}
           onMessage={handleWebViewMessage}
           originWhitelist={["*"]}
         />

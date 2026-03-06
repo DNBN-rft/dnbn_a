@@ -19,6 +19,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./login.styles";
 
+// 앱 생애주기 동안 최초 1회만 Cold Start 딥링크를 처리하기 위한 플래그
+let initialUrlHandled = false;
+
 export default function LoginScreen() {
   const router = useRouter();
   const [userType, setUserType] = useState<"cust" | "store">("cust");
@@ -102,24 +105,27 @@ export default function LoginScreen() {
       } catch (error) {
         // Storage 정리 실패 시 무시 (로그인은 계속 진행)
       }
+
+      // Cold Start 처리: clearAuthData 완료 후 최초 1회만 실행
+      // 로그아웃 후 재마운트 시에는 실행되지 않도록 플래그로 보호
+      if (!initialUrlHandled) {
+        initialUrlHandled = true;
+        const url = await Linking.getInitialURL();
+        if (url) {
+          console.log("[Cold Start] Raw URL:", url);
+          const { queryParams } = Linking.parse(url);
+          console.log(
+            "[Cold Start] Parsed queryParams:",
+            JSON.stringify(queryParams, null, 2),
+          );
+          if (queryParams && queryParams.accessToken) {
+            handleSocialLoginSuccess(queryParams);
+          }
+        }
+      }
     };
 
     initAuth();
-
-    // Cold Start 처리: 앱이 딥링크로 새로 실행된 경우 초기 URL 확인
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.log("[Cold Start] Raw URL:", url);
-        const { queryParams } = Linking.parse(url);
-        console.log(
-          "[Cold Start] Parsed queryParams:",
-          JSON.stringify(queryParams, null, 2),
-        );
-        if (queryParams && queryParams.accessToken) {
-          handleSocialLoginSuccess(queryParams);
-        }
-      }
-    });
 
     // Warm Start 처리: 앱이 이미 실행 중일 때 딥링크 수신
     const subscription = Linking.addEventListener("url", ({ url }) => {
@@ -279,7 +285,7 @@ export default function LoginScreen() {
       // Step 2: 브라우저 오픈
       await WebBrowser.openBrowserAsync(loginUrl);
 
-      // Step 3: 딥링크 결과는 useEffect의 Linking.addEventListener에서 처리
+      // Step 3: 딥링크 결과는 app/social-login.tsx 라우트에서 처리
     } catch (error) {
       console.error(`${provider} 로그인 에러:`, error);
       if (Platform.OS === "web") {
@@ -404,7 +410,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.snsButton, styles.naverButton]}
-                  onPress={() => handleSNSLogin("naver")}
+                  onPress={() => Alert.alert("알림", "준비중입니다.")}
                 >
                   <Text style={styles.naverButtonText}>네이버 로그인</Text>
                 </TouchableOpacity>
