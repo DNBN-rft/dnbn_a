@@ -9,7 +9,7 @@
  * - 정산 계좌 정보 입력
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
-import { apiGet } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import {
   formatBusinessNumber,
   formatPhone,
@@ -57,6 +57,7 @@ export default function StoreSignupBizInfoScreen() {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [showBankPicker, setShowBankPicker] = useState(false);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
   /**
@@ -207,14 +208,45 @@ export default function StoreSignupBizInfoScreen() {
   /**
    * 다음 단계로 이동
    */
-  const handleNext = () => {
+  const handleNext = async () => {
     const validation = validateBizInfo(bizInfo, bizNoDuplicate);
     if (!validation.isValid) {
       Alert.alert("알림", validation.message);
       return;
     }
-    setCurrentStep(3);
-    router.push("/store-signup-store-info" as any);
+
+    // 사업자 등록번호 유효성 검증
+    setIsValidating(true);
+    try {
+      const bizNoClean = bizInfo.bizNo.replace(/-/g, "");
+      const startDtClean = bizInfo.bizRegDate.replace(/-/g, "");
+
+      const validationRequest = {
+        businesses: [
+          {
+            b_no: bizNoClean,
+            start_dt: startDtClean,
+            p_nm: bizInfo.ownerNm,
+          },
+        ],
+      };
+
+      const response = await apiPost("/store/validate", validationRequest);
+
+      if (!response.ok) {
+        Alert.alert("사업자 정보 검증을 실패하였습니다.");
+        return;
+      }
+
+      // 검증 성공 시 다음 단계로 이동
+      setCurrentStep(3);
+      router.push("/store-signup-store-info" as any);
+    } catch (error) {
+      console.error("사업자 정보 검증 에러:", error);
+      Alert.alert("오류", "사업자 정보 검증 중 오류가 발생했습니다.");
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   return (
@@ -558,58 +590,80 @@ export default function StoreSignupBizInfoScreen() {
                 transform: [{ translateY: slideAnim }],
               }}
             >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: "#eee",
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "600" }}>은행 선택</Text>
-              <TouchableOpacity onPress={() => setShowBankPicker(false)}>
-                <Ionicons name="close" size={28} color="#000" />
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{ maxHeight: 500 }}>
-              {banks.map((bank) => (
-                <TouchableOpacity
-                  key={bank.bankIdx}
-                  style={{
-                    padding: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#f0f0f0",
-                    backgroundColor:
-                      bizInfo.bankId === bank.bankIdx.toString()
-                        ? "#FFF5F0"
-                        : "#fff",
-                  }}
-                  onPress={() => handleSelectBank(bank)}
-                >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color:
-                        bizInfo.bankId === bank.bankIdx.toString()
-                          ? "#FF6F2B"
-                          : "#000",
-                      fontWeight:
-                        bizInfo.bankId === bank.bankIdx.toString()
-                          ? "600"
-                          : "normal",
-                    }}
-                  >
-                    {bank.bankNm}
-                  </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#eee",
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: "600" }}>
+                  은행 선택
+                </Text>
+                <TouchableOpacity onPress={() => setShowBankPicker(false)}>
+                  <Ionicons name="close" size={28} color="#000" />
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Animated.View>
+              </View>
+              <ScrollView style={{ maxHeight: 500 }}>
+                {banks.map((bank) => (
+                  <TouchableOpacity
+                    key={bank.bankIdx}
+                    style={{
+                      padding: 16,
+                      borderBottomWidth: 1,
+                      borderBottomColor: "#f0f0f0",
+                      backgroundColor:
+                        bizInfo.bankId === bank.bankIdx.toString()
+                          ? "#FFF5F0"
+                          : "#fff",
+                    }}
+                    onPress={() => handleSelectBank(bank)}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color:
+                          bizInfo.bankId === bank.bankIdx.toString()
+                            ? "#FF6F2B"
+                            : "#000",
+                        fontWeight:
+                          bizInfo.bankId === bank.bankIdx.toString()
+                            ? "600"
+                            : "normal",
+                      }}
+                    >
+                      {bank.bankNm}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </Animated.View>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* 검증 로딩 오버레이 */}
+      {isValidating && (
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={isValidating}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <ActivityIndicator size="large" color="#FF6F2B" />
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
