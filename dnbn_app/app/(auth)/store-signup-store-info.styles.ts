@@ -21,15 +21,25 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
   },
-  headerTitle: {
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    textAlign: "center",
   },
-  headerRight: {
-    width: 44,
+  rightSection: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -70,6 +80,29 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+  inputRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  inputFlex: {
+    flex: 1,
+  },
+  checkButton: {
+    paddingHorizontal: 14,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF6F2B",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    minWidth: 80,
+  },
+  checkButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FF6F2B",
   },
   addressText: {
     fontSize: 15,

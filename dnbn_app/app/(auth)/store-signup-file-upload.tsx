@@ -24,10 +24,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./store-signup-file-upload.styles";
 
 export default function StoreSignupFileUploadScreen() {
+  const insets = useSafeAreaInsets();
   const { formData, updateFileUpload, resetFormData } = useStoreSignup();
   const { fileUpload, memberInfo, bizInfo, storeInfo } = formData;
 
@@ -234,17 +235,24 @@ export default function StoreSignupFileUploadScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>파일 업로드</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>파일 업로드</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView
@@ -324,7 +332,7 @@ export default function StoreSignupFileUploadScreen() {
             >
               <Ionicons name="add-circle-outline" size={24} color="#FF6F2B" />
               <Text style={styles.addDocButtonText}>
-                사업자등록증 추가 ({fileUpload.businessDocs.length}/3)
+                파일찾기 ({fileUpload.businessDocs.length}/3)
               </Text>
             </TouchableOpacity>
           )}
@@ -349,6 +357,9 @@ export default function StoreSignupFileUploadScreen() {
           )}
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+      )}
+    </View>
   );
 }

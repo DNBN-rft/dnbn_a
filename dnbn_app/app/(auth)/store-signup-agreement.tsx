@@ -18,9 +18,9 @@ import TermsModal from "../../components/modal/TermsModal";
 import { styles } from "./store-signup-agreement.styles";
 
 export default function StoreSignupAgreementScreen() {
+  const insets = useSafeAreaInsets();
   const { formData, updateAgreement, setCurrentStep } = useStoreSignup();
   const { agreement } = formData;
-  const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTerms, setSelectedTerms] = useState<{
     title: string;
@@ -86,7 +86,7 @@ export default function StoreSignupAgreementScreen() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
       <View style={styles.header}>
         <View style={styles.leftSection}>
@@ -253,10 +253,6 @@ export default function StoreSignupAgreementScreen() {
         </TouchableOpacity>
       </View>
 
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
-      )}
-
       {selectedTerms && (
         <TermsModal
           visible={modalVisible}
@@ -264,6 +260,9 @@ export default function StoreSignupAgreementScreen() {
           title={selectedTerms.title}
           htmlPath={selectedTerms.htmlPath}
         />
+      )}
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
       )}
     </View>
   );

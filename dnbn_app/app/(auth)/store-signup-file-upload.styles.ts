@@ -21,15 +21,25 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  leftSection: {
+    flex: 1,
     alignItems: "flex-start",
   },
-  headerTitle: {
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    textAlign: "center",
   },
-  headerRight: {
-    width: 44,
+  rightSection: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

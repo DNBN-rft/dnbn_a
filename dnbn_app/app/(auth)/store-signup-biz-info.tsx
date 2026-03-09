@@ -36,7 +36,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./store-signup-biz-info.styles";
 
 interface Bank {
@@ -45,6 +45,7 @@ interface Bank {
 }
 
 export default function StoreSignupBizInfoScreen() {
+  const insets = useSafeAreaInsets();
   const { formData, updateBizInfo, setCurrentStep } = useStoreSignup();
   const { bizInfo } = formData;
 
@@ -164,8 +165,12 @@ export default function StoreSignupBizInfoScreen() {
    * 날짜 선택 핸들러
    */
   const handleDateChange = (event: any, date?: Date) => {
-    if (Platform.OS !== "web") {
-      setShowDatePicker(Platform.OS === "ios");
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+    if (Platform.OS === "ios" && event.type === "dismissed") {
+      setShowDatePicker(false);
+      return;
     }
     if (date) {
       setSelectedDate(date);
@@ -251,8 +256,8 @@ export default function StoreSignupBizInfoScreen() {
       }
 
       // 검증 성공 시 다음 단계로 이동
-      setCurrentStep(3);
-      router.push("/store-signup-store-info" as any);
+      setCurrentStep(4);
+      router.push("/store-signup-file-upload" as any);
     } catch (error) {
       console.error("사업자 정보 검증 에러:", error);
       Alert.alert("오류", "사업자 정보 검증 중 오류가 발생했습니다.");
@@ -262,22 +267,30 @@ export default function StoreSignupBizInfoScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>사업자 정보</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>사업자 정보</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
         <ScrollView
           style={styles.scrollView}
@@ -285,15 +298,86 @@ export default function StoreSignupBizInfoScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* 대표 이름 */}
+
+          {/* 가맹명 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
-              대표 이름 <Text style={styles.required}>*</Text>
+              가맹명 <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="홍길동"
+              placeholder="동네방네 본점"
               placeholderTextColor="#ccc"
+              value={bizInfo.bizNm}
+              onChangeText={(text) =>
+                updateBizInfo({ bizNm: restrictBusinessName(text) })
+              }
+            />
+          </View>
+
+          {/* 업종/업태 */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>
+              업종/업태 <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="예: 식품, 음료, 소매업"
+              placeholderTextColor="#ccc"
+              value={bizInfo.bizType}
+              onChangeText={(text) =>
+                updateBizInfo({ bizType: restrictBusinessType(text) })
+              }
+            />
+          </View>
+
+          {/* 사업자번호 */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>
+              사업자번호 <Text style={styles.required}>*</Text>
+            </Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={[styles.input, styles.inputFlex]}
+                placeholder="123-45-67890"
+                placeholderTextColor="#ccc"
+                value={formatBusinessNumber(bizInfo.bizNo)}
+                onChangeText={(text) => {
+                  const digitsOnly = restrictBusinessNumber(text);
+                  updateBizInfo({ bizNo: digitsOnly });
+                  setBizNoDuplicate(null);
+                }}
+                keyboardType="number-pad"
+                maxLength={12}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.checkButton,
+                  (isCheckingBizNo || bizNoDuplicate === false) &&
+                  styles.checkButtonDisabled,
+                ]}
+                onPress={handleCheckBizNo}
+                disabled={isCheckingBizNo || bizNoDuplicate === false}
+              >
+                {isCheckingBizNo ? (
+                  <ActivityIndicator size="small" color="#FF6F2B" />
+                ) : (
+                  <Text style={styles.checkButtonText}>
+                    {bizNoDuplicate === false ? "확인완료" : "중복확인"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+
+          {/* 사업주 이름 */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>
+              사업주 이름 <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
               value={bizInfo.ownerNm}
               onChangeText={(text) =>
                 updateBizInfo({ ownerNm: restrictName(text) })
@@ -376,65 +460,56 @@ export default function StoreSignupBizInfoScreen() {
             </View>
           </View>
 
-          {/* 사업명 */}
+          {/* 은행 선택 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
-              사업명 <Text style={styles.required}>*</Text>
+              은행 <Text style={styles.required}>*</Text>
+            </Text>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => setShowBankPicker(true)}
+              disabled={isLoadingBanks}
+            >
+              <Text
+                style={
+                  getSelectedBankName()
+                    ? styles.dateText
+                    : styles.datePlaceholder
+                }
+              >
+                {isLoadingBanks
+                  ? "은행 목록 로딩 중..."
+                  : getSelectedBankName() || "은행 선택"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#999" />
+            </TouchableOpacity>
+          </View>
+
+          {/* 정산 계좌번호 */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>
+              계좌번호 <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="동네방네 본점"
+              placeholder="계좌번호 입력 (숫자만)"
               placeholderTextColor="#ccc"
-              value={bizInfo.bizNm}
+              value={bizInfo.storeAccNo}
               onChangeText={(text) =>
-                updateBizInfo({ bizNm: restrictBusinessName(text) })
+                updateBizInfo({ storeAccNo: restrictAccountNumber(text) })
               }
+              keyboardType="number-pad"
+              maxLength={15}
             />
-          </View>
-
-          {/* 사업자번호 */}
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              사업자번호 <Text style={styles.required}>*</Text>
+            <Text style={styles.helperText}>
+              정산금이 입금될 계좌번호입니다.
             </Text>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={[styles.input, styles.inputFlex]}
-                placeholder="123-45-67890"
-                placeholderTextColor="#ccc"
-                value={formatBusinessNumber(bizInfo.bizNo)}
-                onChangeText={(text) => {
-                  const digitsOnly = restrictBusinessNumber(text);
-                  updateBizInfo({ bizNo: digitsOnly });
-                  setBizNoDuplicate(null);
-                }}
-                keyboardType="number-pad"
-                maxLength={12}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.checkButton,
-                  (isCheckingBizNo || bizNoDuplicate === false) &&
-                    styles.checkButtonDisabled,
-                ]}
-                onPress={handleCheckBizNo}
-                disabled={isCheckingBizNo || bizNoDuplicate === false}
-              >
-                {isCheckingBizNo ? (
-                  <ActivityIndicator size="small" color="#FF6F2B" />
-                ) : (
-                  <Text style={styles.checkButtonText}>
-                    {bizNoDuplicate === false ? "확인완료" : "중복확인"}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </View>
           </View>
 
-          {/* 개업일 */}
+          {/* 사업자 등록일 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
-              개업일 <Text style={styles.required}>*</Text>
+              사업자 등록일 <Text style={styles.required}>*</Text>
             </Text>
             {Platform.OS === "web" ? (
               // 웹용 HTML input
@@ -557,68 +632,10 @@ export default function StoreSignupBizInfoScreen() {
               </>
             )}
           </View>
-
-          {/* 업종/업태 */}
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              업종/업태 <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="예: 식품, 음료, 소매업"
-              placeholderTextColor="#ccc"
-              value={bizInfo.bizType}
-              onChangeText={(text) =>
-                updateBizInfo({ bizType: restrictBusinessType(text) })
-              }
-            />
-          </View>
-
-          {/* 은행 선택 */}
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              은행 <Text style={styles.required}>*</Text>
-            </Text>
-            <TouchableOpacity
-              style={styles.dateInput}
-              onPress={() => setShowBankPicker(true)}
-              disabled={isLoadingBanks}
-            >
-              <Text
-                style={
-                  getSelectedBankName()
-                    ? styles.dateText
-                    : styles.datePlaceholder
-                }
-              >
-                {isLoadingBanks
-                  ? "은행 목록 로딩 중..."
-                  : getSelectedBankName() || "은행 선택"}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#999" />
-            </TouchableOpacity>
-          </View>
-
-          {/* 정산 계좌번호 */}
-          <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              정산 계좌번호 <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="계좌번호 입력 (숫자만)"
-              placeholderTextColor="#ccc"
-              value={bizInfo.storeAccNo}
-              onChangeText={(text) =>
-                updateBizInfo({ storeAccNo: restrictAccountNumber(text) })
-              }
-              keyboardType="number-pad"
-              maxLength={15}
-            />
-            <Text style={styles.helperText}>
-              정산금이 입금될 계좌번호입니다.
-            </Text>
-          </View>
+                {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+      )}
+    </View>
         </ScrollView>
 
         {/* 하단 버튼 */}
@@ -628,7 +645,7 @@ export default function StoreSignupBizInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음</Text>
+            <Text style={styles.nextButtonText}>다음  3 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -728,6 +745,5 @@ export default function StoreSignupBizInfoScreen() {
           </View>
         </Modal>
       )}
-    </SafeAreaView>
   );
 }

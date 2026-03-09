@@ -30,10 +30,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./store-signup-store-info.styles";
 
 const WEEK_DAYS = [
@@ -140,27 +137,35 @@ export default function StoreSignupStoreInfoScreen() {
       Alert.alert("알림", validation.message);
       return;
     }
-    setCurrentStep(4);
-    router.push("/store-signup-file-upload" as any);
+    setCurrentStep(3);
+    router.push("/store-signup-biz-info" as any);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>가게 정보</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>가게 정보</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
         <ScrollView
           style={styles.scrollView}
@@ -171,7 +176,7 @@ export default function StoreSignupStoreInfoScreen() {
           {/* 가게 이름 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
-              가게 이름 <Text style={styles.required}>*</Text>
+              가게명 <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
@@ -187,7 +192,7 @@ export default function StoreSignupStoreInfoScreen() {
           {/* 가게 전화번호 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
-              가게 전화번호 <Text style={styles.required}>*</Text>
+              가게 연락처 <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
               style={styles.input}
@@ -208,31 +213,38 @@ export default function StoreSignupStoreInfoScreen() {
             <Text style={styles.label}>
               주소 <Text style={styles.required}>*</Text>
             </Text>
-            <TouchableOpacity
-              style={styles.addressButton}
-              onPress={handleSearchAddress}
-            >
-              <Text
-                style={
-                  storeInfo.storeAddr
-                    ? styles.addressText
-                    : styles.addressPlaceholder
-                }
-              >
-                {storeInfo.storeAddr || "주소 검색"}
-              </Text>
-              <Ionicons name="search" size={20} color="#999" />
-            </TouchableOpacity>
-            {storeInfo.storeAddr && (
+            <View style={styles.inputRow}>
               <TextInput
-                style={[styles.input, { marginTop: 8 }]}
-                placeholder="상세 주소 입력"
+                style={[styles.input, styles.inputFlex, { backgroundColor: "#f5f5f5", color: storeInfo.storeAddr ? "#999" : "#ccc" }]}
+                value={storeInfo.storeAddr}
+                placeholder="주소 검색 버튼을 눌러주세요"
                 placeholderTextColor="#ccc"
-                value={storeInfo.storeDetailAddr}
-                onChangeText={(text) =>
-                  updateStoreInfo({ storeDetailAddr: text })
-                }
+                editable={false}
               />
+              <TouchableOpacity
+                style={styles.checkButton}
+                onPress={handleSearchAddress}
+              >
+                <Text style={styles.checkButtonText}>주소검색</Text>
+              </TouchableOpacity>
+            </View>
+            {storeInfo.storeAddr && (
+              <>
+                <TextInput
+                  style={[styles.input, { marginTop: 8, backgroundColor: "#f5f5f5", color: "#999" }]}
+                  value={storeInfo.storeZipCode || ""}
+                  editable={false}
+                />
+                <TextInput
+                  style={[styles.input, { marginTop: 8 }]}
+                  placeholder="상세 주소 입력"
+                  placeholderTextColor="#ccc"
+                  value={storeInfo.storeDetailAddr}
+                  onChangeText={(text) =>
+                    updateStoreInfo({ storeDetailAddr: text })
+                  }
+                />
+              </>
             )}
           </View>
 
@@ -318,7 +330,7 @@ export default function StoreSignupStoreInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음</Text>
+            <Text style={styles.nextButtonText}>다음  2 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -363,6 +375,9 @@ export default function StoreSignupStoreInfoScreen() {
         onConfirm={handleTimeConfirm}
         onClose={handleTimePickerClose}
       />
-    </SafeAreaView>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+      )}
+    </View>
   );
 }

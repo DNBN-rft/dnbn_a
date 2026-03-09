@@ -10,7 +10,6 @@
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiGet } from "@/utils/api";
 import {
-  restrictEmail,
   restrictLoginId,
   restrictPassword,
 } from "@/utils/storeInputRestrictions";
@@ -20,7 +19,7 @@ import {
 } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -32,10 +31,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./store-signup-member-info.styles";
 
 export default function StoreSignupMemberInfoScreen() {
+  const insets = useSafeAreaInsets();
   const { formData, updateMemberInfo, setCurrentStep } = useStoreSignup();
   const { memberInfo } = formData;
 
@@ -44,6 +44,17 @@ export default function StoreSignupMemberInfoScreen() {
     "idle" | "success" | "error"
   >("idle");
   const [isCheckingId, setIsCheckingId] = useState(false);
+
+  // 이메일 입력 상태
+  const initialEmail = memberInfo.email || "";
+  const [emailLocal, setEmailLocal] = useState(
+    initialEmail.includes("@") ? initialEmail.split("@")[0] : initialEmail
+  );
+  const [emailDomain, setEmailDomain] = useState(
+    initialEmail.includes("@") ? initialEmail.split("@")[1] : ""
+  );
+  const [selectedDomain, setSelectedDomain] = useState("직접입력");
+  const [showDomainDropdown, setShowDomainDropdown] = useState(false);
 
   // 에러 메시지
   const [loginIdError, setLoginIdError] = useState("");
@@ -67,12 +78,53 @@ export default function StoreSignupMemberInfoScreen() {
     updateMemberInfo({ password: restricted });
   };
 
+  // 이메일 도메인 옵션
+  const EMAIL_DOMAINS = [
+    { label: "직접입력", value: "직접입력" },
+    { label: "네이버", value: "naver.com" },
+    { label: "다음", value: "daum.net" },
+    { label: "구글", value: "gmail.com" },
+    { label: "네이트", value: "nate.com" },
+  ];
+
   /**
-   * 이메일 입력 핸들러
+   * 이메일 로컬 파트(@ 앞) 입력 핸들러
    */
-  const handleEmailChange = (text: string) => {
-    const restricted = restrictEmail(text);
-    updateMemberInfo({ email: restricted });
+  const handleEmailLocalChange = (text: string) => {
+    const restricted = text.replace(/[\s]/g, "");
+    setEmailLocal(restricted);
+    const domain =
+      selectedDomain === "직접입력" ? emailDomain : selectedDomain;
+    const fullEmail = domain ? `${restricted}@${domain}` : restricted;
+    updateMemberInfo({ email: fullEmail });
+    setEmailError("");
+  };
+
+  /**
+   * 이메일 도메인 직접 입력 핸들러
+   */
+  const handleEmailDomainChange = (text: string) => {
+    const restricted = text.replace(/[\s]/g, "");
+    setEmailDomain(restricted);
+    const fullEmail = emailLocal ? `${emailLocal}@${restricted}` : restricted;
+    updateMemberInfo({ email: fullEmail });
+    setEmailError("");
+  };
+
+  /**
+   * 이메일 도메인 선택 핸들러
+   */
+  const handleSelectDomain = (domain: string) => {
+    setSelectedDomain(domain);
+    setShowDomainDropdown(false);
+    if (domain !== "직접입력") {
+      setEmailDomain(domain);
+      const fullEmail = emailLocal ? `${emailLocal}@${domain}` : "";
+      updateMemberInfo({ email: fullEmail });
+    } else {
+      setEmailDomain("");
+      updateMemberInfo({ email: emailLocal || "" });
+    }
     setEmailError("");
   };
 
@@ -123,28 +175,36 @@ export default function StoreSignupMemberInfoScreen() {
       return;
     }
     setCurrentStep(2);
-    router.push("/store-signup-biz-info" as any);
+    router.push("/store-signup-store-info" as any);
   };
 
   const passwordCheck = getPasswordCheckMessage(memberInfo.password || "");
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
+      {insets.top > 0 && (
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+      )}
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>회원 정보</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>회원 정보</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
         <ScrollView
           style={styles.scrollView}
@@ -258,16 +318,73 @@ export default function StoreSignupMemberInfoScreen() {
             <Text style={styles.label}>
               이메일 <Text style={styles.required}>*</Text>
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="example@domain.com"
-              placeholderTextColor="#ccc"
-              value={memberInfo.email}
-              onChangeText={handleEmailChange}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <View style={styles.emailRow}>
+              <TextInput
+                style={[styles.input, styles.emailLocalInput]}
+                placeholder="이메일 아이디"
+                placeholderTextColor="#ccc"
+                value={emailLocal}
+                onChangeText={handleEmailLocalChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text style={styles.atSign}>@</Text>
+              {selectedDomain === "직접입력" ? (
+                <TextInput
+                  style={[styles.input, styles.emailDomainInput]}
+                  placeholder="이메일 주소"
+                  placeholderTextColor="#ccc"
+                  value={emailDomain}
+                  onChangeText={handleEmailDomainChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              ) : (
+                <View style={[styles.input, styles.emailDomainInput, styles.domainDisplay]}>
+                  <Text style={styles.domainDisplayText}>{selectedDomain}</Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.domainSelector}
+              onPress={() => setShowDomainDropdown(!showDomainDropdown)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.domainSelectorText}>
+                {selectedDomain === "직접입력" ? "이메일 주소" : selectedDomain}
+              </Text>
+              <Ionicons
+                name={showDomainDropdown ? "chevron-up" : "chevron-down"}
+                size={16}
+                color="#666"
+              />
+            </TouchableOpacity>
+            {showDomainDropdown && (
+              <View style={styles.domainDropdown}>
+                {EMAIL_DOMAINS.map((item) => (
+                  <TouchableOpacity
+                    key={item.value}
+                    style={[
+                      styles.domainItem,
+                      selectedDomain === item.value && styles.domainItemSelected,
+                    ]}
+                    onPress={() => handleSelectDomain(item.value)}
+                  >
+                    <Text
+                      style={[
+                        styles.domainItemText,
+                        selectedDomain === item.value &&
+                          styles.domainItemTextSelected,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             {emailError ? (
               <Text style={styles.errorText}>{emailError}</Text>
             ) : (
@@ -283,10 +400,13 @@ export default function StoreSignupMemberInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음</Text>
+            <Text style={styles.nextButtonText}>다음  1 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+      )}
+    </View>
   );
 }
