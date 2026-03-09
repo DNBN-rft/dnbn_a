@@ -632,10 +632,9 @@ export default function StoreSignupBizInfoScreen() {
               </>
             )}
           </View>
-                {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
-      )}
-    </View>
+          {insets.bottom > 0 && (
+            <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+          )}
         </ScrollView>
 
         {/* 하단 버튼 */}
@@ -745,5 +744,5 @@ export default function StoreSignupBizInfoScreen() {
           </View>
         </Modal>
       )}
-  );
+      );
 }
