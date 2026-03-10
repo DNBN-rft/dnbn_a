@@ -127,9 +127,7 @@ export default function SaleProductListScreen() {
         return {
           id: index.toString(),
           productCode: item.productCode,
-          uri: firstImage?.fileUrl
-            ? { uri: firstImage.fileUrl }
-            : require("@/assets/images/logo.png"), // 기본 이미지
+          uri: firstImage?.fileUrl ? { uri: firstImage.fileUrl } : null,
           productName: item.productNm,
           storeName: item.storeNm,
           discount: discount,
@@ -322,14 +320,30 @@ export default function SaleProductListScreen() {
                 <View style={styles.productContentRow}>
                   {/* 이미지 */}
                   <View style={styles.productImageWrapper}>
-                    <Image
-                      resizeMode="stretch"
-                      source={item.uri}
-                      style={[
-                        styles.productImage,
-                        isExpired && styles.productImageExpired,
-                      ]}
-                    />
+                    {item.uri ? (
+                      <Image
+                        resizeMode="stretch"
+                        source={item.uri}
+                        style={[
+                          styles.productImage,
+                          isExpired && styles.productImageExpired,
+                        ]}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.productImage,
+                          styles.noImageBox,
+                          isExpired && styles.productImageExpired,
+                        ]}
+                      >
+                        <Ionicons
+                          name="image-outline"
+                          size={50}
+                          color="#ccc"
+                        />
+                      </View>
+                    )}
                     {/* 할인 배지 */}
                     <View
                       style={[

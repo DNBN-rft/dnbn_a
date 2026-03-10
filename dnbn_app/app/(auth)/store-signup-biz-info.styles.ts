@@ -55,7 +55,6 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
   },
   required: {
     color: "#FF6F2B",
@@ -161,5 +160,84 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "bold",
     color: "#fff",
+  },
+  flex1: {
+    flex: 1,
+  },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  pickerSheet: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  pickerCancelText: {
+    color: "#FF6F2B",
+    fontSize: 16,
+  },
+  pickerTitleText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  pickerDoneText: {
+    color: "#FF6F2B",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  pickerCenter: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bankSheet: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  bankSheetTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  bankList: {
+    maxHeight: 500,
+  },
+  bankItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+    backgroundColor: "#fff",
+  },
+  bankItemSelected: {
+    backgroundColor: "#FFF5F0",
+  },
+  bankItemText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  bankItemTextSelected: {
+    color: "#FF6F2B",
+    fontWeight: "600",
+  },
+  loadingOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
 });

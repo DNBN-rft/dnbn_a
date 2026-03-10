@@ -10,6 +10,7 @@
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiGet, apiPost } from "@/utils/api";
+import { formatDateToLocalString, formatWebDateInput } from "@/utils/dateUtil";
 import {
   formatBusinessNumber,
   restrictAccountNumber,
@@ -18,6 +19,11 @@ import {
   restrictBusinessType,
   restrictName,
 } from "@/utils/storeInputRestrictions";
+import {
+  handleStorePhoneFirstChange,
+  handleStorePhoneLastChange,
+  handleStorePhoneMiddleChange,
+} from "@/utils/storeSignupUtil";
 import { validateBizInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -69,7 +75,6 @@ export default function StoreSignupBizInfoScreen() {
   const [phoneLast, setPhoneLast] = useState(
     bizInfo.ownerTelNo.substring(7, 11) || "",
   );
-  const phoneFirstRef = useRef<TextInput>(null);
   const phoneMiddleRef = useRef<TextInput>(null);
   const phoneLastRef = useRef<TextInput>(null);
 
@@ -144,14 +149,13 @@ export default function StoreSignupBizInfoScreen() {
     try {
       const bizNoClean = bizInfo.bizNo.replace(/-/g, "");
       const response = await apiGet(`/store/check-bizNo/${bizNoClean}`);
-      const message = await response.text();
 
-      if (response.ok && message.includes("사용가능")) {
+      if (response.ok) {
         setBizNoDuplicate(false);
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용 가능한 사업자 번호입니다.");
       } else {
         setBizNoDuplicate(true);
-        Alert.alert("알림", message);
+        Alert.alert("알림", "이미 등록된 사업자 번호입니다.");
       }
     } catch (error) {
       console.error("사업자번호 중복 체크 에러:", error);
@@ -161,9 +165,6 @@ export default function StoreSignupBizInfoScreen() {
     }
   };
 
-  /**
-   * 날짜 선택 핸들러
-   */
   const handleDateChange = (event: any, date?: Date) => {
     if (Platform.OS === "android") {
       setShowDatePicker(false);
@@ -174,44 +175,15 @@ export default function StoreSignupBizInfoScreen() {
     }
     if (date) {
       setSelectedDate(date);
-      // 로컬 시간 기준으로 날짜 포맷 (타임존 이슈 방지)
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const formattedDate = `${year}-${month}-${day}`;
-      updateBizInfo({ bizRegDate: formattedDate });
+      updateBizInfo({ bizRegDate: formatDateToLocalString(date) });
     }
   };
 
-  /**
-   * 웹용 날짜 선택 핸들러
-   */
   const handleWebDateChange = (text: string) => {
-    // 숫자만 추출
-    const digitsOnly = text.replace(/\D/g, "");
-
-    // 최대 8자리까지만 허용
-    const limited = digitsOnly.slice(0, 8);
-
-    // YYYY-MM-DD 포맷 적용
-    let formatted = limited;
-    if (limited.length >= 5) {
-      formatted = `${limited.slice(0, 4)}-${limited.slice(4, 6)}`;
-      if (limited.length > 6) {
-        formatted += `-${limited.slice(6, 8)}`;
-      }
-    } else if (limited.length > 4) {
-      formatted = `${limited.slice(0, 4)}-${limited.slice(4)}`;
-    }
-
+    const { formatted, parsedDate } = formatWebDateInput(text);
     updateBizInfo({ bizRegDate: formatted });
-
-    // 완전한 날짜가 입력되면 Date 객체 업데이트
-    if (limited.length === 8) {
-      const year = parseInt(limited.slice(0, 4));
-      const month = parseInt(limited.slice(4, 6)) - 1;
-      const day = parseInt(limited.slice(6, 8));
-      setSelectedDate(new Date(year, month, day));
+    if (parsedDate) {
+      setSelectedDate(parsedDate);
     }
   };
 
@@ -220,6 +192,12 @@ export default function StoreSignupBizInfoScreen() {
    */
   const closeDatePicker = () => {
     setShowDatePicker(false);
+  };
+
+  const handleBizNoChange = (text: string) => {
+    const digitsOnly = restrictBusinessNumber(text);
+    updateBizInfo({ bizNo: digitsOnly });
+    setBizNoDuplicate(null);
   };
 
   /**
@@ -288,7 +266,7 @@ export default function StoreSignupBizInfoScreen() {
       </View>
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex1}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
@@ -298,15 +276,15 @@ export default function StoreSignupBizInfoScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-
-          {/* 가맹명 */}
+          {/* 사업자명 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              가맹명 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>사업자명</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="동네방네 본점"
+              placeholder="법인명 또는 개인 상호명"
               placeholderTextColor="#ccc"
               value={bizInfo.bizNm}
               onChangeText={(text) =>
@@ -317,12 +295,13 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 업종/업태 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              업종/업태 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>업종/업태</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="예: 식품, 음료, 소매업"
+              placeholder="식품, 음료, 소매업 등"
               placeholderTextColor="#ccc"
               value={bizInfo.bizType}
               onChangeText={(text) =>
@@ -333,20 +312,17 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 사업자번호 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              사업자번호 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>사업자번호</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
-                placeholder="123-45-67890"
+                placeholder="법인 또는 개인 사업자번호"
                 placeholderTextColor="#ccc"
                 value={formatBusinessNumber(bizInfo.bizNo)}
-                onChangeText={(text) => {
-                  const digitsOnly = restrictBusinessNumber(text);
-                  updateBizInfo({ bizNo: digitsOnly });
-                  setBizNoDuplicate(null);
-                }}
+                onChangeText={handleBizNoChange}
                 keyboardType="number-pad"
                 maxLength={12}
               />
@@ -354,7 +330,7 @@ export default function StoreSignupBizInfoScreen() {
                 style={[
                   styles.checkButton,
                   (isCheckingBizNo || bizNoDuplicate === false) &&
-                  styles.checkButtonDisabled,
+                    styles.checkButtonDisabled,
                 ]}
                 onPress={handleCheckBizNo}
                 disabled={isCheckingBizNo || bizNoDuplicate === false}
@@ -370,12 +346,12 @@ export default function StoreSignupBizInfoScreen() {
             </View>
           </View>
 
-
           {/* 사업주 이름 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              사업주 이름 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>사업주 이름</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
               value={bizInfo.ownerNm}
@@ -387,27 +363,27 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 대표 전화번호 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              대표 전화번호 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>대표 전화번호</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.phoneInputRow}>
               <TextInput
-                ref={phoneFirstRef}
                 style={styles.phoneInput}
                 placeholder="010"
                 placeholderTextColor="#ccc"
                 keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
                 value={phoneFirst}
-                onChangeText={(text) => {
-                  const numbers = text.replace(/[^0-9]/g, "");
-                  setPhoneFirst(numbers.slice(0, 3));
-                  if (numbers.length === 3) {
-                    phoneMiddleRef.current?.focus();
-                  }
-                  updateBizInfo({
-                    ownerTelNo: numbers.slice(0, 3) + phoneMiddle + phoneLast,
-                  });
-                }}
+                onChangeText={(text) =>
+                  handleStorePhoneFirstChange(
+                    text,
+                    phoneMiddle,
+                    phoneLast,
+                    setPhoneFirst,
+                    phoneMiddleRef,
+                    (combined) => updateBizInfo({ ownerTelNo: combined }),
+                  )
+                }
                 maxLength={3}
               />
               <Text style={styles.phoneSeparator}>-</Text>
@@ -418,21 +394,16 @@ export default function StoreSignupBizInfoScreen() {
                 placeholderTextColor="#ccc"
                 keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
                 value={phoneMiddle}
-                onChangeText={(text) => {
-                  const numbers = text.replace(/[^0-9]/g, "");
-                  setPhoneMiddle(numbers.slice(0, 4));
-                  if (numbers.length === 4) {
-                    phoneLastRef.current?.focus();
-                  }
-                  updateBizInfo({
-                    ownerTelNo: phoneFirst + numbers.slice(0, 4) + phoneLast,
-                  });
-                }}
-                onKeyPress={({ nativeEvent }) => {
-                  if (nativeEvent.key === "Backspace" && phoneMiddle === "") {
-                    phoneFirstRef.current?.focus();
-                  }
-                }}
+                onChangeText={(text) =>
+                  handleStorePhoneMiddleChange(
+                    text,
+                    phoneFirst,
+                    phoneLast,
+                    setPhoneMiddle,
+                    phoneLastRef,
+                    (combined) => updateBizInfo({ ownerTelNo: combined }),
+                  )
+                }
                 maxLength={4}
               />
               <Text style={styles.phoneSeparator}>-</Text>
@@ -443,18 +414,15 @@ export default function StoreSignupBizInfoScreen() {
                 placeholderTextColor="#ccc"
                 keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
                 value={phoneLast}
-                onChangeText={(text) => {
-                  const numbers = text.replace(/[^0-9]/g, "");
-                  setPhoneLast(numbers.slice(0, 4));
-                  updateBizInfo({
-                    ownerTelNo: phoneFirst + phoneMiddle + numbers.slice(0, 4),
-                  });
-                }}
-                onKeyPress={({ nativeEvent }) => {
-                  if (nativeEvent.key === "Backspace" && phoneLast === "") {
-                    phoneMiddleRef.current?.focus();
-                  }
-                }}
+                onChangeText={(text) =>
+                  handleStorePhoneLastChange(
+                    text,
+                    phoneFirst,
+                    phoneMiddle,
+                    setPhoneLast,
+                    (combined) => updateBizInfo({ ownerTelNo: combined }),
+                  )
+                }
                 maxLength={4}
               />
             </View>
@@ -462,9 +430,10 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 은행 선택 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              은행 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>은행</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TouchableOpacity
               style={styles.dateInput}
               onPress={() => setShowBankPicker(true)}
@@ -487,12 +456,13 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 정산 계좌번호 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              계좌번호 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>계좌번호</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="계좌번호 입력 (숫자만)"
+              placeholder="계좌번호 입력"
               placeholderTextColor="#ccc"
               value={bizInfo.storeAccNo}
               onChangeText={(text) =>
@@ -508,9 +478,10 @@ export default function StoreSignupBizInfoScreen() {
 
           {/* 사업자 등록일 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              사업자 등록일 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>사업자 등록일</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             {Platform.OS === "web" ? (
               // 웹용 HTML input
               <TextInput
@@ -549,60 +520,29 @@ export default function StoreSignupBizInfoScreen() {
                     onRequestClose={closeDatePicker}
                   >
                     <TouchableOpacity
-                      style={{
-                        flex: 1,
-                        justifyContent: "flex-end",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                      }}
+                      style={styles.modalOverlay}
                       activeOpacity={1}
                       onPress={closeDatePicker}
                     >
                       <TouchableOpacity activeOpacity={1}>
                         <Animated.View
-                          style={{
-                            backgroundColor: "#fff",
-                            borderTopLeftRadius: 20,
-                            borderTopRightRadius: 20,
-                            paddingBottom: 40,
-                            transform: [{ translateY: slideAnim }],
-                          }}
+                          style={[
+                            styles.pickerSheet,
+                            { transform: [{ translateY: slideAnim }] },
+                          ]}
                         >
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              padding: 16,
-                              borderBottomWidth: 1,
-                              borderBottomColor: "#eee",
-                            }}
-                          >
+                          <View style={styles.pickerHeader}>
                             <TouchableOpacity onPress={closeDatePicker}>
-                              <Text style={{ color: "#FF6F2B", fontSize: 16 }}>
-                                취소
-                              </Text>
+                              <Text style={styles.pickerCancelText}>취소</Text>
                             </TouchableOpacity>
-                            <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                            <Text style={styles.pickerTitleText}>
                               개업일 선택
                             </Text>
                             <TouchableOpacity onPress={closeDatePicker}>
-                              <Text
-                                style={{
-                                  color: "#FF6F2B",
-                                  fontSize: 16,
-                                  fontWeight: "600",
-                                }}
-                              >
-                                완료
-                              </Text>
+                              <Text style={styles.pickerDoneText}>완료</Text>
                             </TouchableOpacity>
                           </View>
-                          <View
-                            style={{
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
+                          <View style={styles.pickerCenter}>
                             <DateTimePicker
                               value={selectedDate}
                               mode="date"
@@ -632,9 +572,6 @@ export default function StoreSignupBizInfoScreen() {
               </>
             )}
           </View>
-          {insets.bottom > 0 && (
-            <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
-          )}
         </ScrollView>
 
         {/* 하단 버튼 */}
@@ -644,7 +581,7 @@ export default function StoreSignupBizInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음  3 / 4</Text>
+            <Text style={styles.nextButtonText}>다음 3 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -657,67 +594,40 @@ export default function StoreSignupBizInfoScreen() {
         onRequestClose={() => setShowBankPicker(false)}
       >
         <TouchableOpacity
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setShowBankPicker(false)}
         >
           <TouchableOpacity activeOpacity={1}>
             <Animated.View
-              style={{
-                backgroundColor: "#fff",
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                transform: [{ translateY: slideAnim }],
-              }}
+              style={[
+                styles.bankSheet,
+                { transform: [{ translateY: slideAnim }] },
+              ]}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: 16,
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#eee",
-                }}
-              >
-                <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                  은행 선택
-                </Text>
+              <View style={styles.pickerHeader}>
+                <Text style={styles.bankSheetTitle}>은행 선택</Text>
                 <TouchableOpacity onPress={() => setShowBankPicker(false)}>
                   <Ionicons name="close" size={28} color="#000" />
                 </TouchableOpacity>
               </View>
-              <ScrollView style={{ maxHeight: 500 }}>
+              <ScrollView style={styles.bankList}>
                 {banks.map((bank) => (
                   <TouchableOpacity
                     key={bank.bankIdx}
-                    style={{
-                      padding: 16,
-                      borderBottomWidth: 1,
-                      borderBottomColor: "#f0f0f0",
-                      backgroundColor:
-                        bizInfo.bankId === bank.bankIdx.toString()
-                          ? "#FFF5F0"
-                          : "#fff",
-                    }}
+                    style={[
+                      styles.bankItem,
+                      bizInfo.bankId === bank.bankIdx.toString() &&
+                        styles.bankItemSelected,
+                    ]}
                     onPress={() => handleSelectBank(bank)}
                   >
                     <Text
-                      style={{
-                        fontSize: 16,
-                        color:
-                          bizInfo.bankId === bank.bankIdx.toString()
-                            ? "#FF6F2B"
-                            : "#000",
-                        fontWeight:
-                          bizInfo.bankId === bank.bankIdx.toString()
-                            ? "600"
-                            : "normal",
-                      }}
+                      style={[
+                        styles.bankItemText,
+                        bizInfo.bankId === bank.bankIdx.toString() &&
+                          styles.bankItemTextSelected,
+                      ]}
                     >
                       {bank.bankNm}
                     </Text>
@@ -732,20 +642,13 @@ export default function StoreSignupBizInfoScreen() {
       {/* 검증 로딩 오버레이 */}
       {isValidating && (
         <Modal transparent={true} animationType="fade" visible={isValidating}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.5)",
-            }}
-          >
+          <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#FF6F2B" />
           </View>
         </Modal>
       )}
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

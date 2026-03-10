@@ -8,10 +8,7 @@ export default function CustAuthScreen() {
       <Stack.Screen name="signup" options={{ headerShown: false }} />
       <Stack.Screen name="find-account" options={{ headerShown: false }} />
       {/* Store Signup Screens */}
-      <Stack.Screen
-        name="store-signup-agreement"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="store-terms-page" options={{ headerShown: false }} />
       <Stack.Screen
         name="store-signup-member-info"
         options={{ headerShown: false }}

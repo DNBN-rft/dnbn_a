@@ -6,8 +6,8 @@ import OperatingInfoSection from "@/components/store/OperatingInfoSection";
 import PasswordChangeModal from "@/components/store/PasswordChangeModal";
 import StoreInfoSection from "@/components/store/StoreInfoSection";
 import TimePickerModal from "@/components/store/TimePickerModal";
+import DaumPostcode from "@/components/ui/DaumPostcode";
 import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
-import Postcode from "@actbase/react-daum-postcode";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -579,7 +579,7 @@ export default function EditStoreInfoPage() {
             <Text style={styles.postcodeModalTitle}>주소 검색</Text>
             <View style={styles.postcodeModalEmptyView} />
           </View>
-          <Postcode
+          <DaumPostcode
             style={styles.postcodeStyle}
             onSelected={handleAddressSelect}
             onError={() =>

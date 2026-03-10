@@ -1,12 +1,3 @@
-/**
- * 스토어 회원가입 Step 0: 약관 동의 화면
- *
- * 기능:
- * - 전체 약관 동의 체크박스
- * - 개별 약관 동의 (필수 3개 + 선택 1개)
- * - 약관 상세보기 (Modal)
- * - 필수 약관 동의 여부 검증
- */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { validateAgreement } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,7 +6,7 @@ import React, { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import TermsModal from "../../components/modal/TermsModal";
-import { styles } from "./store-signup-agreement.styles";
+import { styles } from "./store-terms-page.styles";
 
 export default function StoreSignupAgreementScreen() {
   const insets = useSafeAreaInsets();
@@ -27,13 +18,9 @@ export default function StoreSignupAgreementScreen() {
     htmlPath: string;
   } | null>(null);
 
-  // 전체 약관 체크 여부 (marketing 포함)
   const allChecked =
     agreement.terms && agreement.privacy && agreement.marketing;
 
-  /**
-   * 전체 약관 동의 핸들러
-   */
   const handleAllAgree = () => {
     const newValue = !allChecked;
     updateAgreement({
@@ -43,18 +30,12 @@ export default function StoreSignupAgreementScreen() {
     });
   };
 
-  /**
-   * 개별 약관 동의 핸들러
-   */
   const handleIndividualAgree = (field: keyof typeof agreement) => {
     updateAgreement({
       [field]: !agreement[field],
     });
   };
 
-  /**
-   * 다음 단계로 이동
-   */
   const handleNext = () => {
     const validation = validateAgreement(agreement);
     if (!validation.isValid) {
@@ -65,17 +46,11 @@ export default function StoreSignupAgreementScreen() {
     router.push("/store-signup-member-info" as any);
   };
 
-  /**
-   * 약관 상세보기
-   */
   const handleViewTerms = (title: string, htmlPath: string) => {
     setSelectedTerms({ title, htmlPath });
     setModalVisible(true);
   };
 
-  /**
-   * 모달 닫기
-   */
   const handleCloseModal = () => {
     setModalVisible(false);
     setSelectedTerms(null);
@@ -105,7 +80,7 @@ export default function StoreSignupAgreementScreen() {
 
       <ScrollView style={styles.contentContainer}>
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>동네방네 가맹점 회원가입</Text>
+          <Text style={styles.welcomeText}>회원가입</Text>
           <Text style={styles.descriptionText}>
             서비스 이용을 위해 약관에 동의해주세요
           </Text>
@@ -253,6 +228,10 @@ export default function StoreSignupAgreementScreen() {
         </TouchableOpacity>
       </View>
 
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
+
       {selectedTerms && (
         <TermsModal
           visible={modalVisible}
@@ -260,9 +239,6 @@ export default function StoreSignupAgreementScreen() {
           title={selectedTerms.title}
           htmlPath={selectedTerms.htmlPath}
         />
-      )}
-      {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
       )}
     </View>
   );

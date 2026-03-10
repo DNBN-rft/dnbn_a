@@ -14,6 +14,8 @@ import { ValidationResult } from "@/types/store-signup.types";
 const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
 const passwordRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\W)(?=\S+$).{8,16}$/;
 const phoneRegex = /^[0-9]+$/;
+// 아이디: 6자 이상, 영문+숫자 혼합 필수
+const loginIdRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{6,15}$/;
 
 /**
  * 비밀번호 검증 상태 메시지 생성
@@ -77,6 +79,13 @@ export const validateMemberInfo = (
 ): ValidationResult => {
   if (!formData.loginId || !formData.loginId.trim()) {
     return { isValid: false, message: "아이디를 입력해주세요." };
+  }
+
+  if (!loginIdRegex.test(formData.loginId)) {
+    return {
+      isValid: false,
+      message: "아이디는 6~15자 이내 영문과 숫자를 혼합하여 입력해주세요.",
+    };
   }
 
   if (idCheckStatus !== "success") {
@@ -346,7 +355,7 @@ export const validateFileInfo = (
   if (businessDocs.length === 0) {
     return {
       isValid: false,
-      message: "사업자 증명 문서를 최소 1개 이상 등록해주세요.",
+      message: "사업자 관련 서류를 등록해주세요.",
     };
   }
 

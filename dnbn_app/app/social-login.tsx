@@ -1,7 +1,11 @@
 import { setMultipleItems } from "@/utils/storageUtil";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect, useRef } from "react";
 import { ActivityIndicator, View } from "react-native";
+
+// ✅ iOS ASWebAuthenticationSession이 딥링크 수신 즉시 자동으로 닫히도록 처리
+WebBrowser.maybeCompleteAuthSession();
 
 /**
  * 백엔드 소셜 로그인 리다이렉트 수신 라우트
@@ -18,17 +22,35 @@ export default function SocialLoginCallback() {
     isExistCategory?: string;
   }>();
 
-  useEffect(() => {
-    const handleCallback = async () => {
-      const {
-        accessToken,
-        tokenType,
-        refreshToken,
-        custCode,
-        isExistLocation,
-        isExistCategory,
-      } = params;
+  // iOS에서 딥링크 파라미터가 여러 번 처리되는 것을 방지
+  const hasProcessed = useRef(false);
 
+  useEffect(() => {
+    if (hasProcessed.current) return;
+
+    const {
+      accessToken,
+      tokenType,
+      refreshToken,
+      custCode,
+      isExistLocation,
+      isExistCategory,
+    } = params;
+
+    // iOS 딥링크 타이밍 이슈: 첫 렌더에서 params가 비어있을 수 있음
+    // 모든 파라미터가 undefined이면 아직 파싱되지 않은 것이므로 대기
+    if (
+      accessToken === undefined &&
+      tokenType === undefined &&
+      isExistLocation === undefined &&
+      isExistCategory === undefined
+    ) {
+      return;
+    }
+
+    hasProcessed.current = true;
+
+    const handleCallback = async () => {
       if (!accessToken) {
         // accessToken 없으면 로그인 페이지로
         router.replace("/(auth)/login");
@@ -71,6 +93,17 @@ export default function SocialLoginCallback() {
     };
 
     handleCallback();
+  }, [params.accessToken, params.tokenType, params.isExistLocation, params.isExistCategory]);
+
+  // 안전장치: 5초 내에 파라미터가 도착하지 않으면 로그인으로 이동
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!hasProcessed.current) {
+        hasProcessed.current = true;
+        router.replace("/(auth)/login");
+      }
+    }, 5000);
+    return () => clearTimeout(timeout);
   }, []);
 
   return (

@@ -19,6 +19,12 @@ export default function CustMapScreen() {
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<WebView>(null);
   const [webViewKey, setWebViewKey] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [headerAreaHeight, setHeaderAreaHeight] = useState(0);
+  const panelMaxHeight =
+    containerHeight > 0 && headerAreaHeight > 0
+      ? containerHeight - headerAreaHeight
+      : undefined;
 
   const reloadWebView = useCallback(() => {
     setWebViewKey((k) => k + 1);
@@ -112,14 +118,17 @@ export default function CustMapScreen() {
         if (searchAddress && typeof searchAddress === "string") {
           await handleGeocodeAddress(searchAddress);
         } else if (userLocation) {
+          // 초기 진입 시 보정 없이 중앙에 표시
           await handleLocationSelection(
             userLocation.coords.latitude,
             userLocation.coords.longitude,
+            false,
           );
         } else {
           await handleLocationSelection(
             DEFAULT_LOCATION.latitude,
             DEFAULT_LOCATION.longitude,
+            false,
           );
         }
       } catch (error) {
@@ -151,15 +160,25 @@ export default function CustMapScreen() {
     if (selectedStore) {
       slideUp(slideAnim, 300);
     }
-  }, [selectedStore, slideAnim]);
+  }, [selectedStore?.id, slideAnim]);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+    >
       {insets.top > 0 && (
         <View style={[styles.statusBar, { height: insets.top }]} />
       )}
 
-      <View style={styles.header}>
+      <View
+        style={styles.header}
+        onLayout={(e) =>
+          setHeaderAreaHeight(
+            e.nativeEvent.layout.y + e.nativeEvent.layout.height,
+          )
+        }
+      >
         <View style={styles.leftSection}>
           <TouchableOpacity
             style={styles.backButton}
@@ -169,7 +188,7 @@ export default function CustMapScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>내 위치 설정</Text>
+          <Text style={styles.title}>지도</Text>
         </View>
         <View style={styles.rightSection}>
           <TouchableOpacity
@@ -242,6 +261,7 @@ export default function CustMapScreen() {
         <StoreDetailPanel
           selectedStore={selectedStore}
           slideAnim={slideAnim}
+          maxHeight={panelMaxHeight}
           onClose={handleCloseStoreInfo}
         />
       )}
@@ -252,6 +272,7 @@ export default function CustMapScreen() {
           stores={stores}
           storeListAnim={storeListAnim}
           insets={insets}
+          maxHeight={panelMaxHeight}
           onSelectStore={handleSelectStoreFromList}
           onClose={handleCloseStoreList}
         />

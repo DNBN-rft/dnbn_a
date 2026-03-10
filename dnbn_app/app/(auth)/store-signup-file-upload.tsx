@@ -10,6 +10,7 @@
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiPostFormDataWithImage } from "@/utils/api";
+import { buildStoreSignupFormData } from "@/utils/storeSignupFormBuilder";
 import { validateFileInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -33,6 +34,7 @@ export default function StoreSignupFileUploadScreen() {
   const { fileUpload, memberInfo, bizInfo, storeInfo } = formData;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   /**
    * 이미지 권한 요청
@@ -79,8 +81,8 @@ export default function StoreSignupFileUploadScreen() {
     const hasPermission = await requestPermission();
     if (!hasPermission) return;
 
-    if (fileUpload.businessDocs.length >= 5) {
-      Alert.alert("알림", "사업자등록증은 최대 5장까지 등록 가능합니다.");
+    if (fileUpload.businessDocs.length >= 3) {
+      Alert.alert("알림", "첨부파일은 최대 3개까지 등록 가능합니다.");
       return;
     }
 
@@ -137,8 +139,8 @@ export default function StoreSignupFileUploadScreen() {
       "회원가입 제출",
       "입력하신 정보로 회원가입을 진행하시겠습니까?",
       [
-        { text: "취소", style: "cancel" },
         { text: "확인", onPress: submitSignup },
+        { text: "취소", style: "cancel" },
       ],
     );
   };
@@ -150,62 +152,12 @@ export default function StoreSignupFileUploadScreen() {
     setIsSubmitting(true);
 
     try {
-      // FormData 생성
-      const formData = new FormData();
-
-      // 회원 정보
-      formData.append("loginId", memberInfo.loginId);
-      formData.append("password", memberInfo.password);
-      formData.append("email", memberInfo.email);
-
-      // 사업자 정보
-      formData.append("ownerNm", bizInfo.ownerNm);
-      formData.append("ownerTelNo", bizInfo.ownerTelNo.replace(/-/g, ""));
-      formData.append("bizNm", bizInfo.bizNm);
-      formData.append("bizNo", bizInfo.bizNo.replace(/-/g, ""));
-      formData.append("bizRegDate", bizInfo.bizRegDate);
-      formData.append("bizType", bizInfo.bizType || "");
-      formData.append("storeAccNo", bizInfo.storeAccNo);
-      if (bizInfo.bankId) {
-        formData.append("bankId", bizInfo.bankId);
-      }
-
-      // 가게 정보
-      formData.append("storeNm", storeInfo.storeNm);
-      formData.append("storeTelNo", storeInfo.storeTelNo.replace(/-/g, ""));
-      formData.append("storeZipCode", storeInfo.storeZipCode);
-      formData.append("storeAddr", storeInfo.storeAddr);
-      formData.append("storeAddrDetail", storeInfo.storeDetailAddr || "");
-
-      // 영업일 (List<OpenDay>로 전송)
-      storeInfo.storeOpenDate?.forEach((day) => {
-        formData.append("storeOpenDate", day);
-      });
-
-      formData.append("storeOpenTime", storeInfo.storeOpenTime);
-      formData.append("storeCloseTime", storeInfo.storeCloseTime);
-      formData.append("storeType", "가맹점");
-
-      // 약관 동의
-      formData.append("agreed", "true");
-
-      // 가게 대표 이미지 (List<MultipartFile>로 전송)
-      if (fileUpload.storeImage) {
-        formData.append("storeImgFile", {
-          uri: fileUpload.storeImage.uri,
-          type: fileUpload.storeImage.type,
-          name: fileUpload.storeImage.name,
-        } as any);
-      }
-
-      // 사업자등록증 (List<MultipartFile>로 전송)
-      fileUpload.businessDocs.forEach((doc) => {
-        formData.append("bzFile", {
-          uri: doc.uri,
-          type: doc.type,
-          name: doc.name,
-        } as any);
-      });
+      const formData = buildStoreSignupFormData(
+        memberInfo,
+        bizInfo,
+        storeInfo,
+        fileUpload,
+      );
 
       const response = await apiPostFormDataWithImage(
         "/store/register",
@@ -213,18 +165,22 @@ export default function StoreSignupFileUploadScreen() {
       );
 
       if (response.ok) {
-        Alert.alert("성공", "회원가입이 완료되었습니다.", [
-          {
-            text: "확인",
-            onPress: () => {
-              resetFormData();
-              router.replace("/(auth)/login");
+        setIsSubmitted(true);
+        Alert.alert(
+          "성공",
+          "회원가입이 완료되었으며, 승인 후 로그인할 수 있습니다.",
+          [
+            {
+              text: "확인",
+              onPress: () => {
+                resetFormData();
+                router.replace("/(auth)/login?tab=store" as any);
+              },
             },
-          },
-        ]);
+          ],
+        );
       } else {
-        const errorData = await response.json();
-        Alert.alert("실패", errorData.message || "회원가입에 실패했습니다.");
+        Alert.alert("실패", "회원가입에 실패했습니다. 다시 시도해 주세요.");
       }
     } catch (error) {
       console.error("회원가입 에러:", error);
@@ -262,9 +218,10 @@ export default function StoreSignupFileUploadScreen() {
       >
         {/* 가게 대표 이미지 */}
         <View style={styles.section}>
-          <Text style={styles.label}>
-            가게 대표 이미지 <Text style={styles.required}>*</Text>
-          </Text>
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>가게 대표 이미지</Text>
+            <Text style={styles.required}> *</Text>
+          </View>
           <Text style={styles.helperText}>
             가게 대표 이미지를 올려주세요. (jpg, png / 파일당 10MB 이하)
           </Text>
@@ -296,10 +253,10 @@ export default function StoreSignupFileUploadScreen() {
 
         {/* 사업자등록증 */}
         <View style={styles.section}>
-          <Text style={styles.label}>
-            사업자등록증, 영업신고증, 통장사본{" "}
-            <Text style={styles.required}>*</Text>
-          </Text>
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>사업자등록증, 영업신고증, 통장사본</Text>
+            <Text style={styles.required}> *</Text>
+          </View>
           <Text style={styles.helperText}>
             사업자 증명, 영업신고증, 통장사본을 올려주세요. (jpg, png / 파일당
             10MB 이하)
@@ -344,21 +301,21 @@ export default function StoreSignupFileUploadScreen() {
         <TouchableOpacity
           style={[
             styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
+            (isSubmitting || isSubmitted) && styles.submitButtonDisabled,
           ]}
           onPress={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSubmitted}
           activeOpacity={0.8}
         >
           {isSubmitting ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>회원가입 완료</Text>
+            <Text style={styles.submitButtonText}>회원가입</Text>
           )}
         </TouchableOpacity>
       </View>
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
