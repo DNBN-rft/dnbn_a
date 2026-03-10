@@ -237,6 +237,16 @@ export default function StoreHome() {
               {hasAuthority("STORE_ORDER") && (
                 <TouchableOpacity
                   style={styles.menuItem}
+                  onPress={() => router.push("/(store)/order-manage")}
+                >
+                  <Ionicons name="card-outline" size={28} color="#FF9500" />
+                  <Text style={styles.menuText}>주문 관리</Text>
+                </TouchableOpacity>
+              )}
+
+              {hasAuthority("STORE_ORDER") && (
+                <TouchableOpacity
+                  style={styles.menuItem}
                   onPress={() => router.push("/(store)/storestatistic")}
                 >
                   <Ionicons
