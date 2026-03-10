@@ -149,14 +149,13 @@ export default function StoreSignupBizInfoScreen() {
     try {
       const bizNoClean = bizInfo.bizNo.replace(/-/g, "");
       const response = await apiGet(`/store/check-bizNo/${bizNoClean}`);
-      const message = await response.text();
 
-      if (response.ok && message.includes("사용가능")) {
+      if (response.ok) {
         setBizNoDuplicate(false);
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용 가능한 사업자 번호입니다.");
       } else {
         setBizNoDuplicate(true);
-        Alert.alert("알림", message);
+        Alert.alert("알림", "이미 등록된 사업자 번호입니다.");
       }
     } catch (error) {
       console.error("사업자번호 중복 체크 에러:", error);

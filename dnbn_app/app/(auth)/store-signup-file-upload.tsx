@@ -180,8 +180,7 @@ export default function StoreSignupFileUploadScreen() {
           ],
         );
       } else {
-        const errorData = await response.json();
-        Alert.alert("실패", errorData.message || "회원가입에 실패했습니다.");
+        Alert.alert("실패", "회원가입에 실패했습니다. 다시 시도해 주세요.");
       }
     } catch (error) {
       console.error("회원가입 에러:", error);

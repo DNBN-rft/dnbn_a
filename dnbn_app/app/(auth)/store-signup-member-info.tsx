@@ -132,16 +132,15 @@ export default function StoreSignupMemberInfoScreen() {
       const response = await apiGet(
         `/store/check-loginId/${memberInfo.loginId}`,
       );
-      const message = await response.text();
 
-      if (response.ok && message.includes("사용가능")) {
+      if (response.ok) {
         setIdCheckStatus("success");
         setLoginIdError("");
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용 가능한 아이디입니다.");
       } else {
         setIdCheckStatus("error");
-        setLoginIdError("이미 사용 중인 아이디입니다.");
-        Alert.alert("알림", message);
+        setLoginIdError("이미 등록된 아이디입니다.");
+        Alert.alert("알림", "이미 등록된 아이디입니다.");
       }
     } catch (error) {
       console.error("아이디 중복 체크 에러:", error);
