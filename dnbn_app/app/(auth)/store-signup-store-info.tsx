@@ -8,6 +8,7 @@
  * - 영업시간 설정
  */
 import TimePickerModal from "@/components/TimePickerModal";
+import DaumPostcode from "@/components/ui/DaumPostcode";
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import {
   formatPhone,
@@ -15,7 +16,6 @@ import {
   restrictPhone,
 } from "@/utils/storeInputRestrictions";
 import { validateStoreInfo } from "@/utils/storeSignupValidation";
-import Postcode from "@actbase/react-daum-postcode";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -363,7 +363,7 @@ export default function StoreSignupStoreInfoScreen() {
             <Text style={styles.modalTitle}>주소 검색</Text>
             <View style={styles.modalEmptyView} />
           </View>
-          <Postcode
+          <DaumPostcode
             style={styles.postcodeStyle}
             onSelected={handleAddressComplete}
             onError={handlePostcodeError}
