@@ -13,7 +13,6 @@
     "generate-terms": "node ./scripts/generate-terms-content.js"
   },
   "dependencies": {
-    "@actbase/react-daum-postcode": "^1.0.4",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
@@ -52,6 +51,7 @@
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-gifted-charts": "^1.4.70",
+    "react-native-kakao-postcode": "^1.0.2",
     "react-native-radio-buttons-group": "^3.1.0",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",

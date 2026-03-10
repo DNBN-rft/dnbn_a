@@ -6,7 +6,6 @@ import OperatingInfoSection from "@/components/store/OperatingInfoSection";
 import PasswordChangeModal from "@/components/store/PasswordChangeModal";
 import StoreInfoSection from "@/components/store/StoreInfoSection";
 import TimePickerModal from "@/components/store/TimePickerModal";
-import DaumPostcode from "@/components/ui/DaumPostcode";
 import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -22,6 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DaumPostcode from "react-native-kakao-postcode";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./editstoreinfo.styles";
 

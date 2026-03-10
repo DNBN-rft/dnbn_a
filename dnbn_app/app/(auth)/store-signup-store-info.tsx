@@ -8,7 +8,6 @@
  * - 영업시간 설정
  */
 import TimePickerModal from "@/components/TimePickerModal";
-import DaumPostcode from "@/components/ui/DaumPostcode";
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import {
   formatPhone,
@@ -30,6 +29,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DaumPostcode from "react-native-kakao-postcode";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./store-signup-store-info.styles";
 

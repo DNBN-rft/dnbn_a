@@ -1,4 +1,3 @@
-import DaumPostcode from "@/components/ui/DaumPostcode";
 import { apiPost, apiPut } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -17,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DaumPostcode from "react-native-kakao-postcode";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./address-select.styles";
 
