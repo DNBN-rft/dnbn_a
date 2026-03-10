@@ -241,31 +241,41 @@ export default function ProductDetailScreen() {
                     }}
                     style={{ width: screenWidth, height: 350 }}
                   >
-                    <Image
-                      source={
-                        item.fileUrl || require("@/assets/images/logo.png")
-                      }
-                      style={[styles.productImage, { width: screenWidth }]}
-                      priority="high"
-                      cachePolicy="memory-disk"
-                      contentFit="cover"
-                      transition={200}
-                      placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-                    />
+                    {item.fileUrl ? (
+                      <Image
+                        source={item.fileUrl}
+                        style={[styles.productImage, { width: screenWidth }]}
+                        priority="high"
+                        cachePolicy="memory-disk"
+                        contentFit="cover"
+                        transition={200}
+                        placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.productImage,
+                          { width: screenWidth },
+                          styles.noImageBox,
+                        ]}
+                      >
+                        <Ionicons name="image-outline" size={80} color="#ccc" />
+                      </View>
+                    )}
                   </Pressable>
                 )}
               />
             ) : (
               <Pressable style={{ width: screenWidth, height: 350 }}>
-                <Image
-                  source={require("@/assets/images/logo.png")}
-                  style={[styles.productImage, { width: screenWidth }]}
-                  priority="high"
-                  cachePolicy="memory-disk"
-                  contentFit="cover"
-                  transition={200}
-                  placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
-                />
+                <View
+                  style={[
+                    styles.productImage,
+                    { width: screenWidth },
+                    styles.noImageBox,
+                  ]}
+                >
+                  <Ionicons name="image-outline" size={80} color="#ccc" />
+                </View>
               </Pressable>
             )}
 

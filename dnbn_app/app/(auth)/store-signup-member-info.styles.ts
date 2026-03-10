@@ -55,7 +55,6 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
   },
   required: {
     color: "#FF6F2B",
@@ -196,6 +195,14 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+  },
+  flex1: {
+    flex: 1,
+  },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   nextButtonText: {
     fontSize: 17,

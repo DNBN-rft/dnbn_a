@@ -137,14 +137,20 @@ export default function PurchaseBox() {
                       }
                     >
                       <View style={styles.productImageContainer}>
-                        <Image
-                          source={
-                            notUsed.productImageUrl
-                              ? { uri: notUsed.productImageUrl }
-                              : require("@/assets/images/logo.png")
-                          }
-                          style={styles.productImage}
-                        />
+                        {notUsed.productImageUrl ? (
+                          <Image
+                            source={{ uri: notUsed.productImageUrl }}
+                            style={styles.productImage}
+                          />
+                        ) : (
+                          <View style={styles.productImage}>
+                            <Ionicons
+                              name="image-outline"
+                              size={48}
+                              color="#ccc"
+                            />
+                          </View>
+                        )}
                       </View>
 
                       <View style={styles.productInfoContainer}>
@@ -202,14 +208,20 @@ export default function PurchaseBox() {
                     }
                   >
                     <View style={styles.productImageContainer}>
-                      <Image
-                        source={
-                          used.productImageUrl
-                            ? { uri: used.productImageUrl }
-                            : require("@/assets/images/logo.png")
-                        }
-                        style={styles.productImage}
-                      />
+                      {used.productImageUrl ? (
+                        <Image
+                          source={{ uri: used.productImageUrl }}
+                          style={styles.productImage}
+                        />
+                      ) : (
+                        <View style={styles.productImage}>
+                          <Ionicons
+                            name="image-outline"
+                            size={48}
+                            color="#ccc"
+                          />
+                        </View>
+                      )}
                       <View
                         style={[
                           styles.statusOverlayBg,

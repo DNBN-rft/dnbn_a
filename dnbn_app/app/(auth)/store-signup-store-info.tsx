@@ -128,6 +128,11 @@ export default function StoreSignupStoreInfoScreen() {
     setActiveTimePicker(null);
   };
 
+  const handleStoreTelNoChange = (text: string) => {
+    const digitsOnly = restrictPhone(text);
+    updateStoreInfo({ storeTelNo: digitsOnly });
+  };
+
   /**
    * 다음 단계로 이동
    */
@@ -163,7 +168,7 @@ export default function StoreSignupStoreInfoScreen() {
       </View>
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex1}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
@@ -175,12 +180,13 @@ export default function StoreSignupStoreInfoScreen() {
         >
           {/* 가게 이름 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              가게명 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>가게명</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="동네방네 본점"
+              placeholder="가맹점 이름을 입력해주세요"
               placeholderTextColor="#ccc"
               value={storeInfo.storeNm}
               onChangeText={(text) =>
@@ -191,18 +197,16 @@ export default function StoreSignupStoreInfoScreen() {
 
           {/* 가게 전화번호 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              가게 연락처 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>가게 연락처</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="02-1234-5678"
+              placeholder="가맹점 연락처를 입력해주세요"
               placeholderTextColor="#ccc"
               value={formatPhone(storeInfo.storeTelNo)}
-              onChangeText={(text) => {
-                const digitsOnly = restrictPhone(text);
-                updateStoreInfo({ storeTelNo: digitsOnly });
-              }}
+              onChangeText={handleStoreTelNoChange}
               keyboardType="phone-pad"
               maxLength={13}
             />
@@ -210,14 +214,15 @@ export default function StoreSignupStoreInfoScreen() {
 
           {/* 주소 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              주소 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>주소</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.inputRow}>
               <TextInput
-                style={[styles.input, styles.inputFlex, { backgroundColor: "#f5f5f5", color: storeInfo.storeAddr ? "#999" : "#ccc" }]}
+                style={[styles.input, styles.inputFlex, styles.inputReadonly]}
                 value={storeInfo.storeAddr}
-                placeholder="주소 검색 버튼을 눌러주세요"
+                placeholder="주소를 검색해주세요"
                 placeholderTextColor="#ccc"
                 editable={false}
               />
@@ -231,13 +236,13 @@ export default function StoreSignupStoreInfoScreen() {
             {storeInfo.storeAddr && (
               <>
                 <TextInput
-                  style={[styles.input, { marginTop: 8, backgroundColor: "#f5f5f5", color: "#999" }]}
+                  style={[styles.input, styles.inputReadonlySpaced]}
                   value={storeInfo.storeZipCode || ""}
                   editable={false}
                 />
                 <TextInput
-                  style={[styles.input, { marginTop: 8 }]}
-                  placeholder="상세 주소 입력"
+                  style={[styles.input, styles.inputSpaced]}
+                  placeholder="상세 주소를 입력해주세요"
                   placeholderTextColor="#ccc"
                   value={storeInfo.storeDetailAddr}
                   onChangeText={(text) =>
@@ -250,9 +255,10 @@ export default function StoreSignupStoreInfoScreen() {
 
           {/* 영업일 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              영업일 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>영업일</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.daySelector}>
               {WEEK_DAYS.map((day) => (
                 <TouchableOpacity
@@ -280,9 +286,10 @@ export default function StoreSignupStoreInfoScreen() {
 
           {/* 영업 시작 시간 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              영업 시작 시간 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>영업 시작 시간</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TouchableOpacity
               style={styles.timeInput}
               onPress={() => openTimePicker("open")}
@@ -302,9 +309,10 @@ export default function StoreSignupStoreInfoScreen() {
 
           {/* 영업 종료 시간 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              영업 종료 시간 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>영업 종료 시간</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TouchableOpacity
               style={styles.timeInput}
               onPress={() => openTimePicker("close")}
@@ -330,7 +338,7 @@ export default function StoreSignupStoreInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음  2 / 4</Text>
+            <Text style={styles.nextButtonText}>다음 2 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -341,7 +349,7 @@ export default function StoreSignupStoreInfoScreen() {
         animationType="slide"
         onRequestClose={() => setShowPostcode(false)}
       >
-        <View style={{ flex: 1, backgroundColor: "#fff" }}>
+        <View style={styles.modalContent}>
           {insets.top > 0 && (
             <View style={{ height: insets.top, backgroundColor: "#fff" }} />
           )}
@@ -353,7 +361,7 @@ export default function StoreSignupStoreInfoScreen() {
               <Ionicons name="close" size={28} color="#000" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>주소 검색</Text>
-            <View style={{ width: 28 }} />
+            <View style={styles.modalHeaderSpacer} />
           </View>
           <Postcode
             style={{ flex: 1 }}
@@ -376,7 +384,7 @@ export default function StoreSignupStoreInfoScreen() {
         onClose={handleTimePickerClose}
       />
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

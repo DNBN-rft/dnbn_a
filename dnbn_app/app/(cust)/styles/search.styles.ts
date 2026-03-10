@@ -186,6 +186,10 @@ export const styles = StyleSheet.create({
     height: 170,
     backgroundColor: "#f5f5f5",
   },
+  noImageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   galleryInfo: {
     padding: 10,
   },

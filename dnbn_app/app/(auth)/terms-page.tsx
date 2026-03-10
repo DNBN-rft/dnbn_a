@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,7 +7,6 @@ import TermsModal from "../../components/modal/TermsModal";
 import { styles } from "./terms-page.styles";
 
 export default function TermsPage() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [allAgreed, setAllAgreed] = useState(false);
   const [ageAgreed, setAgeAgreed] = useState(false);

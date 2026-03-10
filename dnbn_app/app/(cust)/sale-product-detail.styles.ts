@@ -46,6 +46,10 @@ export const styles = StyleSheet.create({
     height: 350,
     backgroundColor: "#f8f8f8",
   },
+  noImageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   paginationContainer: {
     position: "absolute",
     bottom: 16,

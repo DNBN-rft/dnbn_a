@@ -55,7 +55,6 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
   },
   required: {
     color: "#FF6F2B",
@@ -193,6 +192,33 @@ export const styles = StyleSheet.create({
     height: 44,
     justifyContent: "center",
     alignItems: "flex-start",
+  },
+  flex1: {
+    flex: 1,
+  },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  inputReadonly: {
+    backgroundColor: "#f5f5f5",
+    color: "#999",
+  },
+  inputReadonlySpaced: {
+    marginTop: 8,
+    backgroundColor: "#f5f5f5",
+    color: "#999",
+  },
+  inputSpaced: {
+    marginTop: 8,
+  },
+  modalContent: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  modalHeaderSpacer: {
+    width: 28,
   },
   modalTitle: {
     fontSize: 18,
