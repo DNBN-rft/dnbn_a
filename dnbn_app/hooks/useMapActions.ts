@@ -4,13 +4,16 @@ import { RefObject, useCallback } from "react";
 import { Alert, Animated } from "react-native";
 import { WebView } from "react-native-webview";
 import {
+  addSearchPin,
   addStoreMarkers,
   clearAllMarkers,
   fetchNearbyStores,
+  fetchStoreDetail,
   geocodeAddress,
   getUserLocation as getLocation,
   highlightStoreMarker,
   moveMapToLocation,
+  panMapBy,
   reverseGeocode,
   sendMessageToWebView,
   setUserLocationWithZoom,
@@ -74,7 +77,7 @@ export function useMapActions({
   reloadWebView,
 }: UseMapActionsParams) {
   const handleFetchNearbyStores = useCallback(
-    async (latitude: number, longitude: number) => {
+    async (latitude: number, longitude: number): Promise<Store[]> => {
       try {
         // 기존 마커 제거
         sendMessageToWebView(webViewRef, {
@@ -87,12 +90,14 @@ export function useMapActions({
         if (nearbyStores.length > 0) {
           addStoreMarkers(webViewRef, nearbyStores);
         }
+        return nearbyStores;
       } catch (error) {
         console.error("Fetch stores error:", error);
         setStores([]);
         sendMessageToWebView(webViewRef, {
           type: "clearMarkers",
         });
+        return [];
       }
     },
     [webViewRef, setStores],
@@ -100,7 +105,7 @@ export function useMapActions({
 
   // 좌표 설정 (지도 이동)
   const setLocationCoordinates = useCallback(
-    (latitude: number, longitude: number, zoom: number = 3) => {
+    (latitude: number, longitude: number, zoom: number = 5) => {
       setUserLocationWithZoom(webViewRef, latitude, longitude, zoom);
     },
     [webViewRef],
@@ -108,7 +113,7 @@ export function useMapActions({
 
   // 지도 이동만 (마커 생성 없음)
   const handleMapNavigation = useCallback(
-    (latitude: number, longitude: number, zoom: number = 2) => {
+    (latitude: number, longitude: number, zoom: number = 5) => {
       moveMapToLocation(webViewRef, latitude, longitude, zoom);
     },
     [webViewRef],
@@ -116,20 +121,23 @@ export function useMapActions({
 
   // 위치 선택 처리 (좌표 설정 + 주변 가맹점 조회)
   const handleLocationSelection = useCallback(
-    async (latitude: number, longitude: number) => {
+    async (latitude: number, longitude: number, withPan: boolean = true) => {
       try {
-        // 다른 패널이 열려있으면 먼저 닫기
         await closeAllPanels({
           clickedLocation: true,
           selectedStore: true,
         });
 
         setLocationCoordinates(latitude, longitude);
-        await handleFetchNearbyStores(latitude, longitude);
+        const nearbyStores = await handleFetchNearbyStores(latitude, longitude);
 
         // 가맹점 목록 표시
         setShowStoreList(true);
         slideUp(storeListAnim, 400);
+        // 하단 패널 보정: withPan=true이고 가맹점이 있을 때만 적용
+        if (withPan && nearbyStores.length > 0) {
+          setTimeout(() => panMapBy(webViewRef, 0, 170), 50);
+        }
 
         // 모든 작업 완료 후 로딩 종료
         setIsLoading(false);
@@ -145,6 +153,7 @@ export function useMapActions({
       closeAllPanels,
       setShowStoreList,
       setIsLoading,
+      webViewRef,
     ],
   );
 
@@ -168,12 +177,23 @@ export function useMapActions({
           // 지도 이동
           await handleMapNavigation(result.latitude, result.longitude);
 
-          // 주변 가맹점 조회
-          await handleFetchNearbyStores(result.latitude, result.longitude);
+          // 지도 이동 완료 후 핀 표시 (300ms 대기)
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          addSearchPin(webViewRef, result.latitude, result.longitude);
 
-          // 가맹점 목록 표시
-          setShowStoreList(true);
-          slideUp(storeListAnim, 400);
+          // 주변 가맹점 조회
+          const nearbyStores = await handleFetchNearbyStores(
+            result.latitude,
+            result.longitude,
+          );
+
+          if (nearbyStores.length > 0) {
+            // 가맹점 목록 표시 + 모달 높이 보정
+            setShowStoreList(true);
+            slideUp(storeListAnim, 400);
+            setTimeout(() => panMapBy(webViewRef, 0, 170), 50);
+          }
+          // 가맹점 없으면 핀만 가운데 표시 (pan 없음)
 
           // 모든 작업 완료 후 로딩 종료
           setIsLoading(false);
@@ -190,6 +210,7 @@ export function useMapActions({
       closeAllPanels,
       setShowStoreList,
       setIsLoading,
+      webViewRef,
     ],
   );
 
@@ -289,7 +310,7 @@ export function useMapActions({
           if (showStoreList) {
             closePromises.push(
               new Promise<void>((resolve) => {
-                slideDown(storeListAnim, 300, 300, () => {
+                slideDown(storeListAnim, 1000, 300, () => {
                   setShowStoreList(false);
                   resolve();
                 });
@@ -302,11 +323,33 @@ export function useMapActions({
             Promise.all(closePromises).then(() => {
               setTimeout(() => {
                 setSelectedStore(data.store);
+                // 상세 API 호출 (phone, recentProducts)
+                if (data.store.storeCode || data.store.id) {
+                  const code = data.store.storeCode ?? data.store.id;
+                  const lat = data.store.latitude;
+                  const lng = data.store.longitude;
+                  fetchStoreDetail(code, lat, lng).then((detail) => {
+                    if (detail) {
+                      setSelectedStore({ ...data.store, ...detail });
+                    }
+                  });
+                }
               }, 100);
             });
           } else {
             // 다른 패널이 없으면 바로 표시
             setSelectedStore(data.store);
+            // 상세 API 호출 (phone, recentProducts)
+            if (data.store.storeCode || data.store.id) {
+              const code = data.store.storeCode ?? data.store.id;
+              const lat = data.store.latitude;
+              const lng = data.store.longitude;
+              fetchStoreDetail(code, lat, lng).then((detail) => {
+                if (detail) {
+                  setSelectedStore({ ...data.store, ...detail });
+                }
+              });
+            }
           }
         } else if (data.type === "mapClicked") {
           // 새 위치 클릭 시 기존 패널들 닫기 (순차적으로)
@@ -315,7 +358,7 @@ export function useMapActions({
           if (showStoreList) {
             closePromises.push(
               new Promise<void>((resolve) => {
-                slideDown(storeListAnim, 600, 300, () => {
+                slideDown(storeListAnim, 1000, 300, () => {
                   setShowStoreList(false);
                   resolve();
                 });
@@ -326,7 +369,7 @@ export function useMapActions({
           if (selectedStore) {
             closePromises.push(
               new Promise<void>((resolve) => {
-                slideDown(slideAnim, 300, 300, () => {
+                slideDown(slideAnim, 1000, 300, () => {
                   setSelectedStore(null);
                   resolve();
                 });
@@ -430,7 +473,7 @@ export function useMapActions({
 
   // 가맹점 정보 닫기
   const handleCloseStoreInfo = useCallback(() => {
-    slideDown(slideAnim, 300, 300, () => {
+    slideDown(slideAnim, 1000, 300, () => {
       setSelectedStore(null);
     });
   }, [slideAnim, setSelectedStore]);
@@ -453,13 +496,18 @@ export function useMapActions({
       highlightStoreMarker(webViewRef, store.id);
 
       // 목록 패널 닫기
-      slideDown(storeListAnim, 300, 300, () => {
+      slideDown(storeListAnim, 1000, 300, () => {
         setShowStoreList(false);
       });
 
       // 목록이 완전히 닫힌 후 상세정보 표시
       await new Promise((resolve) => setTimeout(resolve, 350));
       setSelectedStore(store);
+      // 상세 API 호출 (phone, recentProducts)
+      const code = store.storeCode ?? store.id;
+      fetchStoreDetail(code, store.latitude, store.longitude).then((detail) => {
+        if (detail) setSelectedStore({ ...store, ...detail });
+      });
     },
     [
       storeListAnim,
@@ -483,7 +531,7 @@ export function useMapActions({
     await handleMapNavigation(latitude, longitude, 4);
 
     // 2. 가맹점 조회
-    await handleFetchNearbyStores(latitude, longitude);
+    const nearbyStores = await handleFetchNearbyStores(latitude, longitude);
 
     // 3. 다른 패널들이 열려있으면 먼저 닫기
     const closePromises: Promise<void>[] = [];
@@ -491,7 +539,7 @@ export function useMapActions({
     if (selectedStore) {
       closePromises.push(
         new Promise<void>((resolve) => {
-          slideDown(slideAnim, 300, 300, () => {
+          slideDown(slideAnim, 1000, 300, () => {
             setSelectedStore(null);
             resolve();
           });
@@ -509,12 +557,17 @@ export function useMapActions({
       }),
     );
 
-    // 4. 모든 패널이 완전히 닫힌 후 가맹점 목록 표시
+    // 4. 모든 패널이 완전히 닫힌 후 처리
     await Promise.all(closePromises);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    setShowStoreList(true);
-    slideUp(storeListAnim, 400);
+    if (nearbyStores.length > 0) {
+      // 가맹점 있으면 목록 표시 + 모달 높이 보정
+      setShowStoreList(true);
+      slideUp(storeListAnim, 400);
+      setTimeout(() => panMapBy(webViewRef, 0, 170), 50);
+    }
+    // 가맹점 없으면 보정 없이 핀만 중앙에 표시
   }, [
     clickedLocation,
     handleMapNavigation,
@@ -526,6 +579,7 @@ export function useMapActions({
     setClickedLocation,
     setSelectedStore,
     setShowStoreList,
+    webViewRef,
   ]);
 
   // 클릭 패널 닫기
@@ -537,7 +591,7 @@ export function useMapActions({
 
   // 목록 패널 닫기
   const handleCloseStoreList = useCallback(() => {
-    slideDown(storeListAnim, 300, 300, () => {
+    slideDown(storeListAnim, 1000, 300, () => {
       setShowStoreList(false);
     });
   }, [storeListAnim, setShowStoreList]);

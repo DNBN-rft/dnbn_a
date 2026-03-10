@@ -4,7 +4,7 @@ import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -28,6 +28,9 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+
+  // 소셜 로그인 진행 중 플래그 (Linking 이벤트 중복 방지)
+  const isSocialLoginInProgress = useRef(false);
 
   // 소셜 로그인 성공 처리
   const handleSocialLoginSuccess = useCallback(
@@ -129,8 +132,11 @@ export default function LoginScreen() {
 
     // Warm Start 처리: 앱이 이미 실행 중일 때 딥링크 수신
     const subscription = Linking.addEventListener("url", ({ url }) => {
-      const { queryParams } = Linking.parse(url);
+      // ✅ openAuthSessionAsync 진행 중이면 Linking 이벤트 무시
+      // Android에서 openAuthSessionAsync와 Linking 둘 다 발동되는 중복 방지
+      if (isSocialLoginInProgress.current) return;
 
+      const { queryParams } = Linking.parse(url);
       if (queryParams && queryParams.accessToken) {
         handleSocialLoginSuccess(queryParams);
       }
@@ -282,12 +288,18 @@ export default function LoginScreen() {
       const loginUrl = await getSocialLoginUrl(provider);
       console.log(`${provider} 로그인 URL:`, loginUrl);
 
+      // ✅ 소셜 로그인 시작 전 플래그 ON → Linking 이벤트 차단
+      isSocialLoginInProgress.current = true;
+
       // Step 2: openAuthSessionAsync 사용 → iOS ASWebAuthenticationSession / Android Custom Tabs
       // 새 앱 인스턴스를 열지 않고 동일 앱 내에서 리다이렉트를 가로챔
       const result = await WebBrowser.openAuthSessionAsync(
         loginUrl,
         "dnbnapp://social-login",
       );
+
+      // ✅ openAuthSessionAsync 완료 후 플래그 OFF
+      isSocialLoginInProgress.current = false;
 
       // Step 3: 브라우저가 리다이렉트 URL을 가로챈 경우 직접 파싱하여 처리
       if (result.type === "success" && result.url) {
@@ -298,6 +310,7 @@ export default function LoginScreen() {
       }
       // result.type === 'cancel' 이면 사용자가 직접 닫은 것이므로 아무것도 하지 않음
     } catch (error) {
+      isSocialLoginInProgress.current = false;
       console.error(`${provider} 로그인 에러:`, error);
       if (Platform.OS === "web") {
         window.alert("소셜 로그인 중 오류가 발생했습니다.");

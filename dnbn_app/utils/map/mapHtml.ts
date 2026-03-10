@@ -79,6 +79,63 @@ export const generateMapHTML = (appKey: string) => `
               color: #666;
               font-size: 12px;
           }
+          .store-marker-wrap {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              cursor: pointer;
+              user-select: none;
+          }
+          .store-badge {
+              display: flex;
+              align-items: center;
+              background: white;
+              border-radius: 20px;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+              overflow: hidden;
+              white-space: nowrap;
+          }
+          .store-icon-circle {
+              width: 26px;
+              height: 26px;
+              background: #1C4BC8;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 3px 2px 3px 3px;
+              flex-shrink: 0;
+              color: white;
+          }
+          .store-rating-text {
+              color: #222;
+              font-size: 11px;
+              font-weight: 700;
+              padding: 0 8px 0 4px;
+              line-height: 1;
+          }
+          .store-badge-arrow {
+              width: 0;
+              height: 0;
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              border-top: 5px solid white;
+              filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+          }
+          .store-marker-wrap--highlighted .store-badge {
+              background: #EF7810;
+          }
+          .store-marker-wrap--highlighted .store-icon-circle {
+              background: white;
+              color: #EF7810;
+          }
+          .store-marker-wrap--highlighted .store-rating-text {
+              color: white;
+              font-size: 12px;
+          }
+          .store-marker-wrap--highlighted .store-badge-arrow {
+              border-top-color: #EF7810;
+          }
       </style>
   </head>
   <body>
@@ -91,6 +148,7 @@ export const generateMapHTML = (appKey: string) => `
           let userLocationMarker = null;
           let clickedMarker = null;
           let highlightedMarkerId = null; // 현재 강조된 마커의 ID
+          let lastMarkerClickTime = 0; // 마커 클릭 시각 (맵 click 이벤트 중복 방지)
           let isReady = false;
           let initInProgress = false;
           let kakaoWaitTimeout = null;
@@ -173,6 +231,10 @@ export const generateMapHTML = (appKey: string) => `
                       map.setCenter(new kakao.maps.LatLng(data.latitude, data.longitude));
                       map.setLevel(data.zoom);
                       break;
+                  case 'panBy':
+                      // 지도를 픽셀 단위로 pan (패널 높이 보정)
+                      map.panBy(data.dx, data.dy);
+                      break;
                   case 'addStores':
                       clearMarkers();
                       data.stores.forEach(store => addStoreMarker(store));
@@ -240,6 +302,8 @@ export const generateMapHTML = (appKey: string) => `
               
               // 지도 클릭 이벤트 리스너
               kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                  // 마커 클릭 직후 300ms 이내면 무시 (마커 클릭이 맵 click으로 전파되는 현상 방지)
+                  if (Date.now() - lastMarkerClickTime < 300) return;
                   const latlng = mouseEvent.latLng;
                   const lat = latlng.getLat();
                   const lng = latlng.getLng();
@@ -300,74 +364,76 @@ export const generateMapHTML = (appKey: string) => `
           }
 
           function createUserIcon() {
-              const imageSize = new kakao.maps.Size(32, 40);
-              const imageOption = { offset: new kakao.maps.Point(16, 40) };
+              const imageSize = new kakao.maps.Size(22, 34);
+              const imageOption = { offset: new kakao.maps.Point(11, 34) };
               return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 40"><path d="M16 0C8.27 0 2 6.27 2 14c0 12 14 26 14 26s14-14 14-26c0-7.73-6.27-14-14-14z" fill="%23EF7810"/><circle cx="16" cy="14" r="5" fill="white"/></svg>',
+                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 34"><path d="M11 0C4.92 0 0 4.92 0 11c0 8.5 11 23 11 23s11-14.5 11-23C22 4.92 17.08 0 11 0z" fill="%23EF7810"/><circle cx="11" cy="11" r="4" fill="white"/></svg>',
                   imageSize,
                   imageOption
               );
           }
 
-          function createStoreIcon() {
-              const imageSize = new kakao.maps.Size(40, 45);
-              const imageOption = { offset: new kakao.maps.Point(20, 45) };
-              return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 45"><path d="M20 0C9.06 0 0 9.06 0 20c0 13 20 25 20 25s20-12 20-25c0-10.94-9.06-20-20-20z" fill="%23FF6B6B"/><circle cx="20" cy="20" r="8" fill="white"/></svg>',
-                  imageSize,
-                  imageOption
-              );
-          }
 
           function createClickedIcon() {
-              const imageSize = new kakao.maps.Size(40, 45);
-              const imageOption = { offset: new kakao.maps.Point(20, 45) };
+              const imageSize = new kakao.maps.Size(26, 40);
+              const imageOption = { offset: new kakao.maps.Point(13, 40) };
               return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 45"><path d="M20 0C9.06 0 0 9.06 0 20c0 13 20 25 20 25s20-12 20-25c0-10.94-9.06-20-20-20z" fill="%23EF7810" opacity="0.8"/><circle cx="20" cy="20" r="8" fill="white"/></svg>',
+                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 40"><path d="M13 0C5.82 0 0 5.82 0 13c0 10 13 27 13 27s13-17 13-27C26 5.82 20.18 0 13 0z" fill="%2327AE60"/><circle cx="13" cy="13" r="5" fill="white"/></svg>',
                   imageSize,
                   imageOption
               );
           }
 
           function addStoreMarker(store) {
-              const position = new kakao.maps.LatLng(store.latitude, store.longitude);
-              
-              const marker = new kakao.maps.Marker({
-                  position: position,
-                  map: map,
-                  image: createStoreIcon(),
-                  title: store.name
-              });
+              var position = new kakao.maps.LatLng(store.latitude, store.longitude);
 
-              marker.addListener('click', function() {
+              var wrapEl = document.createElement('div');
+              wrapEl.className = 'store-marker-wrap';
+
+              var badgeEl = document.createElement('div');
+              badgeEl.className = 'store-badge';
+              badgeEl.innerHTML =
+                  '<div class="store-icon-circle">'
+                  + '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>'
+                  + '</div>'
+                  + '<span class="store-rating-text">' + (store.reviewAvg != null ? Number(store.reviewAvg).toFixed(1) : '-') + '</span>';
+
+              var arrowEl = document.createElement('div');
+              arrowEl.className = 'store-badge-arrow';
+
+              wrapEl.appendChild(badgeEl);
+              wrapEl.appendChild(arrowEl);
+
+              wrapEl.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  lastMarkerClickTime = Date.now();
                   window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'storeSelected', store: store }));
               });
 
-              markers.push(marker);
-              markerMap[store.id] = { marker: marker, store: store }; // 마커 저장
+              var overlay = new kakao.maps.CustomOverlay({
+                  position: position,
+                  content: wrapEl,
+                  yAnchor: 1,
+                  zIndex: 3
+              });
+              overlay.setMap(map);
+
+              markers.push(overlay);
+              markerMap[store.id] = { marker: overlay, store: store, el: wrapEl };
           }
 
           function highlightStoreMarker(storeId) {
               // 이전에 강조된 마커 원래대로 복원
               if (highlightedMarkerId && markerMap[highlightedMarkerId]) {
-                  markerMap[highlightedMarkerId].marker.setImage(createStoreIcon());
+                  markerMap[highlightedMarkerId].el.className = 'store-marker-wrap';
               }
-              
+
               // 새로운 마커 강조
               if (markerMap[storeId]) {
-                  markerMap[storeId].marker.setImage(createHighlightedStoreIcon());
+                  markerMap[storeId].el.className = 'store-marker-wrap store-marker-wrap--highlighted';
                   highlightedMarkerId = storeId;
               }
-          }
-
-          function createHighlightedStoreIcon() {
-              const imageSize = new kakao.maps.Size(48, 54);
-              const imageOption = { offset: new kakao.maps.Point(24, 54) };
-              return new kakao.maps.MarkerImage(
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 54"><path d="M24 0C10.7 0 0 10.7 0 24c0 15.6 24 30 24 30s24-14.4 24-30c0-13.3-10.7-24-24-24z" fill="%23EF7810"/><circle cx="24" cy="24" r="10" fill="white"/><circle cx="24" cy="24" r="8" fill="%23EF7810" opacity="0.3"/></svg>',
-                  imageSize,
-                  imageOption
-              );
           }
 
           function clearMarkers() {

@@ -1,7 +1,11 @@
 import { setMultipleItems } from "@/utils/storageUtil";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useRef } from "react";
 import { ActivityIndicator, View } from "react-native";
+
+// ✅ iOS ASWebAuthenticationSession이 딥링크 수신 즉시 자동으로 닫히도록 처리
+WebBrowser.maybeCompleteAuthSession();
 
 /**
  * 백엔드 소셜 로그인 리다이렉트 수신 라우트
