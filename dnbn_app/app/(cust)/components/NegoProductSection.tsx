@@ -31,7 +31,7 @@ export default function NegoProductSection({
       <View style={sectionStyles.headerContainer}>
         <Text style={sectionStyles.headerTitle}>네고</Text>
         <Text style={sectionStyles.headerSubtitle}>
-          가격 협상으로 더 저렴하게 구매하세요!
+          내 주변 상품을 가격 협상으로 더 저렴하게 구매하세요!
         </Text>
       </View>
       {products.length === 0 ? (

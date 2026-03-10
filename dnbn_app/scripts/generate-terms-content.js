@@ -8,6 +8,7 @@ const assignmentDir = path.join(__dirname, "../assets/assignment");
 const htmlFiles = [
   "동네방네_서비스_통합_정책_가이드라인_V1.html",
   "개인정보_처리방침_소비자_V2.html",
+  "동네방네_가맹점_개인정보_처리방침_V2.html",
   "동네방네_마케팅_수신_동의_약관_V1.html",
 ];
 

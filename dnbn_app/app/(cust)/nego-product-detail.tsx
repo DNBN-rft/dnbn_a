@@ -2,7 +2,7 @@ import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -84,7 +84,12 @@ export default function ProductDetailScreen() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const insets = useSafeAreaInsets();
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const screenWidth = Dimensions.get("window").width;
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
 
   // 백엔드에서 상품 상세 정보 조회
   useEffect(() => {
@@ -180,7 +185,7 @@ export default function ProductDetailScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <ScrollView style={styles.productDetailContainer}>
+        <ScrollView ref={scrollViewRef} style={styles.productDetailContainer}>
           {/* 이미지 슬라이더 */}
           <View style={styles.imageSliderContainer}>
             {product.productImgs?.files &&
@@ -264,7 +269,7 @@ export default function ProductDetailScreen() {
                 style={styles.imageModalCloseButton}
                 onPress={() => setImageModalVisible(false)}
               >
-                <Ionicons name="close" size={32} color="#fff" />
+                <Ionicons name="close" size={32} color="#FFF" />
               </TouchableOpacity>
 
               {product.productImgs?.files &&
@@ -289,12 +294,7 @@ export default function ProductDetailScreen() {
                       })}
                       keyExtractor={(item, index) => `modal-image-${index}`}
                       renderItem={({ item }) => (
-                        <View
-                          style={[
-                            styles.imageModalSlide,
-                            { width: screenWidth, height: screenWidth },
-                          ]}
-                        >
+                        <View style={[styles.imageModalSlide]}>
                           <Image
                             source={
                               item.fileUrl ||
@@ -522,6 +522,16 @@ export default function ProductDetailScreen() {
             <Text style={styles.purchaseButtonText}>네고 요청하기</Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {/* FloatingButton - 최상단 이동 */}
+      {!loading && !error && (
+        <TouchableOpacity
+          style={[styles.scrollToTopButton, { bottom: 90 + insets.bottom }]}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#ef7810" />
+        </TouchableOpacity>
       )}
 
       <Modal
