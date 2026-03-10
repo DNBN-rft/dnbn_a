@@ -217,8 +217,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  modalHeaderSpacer: {
+  modalEmptyView: {
     width: 28,
+  },
+  postcodeStyle: {
+    flex: 1,
   },
   modalTitle: {
     fontSize: 18,

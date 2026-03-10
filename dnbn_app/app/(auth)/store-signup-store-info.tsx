@@ -349,10 +349,10 @@ export default function StoreSignupStoreInfoScreen() {
         animationType="slide"
         onRequestClose={() => setShowPostcode(false)}
       >
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
         <View style={styles.modalContent}>
-          {insets.top > 0 && (
-            <View style={{ height: insets.top, backgroundColor: "#fff" }} />
-          )}
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.modalCloseButton}
@@ -361,10 +361,10 @@ export default function StoreSignupStoreInfoScreen() {
               <Ionicons name="close" size={28} color="#000" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>주소 검색</Text>
-            <View style={styles.modalHeaderSpacer} />
+            <View style={styles.modalEmptyView} />
           </View>
           <Postcode
-            style={{ flex: 1 }}
+            style={styles.postcodeStyle}
             onSelected={handleAddressComplete}
             onError={handlePostcodeError}
           />
