@@ -744,5 +744,9 @@ export default function StoreSignupBizInfoScreen() {
           </View>
         </Modal>
       )}
-      );
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+      )}
+    </View>
+  );
 }
