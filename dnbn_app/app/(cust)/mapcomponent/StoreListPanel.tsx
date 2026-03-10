@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import {
   Animated,
   FlatList,
@@ -9,12 +10,13 @@ import {
 import { EdgeInsets } from "react-native-safe-area-context";
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
-import { Ionicons } from "@expo/vector-icons";
+import DraggableBottomSheet from "./DraggableBottomSheet";
 
 interface StoreListPanelProps {
   stores: Store[];
   storeListAnim: Animated.Value;
   insets: EdgeInsets;
+  maxHeight?: number;
   onSelectStore: (store: Store) => void;
   onClose: () => void;
 }
@@ -23,25 +25,21 @@ export default function StoreListPanel({
   stores,
   storeListAnim,
   insets,
+  maxHeight,
   onSelectStore,
   onClose,
 }: StoreListPanelProps) {
   return (
-    <Animated.View
-      style={[
-        styles.storeListContainer,
-        {
-          transform: [{ translateY: storeListAnim }],
-          pointerEvents: "auto",
-        },
-      ]}
+    <DraggableBottomSheet
+      slideAnim={storeListAnim}
+      collapsedHeight={340}
+      maxHeight={maxHeight}
+      onClose={onClose}
+      zIndex={10}
     >
       {/* 헤더 */}
       <View style={styles.storeListHeader}>
         <Text style={styles.storeListTitle}>주변 가맹점</Text>
-        <TouchableOpacity style={styles.storeListCloseButton} onPress={onClose}>
-          <Ionicons name="close" size={24} color="#333" />
-        </TouchableOpacity>
       </View>
       {/* 목록 */}
       <FlatList
@@ -55,11 +53,40 @@ export default function StoreListPanel({
           >
             {/* 왼쪽: 가게 정보 */}
             <View style={styles.storeDetailInfo}>
-              <Text style={styles.storeListItemName}>{item.name}</Text>
-              <Text style={styles.storeListItemAddress}>{item.address}</Text>
-              {item.phone && (
-                <Text style={styles.storeListItemPhone}>{item.phone}</Text>
+              {/* 이름 & 업태 */}
+              <View style={styles.storeNameRow}>
+                <Text style={styles.storeListItemName}>{item.name}</Text>
+                {item.category && (
+                  <Text style={styles.storeCategory}>{item.category}</Text>
+                )}
+              </View>
+              {/* 별점 & 리뷰수 */}
+              {item.reviewAvg != null && (
+                <View style={styles.storeRatingRow}>
+                  <Ionicons name="star" size={12} color="#EF7810" />
+                  <Text style={styles.storeRatingText}>
+                    {Number(item.reviewAvg).toFixed(1)}
+                  </Text>
+                  {item.reviewCount != null && (
+                    <Text style={styles.storeReviewCount}>
+                      ({item.reviewCount})
+                    </Text>
+                  )}
+                </View>
               )}
+              {/* 주소 & 거리 */}
+              <View style={styles.storeAddressRow}>
+                <Text style={styles.storeListItemAddress} numberOfLines={1}>
+                  {item.address}
+                </Text>
+                {item.distance != null && (
+                  <Text style={styles.storeDistance}>
+                    {item.distance < 1
+                      ? `${Math.round(item.distance * 1000)}m`
+                      : `${item.distance.toFixed(1)}km`}
+                  </Text>
+                )}
+              </View>
             </View>
             {/* 오른쪽: 대표 이미지 */}
             <View style={styles.storeDetailImageWrapper}>
@@ -79,8 +106,10 @@ export default function StoreListPanel({
         )}
         initialNumToRender={5}
         maxToRenderPerBatch={10}
+        nestedScrollEnabled
+        scrollEnabled
+        style={{ flex: 1 }}
       />
-    </Animated.View>
+    </DraggableBottomSheet>
   );
 }
-

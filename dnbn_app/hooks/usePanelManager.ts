@@ -64,7 +64,7 @@ export function usePanelManager({
       if (options.selectedStore && selectedStoreRef.current) {
         promises.push(
           new Promise<void>((resolve) => {
-            slideDown(slideAnim, 300, 300, () => {
+            slideDown(slideAnim, 1000, 300, () => {
               setSelectedStore(null);
               resolve();
             });
@@ -76,7 +76,7 @@ export function usePanelManager({
       if (options.showStoreList && showStoreListRef.current) {
         promises.push(
           new Promise<void>((resolve) => {
-            slideDown(storeListAnim, 300, 300, () => {
+            slideDown(storeListAnim, 1000, 300, () => {
               setShowStoreList(false);
               resolve();
             });

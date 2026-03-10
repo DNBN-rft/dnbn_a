@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
+
 import {
   ActivityIndicator,
   Alert,
@@ -48,9 +49,14 @@ export default function CategoryScreen() {
     checkInitialSetup();
   }, []);
 
+  // 소셜 로그인 후 초기 설정 흐름에서 알림이 중복으로 뜨지 않도록 방지
+  let _categoryInitAlertShown = false;
+
   // 최초 설정인지 확인 및 알림
   useEffect(() => {
     const showInitialSetupAlert = async () => {
+      if (_categoryInitAlertShown) return;
+
       let hasActCategory = false;
       if (Platform.OS === "web") {
         hasActCategory = localStorage.getItem("hasActCategory") === "true";
@@ -60,6 +66,7 @@ export default function CategoryScreen() {
       }
 
       if (!hasActCategory) {
+        _categoryInitAlertShown = true;
         if (Platform.OS === "web") {
           window.alert("카테고리 정보가 없어요 관심 카테고리를 설정해주세요");
         } else {
