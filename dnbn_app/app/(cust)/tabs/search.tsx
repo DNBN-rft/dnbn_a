@@ -102,7 +102,7 @@ export default function SearchView() {
           id: item.productCode,
           uri: item.productImageUrl
             ? { uri: item.productImageUrl }
-            : require("@/assets/images/logo.png"),
+            : null,
           storeName: item.storeNm,
           name: item.productNm,
           originalPrice: item.productPrice,
@@ -116,7 +116,7 @@ export default function SearchView() {
           id: item.productCode,
           uri: item.productImageUrl
             ? { uri: item.productImageUrl }
-            : require("@/assets/images/logo.png"),
+            : null,
           storeName: item.storeNm,
           name: item.productNm,
           price: "협상가능",
@@ -128,7 +128,7 @@ export default function SearchView() {
           id: item.productCode,
           uri: item.productImageUrl
             ? { uri: item.productImageUrl }
-            : require("@/assets/images/logo.png"),
+            : null,
           storeName: item.storeNm,
           name: item.productNm,
           price: item.productPrice,
@@ -367,15 +367,21 @@ export default function SearchView() {
                         }
                         style={styles.galleryItem}
                       >
-                        <Image
-                          resizeMode="cover"
-                          source={
-                            typeof item.uri === "string"
-                              ? { uri: item.uri }
-                              : item.uri
-                          }
-                          style={styles.galleryImage}
-                        />
+                        {item.uri ? (
+                          <Image
+                            resizeMode="cover"
+                            source={item.uri}
+                            style={styles.galleryImage}
+                          />
+                        ) : (
+                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                            <Ionicons
+                              name="image-outline"
+                              size={50}
+                              color="#ccc"
+                            />
+                          </View>
+                        )}
                         <View style={styles.galleryInfo}>
                           <Text style={styles.storeName} numberOfLines={1}>
                             {item.storeName}
@@ -448,15 +454,21 @@ export default function SearchView() {
                         }
                         style={styles.galleryItem}
                       >
-                        <Image
-                          resizeMode="cover"
-                          source={
-                            typeof item.uri === "string"
-                              ? { uri: item.uri }
-                              : item.uri
-                          }
-                          style={styles.galleryImage}
-                        />
+                        {item.uri ? (
+                          <Image
+                            resizeMode="cover"
+                            source={item.uri}
+                            style={styles.galleryImage}
+                          />
+                        ) : (
+                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                            <Ionicons
+                              name="image-outline"
+                              size={50}
+                              color="#ccc"
+                            />
+                          </View>
+                        )}
                         <View style={styles.galleryInfo}>
                           <Text style={styles.storeName} numberOfLines={1}>
                             {item.storeName}
@@ -513,15 +525,21 @@ export default function SearchView() {
                         }
                         style={styles.galleryItem}
                       >
-                        <Image
-                          resizeMode="cover"
-                          source={
-                            typeof item.uri === "string"
-                              ? { uri: item.uri }
-                              : item.uri
-                          }
-                          style={styles.galleryImage}
-                        />
+                        {item.uri ? (
+                          <Image
+                            resizeMode="cover"
+                            source={item.uri}
+                            style={styles.galleryImage}
+                          />
+                        ) : (
+                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                            <Ionicons
+                              name="image-outline"
+                              size={50}
+                              color="#ccc"
+                            />
+                          </View>
+                        )}
                         <View style={styles.galleryInfo}>
                           <Text style={styles.storeName} numberOfLines={1}>
                             {item.storeName}

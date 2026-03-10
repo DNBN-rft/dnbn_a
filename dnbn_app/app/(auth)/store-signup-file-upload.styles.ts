@@ -60,6 +60,14 @@ export const styles = StyleSheet.create({
   required: {
     color: "#FF6F2B",
   },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  required: {
+    color: "#FF6F2B",
+  },
   helperText: {
     fontSize: 13,
     color: "#999",

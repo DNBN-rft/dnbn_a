@@ -416,10 +416,9 @@ export default function StoreNego() {
                       source={{ uri: item.images.files[0] }}
                     />
                   ) : (
-                    <Image
-                      style={styles.productImage}
-                      source={require("@/assets/images/logo.png")}
-                    />
+                    <View style={[styles.productImage, styles.noImageBox]}>
+                      <Ionicons name="image-outline" size={48} color="#ccc" />
+                    </View>
                   )}
                 </View>
 

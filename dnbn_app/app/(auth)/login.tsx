@@ -2,7 +2,7 @@ import { apiPost, apiPut, getSocialLoginUrl } from "@/utils/api";
 import { getFcmToken } from "@/utils/notificationUtil";
 import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -24,7 +24,8 @@ let initialUrlHandled = false;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [userType, setUserType] = useState<"cust" | "store">("cust");
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
+  const [userType, setUserType] = useState<"cust" | "store">(tab === "store" ? "store" : "cust");
   const insets = useSafeAreaInsets();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -416,7 +417,7 @@ export default function LoginScreen() {
                   if (userType === "cust") {
                     router.push("/(auth)/terms-page");
                   } else {
-                    router.push("/store-signup-agreement" as any);
+                    router.push("/store-terms-page" as any);
                   }
                 }}
               >

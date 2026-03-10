@@ -94,6 +94,10 @@ export const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
+  noImageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   productInfoContainer: {
     flex: 1,
     justifyContent: "center",

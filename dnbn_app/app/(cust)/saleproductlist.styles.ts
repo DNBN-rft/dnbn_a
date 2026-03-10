@@ -105,6 +105,11 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  noImageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
+  },
   productImageExpired: {
     opacity: 0.5,
   },

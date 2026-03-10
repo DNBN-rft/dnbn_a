@@ -13,13 +13,14 @@ import {
   restrictLoginId,
   restrictPassword,
 } from "@/utils/storeInputRestrictions";
+import { buildEmail, resolveEmailDomain } from "@/utils/storeSignupUtil";
 import {
   getPasswordCheckMessage,
   validateMemberInfo,
 } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -48,10 +49,10 @@ export default function StoreSignupMemberInfoScreen() {
   // 이메일 입력 상태
   const initialEmail = memberInfo.email || "";
   const [emailLocal, setEmailLocal] = useState(
-    initialEmail.includes("@") ? initialEmail.split("@")[0] : initialEmail
+    initialEmail.includes("@") ? initialEmail.split("@")[0] : initialEmail,
   );
   const [emailDomain, setEmailDomain] = useState(
-    initialEmail.includes("@") ? initialEmail.split("@")[1] : ""
+    initialEmail.includes("@") ? initialEmail.split("@")[1] : "",
   );
   const [selectedDomain, setSelectedDomain] = useState("직접입력");
   const [showDomainDropdown, setShowDomainDropdown] = useState(false);
@@ -87,53 +88,42 @@ export default function StoreSignupMemberInfoScreen() {
     { label: "네이트", value: "nate.com" },
   ];
 
-  /**
-   * 이메일 로컬 파트(@ 앞) 입력 핸들러
-   */
   const handleEmailLocalChange = (text: string) => {
     const restricted = text.replace(/[\s]/g, "");
     setEmailLocal(restricted);
-    const domain =
-      selectedDomain === "직접입력" ? emailDomain : selectedDomain;
-    const fullEmail = domain ? `${restricted}@${domain}` : restricted;
-    updateMemberInfo({ email: fullEmail });
+    updateMemberInfo({
+      email: buildEmail(
+        restricted,
+        resolveEmailDomain(emailDomain, selectedDomain),
+      ),
+    });
     setEmailError("");
   };
 
-  /**
-   * 이메일 도메인 직접 입력 핸들러
-   */
   const handleEmailDomainChange = (text: string) => {
     const restricted = text.replace(/[\s]/g, "");
     setEmailDomain(restricted);
-    const fullEmail = emailLocal ? `${emailLocal}@${restricted}` : restricted;
-    updateMemberInfo({ email: fullEmail });
+    updateMemberInfo({ email: buildEmail(emailLocal, restricted) });
     setEmailError("");
   };
 
-  /**
-   * 이메일 도메인 선택 핸들러
-   */
   const handleSelectDomain = (domain: string) => {
     setSelectedDomain(domain);
     setShowDomainDropdown(false);
-    if (domain !== "직접입력") {
-      setEmailDomain(domain);
-      const fullEmail = emailLocal ? `${emailLocal}@${domain}` : "";
-      updateMemberInfo({ email: fullEmail });
-    } else {
-      setEmailDomain("");
-      updateMemberInfo({ email: emailLocal || "" });
-    }
+    const newDomain = domain !== "직접입력" ? domain : "";
+    setEmailDomain(newDomain);
+    updateMemberInfo({ email: buildEmail(emailLocal, newDomain) });
     setEmailError("");
   };
 
   /**
    * 아이디 중복 체크
    */
+  const loginIdRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{6,15}$/;
+
   const handleCheckDuplicateId = async () => {
-    if (!memberInfo.loginId || memberInfo.loginId.length < 6) {
-      Alert.alert("알림", "아이디는 6자 이상 입력해주세요.");
+    if (!memberInfo.loginId || !loginIdRegex.test(memberInfo.loginId)) {
+      Alert.alert("알림", "아이디는 6~15자 이내 영문과 숫자를 혼합하여 입력해주세요.");
       return;
     }
 
@@ -142,16 +132,15 @@ export default function StoreSignupMemberInfoScreen() {
       const response = await apiGet(
         `/store/check-loginId/${memberInfo.loginId}`,
       );
-      const message = await response.text();
 
-      if (response.ok && message.includes("사용가능")) {
+      if (response.ok) {
         setIdCheckStatus("success");
         setLoginIdError("");
-        Alert.alert("성공", message);
+        Alert.alert("성공", "사용 가능한 아이디입니다.");
       } else {
         setIdCheckStatus("error");
-        setLoginIdError("이미 사용 중인 아이디입니다.");
-        Alert.alert("알림", message);
+        setLoginIdError("이미 등록된 아이디입니다.");
+        Alert.alert("알림", "이미 등록된 아이디입니다.");
       }
     } catch (error) {
       console.error("아이디 중복 체크 에러:", error);
@@ -202,7 +191,7 @@ export default function StoreSignupMemberInfoScreen() {
       </View>
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex1}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -insets.bottom}
       >
@@ -214,13 +203,14 @@ export default function StoreSignupMemberInfoScreen() {
         >
           {/* 아이디 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              아이디 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>아이디</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, styles.inputFlex]}
-                placeholder="아이디 입력 (6~15자)"
+                placeholder="아이디 입력"
                 placeholderTextColor="#ccc"
                 value={memberInfo.loginId}
                 onChangeText={handleLoginIdChange}
@@ -256,9 +246,10 @@ export default function StoreSignupMemberInfoScreen() {
 
           {/* 비밀번호 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              비밀번호 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>비밀번호</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="비밀번호 입력"
@@ -288,12 +279,13 @@ export default function StoreSignupMemberInfoScreen() {
 
           {/* 비밀번호 확인 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              비밀번호 확인 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>비밀번호 확인</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <TextInput
               style={styles.input}
-              placeholder="비밀번호 재입력"
+              placeholder="비밀번호 확인"
               placeholderTextColor="#ccc"
               value={passwordConfirm}
               onChangeText={(text) =>
@@ -315,13 +307,14 @@ export default function StoreSignupMemberInfoScreen() {
 
           {/* 이메일 */}
           <View style={styles.inputSection}>
-            <Text style={styles.label}>
-              이메일 <Text style={styles.required}>*</Text>
-            </Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>이메일</Text>
+              <Text style={styles.required}> *</Text>
+            </View>
             <View style={styles.emailRow}>
               <TextInput
                 style={[styles.input, styles.emailLocalInput]}
-                placeholder="이메일 아이디"
+                placeholder="이메일"
                 placeholderTextColor="#ccc"
                 value={emailLocal}
                 onChangeText={handleEmailLocalChange}
@@ -333,7 +326,7 @@ export default function StoreSignupMemberInfoScreen() {
               {selectedDomain === "직접입력" ? (
                 <TextInput
                   style={[styles.input, styles.emailDomainInput]}
-                  placeholder="이메일 주소"
+                  placeholder="주소"
                   placeholderTextColor="#ccc"
                   value={emailDomain}
                   onChangeText={handleEmailDomainChange}
@@ -342,7 +335,13 @@ export default function StoreSignupMemberInfoScreen() {
                   autoCorrect={false}
                 />
               ) : (
-                <View style={[styles.input, styles.emailDomainInput, styles.domainDisplay]}>
+                <View
+                  style={[
+                    styles.input,
+                    styles.emailDomainInput,
+                    styles.domainDisplay,
+                  ]}
+                >
                   <Text style={styles.domainDisplayText}>{selectedDomain}</Text>
                 </View>
               )}
@@ -368,7 +367,8 @@ export default function StoreSignupMemberInfoScreen() {
                     key={item.value}
                     style={[
                       styles.domainItem,
-                      selectedDomain === item.value && styles.domainItemSelected,
+                      selectedDomain === item.value &&
+                        styles.domainItemSelected,
                     ]}
                     onPress={() => handleSelectDomain(item.value)}
                   >
@@ -400,12 +400,12 @@ export default function StoreSignupMemberInfoScreen() {
             onPress={handleNext}
             activeOpacity={0.8}
           >
-            <Text style={styles.nextButtonText}>다음  1 / 4</Text>
+            <Text style={styles.nextButtonText}>다음 1 / 4</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
