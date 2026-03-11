@@ -46,6 +46,16 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
+    marginBottom: 4,
+  },
+  requiredMark: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FF3B30",
+  },
+  imageHint: {
+    fontSize: 12,
+    color: "#FF3B30",
     marginBottom: 8,
   },
   input: {

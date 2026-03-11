@@ -157,14 +157,16 @@ export default function DetailProductPage() {
                   />
                 </TouchableOpacity>
 
-                <Image
-                  style={styles.productMainImage}
-                  source={{
-                    uri:
-                      currentImage?.fileUrl ||
-                      "https://via.placeholder.com/300",
-                  }}
-                />
+                {currentImage?.fileUrl ? (
+                  <Image
+                    style={styles.productMainImage}
+                    source={{ uri: currentImage.fileUrl }}
+                  />
+                ) : (
+                  <View style={[styles.productMainImage, styles.noImageBox]}>
+                    <Ionicons name="image-outline" size={48} color="#ccc" />
+                  </View>
+                )}
 
                 <TouchableOpacity
                   style={styles.mainImageButton}

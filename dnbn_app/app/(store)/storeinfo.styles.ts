@@ -106,4 +106,14 @@ export const styles = StyleSheet.create({
     flex: 2,
     textAlign: "right",
   },
+  storeMainImg: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+  },
+  noImageBox: {
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

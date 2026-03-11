@@ -92,6 +92,13 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  productImagePlaceholder: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f5",
+  },
   productInfoContainer: {
     flex: 1,
     justifyContent: "center",

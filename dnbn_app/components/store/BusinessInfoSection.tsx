@@ -8,6 +8,8 @@ interface BusinessInfoSectionProps {
   businessNumber: string;
   representativeName: string;
   representativePhone: string;
+  onRepresentativePhoneChange: (value: string) => void;
+  representativePhoneError?: string;
   businessType: string;
   bizRegDateTime: string;
 }
@@ -17,20 +19,19 @@ export default function BusinessInfoSection({
   businessNumber,
   representativeName,
   representativePhone,
+  onRepresentativePhoneChange,
+  representativePhoneError,
   businessType,
   bizRegDateTime,
 }: BusinessInfoSectionProps) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Ionicons name="document-text" size={22} color="#999" />
-        <Text style={[styles.sectionTitle, styles.disabledTitle]}>
+        <Ionicons name="document-text" size={22} color="#EF7810" />
+        <Text style={styles.sectionTitle}>
           사업자 정보
         </Text>
       </View>
-      <Text style={styles.sectionDescription}>
-        사업자 정보는 변경할 수 없습니다
-      </Text>
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>사업자명</Text>
@@ -62,10 +63,19 @@ export default function BusinessInfoSection({
       <View style={styles.formGroup}>
         <Text style={styles.label}>대표 연락처</Text>
         <TextInput
-          style={[styles.input, styles.inputDisabled]}
+          style={[
+            styles.input,
+            representativePhoneError ? styles.inputErrorBorder : undefined,
+          ]}
           value={representativePhone}
-          editable={false}
+          onChangeText={onRepresentativePhoneChange}
+          keyboardType="phone-pad"
+          placeholder="대표 연락처를 입력해주세요"
+          placeholderTextColor="#ccc"
         />
+        {representativePhoneError && (
+          <Text style={styles.inputError}>{representativePhoneError}</Text>
+        )}
       </View>
 
       <View style={styles.formGroup}>

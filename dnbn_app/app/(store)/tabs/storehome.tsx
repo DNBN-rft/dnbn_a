@@ -212,7 +212,7 @@ export default function StoreHome() {
                 <TouchableOpacity
                   style={styles.menuItem}
                   onPress={() =>
-                    router.navigate("/(store)/tabs/storenego?tab=request")
+                    router.push("/(store)/tabs/storenego?tab=request")
                   }
                 >
                   <Ionicons

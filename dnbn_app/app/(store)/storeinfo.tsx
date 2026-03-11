@@ -271,11 +271,17 @@ export default function StoreInfoPage() {
                 </View>
 
                 <View>
-                  <Image
-                    source={{ uri: storeInfo.mainImg.fileUrl }}
-                    style={{ width: 100, height: 100, borderRadius: 8 }}
-                    resizeMode="cover"
-                  />
+                  {storeInfo.mainImg?.fileUrl ? (
+                    <Image
+                      source={{ uri: storeInfo.mainImg.fileUrl }}
+                      style={styles.storeMainImg}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.storeMainImg, styles.noImageBox]}>
+                      <Ionicons name="image-outline" size={40} color="#ccc" />
+                    </View>
+                  )}
                 </View>
               </View>
 
