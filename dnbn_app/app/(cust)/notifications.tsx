@@ -106,7 +106,7 @@ function AlarmItemComponent({ alarm }: { alarm: Alarm }) {
       });
     } else {
       // 기타 경로는 그대로 사용
-      router.navigate(alarm.navigationLink as any);
+      router.push(alarm.navigationLink as any);
     }
   };
 

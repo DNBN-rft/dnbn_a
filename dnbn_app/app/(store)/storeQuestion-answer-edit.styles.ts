@@ -100,44 +100,66 @@ export const styles = StyleSheet.create({
     color: "#666",
   },
 
-  questionImageContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  photoSlot: {
-    width: 100,
-    height: 100,
+  imageManagementBox: {
+    backgroundColor: "#fff",
     borderRadius: 8,
-    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    padding: 16,
+    marginTop: 8,
   },
-  photoWrapper: {
-    width: "100%",
-    height: "100%",
+  imageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  imagePreview: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    overflow: "visible",
     position: "relative",
   },
-  questionImage: {
+  previewImage: {
     width: "100%",
     height: "100%",
-  },
-  removePhotoButton: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "transparent",
-  },
-  photoUploadButton: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
     borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  addImageButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderStyle: "dashed",
+    backgroundColor: "#fafafa",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addImageText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#999",
+  },
+  disabledButton: {
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ddd",
+  },
+  disabledText: {
+    color: "#ccc",
   },
 
   submitButtonContainer: {

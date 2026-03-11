@@ -367,7 +367,9 @@ export default function NegoHistory() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.categoryNm ?? "-"}</Text>
+                    <Text style={styles.categoryText}>
+                      {item.categoryNm ?? "-"}
+                    </Text>
 
                     <Text
                       numberOfLines={1}
@@ -380,7 +382,9 @@ export default function NegoHistory() {
 
                   <View>
                     <Text style={styles.priceText}>
-                      {item.productPrice != null ? item.productPrice.toLocaleString() + "원" : "-"}
+                      {item.productPrice != null
+                        ? item.productPrice.toLocaleString() + "원"
+                        : "-"}
                     </Text>
 
                     <Text
@@ -401,7 +405,7 @@ export default function NegoHistory() {
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() => {
-                    router.navigate({
+                    router.push({
                       pathname: "/(store)/nego-history-detail",
                       params: { negoLogIdx: item.negoLogIdx },
                     });
@@ -473,7 +477,9 @@ export default function NegoHistory() {
 
                 <View style={styles.requestInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.categoryNm ?? "-"}</Text>
+                    <Text style={styles.categoryText}>
+                      {item.categoryNm ?? "-"}
+                    </Text>
 
                     <Text
                       numberOfLines={1}
@@ -486,15 +492,21 @@ export default function NegoHistory() {
 
                   <View style={styles.priceContainer}>
                     <Text style={styles.originalPriceText}>
-                      {item.originalPrice != null ? item.originalPrice.toLocaleString() + "원" : "-"}
+                      {item.originalPrice != null
+                        ? item.originalPrice.toLocaleString() + "원"
+                        : "-"}
                     </Text>
                     <Text style={styles.negoPriceText}>
-                      {item.requestPrice != null ? item.requestPrice.toLocaleString() + "원" : "-"}
+                      {item.requestPrice != null
+                        ? item.requestPrice.toLocaleString() + "원"
+                        : "-"}
                     </Text>
                   </View>
 
                   <View style={styles.requestorContainer}>
-                    <Text style={styles.requestorText}>{item.custNm ?? "-"}</Text>
+                    <Text style={styles.requestorText}>
+                      {item.custNm ?? "-"}
+                    </Text>
                     <Text style={styles.requestorPhoneText}>
                       {item.custTelNo ?? "-"}
                     </Text>
@@ -511,14 +523,11 @@ export default function NegoHistory() {
       )}
 
       <TouchableOpacity
-          style={[
-            styles.scrollTopButton,
-            { bottom: insets.bottom + 20 },
-          ]}
-          onPress={scrollToTop}
-        >
-          <Ionicons name="chevron-up" size={24} color="#fff" />
-        </TouchableOpacity>
+        style={[styles.scrollTopButton, { bottom: insets.bottom + 20 }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }

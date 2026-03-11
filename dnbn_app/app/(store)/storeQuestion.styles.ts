@@ -1,9 +1,9 @@
-import { StyleSheet, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   header: {
     flexDirection: "row",
@@ -139,10 +139,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
-    paddingBottom: Platform.OS === "ios" ? 72 : 12,
-  },
-  flatListContentContainer: {
-    paddingBottom: Platform.OS === "ios" ? 60 : 0,
   },
   registerButton: {
     backgroundColor: "#EF7810",

@@ -6,7 +6,7 @@ import OperatingInfoSection from "@/components/store/OperatingInfoSection";
 import PasswordChangeModal from "@/components/store/PasswordChangeModal";
 import StoreInfoSection from "@/components/store/StoreInfoSection";
 import TimePickerModal from "@/components/store/TimePickerModal";
-import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
+import { apiGet, apiPost, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
@@ -18,6 +18,7 @@ import {
   Platform,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -131,19 +132,22 @@ export default function EditStoreInfoPage() {
     phoneNumber?: string;
     address?: string;
     accountNumber?: string;
+    representativePhone?: string;
   }>({});
 
   // 전화번호 자동 하이픈 포맷
   const formatPhoneNumber = (digits: string): string => {
     if (digits.startsWith("02")) {
+      // 02-xxx-xxxx (최대 9자리)
       if (digits.length <= 2) return digits;
       if (digits.length <= 5) return `02-${digits.slice(2)}`;
-      if (digits.length <= 9)
-        return `02-${digits.slice(2, 5)}-${digits.slice(5)}`;
-      return `02-${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+      return `02-${digits.slice(2, 5)}-${digits.slice(5, 9)}`;
     } else {
+      // xxx-xxx-xxxx (10자리) 또는 xxx-xxxx-xxxx (11자리)
       if (digits.length <= 3) return digits;
-      if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+      if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+      if (digits.length <= 10)
+        return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
       return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
     }
   };
@@ -157,9 +161,11 @@ export default function EditStoreInfoPage() {
     }
   };
 
-  // 핸들러: 전화번호 (자동 하이픈 + 최대 11자리)
+  // 핸들러: 전화번호 (자동 하이픈 + 02는 최대 9자리, 그 외 최대 11자리)
   const handlePhoneChange = (value: string) => {
-    const digits = value.replace(/[^0-9]/g, "").slice(0, 11);
+    const raw = value.replace(/[^0-9]/g, "");
+    const maxLen = raw.startsWith("02") ? 9 : 11;
+    const digits = raw.slice(0, maxLen);
     const formatted = formatPhoneNumber(digits);
     setPhoneNumber(formatted);
     if (digits.length >= 9) {
@@ -255,6 +261,11 @@ export default function EditStoreInfoPage() {
     loadBanks();
   }, []);
 
+  // 회원탈퇴 모달 state
+  const [withdrawPasswordModalVisible, setWithdrawPasswordModalVisible] =
+    useState(false);
+  const [withdrawPassword, setWithdrawPassword] = useState("");
+
   // 모달 관련 state
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [showAddressSearch, setShowAddressSearch] = useState(false);
@@ -268,9 +279,62 @@ export default function EditStoreInfoPage() {
   const businessName = initialStoreInfo?.bizNm || "";
   const businessNumber = initialStoreInfo?.bizNo || "";
   const representativeName = initialStoreInfo?.ownerNm || "";
-  const representativePhone = initialStoreInfo?.ownerTelNo || "";
+  const [representativePhone, setRepresentativePhone] = useState(
+    initialStoreInfo?.ownerTelNo || "",
+  );
   const businessType = initialStoreInfo?.storeType || "";
   const registrationDate = initialStoreInfo?.bizRegDateTime || "";
+
+  const handleRepresentativePhoneChange = (value: string) => {
+    const raw = value.replace(/[^0-9]/g, "");
+    const maxLen = raw.startsWith("02") ? 9 : 11;
+    const digits = raw.slice(0, maxLen);
+    const formatted = formatPhoneNumber(digits);
+    setRepresentativePhone(formatted);
+    if (digits.length >= 9) {
+      setErrors((prev) => ({ ...prev, representativePhone: undefined }));
+    }
+  };
+
+  const handleWithdrawClick = () => {
+    setWithdrawPasswordModalVisible(true);
+  };
+
+  const handleWithdrawPasswordSubmit = async () => {
+    if (!withdrawPassword) {
+      if (Platform.OS === "web") {
+        alert("비밀번호를 입력해주세요.");
+      } else {
+        Alert.alert("입력 오류", "비밀번호를 입력해주세요.");
+      }
+      return;
+    }
+
+    try {
+      const response = await apiPost("/store/app/password", {
+        password: withdrawPassword,
+      });
+
+      if (response.ok) {
+        setWithdrawPasswordModalVisible(false);
+        setWithdrawPassword("");
+        router.push("/(store)/Withdraw");
+      } else {
+        if (Platform.OS === "web") {
+          alert("비밀번호가 일치하지 않습니다.");
+        } else {
+          Alert.alert("오류", "비밀번호가 일치하지 않습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("비밀번호 확인 에러:", error);
+      if (Platform.OS === "web") {
+        alert("비밀번호 확인 중 오류가 발생했습니다.");
+      } else {
+        Alert.alert("오류", "비밀번호 확인 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   const openTimePicker = (type: "open" | "close") => {
     setActiveTimePicker(type);
@@ -348,7 +412,7 @@ export default function EditStoreInfoPage() {
     const phoneDigits = phoneNumber.replace(/[^0-9]/g, "");
     if (!phoneDigits) {
       newErrors.phoneNumber = "전화번호를 입력해주세요.";
-    } else if (phoneDigits.length < 9 || phoneDigits.length > 11) {
+    } else if (phoneDigits.startsWith("02") ? phoneDigits.length !== 9 : phoneDigits.length < 10 || phoneDigits.length > 11) {
       newErrors.phoneNumber = "유효한 전화번호를 입력해주세요.";
     }
 
@@ -360,6 +424,13 @@ export default function EditStoreInfoPage() {
       newErrors.accountNumber = "계좌번호를 입력해주세요.";
     } else if (!/^[0-9]+$/.test(accountNumber)) {
       newErrors.accountNumber = "계좌번호는 숫자만 입력 가능합니다.";
+    }
+
+    const repPhoneDigits = representativePhone.replace(/[^0-9]/g, "");
+    if (!repPhoneDigits) {
+      newErrors.representativePhone = "대표 연락처를 입력해주세요.";
+    } else if (repPhoneDigits.startsWith("02") ? repPhoneDigits.length !== 9 : repPhoneDigits.length < 10 || repPhoneDigits.length > 11) {
+      newErrors.representativePhone = "유효한 연락처를 입력해주세요.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -387,6 +458,7 @@ export default function EditStoreInfoPage() {
       formData.append("bankIdx", String(bankIdx));
       formData.append("storeAccNo", accountNumber);
       formData.append("ownerNm", initialStoreInfo?.ownerNm || "");
+      formData.append("ownerTelNo", representativePhone);
       formData.append("storeOpenTime", businessOpenTime);
       formData.append("storeCloseTime", businessCloseTime);
 
@@ -504,6 +576,8 @@ export default function EditStoreInfoPage() {
           businessNumber={businessNumber}
           representativeName={representativeName}
           representativePhone={representativePhone}
+          onRepresentativePhoneChange={handleRepresentativePhoneChange}
+          representativePhoneError={errors.representativePhone}
           businessType={businessType}
           bizRegDateTime={registrationDate}
         />
@@ -519,14 +593,29 @@ export default function EditStoreInfoPage() {
           onToggleBusinessDay={toggleBusinessDay}
         />
 
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.submitButton, isSubmitting && { opacity: 0.5 }]}
+            onPress={handleUpdate}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.submitButtonText}>
+              {isSubmitting ? "처리 중..." : "수정 완료"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backButtonSecondary}
+            onPress={() => router.back()}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.backButtonSecondaryText}>이전</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && { opacity: 0.5 }]}
-          onPress={handleUpdate}
-          disabled={isSubmitting}
+          style={styles.withdrawButton}
+          onPress={handleWithdrawClick}
         >
-          <Text style={styles.submitButtonText}>
-            {isSubmitting ? "처리 중..." : "수정 완료"}
-          </Text>
+          <Text style={styles.withdrawButtonText}>회원탈퇴</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -590,6 +679,54 @@ export default function EditStoreInfoPage() {
         {insets.bottom > 0 && (
           <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
         )}
+      </Modal>
+
+      {/* 회원탈퇴 비밀번호 확인 모달 */}
+      <Modal
+        visible={withdrawPasswordModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setWithdrawPasswordModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.withdrawPasswordModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>비밀번호 확인</Text>
+            </View>
+
+            <View style={styles.withdrawModalContent}>
+              <Text style={styles.withdrawModalDescription}>
+                회원 탈퇴를 위해 비밀번호를 입력해주세요.
+              </Text>
+              <TextInput
+                style={styles.withdrawPasswordInput}
+                placeholder="비밀번호"
+                placeholderTextColor="#ccc"
+                value={withdrawPassword}
+                onChangeText={setWithdrawPassword}
+                secureTextEntry
+              />
+            </View>
+
+            <View style={styles.withdrawModalButtonContainer}>
+              <TouchableOpacity
+                style={styles.withdrawModalSubmitButton}
+                onPress={handleWithdrawPasswordSubmit}
+              >
+                <Text style={styles.withdrawModalSubmitButtonText}>확인</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.withdrawModalCancelButton}
+                onPress={() => {
+                  setWithdrawPasswordModalVisible(false);
+                  setWithdrawPassword("");
+                }}
+              >
+                <Text style={styles.withdrawModalCancelButtonText}>취소</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
 
       {insets.bottom > 0 && (

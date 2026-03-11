@@ -98,7 +98,7 @@ function AlarmItemComponent({
     if (!isRead) {
       await onRead(alarm.alarmIdx);
     }
-    router.navigate(alarm.alarmLink as any);
+    router.push(alarm.alarmLink as any);
   };
 
   return (

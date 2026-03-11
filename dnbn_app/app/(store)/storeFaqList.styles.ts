@@ -1,0 +1,200 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  leftSection: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+  rightSection: {
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  faqInnerContainer: {
+    flex: 1,
+    margin: 10,
+  },
+  faqHeaderContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  faqSearchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#F8F9FA",
+  },
+  faqSearchPlaceholderText: {
+    flex: 1,
+    color: "#000",
+    fontSize: 15,
+  },
+  faqSubjectContainer: {
+    flexDirection: "row",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  faqSubjectButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  faqSubjectButtonSelected: {
+    backgroundColor: "#EF7810",
+    elevation: 2,
+    shadowColor: "#EF7810",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  faqSubjectButtonUnselected: {
+    borderColor: "#E5E5E5",
+    borderWidth: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  faqSubjectButtonText: {
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  faqSubjectButtonTextSelected: {
+    color: "#FFFFFF",
+  },
+  faqSubjectButtonTextUnselected: {
+    color: "#666666",
+  },
+  faqListContainer: {},
+  faqItemWrapper: {
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderColor: "#F0F0F0",
+    overflow: "hidden",
+  },
+  faqItemContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  faqItemContainerExpanded: {
+    backgroundColor: "#FFF8F0",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+  },
+  faqItemQuestionRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  faqItemQuestionLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#EF7810",
+  },
+  faqItemQuestionText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#333333",
+    fontWeight: "500",
+  },
+  faqItemAnswerContainer: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  faqItemAnswerRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  faqItemAnswerLabel: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#666666",
+  },
+  faqItemAnswerText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#666666",
+    lineHeight: 22,
+  },
+  questionReqContainer: {
+    alignItems: "center",
+    marginVertical: 30,
+    marginHorizontal: 20,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+  },
+  questionReqText: {
+    fontSize: 16,
+    color: "#333333",
+    marginBottom: 20,
+    fontWeight: "500",
+  },
+  questionBtnContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  questionReqButton: {
+    backgroundColor: "#EF7810",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  questionReqButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  questionListViewButton: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#EF7810",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  questionListViewText: {
+    color: "#EF7810",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+});

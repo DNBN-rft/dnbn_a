@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View, Pressable, Platform } from "react-native";
+import { useCallback, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiGet } from "../../utils/api";
 import { styles } from "./storeQuestion.styles";
@@ -42,7 +48,7 @@ export default function StoreQuestion() {
   useFocusEffect(
     useCallback(() => {
       fetchQuestions();
-    }, [])
+    }, []),
   );
 
   const fetchQuestions = async () => {
@@ -57,13 +63,15 @@ export default function StoreQuestion() {
         const data = responseData.content || responseData;
 
         // 백엔드 데이터를 UI 형식으로 변환
-        const formattedQuestions: Question[] = data.map((item: QuestionResponse) => ({
-          id: item.questionId?.toString() || "",
-          title: item.questionTitle,
-          date: formatDate(item.questionRegDateTime),
-          dateRaw: item.questionRegDateTime, // 원본 ISO 날짜 저장
-          status: item.isAnswered ? "답변완료" : "답변대기",
-        }));
+        const formattedQuestions: Question[] = data.map(
+          (item: QuestionResponse) => ({
+            id: item.questionId?.toString() || "",
+            title: item.questionTitle,
+            date: formatDate(item.questionRegDateTime),
+            dateRaw: item.questionRegDateTime, // 원본 ISO 날짜 저장
+            status: item.isAnswered ? "답변완료" : "답변대기",
+          }),
+        );
 
         setQuestionList(formattedQuestions);
       } else {
@@ -145,10 +153,6 @@ export default function StoreQuestion() {
             data={sortedQuestionList}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.flatListContentContainer,
-              { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 60 : 0 }
-            ]}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.questionItemContainer}
@@ -165,7 +169,7 @@ export default function StoreQuestion() {
                     style={[
                       styles.questionIconContainer,
                       item.status === "답변대기" &&
-                      styles.questionItemStatusPending,
+                        styles.questionItemStatusPending,
                     ]}
                   >
                     {item.status === "답변대기" ? (
@@ -189,14 +193,14 @@ export default function StoreQuestion() {
                         style={[
                           styles.questionItemStatusContainer,
                           item.status === "답변대기" &&
-                          styles.questionItemStatusPending,
+                            styles.questionItemStatusPending,
                         ]}
                       >
                         <Text
                           style={[
                             styles.questionItemStatusText,
                             item.status === "답변대기" &&
-                            styles.questionItemStatusTextPending,
+                              styles.questionItemStatusTextPending,
                           ]}
                         >
                           {item.status}
@@ -235,15 +239,13 @@ export default function StoreQuestion() {
             onPress={() => router.push("/(store)/storeQuestionReg")}
             style={styles.registerButton}
           >
-            <Text style={styles.registerButtonText}>
-              새로운 문의 등록
-            </Text>
+            <Text style={styles.registerButtonText}>새로운 문의 등록</Text>
           </Pressable>
         </View>
       )}
 
-      {insets.bottom > 0 && sortedQuestionList.length === 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#FFFFFF" }} />
+      {insets.bottom > 0 && (
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

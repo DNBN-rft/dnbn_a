@@ -96,7 +96,7 @@ export default function QuestionAnswer() {
                 Alert.alert("성공", "문의가 삭제되었습니다.", [
                   {
                     text: "확인",
-                    onPress: () => router.navigate("/(cust)/question"),
+                    onPress: () => router.replace("/(cust)/question"),
                   },
                 ]);
               } else {
@@ -181,7 +181,7 @@ export default function QuestionAnswer() {
                   <TouchableOpacity
                     style={styles.editButton}
                     onPress={() =>
-                      router.navigate({
+                      router.replace({
                         pathname: "/(cust)/question-answer-edit",
                         params: { questionId: questionId },
                       })

@@ -135,7 +135,7 @@ export default function NoticeDetailScreen() {
                 style={styles.questionItemContainer}
                 activeOpacity={0.7}
                 onPress={() =>
-                  router.navigate({
+                  router.push({
                     pathname: "/(cust)/question-answer",
                     params: { questionId: item.id },
                   })

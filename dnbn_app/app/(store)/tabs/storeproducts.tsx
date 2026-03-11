@@ -53,6 +53,7 @@ export default function StoreProducts() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [limitTime, setLimitTime] = useState<number>(24);
 
   // 성공 메시지 표시 (웹/앱 분기 처리)
   const showSuccessMessage = (message: string) => {
@@ -87,12 +88,11 @@ export default function StoreProducts() {
   const loadProducts = useCallback(async (page: number = currentPage) => {
     try {
       setIsLoading(true);
-      const response = await apiGet(
-        `/store/app/product?page=${page}&size=10`,
-      );
+      const response = await apiGet(`/store/app/product?page=${page}&size=10`);
       if (response.ok) {
         const data = await response.json();
-        const productList = data.content || [];
+        const productList = data.products?.content || [];
+        setLimitTime(data.limitTime ?? 24);
         setProducts(productList);
       } else {
         console.error("상품 목록 로드 실패:", response.status);
@@ -242,7 +242,7 @@ export default function StoreProducts() {
         <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => router.navigate("/(store)/addproduct")}
+            onPress={() => router.push("/(store)/addproduct")}
           >
             <Ionicons name="add" size={28} color="#EF7810" />
           </TouchableOpacity>
@@ -262,15 +262,17 @@ export default function StoreProducts() {
           <View style={styles.content}>
             <View style={styles.productContainer}>
               <View style={styles.productImageContainer}>
-                <Image
-                  source={
-                    product.images?.files?.[0]?.fileUrl
-                      ? { uri: product.images.files[0].fileUrl }
-                      : { uri: "https://via.placeholder.com/150" }
-                  }
-                  style={styles.productImage}
-                  resizeMode="cover"
-                />
+                {product.images?.files?.[0]?.fileUrl ? (
+                  <Image
+                    source={{ uri: product.images.files[0].fileUrl }}
+                    style={styles.productImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.productImagePlaceholder}>
+                    <Ionicons name="image-outline" size={32} color="#ccc" />
+                  </View>
+                )}
               </View>
               <View style={styles.productInfoContainer}>
                 <View style={styles.categoryTag}>
@@ -434,6 +436,7 @@ export default function StoreProducts() {
       <DiscountRegistrationModal
         visible={saleModal}
         onClose={() => setSaleModal(false)}
+        limitTime={limitTime}
         onConfirm={async (data) => {
           if (selectedProductCode) {
             const success = await registerDiscount(selectedProductCode, data);
@@ -457,6 +460,7 @@ export default function StoreProducts() {
       <NegoRegistrationModal
         visible={negoModal}
         onClose={() => setNegoModal(false)}
+        limitTime={limitTime}
         onConfirm={async (data) => {
           if (selectedProductCode) {
             const success = await registerNego(selectedProductCode, data);

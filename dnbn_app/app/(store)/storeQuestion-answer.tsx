@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiDelete, apiGet } from "../../utils/api";
 import { styles } from "./storeQuestion-answer.styles";
@@ -53,7 +53,7 @@ export default function StoreQuestionAnswer() {
       if (questionId) {
         fetchQuestionDetail();
       }
-    }, [questionId])
+    }, [questionId]),
   );
 
   const fetchQuestionDetail = async () => {
@@ -91,10 +91,6 @@ export default function StoreQuestionAnswer() {
       "문의를 삭제하시겠습니까?",
       [
         {
-          text: "취소",
-          style: "cancel",
-        },
-        {
           text: "삭제",
           style: "destructive",
           onPress: async () => {
@@ -121,6 +117,10 @@ export default function StoreQuestionAnswer() {
               setDeleting(false);
             }
           },
+        },
+        {
+          text: "취소",
+          style: "cancel",
         },
       ],
       { cancelable: true },
@@ -302,7 +302,7 @@ export default function StoreQuestionAnswer() {
       </ScrollView>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#FFFFFF" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

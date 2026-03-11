@@ -10,7 +10,6 @@
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiGet, apiPost } from "@/utils/api";
-import { formatDateToLocalString, formatWebDateInput } from "@/utils/dateUtil";
 import {
   formatBusinessNumber,
   restrictAccountNumber,
@@ -26,7 +25,6 @@ import {
 } from "@/utils/storeSignupUtil";
 import { validateBizInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -57,8 +55,6 @@ export default function StoreSignupBizInfoScreen() {
 
   const [bizNoDuplicate, setBizNoDuplicate] = useState<boolean | null>(null);
   const [isCheckingBizNo, setIsCheckingBizNo] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [banks, setBanks] = useState<Bank[]>([]);
   const [showBankPicker, setShowBankPicker] = useState(false);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
@@ -78,11 +74,13 @@ export default function StoreSignupBizInfoScreen() {
   const phoneMiddleRef = useRef<TextInput>(null);
   const phoneLastRef = useRef<TextInput>(null);
 
+  const [dateInput, setDateInput] = useState(bizInfo.bizRegDate || "");
+
   /**
    * DatePicker/BankPicker 애니메이션
    */
   useEffect(() => {
-    if (showDatePicker || showBankPicker) {
+    if (showBankPicker) {
       slideAnim.setValue(300);
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -92,7 +90,7 @@ export default function StoreSignupBizInfoScreen() {
       }).start();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDatePicker, showBankPicker]);
+  }, [showBankPicker]);
 
   /**
    * 은행 목록 조회
@@ -165,33 +163,18 @@ export default function StoreSignupBizInfoScreen() {
     }
   };
 
-  const handleDateChange = (event: any, date?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDatePicker(false);
+  const handleDateInputChange = (text: string) => {
+    const digits = text.replace(/\D/g, "").slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 6) {
+      formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+    } else if (digits.length > 4) {
+      formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}`;
+    } else if (digits.length > 0) {
+      formatted = digits.slice(0, 4);
     }
-    if (Platform.OS === "ios" && event.type === "dismissed") {
-      setShowDatePicker(false);
-      return;
-    }
-    if (date) {
-      setSelectedDate(date);
-      updateBizInfo({ bizRegDate: formatDateToLocalString(date) });
-    }
-  };
-
-  const handleWebDateChange = (text: string) => {
-    const { formatted, parsedDate } = formatWebDateInput(text);
-    updateBizInfo({ bizRegDate: formatted });
-    if (parsedDate) {
-      setSelectedDate(parsedDate);
-    }
-  };
-
-  /**
-   * 날짜 선택 모달 닫기
-   */
-  const closeDatePicker = () => {
-    setShowDatePicker(false);
+    setDateInput(formatted);
+    updateBizInfo({ bizRegDate: digits.length === 8 ? formatted : "" });
   };
 
   const handleBizNoChange = (text: string) => {
@@ -482,95 +465,15 @@ export default function StoreSignupBizInfoScreen() {
               <Text style={styles.label}>사업자 등록일</Text>
               <Text style={styles.required}> *</Text>
             </View>
-            {Platform.OS === "web" ? (
-              // 웹용 HTML input
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#ccc"
-                value={bizInfo.bizRegDate}
-                onChangeText={handleWebDateChange}
-                maxLength={10}
-              />
-            ) : (
-              // 앱용 DateTimePicker
-              <>
-                <TouchableOpacity
-                  style={styles.dateInput}
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <Text
-                    style={
-                      bizInfo.bizRegDate
-                        ? styles.dateText
-                        : styles.datePlaceholder
-                    }
-                  >
-                    {bizInfo.bizRegDate || "날짜 선택"}
-                  </Text>
-                  <Ionicons name="calendar-outline" size={20} color="#999" />
-                </TouchableOpacity>
-
-                {/* iOS용 Modal + DateTimePicker */}
-                {Platform.OS === "ios" && showDatePicker && (
-                  <Modal
-                    transparent={true}
-                    animationType="fade"
-                    visible={showDatePicker}
-                    onRequestClose={closeDatePicker}
-                  >
-                    <TouchableOpacity
-                      style={styles.modalOverlay}
-                      activeOpacity={1}
-                      onPress={closeDatePicker}
-                    >
-                      <TouchableOpacity activeOpacity={1}>
-                        <Animated.View
-                          style={[
-                            styles.pickerSheet,
-                            { transform: [{ translateY: slideAnim }] },
-                          ]}
-                        >
-                          <View style={styles.pickerHeader}>
-                            <TouchableOpacity onPress={closeDatePicker}>
-                              <Text style={styles.pickerCancelText}>취소</Text>
-                            </TouchableOpacity>
-                            <Text style={styles.pickerTitleText}>
-                              개업일 선택
-                            </Text>
-                            <TouchableOpacity onPress={closeDatePicker}>
-                              <Text style={styles.pickerDoneText}>완료</Text>
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.pickerCenter}>
-                            <DateTimePicker
-                              value={selectedDate}
-                              mode="date"
-                              display="spinner"
-                              onChange={handleDateChange}
-                              maximumDate={new Date()}
-                              textColor="#000"
-                              locale="ko-KR"
-                            />
-                          </View>
-                        </Animated.View>
-                      </TouchableOpacity>
-                    </TouchableOpacity>
-                  </Modal>
-                )}
-
-                {/* Android용 DateTimePicker */}
-                {Platform.OS === "android" && showDatePicker && (
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    onChange={handleDateChange}
-                    maximumDate={new Date()}
-                  />
-                )}
-              </>
-            )}
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#ccc"
+              value={dateInput}
+              onChangeText={handleDateInputChange}
+              keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
+              maxLength={10}
+            />
           </View>
         </ScrollView>
 
