@@ -3,18 +3,18 @@ import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./faqlist.styles";
+import { styles } from "./storeFaqList.styles";
 
-export default function FaqListScreen() {
+export default function StoreFaqListScreen() {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
   const [selectedSubject, setSelectedSubject] = useState("전체");
@@ -36,7 +36,7 @@ export default function FaqListScreen() {
   useEffect(() => {
     const fetchFaqList = async () => {
       try {
-        const response = await apiGet("/cust/faq");
+        const response = await apiGet("/store/faq");
         if (response.ok) {
           const data = await response.json();
           setFaqData(data);
@@ -203,14 +203,14 @@ export default function FaqListScreen() {
           <View style={styles.questionBtnContainer}>
             <TouchableOpacity
               style={styles.questionReqButton}
-              onPress={() => router.push("/(cust)/questionReg")}
+              onPress={() => router.push("/(store)/storeQuestionReg")}
             >
               <Text style={styles.questionReqButtonText}>1:1 문의하기</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.questionListViewButton}
-              onPress={() => router.push("/(cust)/question")}
+              onPress={() => router.push("/(store)/storeQuestion")}
             >
               <Text style={styles.questionListViewText}>내 문의 목록 보기</Text>
             </TouchableOpacity>

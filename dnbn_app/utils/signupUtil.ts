@@ -75,12 +75,13 @@ export const validateName = (custNm: string): boolean => {
 /**
  * 주민등록번호 유효성 검사
  */
-export const validateResidentNumber = (
-  front: string,
-  back: string,
-): boolean => {
-  if (!front || !back) {
-    Alert.alert("알림", "주민등록번호를 입력해주세요.");
+export const validateBirthDate = (birthDate: string): boolean => {
+  if (!birthDate) {
+    Alert.alert("알림", "생년월일을 입력해주세요.");
+    return false;
+  }
+  if (!/^\d{8}$/.test(birthDate)) {
+    Alert.alert("알림", "생년월일은 8자리 숫자로 입력해주세요. (예: 19900101)");
     return false;
   }
   return true;

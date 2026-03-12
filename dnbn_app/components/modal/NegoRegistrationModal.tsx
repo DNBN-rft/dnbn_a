@@ -9,12 +9,14 @@ interface NegoRegistrationModalProps {
   visible: boolean;
   onClose: () => void;
   onConfirm: (data: { startDate: Date }) => void;
+  limitTime?: number;
 }
 
 export default function NegoRegistrationModal({
   visible,
   onClose,
   onConfirm,
+  limitTime = 24,
 }: NegoRegistrationModalProps) {
   const [negoStartDate, setNegoStartDate] = useState(new Date());
   const [showNegoDatePicker, setShowNegoDatePicker] = useState(false);
@@ -61,7 +63,7 @@ export default function NegoRegistrationModal({
   };
 
   const timeOptions = generateTimeOptions();
-  const negoDurationHours = 24;
+  const negoDurationHours = limitTime;
 
   // 날짜 변경 시 선택된 시간이 유효한지 확인
   const handleDateChange = (selectedDate?: Date) => {

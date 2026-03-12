@@ -55,12 +55,23 @@ export default function NegoProductSection({
                   )
                 }
               >
-                <Image
-                  source={
-                    typeof item.uri === "string" ? { uri: item.uri } : item.uri
-                  }
-                  style={styles.productImage}
-                />
+                {item.uri ? (
+                  <Image
+                    source={
+                      typeof item.uri === "string" ? { uri: item.uri } : item.uri
+                    }
+                    style={styles.productImage}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.productImage,
+                      { backgroundColor: "#f0f0f0", justifyContent: "center", alignItems: "center" },
+                    ]}
+                  >
+                    <Ionicons name="image-outline" size={40} color="#ccc" />
+                  </View>
+                )}
                 <View style={styles.productInfo}>
                   <Text style={styles.productName} numberOfLines={1}>
                     {item.productName}

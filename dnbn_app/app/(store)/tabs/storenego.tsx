@@ -449,7 +449,7 @@ export default function StoreNego() {
                 <TouchableOpacity
                   style={styles.detailButton}
                   onPress={() =>
-                    router.navigate({
+                    router.push({
                       pathname: "/(store)/detailnego",
                       params: { negoIdx: item.negoIdx },
                     })
@@ -499,10 +499,14 @@ export default function StoreNego() {
                       source={{ uri: item.images.files[0] }}
                     />
                   ) : (
-                    <Image
-                      style={styles.negoRequestProductImage}
-                      source={require("@/assets/images/logo.png")}
-                    />
+                    <View
+                      style={[
+                        styles.negoRequestProductImage,
+                        styles.noImageBox,
+                      ]}
+                    >
+                      <Ionicons name="image-outline" size={32} color="#ccc" />
+                    </View>
                   )}
                 </View>
 

@@ -96,6 +96,11 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#f0f0f0",
   },
+  noImageBox: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
   productSubImages: {
     flexDirection: "row",
     justifyContent: "center",

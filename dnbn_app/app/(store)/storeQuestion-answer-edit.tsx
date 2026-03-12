@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -16,7 +17,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storeQuestion-answer-edit.styles";
 
@@ -43,6 +43,12 @@ interface QuestionDetailResponse {
   };
 }
 
+interface ImageFile {
+  uri: string;
+  name: string;
+  isNew?: boolean;
+}
+
 // 백엔드 응답은 한글 label, 요청은 enum 코드 필요
 const questionTypeMap: { [key: string]: string } = {
   "QR 관련": "QR",
@@ -63,9 +69,7 @@ export default function StoreQuestionAnswerEdit() {
     useState<string>("문의유형 선택");
   const [questionTitle, setQuestionTitle] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
-  const [questionFiles, setQuestionFiles] = useState<string[]>([]);
-  // 기존 서버 이미지 URL 추적 (삭제 여부 판단용)
-  const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   useEffect(() => {
     if (questionId) {
@@ -90,13 +94,16 @@ export default function StoreQuestionAnswerEdit() {
         setQuestionTitle(data.questionTitle);
         setQuestionContent(data.questionContent);
 
-        // 이미지가 있으면 URL 배열로 설정
+        // 이미지가 있으면 ImageFile 배열로 설정
         if (data.imgs?.files && data.imgs.files.length > 0) {
-          const imageUrls = data.imgs.files
+          const imageList = data.imgs.files
             .sort((a, b) => a.order - b.order)
-            .map((img) => img.fileUrl);
-          setQuestionFiles(imageUrls);
-          setOriginalImageUrls(imageUrls);
+            .map((img) => ({
+              uri: img.fileUrl,
+              name: img.originalName,
+              isNew: false,
+            }));
+          setImages(imageList);
         }
       } else {
         console.error("문의 상세 조회 실패:", response.status);
@@ -114,37 +121,45 @@ export default function StoreQuestionAnswerEdit() {
 
   // 이미지 선택 함수
   const pickImage = async () => {
-    // 이미 3개 선택된 경우
-    if (questionFiles.length >= 3) {
-      Alert.alert("알림", "최대 3개까지 첨부 가능합니다.");
+    if (images.length >= 3) {
+      Alert.alert("알림", "이미지는 최대 3개까지만 등록할 수 있습니다");
       return;
     }
 
-    // 권한 요청
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      Alert.alert("알림", "갤러리 접근 권한이 필요합니다.");
-      return;
-    }
-
-    // 이미지 선택
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setQuestionFiles([...questionFiles, result.assets[0].uri]);
+    if (!result.canceled) {
+      const asset = result.assets[0];
+
+      const extFromMime = asset.mimeType
+        ? asset.mimeType.split("/").pop()?.replace("jpeg", "jpg") || "jpg"
+        : "jpg";
+
+      const rawName = asset.fileName || asset.uri.split("/").pop() || "";
+      const hasExt = rawName.includes(".");
+      const name = hasExt
+        ? rawName
+        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+
+      setImages([
+        ...images,
+        {
+          uri: asset.uri,
+          name,
+          isNew: true,
+        },
+      ]);
     }
   };
 
   // 이미지 삭제 함수
   const removeImage = (index: number) => {
-    setQuestionFiles(questionFiles.filter((_, i) => i !== index));
+    setImages(images.filter((_, i) => i !== index));
   };
 
   // 문의 수정 및 이미지 업로드 함수
@@ -174,63 +189,24 @@ export default function StoreQuestionAnswerEdit() {
       formData.append("questionTitle", questionTitle);
       formData.append("questionContent", questionContent);
 
-      // 이미지 파일들 추가
-      // 기존 서버 URL: keepImageUrls로 전송 (유지할 URL 목록)
-      // 새로 추가한 로컬 파일: questionFiles로 업로드
-      const keptUrls = questionFiles.filter((uri) => uri.startsWith("http"));
-      const newLocalFiles = questionFiles.filter(
-        (uri) => !uri.startsWith("http"),
-      );
+      // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
+      // 유지할 기존 이미지(isNew: false) + 새 이미지(isNew: true) 모두 전송
+      for (const img of images) {
+        const ext = img.name.split(".").pop()?.toLowerCase() || "jpg";
+        const mimeType =
+          ext === "png"
+            ? "image/png"
+            : ext === "gif"
+              ? "image/gif"
+              : ext === "webp"
+                ? "image/webp"
+                : "image/jpeg";
 
-      // 유지할 기존 이미지 URL 전송 (비어있으면 백엔드가 전체 삭제로 처리)
-      for (const url of keptUrls) {
-        formData.append("keepImageUrls", url);
-      }
-
-      // 새로 추가한 로컬 파일만 업로드
-      if (newLocalFiles.length > 0) {
-        for (let i = 0; i < newLocalFiles.length; i++) {
-          const imageUri = newLocalFiles[i];
-
-          // 파일명 생성 (확장자 포함)
-          let filename =
-            imageUri.split("/").pop() || `question_${Date.now()}_${i}.jpg`;
-
-          // 확장자 확인 및 MIME 타입 설정
-          const fileExtension = filename.toLowerCase().split(".").pop();
-          let mimeType = "image/jpeg";
-
-          if (fileExtension === "png") {
-            mimeType = "image/png";
-          } else if (fileExtension === "jpg" || fileExtension === "jpeg") {
-            mimeType = "image/jpeg";
-          } else {
-            // 확장자가 없거나 이상한 경우 기본값 설정
-            filename = `question_${Date.now()}_${i}.jpg`;
-            mimeType = "image/jpeg";
-          }
-
-          // 웹과 네이티브 환경에 따라 다르게 처리
-          if (Platform.OS === "web") {
-            // 웹: Blob으로 변환하여 전송 (URL이든 로컬이든 동일)
-            const response = await fetch(imageUri);
-            const blob = await response.blob();
-            const typedBlob = new Blob([blob], { type: mimeType });
-            formData.append("questionFiles", typedBlob as any, filename);
-          } else {
-            // 네이티브: URI를 직접 FormData에 추가
-            formData.append("questionFiles", {
-              uri: imageUri,
-              type: mimeType,
-              name: filename,
-            } as any);
-          }
-        }
-      } else if (keptUrls.length === 0) {
-        // 이미지가 하나도 없음 = 전체 삭제 의도
-        // 빈 Blob을 전송해서 백엔드가 전체 삭제로 감지하게 처리
-        const emptyBlob = new Blob([], { type: "image/jpeg" });
-        formData.append("questionFiles", emptyBlob as any, "empty.jpg");
+        formData.append("questionFiles", {
+          uri: img.uri,
+          name: img.name,
+          type: mimeType,
+        } as any);
       }
 
       const response = await apiPutFormDataWithImage(
@@ -371,47 +347,48 @@ export default function StoreQuestionAnswerEdit() {
 
         <View style={styles.questionItemContainer}>
           <Text style={styles.questionItemTitleText}>
-            첨부파일 ({questionFiles.length}/3)
+            첨부파일 ({images.length}/3)
           </Text>
-        </View>
-
-        <View style={styles.questionImageContainer}>
-          {[0, 1, 2].map((index) => (
-            <View key={index} style={styles.photoSlot}>
-              {questionFiles[index] ? (
-                <View style={styles.photoWrapper}>
+          <View style={styles.imageManagementBox}>
+            <View style={styles.imageGrid}>
+              {images.map((img, index) => (
+                <View key={index} style={styles.imagePreview}>
                   <Image
-                    style={styles.questionImage}
-                    source={{ uri: questionFiles[index] }}
-                    priority="high"
-                    cachePolicy="memory-disk"
-                    contentFit="cover"
-                    transition={200}
-                    placeholder="L6PZfSi_.AyE_3t7t7R**0o#DgR4"
+                    source={{ uri: img.uri }}
+                    style={styles.previewImage}
                   />
-
-                  <Pressable
-                    style={styles.removePhotoButton}
+                  <TouchableOpacity
+                    style={styles.removeImageButton}
                     onPress={() => removeImage(index)}
                   >
-                    <Ionicons name="close-circle" size={24} color="#FF6B35" />
-                  </Pressable>
+                    <Ionicons name="close-circle" size={24} color="#ff4444" />
+                  </TouchableOpacity>
                 </View>
-              ) : (
-                <Pressable
-                  style={styles.photoUploadButton}
-                  onPress={pickImage}
-                  disabled={questionFiles.length >= 3}
+              ))}
+              <TouchableOpacity
+                style={[
+                  styles.addImageButton,
+                  images.length >= 3 && styles.disabledButton,
+                ]}
+                onPress={pickImage}
+                disabled={submitting || images.length >= 3}
+              >
+                <Ionicons
+                  name="add"
+                  size={32}
+                  color={images.length >= 3 ? "#ccc" : "#999"}
+                />
+                <Text
+                  style={[
+                    styles.addImageText,
+                    images.length >= 3 && styles.disabledText,
+                  ]}
                 >
-                  <Ionicons
-                    name="camera"
-                    size={32}
-                    color={questionFiles.length >= 3 ? "#ccc" : "#888"}
-                  />
-                </Pressable>
-              )}
+                  {images.length >= 3 ? "완료" : "추가"}
+                </Text>
+              </TouchableOpacity>
             </View>
-          ))}
+          </View>
         </View>
 
         <View style={styles.submitButtonContainer}>

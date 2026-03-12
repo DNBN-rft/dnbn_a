@@ -19,8 +19,8 @@ import { styles } from "./addproduct.styles";
 interface Category {
   categoryIdx: number;
   categoryNm: string;
-  fileMasterResponse: {
-    files: ImageFile[];
+  fileMasterResponse?: {
+    files: { fileUrl: string; originalName: string; order: number }[];
   };
 }
 
@@ -266,6 +266,7 @@ export default function AddProduct() {
                 일반
               </Text>
             </TouchableOpacity>
+{/* 성인 선택 버튼 - 추후 구현 예정
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -282,6 +283,7 @@ export default function AddProduct() {
                 성인
               </Text>
             </TouchableOpacity>
+*/}
           </View>
         </View>
 
@@ -351,7 +353,10 @@ export default function AddProduct() {
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 이미지</Text>
+          <Text style={styles.label}>
+            상품 이미지 <Text style={styles.requiredMark}>*</Text>
+          </Text>
+          <Text style={styles.imageHint}>최소 1개 이상 등록 필수 (최대 3개)</Text>
           <TouchableOpacity
             style={[
               styles.imageUploadButton,

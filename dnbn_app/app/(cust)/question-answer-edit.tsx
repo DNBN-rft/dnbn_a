@@ -2,6 +2,7 @@ import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -161,8 +162,21 @@ export default function QuestionAnswerEdit() {
     try {
       const formData = new FormData();
 
+      // storage에서 custCode 가져오기
+      let custCode: string | null = null;
+      if (Platform.OS === "web") {
+        custCode = localStorage.getItem("custCode");
+      } else {
+        custCode = await SecureStore.getItemAsync("custCode");
+      }
+
+      if (!custCode) {
+        Alert.alert("오류", "로그인 정보를 찾을 수 없습니다.");
+        return;
+      }
+
       // 문의 정보 추가
-      formData.append("custCode", "CUST_001");
+      formData.append("custCode", custCode);
       // 백엔드 deserialize를 위해 enum 코드 전송
       const enumCode = questionTypeMap[selectedQuestionType];
       formData.append("questionRequestType", enumCode);
@@ -217,13 +231,13 @@ export default function QuestionAnswerEdit() {
         // 웹 환경에서는 window.alert 사용
         if (Platform.OS === "web") {
           window.alert("문의가 성공적으로 수정되었습니다.");
-          router.back();
+          router.replace("/(cust)/question");
         } else {
           // 네이티브 환경에서는 Alert.alert 사용
           Alert.alert("성공", "문의가 성공적으로 수정되었습니다.", [
             {
               text: "확인",
-              onPress: () => router.back(),
+              onPress: () => router.replace("/(cust)/question"),
             },
           ]);
         }
@@ -288,14 +302,18 @@ export default function QuestionAnswerEdit() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>문의 수정</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>문의수정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
       <ScrollView
         style={{ flex: 1 }}

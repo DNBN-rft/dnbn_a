@@ -194,7 +194,7 @@ export default function CustHomeScreen() {
     id: item.productCode,
     uri: item.images?.files?.[0]?.fileUrl
       ? { uri: item.images.files[0].fileUrl }
-      : { uri: "https://via.placeholder.com/150" },
+      : null,
     productName: item.productNm,
     storeName: item.storeNm,
     price: item.price,
@@ -213,7 +213,7 @@ export default function CustHomeScreen() {
       id: item.productCode,
       uri: item.images?.files?.[0]?.fileUrl
         ? { uri: item.images.files[0].fileUrl }
-        : { uri: "https://via.placeholder.com/150" },
+        : null,
       productName: item.productNm,
       storeName: item.storeNm,
       discount: discountPercent,
@@ -225,7 +225,7 @@ export default function CustHomeScreen() {
     id: item.productCode,
     uri: item.productImg?.fileUrl
       ? { uri: item.productImg.fileUrl }
-      : { uri: "https://via.placeholder.com/150" },
+      : null,
     productName: item.productNm,
     storeName: item.storeNm,
     price: item.price,
@@ -244,7 +244,7 @@ export default function CustHomeScreen() {
         id: item.productCode,
         uri: firstImage?.fileUrl
           ? { uri: firstImage.fileUrl }
-          : { uri: "https://via.placeholder.com/150" },
+          : null,
         productName: item.productNm,
         storeName: item.storeNm,
         discount: item.discountRate,

@@ -23,6 +23,7 @@ interface DiscountRegistrationModalProps {
     startDate: Date;
   }) => void;
   productPrice?: number;
+  limitTime?: number;
 }
 
 export default function DiscountRegistrationModal({
@@ -30,6 +31,7 @@ export default function DiscountRegistrationModal({
   onClose,
   onConfirm,
   productPrice = 10000,
+  limitTime = 24,
 }: DiscountRegistrationModalProps) {
   const [discountType, setDiscountType] = useState<"rate" | "price">("rate");
   const [discountValue, setDiscountValue] = useState("");
@@ -78,7 +80,7 @@ export default function DiscountRegistrationModal({
   };
 
   const timeOptions = generateTimeOptions();
-  const discountDurationHours = 24;
+  const discountDurationHours = limitTime;
 
   // 날짜 변경 시 선택된 시간이 유효한지 확인
   const handleDateChange = (selectedDate?: Date) => {

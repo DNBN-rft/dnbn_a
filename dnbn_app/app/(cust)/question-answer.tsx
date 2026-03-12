@@ -96,7 +96,7 @@ export default function QuestionAnswer() {
                 Alert.alert("성공", "문의가 삭제되었습니다.", [
                   {
                     text: "확인",
-                    onPress: () => router.navigate("/(cust)/question"),
+                    onPress: () => router.replace("/(cust)/question"),
                   },
                 ]);
               } else {
@@ -148,14 +148,18 @@ export default function QuestionAnswer() {
         <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
       )}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>문의상세</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.leftSection}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.title}>문의상세</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       <ScrollView
@@ -181,7 +185,7 @@ export default function QuestionAnswer() {
                   <TouchableOpacity
                     style={styles.editButton}
                     onPress={() =>
-                      router.navigate({
+                      router.push({
                         pathname: "/(cust)/question-answer-edit",
                         params: { questionId: questionId },
                       })
@@ -275,7 +279,7 @@ export default function QuestionAnswer() {
       </ScrollView>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#FFFFFF" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );

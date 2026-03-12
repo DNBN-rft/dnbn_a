@@ -263,10 +263,12 @@ export default function EditProductPage() {
                 ? "image/webp"
                 : "image/jpeg";
 
-        // URI → Blob 변환 후 MultipartFile로 전송 (기존 서버 URL도 동일하게 처리)
-        const fileResponse = await fetch(img.uri);
-        const blob = await fileResponse.blob();
-        formData.append("productImgs", blob, img.name);
+        // React Native FormData 파일 객체 방식으로 전송
+        formData.append("productImgs", {
+          uri: img.uri,
+          name: img.name,
+          type: mimeType,
+        } as any);
       }
 
       // API 요청
@@ -398,6 +400,7 @@ export default function EditProductPage() {
                 일반
               </Text>
             </TouchableOpacity>
+{/* 성인 선택 버튼 - 추후 구현 예정
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -414,6 +417,7 @@ export default function EditProductPage() {
                 성인
               </Text>
             </TouchableOpacity>
+*/}
           </View>
         </View>
 

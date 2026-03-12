@@ -2,20 +2,20 @@ import { apiPost } from "@/utils/api";
 import { permitCheck } from "@/utils/notificationUtil";
 import {
   checkDuplicateId,
-  handleEmailDomainSelect as handleEmailDomainSelectUtil,
   handleEmailDomainDirectInput,
+  handleEmailDomainSelect as handleEmailDomainSelectUtil,
   handleLoginIdChange as handleLoginIdChangeUtil,
   handlePasswordChange as handlePasswordChangeUtil,
   handlePasswordConfirmChange as handlePasswordConfirmChangeUtil,
   handlePhoneFirstChange as handlePhoneFirstChangeUtil,
   handlePhoneLastChange as handlePhoneLastChangeUtil,
   handlePhoneMiddleChange as handlePhoneMiddleChangeUtil,
+  validateBirthDate,
   validateEmail,
   validateLoginId,
   validateName,
   validatePassword,
   validatePhoneNumber,
-  validateResidentNumber,
 } from "@/utils/signupUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -53,8 +53,7 @@ export default function PracticeView() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [custNm, setCustNm] = useState("");
-  const [residentNumberFront, setResidentNumberFront] = useState("");
-  const [residentNumberBack, setResidentNumberBack] = useState("");
+  const [yearBirth, setYearBirth] = useState("");
   // const [custNickNm, setCustNickNm] = useState("");
   // const [isNickNmChecked, setIsNickNmChecked] = useState(false);
   // const [isNickNmAvailable, setIsNickNmAvailable] = useState(false);
@@ -97,17 +96,34 @@ export default function PracticeView() {
 
   // 아이디 입력 핸들러
   const handleLoginIdChange = (text: string) => {
-    handleLoginIdChangeUtil(text, setLoginId, setIsIdChecked, setIsIdAvailable, setLoginIdError);
+    handleLoginIdChangeUtil(
+      text,
+      setLoginId,
+      setIsIdChecked,
+      setIsIdAvailable,
+      setLoginIdError,
+    );
   };
 
   // 비밀번호 입력 핸들러
   const handlePasswordChange = (text: string) => {
-    handlePasswordChangeUtil(text, passwordConfirm, setPassword, setPasswordError, setPasswordConfirmError);
+    handlePasswordChangeUtil(
+      text,
+      passwordConfirm,
+      setPassword,
+      setPasswordError,
+      setPasswordConfirmError,
+    );
   };
 
   // 비밀번호 확인 입력 핸들러
   const handlePasswordConfirmChange = (text: string) => {
-    handlePasswordConfirmChangeUtil(text, password, setPasswordConfirm, setPasswordConfirmError);
+    handlePasswordConfirmChangeUtil(
+      text,
+      password,
+      setPasswordConfirm,
+      setPasswordConfirmError,
+    );
   };
 
   // 이메일 도메인 직접입력 핸들러
@@ -202,7 +218,10 @@ export default function PracticeView() {
     setIsVerifyLoading(true);
 
     try {
-      const response = await apiPost("/cust/mms/verify", { phone, code: verificationCode });
+      const response = await apiPost("/cust/mms/verify", {
+        phone,
+        code: verificationCode,
+      });
 
       if (response.ok) {
         setIsPhoneVerified(true);
@@ -230,8 +249,7 @@ export default function PracticeView() {
     if (!validateLoginId(loginId, isIdChecked, isIdAvailable)) return;
     if (!validatePassword(password, passwordConfirm)) return;
     if (!validateName(custNm)) return;
-    if (!validateResidentNumber(residentNumberFront, residentNumberBack))
-      return;
+    if (!validateBirthDate(yearBirth)) return;
     // if (!validateNickname(custNickNm, isNickNmChecked, isNickNmAvailable))
     //   return;
     if (
@@ -255,8 +273,7 @@ export default function PracticeView() {
         loginId,
         password,
         custNm,
-        residentNumberFront,
-        residentNumberBack,
+        yearBirth,
         // custNickNm,
         custTelNo: telNoWithoutHyphen,
         custGender,
@@ -394,7 +411,9 @@ export default function PracticeView() {
               />
             </View>
             {passwordConfirmError ? (
-              <Text style={styles.validationErrorText}>{passwordConfirmError}</Text>
+              <Text style={styles.validationErrorText}>
+                {passwordConfirmError}
+              </Text>
             ) : null}
           </View>
 
@@ -406,7 +425,14 @@ export default function PracticeView() {
                 placeholder="이름 입력"
                 placeholderTextColor={"#ccc"}
                 value={custNm}
-                onChangeText={(text) => setCustNm(text.replace(/[^가-힣\u1100-\u11FF\u3130-\u318Fa-zA-Z]/g, ""))}
+                onChangeText={(text) =>
+                  setCustNm(
+                    text.replace(
+                      /[^가-힣\u1100-\u11FF\u3130-\u318Fa-zA-Z]/g,
+                      "",
+                    ),
+                  )
+                }
               />
             </View>
           </View>
@@ -424,29 +450,23 @@ export default function PracticeView() {
           </View>
 
           <View style={styles.viewMargin}>
-            <Text style={styles.inputTitle}>주민등록번호 *</Text>
+            <Text style={styles.inputTitle}>생년월일 *</Text>
             <View style={styles.inputComponent}>
               <TextInput
                 style={styles.inputStyle}
-                placeholder="주민등록번호 앞"
+                placeholder="생년월일 (예: 19900101)"
                 placeholderTextColor={"#ccc"}
                 keyboardType="numeric"
-                maxLength={6}
-                value={residentNumberFront}
-                onChangeText={setResidentNumberFront}
-              />
-              <Text>-</Text>
-              <TextInput
-                style={styles.inputStyle}
-                placeholder="주민등록번호 뒤"
-                placeholderTextColor={"#ccc"}
-                secureTextEntry
-                keyboardType="numeric"
-                maxLength={7}
-                value={residentNumberBack}
-                onChangeText={setResidentNumberBack}
+                maxLength={8}
+                value={yearBirth}
+                onChangeText={(text) =>
+                  setYearBirth(text.replace(/[^0-9]/g, ""))
+                }
               />
             </View>
+            <Text style={styles.descriptionStyle}>
+              YYYYMMDD 형식으로 입력해주세요
+            </Text>
           </View>
 
           {/** 닉네임 처리 막기
@@ -611,7 +631,12 @@ export default function PracticeView() {
                       style={styles.modalBackdrop}
                       onPress={() => setShowEmailDomainPicker(false)}
                     />
-                    <View style={[styles.modalContent, { paddingBottom: Math.max(20, insets.bottom + 8) }]}>
+                    <View
+                      style={[
+                        styles.modalContent,
+                        { paddingBottom: Math.max(20, insets.bottom + 8) },
+                      ]}
+                    >
                       <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>이메일 선택</Text>
                         <TouchableOpacity
@@ -684,7 +709,10 @@ export default function PracticeView() {
                   );
                   setIsSmsSent(false);
                   setVerificationCode("");
-                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  if (countdownRef.current) {
+                    clearInterval(countdownRef.current);
+                    countdownRef.current = null;
+                  }
                   setCountdown(0);
                 }}
                 maxLength={3}
@@ -706,7 +734,10 @@ export default function PracticeView() {
                   );
                   setIsSmsSent(false);
                   setVerificationCode("");
-                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  if (countdownRef.current) {
+                    clearInterval(countdownRef.current);
+                    countdownRef.current = null;
+                  }
                   setCountdown(0);
                 }}
                 maxLength={4}
@@ -727,7 +758,10 @@ export default function PracticeView() {
                   );
                   setIsSmsSent(false);
                   setVerificationCode("");
-                  if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+                  if (countdownRef.current) {
+                    clearInterval(countdownRef.current);
+                    countdownRef.current = null;
+                  }
                   setCountdown(0);
                 }}
                 maxLength={4}
@@ -735,12 +769,19 @@ export default function PracticeView() {
             </View>
             {!isPhoneVerified && (
               <Pressable
-                style={[styles.sendCodeButton, isSmsLoading && styles.buttonDisabled]}
+                style={[
+                  styles.sendCodeButton,
+                  isSmsLoading && styles.buttonDisabled,
+                ]}
                 onPress={handlePhoneVerification}
                 disabled={isSmsLoading}
               >
                 <Text style={styles.sendCodeButtonText}>
-                  {isSmsLoading ? "전송 중..." : isSmsSent ? "재전송" : "인증번호 전송"}
+                  {isSmsLoading
+                    ? "전송 중..."
+                    : isSmsSent
+                      ? "재전송"
+                      : "인증번호 전송"}
                 </Text>
               </Pressable>
             )}
@@ -760,13 +801,18 @@ export default function PracticeView() {
                   <Pressable
                     style={[
                       styles.verifyCodeButton,
-                      (isVerifyLoading || isPhoneVerified) && styles.buttonDisabled,
+                      (isVerifyLoading || isPhoneVerified) &&
+                        styles.buttonDisabled,
                     ]}
                     onPress={handleVerifyCode}
                     disabled={isVerifyLoading || isPhoneVerified}
                   >
                     <Text style={styles.verifyCodeButtonText}>
-                      {isPhoneVerified ? "인증완료" : isVerifyLoading ? "확인 중..." : "확인"}
+                      {isPhoneVerified
+                        ? "인증완료"
+                        : isVerifyLoading
+                          ? "확인 중..."
+                          : "확인"}
                     </Text>
                   </Pressable>
                 </View>

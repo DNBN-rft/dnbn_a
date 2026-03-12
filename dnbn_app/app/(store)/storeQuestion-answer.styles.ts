@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#fff",
   },
   qaSection: {
     marginHorizontal: 20,

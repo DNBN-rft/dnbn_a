@@ -152,10 +152,16 @@ export default function StoreSale() {
             <View style={styles.saleProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  <Image
-                    style={styles.productImage}
-                    source={{ uri: item.images.files[0]?.fileUrl }}
-                  />
+                  {item.images?.files && item.images.files.length > 0 && item.images.files[0]?.fileUrl ? (
+                    <Image
+                      style={styles.productImage}
+                      source={{ uri: item.images.files[0].fileUrl }}
+                    />
+                  ) : (
+                    <View style={[styles.productImage, styles.noImageBox]}>
+                      <Ionicons name="image-outline" size={32} color="#ccc" />
+                    </View>
+                  )}
                 </View>
 
                 <View style={styles.productInfoContainer}>

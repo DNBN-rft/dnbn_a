@@ -35,20 +35,24 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
   const currentIndex = useRef(1); // 첫 번째 원본부터 시작
   const intervalRef = useRef<number | null>(null);
 
-  // 배너 데이터가 없으면 기본 이미지만 표시
-  const originalBanners =
-    banners.length > 0
-      ? banners
-      : [
-          {
-            id: "1",
-            uri: require("@/assets/images/mainbanner/dnbn_app.png"),
-          },
-          {
-            id: "2",
-            uri: require("@/assets/images/mainbanner/dnbn_sale.png"),
-          },
-        ];
+  // 기본 배너 이미지 목록
+  const defaultBanners = [
+    { id: "default-1", uri: require("@/assets/images/mainbanner/dnbn_app.png") },
+    { id: "default-2", uri: require("@/assets/images/mainbanner/dnbn_sale.png") },
+    { id: "default-3", uri: require("@/assets/images/mainbanner/dnbn_app.png") },
+    { id: "default-4", uri: require("@/assets/images/mainbanner/dnbn_sale.png") },
+  ];
+
+  const MAX_BANNERS = 5;
+
+  // 상품 배너가 MAX_BANNERS보다 적으면 모자란 수만큼 기본 배너로 채움
+  const originalBanners = (() => {
+    if (banners.length === 0) return defaultBanners.slice(0, MAX_BANNERS);
+    if (banners.length >= MAX_BANNERS) return banners.slice(0, MAX_BANNERS);
+    const needed = MAX_BANNERS - banners.length;
+    const fillers = defaultBanners.slice(0, needed);
+    return [...banners, ...fillers];
+  })();
 
   // 무한스크롤을 위한 배너 복제 (양쪽에 복제본 추가)
   const finalBanners = [
