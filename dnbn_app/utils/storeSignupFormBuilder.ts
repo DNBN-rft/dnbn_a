@@ -13,6 +13,8 @@ export const buildStoreSignupFormData = (
   bizInfo: BizInfoData,
   storeInfo: StoreInfoData,
   fileUpload: FileUploadData,
+  fcmToken: string | null = null,
+  pushSet: boolean = false,
 ): FormData => {
   const formData = new FormData();
 
@@ -51,6 +53,10 @@ export const buildStoreSignupFormData = (
 
   // 약관 동의
   formData.append("agreed", "true");
+  formData.append("pushSet", String(pushSet));
+  if (fcmToken) {
+    formData.append("fcmToken", fcmToken);
+  }
 
   // 가게 대표 이미지 (List<MultipartFile>로 전송)
   if (fileUpload.storeImage) {
