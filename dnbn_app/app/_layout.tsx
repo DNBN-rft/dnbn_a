@@ -8,6 +8,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreSignupProvider } from '@/contexts/StoreSignupContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { setLogoutCallback } from '@/utils/api';
+import { requestNotificationPermission } from '@/utils/notificationUtil';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -17,6 +19,17 @@ function RootLayoutContent() {
     setLogoutCallback(() => {
       router.replace('/(auth)/login');
     });
+  }, []);
+
+  // 앱 최초 실행 시 알림 권한 1회 요청
+  useEffect(() => {
+    (async () => {
+      const requested = await AsyncStorage.getItem('notification_permission_requested');
+      if (!requested) {
+        await requestNotificationPermission();
+        await AsyncStorage.setItem('notification_permission_requested', 'true');
+      }
+    })();
   }, []);
 
   return (

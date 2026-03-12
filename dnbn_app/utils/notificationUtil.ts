@@ -1,45 +1,33 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Alert, Linking, Platform } from "react-native";
+import { Platform } from "react-native";
 
 /**
- * 마케팅 수신 동의 시 푸시 토큰을 발급합니다.
- * - 실제 기기에서만 동작합니다 (시뮬레이터/에뮬레이터 불가).
- * - Android의 경우 알림 채널을 함께 생성합니다.
- * - 권한이 거부되면 null을 반환합니다.
- *
- * Expo Go, EAS 빌드 모두 getExpoPushTokenAsync()로 통일.
- * 반환 형식: ExponentPushToken[...]
+ * 앱 최초 실행 시 알림 권한만 요청합니다 (토큰 발급 X).
+ * _layout.tsx에서 AsyncStorage로 1회만 호출합니다.
+ */
+export async function requestNotificationPermission(): Promise<void> {
+  if (Platform.OS === "web" || !Device.isDevice) return;
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status !== "granted") {
+    await Notifications.requestPermissionsAsync();
+  }
+}
+
+/**
+ * 현재 권한이 granted인 경우에만 FCM 토큰을 발급합니다.
+ * - 권한이 없으면 Alert 없이 null 반환 (권한 요청은 앱 최초 실행 시 이미 완료).
+ * - 마케팅 동의 시에만 호출합니다.
  */
 export async function getFcmToken(): Promise<string | null> {
   if (Platform.OS === "web" || !Device.isDevice) {
     return null;
   }
 
-  // 알림 권한 확인 및 요청
-  const { status: existingStatus } =
-    await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+  const { status } = await Notifications.getPermissionsAsync();
 
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== "granted") {
-    // 이미 거부된 경우 설정 앱으로 안내
-    Alert.alert(
-      "알림 권한 필요",
-      "마케팅 알림을 받으려면 기기 설정에서 알림 권한을 허용해주세요.",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "설정으로 이동",
-          onPress: () => Linking.openSettings(),
-        },
-      ]
-    );
+  if (status !== "granted") {
     return null;
   }
 
