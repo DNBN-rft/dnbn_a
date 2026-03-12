@@ -51,8 +51,7 @@ export default function StoreProducts() {
 
   // API 연동용 state
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage] = useState(0);
   const [limitTime, setLimitTime] = useState<number>(24);
 
   // 성공 메시지 표시 (웹/앱 분기 처리)
@@ -87,7 +86,6 @@ export default function StoreProducts() {
   // 상품 목록 조회 함수
   const loadProducts = useCallback(async (page: number = currentPage) => {
     try {
-      setIsLoading(true);
       const response = await apiGet(`/store/app/product?page=${page}&size=10`);
       if (response.ok) {
         const data = await response.json();
@@ -99,10 +97,8 @@ export default function StoreProducts() {
       }
     } catch (error) {
       console.error("상품 목록 로드 오류:", error);
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  }, [currentPage]);
 
   // 페이지 변경 시 상품 조회
   useEffect(() => {
@@ -437,6 +433,12 @@ export default function StoreProducts() {
         visible={saleModal}
         onClose={() => setSaleModal(false)}
         limitTime={limitTime}
+        productPrice={
+          selectedProductCode
+            ? products.find((p) => p.productCode === selectedProductCode)
+                ?.productPrice
+            : undefined
+        }
         onConfirm={async (data) => {
           if (selectedProductCode) {
             const success = await registerDiscount(selectedProductCode, data);
@@ -449,12 +451,6 @@ export default function StoreProducts() {
             }
           }
         }}
-        productPrice={
-          selectedProductCode
-            ? products.find((p) => p.productCode === selectedProductCode)
-                ?.productPrice
-            : undefined
-        }
       />
 
       <NegoRegistrationModal
