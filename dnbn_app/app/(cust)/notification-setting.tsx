@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "@/utils/api";
-import { getFcmTokenSilently } from "@/utils/notificationUtil";
+import { permitCheck } from "@/utils/notificationUtil";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -49,7 +49,7 @@ export default function NotificationSetting() {
 
       let fcmToken: string | null = null;
       if (marketingEnabled) {
-        fcmToken = await getFcmTokenSilently();
+        fcmToken = await permitCheck();
         if (!fcmToken) {
           Alert.alert(
             "알림 권한 필요",

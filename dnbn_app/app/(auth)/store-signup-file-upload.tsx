@@ -10,7 +10,7 @@
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiPostFormDataWithImage } from "@/utils/api";
-import { getFcmTokenSilently } from "@/utils/notificationUtil";
+import { permitCheck } from "@/utils/notificationUtil";
 import { buildStoreSignupFormData } from "@/utils/storeSignupFormBuilder";
 import { validateFileInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
@@ -153,7 +153,7 @@ export default function StoreSignupFileUploadScreen() {
     setIsSubmitting(true);
 
     try {
-      const fcmToken = agreement.marketing ? await getFcmTokenSilently() : null;
+      const fcmToken = agreement.marketing ? await permitCheck() : null;
       const pushSet = agreement.marketing ? true : false;
 
       const formData = buildStoreSignupFormData(

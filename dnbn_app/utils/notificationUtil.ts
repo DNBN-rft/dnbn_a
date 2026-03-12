@@ -19,7 +19,7 @@ export async function requestNotificationPermission(): Promise<void> {
  * 현재 권한이 granted인 경우에만 토큰을 발급합니다.
  * - 권한이 없으면 Alert 없이 null 반환 (권한 요청은 앱 최초 실행 시 이미 완료).
  */
-export async function getFcmTokenSilently(): Promise<string | null> {
+export async function permitCheck(): Promise<string | null> {
   const { status } = await Notifications.getPermissionsAsync();
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
   const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });

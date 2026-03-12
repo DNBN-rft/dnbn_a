@@ -1,5 +1,5 @@
 import { apiPost } from "@/utils/api";
-import { getFcmTokenSilently } from "@/utils/notificationUtil";
+import { permitCheck } from "@/utils/notificationUtil";
 import {
   checkDuplicateId,
   handleEmailDomainSelect as handleEmailDomainSelectUtil,
@@ -247,7 +247,7 @@ export default function PracticeView() {
       // 핸드폰번호 조합
       const telNoWithoutHyphen = `${phoneFirst}${phoneMiddle}${phoneLast}`;
 
-      const fcmToken = isMarketingAgreed ? await getFcmTokenSilently() : null;
+      const fcmToken = isMarketingAgreed ? await permitCheck() : null;
       const pushSet = fcmToken !== null;
 
       const requestBody = {
