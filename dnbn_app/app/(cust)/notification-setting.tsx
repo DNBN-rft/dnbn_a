@@ -124,7 +124,7 @@ export default function NotificationSetting() {
 
       <View style={styles.notificationContainer}>
         <View style={styles.notificationContent}>
-          <Text>앱 푸시 설정</Text>
+          <Text>푸시 설정(마케팅 수신 여부)</Text>
           <CumtomToggle isOn={appPushEnabled} onToggle={setAppPushEnabled} />
         </View>
         <View style={styles.notificationContent}>
@@ -132,13 +132,6 @@ export default function NotificationSetting() {
           <CumtomToggle
             isOn={notificationEnabled}
             onToggle={setNotificationEnabled}
-          />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>마케팅 수신 동의</Text>
-          <CumtomToggle
-            isOn={marketingEnabled}
-            onToggle={setMarketingEnabled}
           />
         </View>
       </View>

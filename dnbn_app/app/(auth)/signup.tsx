@@ -248,7 +248,7 @@ export default function PracticeView() {
       const telNoWithoutHyphen = `${phoneFirst}${phoneMiddle}${phoneLast}`;
 
       const fcmToken = isMarketingAgreed ? await permitCheck() : null;
-      const pushSet = fcmToken !== null;
+      const pushSet = isMarketingAgreed ? true : false;
 
       const requestBody = {
         email,
