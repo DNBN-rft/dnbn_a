@@ -261,6 +261,9 @@ export default function StoreSignupFileUploadScreen() {
             사업자 증명, 영업신고증, 통장사본을 올려주세요. (jpg, png / 파일당
             10MB 이하)
           </Text>
+          <Text style={styles.helperText}>
+            PDF 파일은 웹에서 등록할 수 있습니다.
+          </Text>
 
           {fileUpload.businessDocs.length > 0 && (
             <View style={styles.docGrid}>
