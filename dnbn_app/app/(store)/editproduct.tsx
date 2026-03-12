@@ -400,6 +400,7 @@ export default function EditProductPage() {
                 일반
               </Text>
             </TouchableOpacity>
+{/* 성인 선택 버튼 - 추후 구현 예정
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -416,6 +417,7 @@ export default function EditProductPage() {
                 성인
               </Text>
             </TouchableOpacity>
+*/}
           </View>
         </View>
 

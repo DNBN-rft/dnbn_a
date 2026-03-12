@@ -8,46 +8,18 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiPost } from "../../utils/api";
+import { apiDelete } from "../../utils/api";
 import { styles } from "./withdraw.styles";
-
-const WITHDRAW_REASONS = [
-  { id: "1", label: "서비스 만족도 낮음" },
-  { id: "2", label: "이용할 이유가 없음" },
-  { id: "3", label: "더 나은 서비스 찾음" },
-  { id: "4", label: "개인정보 보안 우려" },
-  { id: "5", label: "기타" },
-];
 
 export default function StoreWithdrawScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedReason, setSelectedReason] = useState<string | null>(null);
-  const [reasonDetail, setReasonDetail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitReason = () => {
-    if (!selectedReason) {
-      if (Platform.OS === "web") {
-        window.alert("탈퇴 이유를 선택해주세요.");
-      } else {
-        Alert.alert("필수 입력", "탈퇴 이유를 선택해주세요.");
-      }
-      return;
-    }
-    if (selectedReason === "5" && !reasonDetail.trim()) {
-      if (Platform.OS === "web") {
-        window.alert("상세 이유를 입력해주세요.");
-      } else {
-        Alert.alert("필수 입력", "상세 이유를 입력해주세요.");
-      }
-      return;
-    }
-
     if (Platform.OS === "web") {
       const confirmed = window.confirm("정말 탈퇴하시겠어요?");
       if (confirmed) {
@@ -55,8 +27,8 @@ export default function StoreWithdrawScreen() {
       }
     } else {
       Alert.alert("회원 탈퇴", "정말 탈퇴하시겠어요?", [
-        { text: "취소", style: "cancel" },
         { text: "탈퇴", onPress: handleWithdraw, style: "destructive" },
+        { text: "취소", style: "cancel" },
       ]);
     }
   };
@@ -82,15 +54,7 @@ export default function StoreWithdrawScreen() {
         return;
       }
 
-      const reason =
-        WITHDRAW_REASONS.find((r) => r.id === selectedReason)?.label || "";
-      const finalReason =
-        selectedReason === "5" && reasonDetail.trim() ? reasonDetail : reason;
-
-      const response = await apiPost("/store/withdraw", {
-        storeCode,
-        reason: finalReason,
-      });
+      const response = await apiDelete(`/store/app/withdraw/${storeCode}`);
 
       if (!response.ok) {
         throw new Error("회원 탈퇴에 실패했습니다.");
@@ -109,29 +73,24 @@ export default function StoreWithdrawScreen() {
       setIsLoading(false);
 
       if (Platform.OS === "web") {
-        window.alert(message || "탈퇴가 완료되었습니다.");
+        window.alert(
+          message || "탈퇴가 완료되었습니다. 7일 이내에 복구 가능합니다.",
+        );
         router.replace("/(auth)/login");
       } else {
-        Alert.alert("안내", message || "탈퇴가 완료되었습니다.", [
-          { text: "확인", onPress: () => router.replace("/(auth)/login") },
-        ]);
+        Alert.alert(
+          "안내",
+          message || "탈퇴가 완료되었습니다. 7일 이내에 복구 가능합니다.",
+          [{ text: "확인", onPress: () => router.replace("/(auth)/login") }],
+        );
       }
     } catch (error) {
       setIsLoading(false);
       console.error("회원 탈퇴 오류:", error);
       if (Platform.OS === "web") {
-        window.alert(
-          error instanceof Error
-            ? error.message
-            : "탈퇴 처리 중 오류가 발생했습니다.",
-        );
+        window.alert("탈퇴 처리 중 오류가 발생했습니다.");
       } else {
-        Alert.alert(
-          "오류",
-          error instanceof Error
-            ? error.message
-            : "탈퇴 처리 중 오류가 발생했습니다.",
-        );
+        Alert.alert("오류", "탈퇴 처리 중 오류가 발생했습니다.");
       }
     }
   };
@@ -157,60 +116,6 @@ export default function StoreWithdrawScreen() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>탈퇴 이유</Text>
-
-          <Text style={styles.description}>
-            서비스를 이용하지 않는 이유가 무엇인가요? 더 나은 서비스를 제공하기
-            위해 의견을 듣고 싶습니다.
-          </Text>
-
-          <View style={styles.reasonContainer}>
-            {WITHDRAW_REASONS.map((reason) => (
-              <TouchableOpacity
-                key={reason.id}
-                style={styles.reasonOption}
-                onPress={() => setSelectedReason(reason.id)}
-              >
-                <View
-                  style={[
-                    styles.radioButton,
-                    selectedReason === reason.id && styles.radioButtonSelected,
-                  ]}
-                >
-                  {selectedReason === reason.id && (
-                    <View style={styles.radioButtonInner} />
-                  )}
-                </View>
-                <Text
-                  style={[
-                    styles.reasonLabel,
-                    selectedReason === reason.id && styles.reasonLabelSelected,
-                  ]}
-                >
-                  {reason.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {selectedReason === "5" && (
-            <View style={styles.detailSection}>
-              <Text style={styles.detailLabel}>상세 이유</Text>
-              <TextInput
-                style={styles.detailInput}
-                placeholder="탈퇴 이유를 입력해주세요"
-                placeholderTextColor="#ccc"
-                value={reasonDetail}
-                onChangeText={setReasonDetail}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-              />
-            </View>
-          )}
-        </View>
-
         <View style={styles.warningSection}>
           <View style={styles.warningTitleContainer}>
             <Ionicons
@@ -253,7 +158,7 @@ export default function StoreWithdrawScreen() {
       </View>
 
       {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
