@@ -225,21 +225,21 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
                     {item.productName}
                   </Text>
                   <View style={bannerStyles.priceContainer}>
-                    {item.discount && (
+                    {item?.discount != null && (
                       <View style={bannerStyles.discountBadge}>
                         <Text style={bannerStyles.discountText}>
                           {item.saleType === "할인가" ? "약 " : ""}
-                          {item.discount}%
+                          {item.price == 0 ? 100 : item.discount}%
                         </Text>
                       </View>
                     )}
                     <View style={bannerStyles.priceWrapper}>
-                      {item.originalPrice && (
+                      {item?.originalPrice != null && (
                         <Text style={bannerStyles.originalPrice}>
                           {item.originalPrice.toLocaleString()}원
                         </Text>
                       )}
-                      {item.price && (
+                      {item?.price != null && (
                         <Text style={bannerStyles.price}>
                           {item.price.toLocaleString()}원
                         </Text>

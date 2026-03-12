@@ -1,5 +1,5 @@
 import { apiPut } from "@/utils/api";
-import { getFcmTokenSilently } from "@/utils/notificationUtil";
+import { permitCheck } from "@/utils/notificationUtil";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Stack } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -13,7 +13,7 @@ export default function CustLayout() {
       // background/inactive → active (설정에서 돌아올 때)
       if (appState.current !== "active" && nextState === "active") {
         try {
-          const token = await getFcmTokenSilently();
+          const token = await permitCheck();
           if (token) {
             await apiPut("/cust/fcm-token", { fcmToken: token });
           }
