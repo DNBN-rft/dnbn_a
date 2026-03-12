@@ -55,8 +55,9 @@ export default function NotificationSetting() {
             "알림 권한 필요",
             "마케팅 알림을 받으려면 기기 설정에서 알림 권한을 허용해주세요.",
             [
-              { text: "취소", style: "cancel" },
               { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+
             ]
           );
         }
