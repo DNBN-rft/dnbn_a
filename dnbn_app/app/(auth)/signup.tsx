@@ -1,4 +1,5 @@
 import { apiPost } from "@/utils/api";
+import { permitCheck } from "@/utils/notificationUtil";
 import {
   checkDuplicateId,
   handleEmailDomainSelect as handleEmailDomainSelectUtil,
@@ -246,6 +247,9 @@ export default function PracticeView() {
       // 핸드폰번호 조합
       const telNoWithoutHyphen = `${phoneFirst}${phoneMiddle}${phoneLast}`;
 
+      const fcmToken = isMarketingAgreed ? await permitCheck() : null;
+      const pushSet = isMarketingAgreed ? true : false;
+
       const requestBody = {
         email,
         loginId,
@@ -257,6 +261,8 @@ export default function PracticeView() {
         custTelNo: telNoWithoutHyphen,
         custGender,
         custMarketAgreed: isMarketingAgreed,
+        fcmToken,
+        pushSet,
       };
 
       const response = await apiPost("/cust/signup", requestBody);

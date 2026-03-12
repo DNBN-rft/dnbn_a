@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from "@/utils/api";
+import { permitCheck } from "@/utils/notificationUtil";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -6,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
+  Linking,
   Platform,
   Pressable,
   Text,
@@ -19,6 +21,7 @@ export default function NotificationSetting() {
   const insets = useSafeAreaInsets();
   const [appPushEnabled, setAppPushEnabled] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [marketingEnabled, setMarketingEnabled] = useState(false);
 
   // 페이지 로드 시 알림 설정 정보 가져오기
   useEffect(() => {
@@ -33,6 +36,7 @@ export default function NotificationSetting() {
         const data = await response.json();
         setAppPushEnabled(data.pushSet);
         setNotificationEnabled(data.alarmSet);
+        setMarketingEnabled(data.marketAgreed ?? false);
       }
     } catch (error) {
       console.error("알림 설정 정보를 가져오는 중 오류:", error);
@@ -43,9 +47,27 @@ export default function NotificationSetting() {
     try {
       const custCode = await getStorageItem("custCode");
 
+      let fcmToken: string | null = null;
+      if (marketingEnabled) {
+        fcmToken = await permitCheck();
+        if (!fcmToken) {
+          Alert.alert(
+            "알림 권한 필요",
+            "마케팅 알림을 받으려면 기기 설정에서 알림 권한을 허용해주세요.",
+            [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+
+            ]
+          );
+        }
+      }
+
       const response = await apiPost("/cust/alarm", {
         pushSet: appPushEnabled,
         alarmSet: notificationEnabled,
+        marketAgreed: marketingEnabled,
+        fcmToken,
         custCode: custCode,
       });
 
@@ -102,7 +124,7 @@ export default function NotificationSetting() {
 
       <View style={styles.notificationContainer}>
         <View style={styles.notificationContent}>
-          <Text>앱 푸시 설정</Text>
+          <Text>푸시 설정(마케팅 수신 여부)</Text>
           <CumtomToggle isOn={appPushEnabled} onToggle={setAppPushEnabled} />
         </View>
         <View style={styles.notificationContent}>

@@ -10,6 +10,7 @@
  */
 import { useStoreSignup } from "@/contexts/StoreSignupContext";
 import { apiPostFormDataWithImage } from "@/utils/api";
+import { permitCheck } from "@/utils/notificationUtil";
 import { buildStoreSignupFormData } from "@/utils/storeSignupFormBuilder";
 import { validateFileInfo } from "@/utils/storeSignupValidation";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +32,7 @@ import { styles } from "./store-signup-file-upload.styles";
 export default function StoreSignupFileUploadScreen() {
   const insets = useSafeAreaInsets();
   const { formData, updateFileUpload, resetFormData } = useStoreSignup();
-  const { fileUpload, memberInfo, bizInfo, storeInfo } = formData;
+  const { fileUpload, memberInfo, bizInfo, storeInfo, agreement } = formData;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -152,11 +153,16 @@ export default function StoreSignupFileUploadScreen() {
     setIsSubmitting(true);
 
     try {
+      const fcmToken = agreement.marketing ? await permitCheck() : null;
+      const pushSet = agreement.marketing ? true : false;
+
       const formData = buildStoreSignupFormData(
         memberInfo,
         bizInfo,
         storeInfo,
         fileUpload,
+        fcmToken,
+        pushSet,
       );
 
       const response = await apiPostFormDataWithImage(

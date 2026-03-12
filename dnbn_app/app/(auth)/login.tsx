@@ -1,5 +1,5 @@
 import { apiPost, apiPut, getSocialLoginUrl } from "@/utils/api";
-import { getFcmToken } from "@/utils/notificationUtil";
+import { permitCheck } from "@/utils/notificationUtil";
 import { clearAuthData, setMultipleItems } from "@/utils/storageUtil";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -199,7 +199,7 @@ export default function LoginScreen() {
           // 서버에 FCM 토큰이 없는 경우에만 발급 시도
           if (data.fcmGranted === false) {
             try {
-              const fcmToken = await getFcmToken();
+              const fcmToken = await permitCheck();
               if (fcmToken) {
                 await apiPut("/cust/fcm-token", { fcmToken: fcmToken });
               }
