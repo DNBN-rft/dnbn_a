@@ -1,6 +1,7 @@
 import CartAddModal from "@/components/modal/CartAddModal";
 import PurchaseModal from "@/components/modal/PurchaseModal";
 import { apiGet, apiPost } from "@/utils/api";
+import { shareProduct } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -192,7 +193,20 @@ export default function ProductDetailScreen() {
           <Text style={styles.title}>상품 상세</Text>
         </View>
         <View style={styles.rightSection}>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() =>
+              productData &&
+              shareProduct({
+                productCode: productData.response.productCode,
+                productNm: productData.response.productNm,
+                storeNm: productData.response.storeNm,
+                price: productData.response.price,
+                imageUrl: productData.response.productImgs?.files?.[0]?.fileUrl,
+                type: "sale",
+              })
+            }
+          >
             <Ionicons name="share-social-outline" size={24} color="#333" />
           </TouchableOpacity>
         </View>
