@@ -39,9 +39,7 @@ export default function PurchaseScreen() {
   const [tempStatus, setTempStatus] = useState<
     "ALL" | "PURCHASE" | "CANCEL" | "REFUND"
   >("ALL");
-  const [tempPeriod, setTempPeriod] = useState<
-    "1M" | "3M" | "6M" | "1Y" | "ALL"
-  >("1M");
+  const [tempPeriod, setTempPeriod] = useState<"1M" | "3M" | "6M" | "1Y" | "ALL">("ALL");
 
   const listRef = useRef<FlatList>(null);
 
@@ -203,7 +201,7 @@ export default function PurchaseScreen() {
           onChangeText={setKeyword}
         />
         <Pressable
-          onPress={() => fetchPurchaseHistoryWithFilter()}
+          onPress={() => fetchPurchaseHistoryWithFilter(status, period, keyword)}
           style={styles.searchButton}
         >
           <Text style={styles.searchButtonText}>검색</Text>
@@ -384,7 +382,7 @@ export default function PurchaseScreen() {
                   style={[
                     styles.filterOptionButton,
                     tempStatus === "PURCHASE" &&
-                      styles.filterOptionButtonActive,
+                    styles.filterOptionButtonActive,
                   ]}
                   onPress={() => setTempStatus("PURCHASE")}
                   activeOpacity={0.7}

@@ -38,7 +38,7 @@ export interface CustNegoCompleteResponse {
   productImg: ProductImage | null;
   storeNm: string;
   productNm: string;
-  requestStatus: "APPROVED" | "REJECTED" | "CANCELED";
+  requestLogStatus: string;
   requestPrice: number;
   originalPrice: number;
 }
@@ -86,7 +86,7 @@ export default function NegoLogListScreen() {
 
       if (response.ok) {
         const data = await response.json();
-
+        console.log(`네고 ${status} 목록:`, data);
         if (status === "CURRENT") {
           setCurrentNegoList(data || []);
         } else {
@@ -235,7 +235,7 @@ export default function NegoLogListScreen() {
       }
     };
 
-    const statusColor = getStatusColor(item.requestStatus);
+    const statusColor = getStatusColor(item.requestLogStatus);
 
     return (
       <View style={styles.itemContainer}>

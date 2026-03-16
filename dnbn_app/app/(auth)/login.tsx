@@ -48,6 +48,7 @@ export default function LoginScreen() {
           custCode,
           isExistLocation,
           isExistCategory,
+          isSocial
         } = params;
 
         console.log("소셜 로그인 성공:", {
@@ -57,6 +58,7 @@ export default function LoginScreen() {
           nickname,
           isExistLocation,
           isExistCategory,
+          isSocial
         });
 
         // 토큰 저장
@@ -175,6 +177,7 @@ export default function LoginScreen() {
             custCode: data.custCode,
             hasLocation: data.isExistLocation,
             hasActCategory: data.isSetActiveCategory,
+            isSocial: data.isSocial,
           });
         }
 
