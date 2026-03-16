@@ -37,10 +37,22 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
 
   // 기본 배너 이미지 목록
   const defaultBanners = [
-    { id: "default-1", uri: require("@/assets/images/mainbanner/dnbn_app.png") },
-    { id: "default-2", uri: require("@/assets/images/mainbanner/dnbn_sale.png") },
-    { id: "default-3", uri: require("@/assets/images/mainbanner/dnbn_app.png") },
-    { id: "default-4", uri: require("@/assets/images/mainbanner/dnbn_sale.png") },
+    {
+      id: "default-1",
+      uri: require("@/assets/images/mainbanner/dnbn_app.png"),
+    },
+    {
+      id: "default-2",
+      uri: require("@/assets/images/mainbanner/dnbn_sale.png"),
+    },
+    {
+      id: "default-3",
+      uri: require("@/assets/images/mainbanner/dnbn_alarm.png"),
+    },
+    {
+      id: "default-4",
+      uri: require("@/assets/images/mainbanner/dnbn_main.png"),
+    },
   ];
 
   const MAX_BANNERS = 5;
