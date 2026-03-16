@@ -98,7 +98,6 @@ export default function ReportPage() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
-      quality: 1,
     });
 
     if (!result.canceled && result.assets[0]) {

@@ -239,8 +239,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   imageViewerImage: {
-    width: "100%",
-    height: "100%",
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
   },
   imageViewerCounter: {
     position: "absolute",
