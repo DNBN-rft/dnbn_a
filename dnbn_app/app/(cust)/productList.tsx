@@ -1,8 +1,15 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./productlist.styles";
 
@@ -25,30 +32,104 @@ interface Product {
   productImg: ProductImage | null;
 }
 
+interface ProductPageResponse {
+  content: Product[];
+  last: boolean;
+  number: number;
+}
+
 export default function ProductListScreen() {
   const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterType>(null);
   const [productList, setProductList] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const flatListRef = useRef<FlatList<Product>>(null);
 
-  // API 호출: 일반상품 목록 불러오기
-  useEffect(() => {
-    const fetchProductList = async () => {
-      try {
-        const response = await apiGet(`/cust/regular`);
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
-        if (response.ok) {
-          const data = await response.json();
-          setProductList(data);
-        } else {
-          console.error("API 요청 실패:", response.status, response.statusText);
-        }
-      } catch (error) {
-        console.error("일반상품 목록 불러오기 실패:", error);
+  const fetchProductList = async (
+    pageNum: number,
+    isRefresh: boolean = false,
+  ) => {
+    if (loadingMore || (pageNum > 0 && !hasMore)) return;
+
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (pageNum === 0) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
       }
-    };
 
-    fetchProductList();
+      const response = await apiGet(`/cust/regular?page=${pageNum}&size=20`);
+
+      if (response.ok) {
+        const data: ProductPageResponse = await response.json();
+        const content = data?.content || [];
+
+        setProductList((prev) =>
+          pageNum === 0
+            ? content
+            : [
+                ...prev,
+                ...content.filter(
+                  (nextItem) =>
+                    !prev.some(
+                      (prevItem) => prevItem.productCode === nextItem.productCode,
+                    ),
+                ),
+              ],
+        );
+
+        setPage(data?.number ?? pageNum);
+        setHasMore(!data?.last);
+      } else {
+        console.error("API 요청 실패:", response.status, response.statusText);
+        if (pageNum === 0) {
+          setProductList([]);
+        }
+      }
+    } catch (error) {
+      console.error("일반상품 목록 불러오기 실패:", error);
+      if (pageNum === 0) {
+        setProductList([]);
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductList(0);
   }, []);
+
+  const handleRefresh = () => {
+    setHasMore(true);
+    setPage(0);
+    fetchProductList(0, true);
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      fetchProductList(page + 1);
+    }
+  };
+
+  const sortedProducts = [...productList];
+  if (activeFilter === "price") {
+    sortedProducts.sort((a, b) => a.price - b.price);
+  } else if (activeFilter === "rating") {
+    sortedProducts.sort((a, b) => b.rate - a.rate);
+  }
 
   return (
     <View style={styles.container}>
@@ -131,13 +212,31 @@ export default function ProductListScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={productList}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#EF7810" />
+          <Text style={styles.loadingText}>일반 상품을 불러오는 중...</Text>
+        </View>
+      ) : (
+        <FlatList
+        ref={flatListRef}
+        data={sortedProducts}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.productCode}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={styles.listFooterLoading}>
+              <ActivityIndicator size="small" color="#EF7810" />
+            </View>
+          ) : null
+        }
         renderItem={({ item }) => (
           <View style={styles.listItemWrapper}>
             <TouchableOpacity
@@ -189,6 +288,14 @@ export default function ProductListScreen() {
           </View>
         )}
       ></FlatList>
+      )}
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />

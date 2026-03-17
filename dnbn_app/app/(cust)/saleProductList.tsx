@@ -47,8 +47,13 @@ interface CustSaleListResponse {
   reviewAvg: number;
 }
 
+interface CustSaleListPageResponse {
+  content: CustSaleListResponse[];
+  last: boolean;
+  number: number;
+}
+
 interface SaleProduct {
-  id: string;
   productCode: string;
   uri: any;
   productName: string;
@@ -78,30 +83,43 @@ export default function SaleProductListScreen() {
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
   const [saleProducts, setSaleProducts] = useState<SaleProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const flatListRef = useRef<import("react-native").FlatList>(null);
 
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  useEffect(() => {
-    fetchSaleProducts();
-  }, []);
+  const fetchSaleProducts = async (
+    pageNum: number,
+    isRefresh: boolean = false,
+  ) => {
+    if (loadingMore || (pageNum > 0 && !hasMore)) return;
 
-  const fetchSaleProducts = async () => {
     try {
-      setLoading(true);
-      const apiUrl =
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (pageNum === 0) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const apiBaseUrl =
         from === "search" ? `/cust/search/sale-list` : `/cust/sales`;
-      const response = await apiGet(apiUrl);
+      const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch sale products");
       }
 
-      const data: CustSaleListResponse[] = await response.json();
+      const data: CustSaleListPageResponse = await response.json();
+      const content = data?.content || [];
 
-      const products: SaleProduct[] = data.map((item, index) => {
+      const products: SaleProduct[] = content.map((item) => {
         // 종료 시간까지 남은 시간 계산 (초 단위)
         const endTime = new Date(item.endDateTime).getTime();
         const now = Date.now();
@@ -125,7 +143,6 @@ export default function SaleProductListScreen() {
             : null;
 
         return {
-          id: index.toString(),
           productCode: item.productCode,
           uri: firstImage?.fileUrl ? { uri: firstImage.fileUrl } : null,
           productName: item.productNm,
@@ -142,12 +159,58 @@ export default function SaleProductListScreen() {
         };
       });
 
-      setSaleProducts(products);
+      setSaleProducts((prev) => {
+        const merged =
+          pageNum === 0
+            ? products
+            : [
+                ...prev,
+                ...products.filter(
+                  (nextItem) =>
+                    !prev.some(
+                      (prevItem) => prevItem.productCode === nextItem.productCode,
+                    ),
+                ),
+              ];
+
+        const initialTimeLeft: { [key: string]: number } = {};
+        merged.forEach((product) => {
+          initialTimeLeft[product.productCode] = product.timeLimitSeconds;
+        });
+        setTimeLeft(initialTimeLeft);
+
+        return merged;
+      });
+      setPage(data?.number ?? pageNum);
+      setHasMore(!data?.last);
     } catch (error) {
       console.error("할인 상품 목록 조회 실패:", error);
-      setSaleProducts([]);
+      if (pageNum === 0) {
+        setSaleProducts([]);
+        setTimeLeft({});
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    setHasMore(true);
+    setPage(0);
+    fetchSaleProducts(0);
+  }, [from]);
+
+  const handleRefresh = () => {
+    setHasMore(true);
+    setPage(0);
+    fetchSaleProducts(0, true);
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      fetchSaleProducts(page + 1);
     }
   };
 
@@ -155,24 +218,18 @@ export default function SaleProductListScreen() {
   useEffect(() => {
     if (saleProducts.length === 0) return;
 
-    // 초기값 설정
-    const initialTimeLeft: { [key: string]: number } = {};
-    saleProducts.forEach((product) => {
-      initialTimeLeft[product.id] = product.timeLimitSeconds;
-    });
-    setTimeLeft(initialTimeLeft);
-
     // 1초마다 업데이트
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         const updated: { [key: string]: number } = {};
         saleProducts.forEach((product) => {
-          const currentTime = prev[product.id] ?? product.timeLimitSeconds;
+          const currentTime =
+            prev[product.productCode] ?? product.timeLimitSeconds;
           // 0이 되면 카운트 중단 (0 유지)
           if (currentTime <= 0) {
-            updated[product.id] = 0;
+            updated[product.productCode] = 0;
           } else {
-            updated[product.id] = currentTime - 1;
+            updated[product.productCode] = currentTime - 1;
           }
         });
         return updated;
@@ -269,11 +326,23 @@ export default function SaleProductListScreen() {
           ref={flatListRef}
           data={getSortedProducts()}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.productCode}
           contentContainerStyle={{ paddingVertical: 8 }}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 16 }}>
+                <ActivityIndicator size="small" color="#FF6B00" />
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => {
             const isExpired =
-              timeLeft[item.id] !== undefined && timeLeft[item.id] <= 0;
+              timeLeft[item.productCode] !== undefined &&
+              timeLeft[item.productCode] <= 0;
 
             return (
               <TouchableOpacity
@@ -291,7 +360,8 @@ export default function SaleProductListScreen() {
                 disabled={isExpired}
               >
                 {/* 시간 제한 배너 */}
-                {item.timeLimitSeconds && timeLeft[item.id] !== undefined && (
+                {item.timeLimitSeconds &&
+                  timeLeft[item.productCode] !== undefined && (
                   <View
                     style={[
                       styles.timeLimitBanner,
@@ -311,7 +381,7 @@ export default function SaleProductListScreen() {
                     >
                       {isExpired
                         ? "등록 시간 만료"
-                        : `남은 시간: ${formatCountdown(timeLeft[item.id])}`}
+                        : `남은 시간: ${formatCountdown(timeLeft[item.productCode])}`}
                     </Text>
                   </View>
                 )}

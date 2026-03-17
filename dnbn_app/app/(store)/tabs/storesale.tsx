@@ -2,7 +2,7 @@ import { apiDelete, apiGet } from "@/utils/api";
 import { formatDateTime } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -55,10 +55,15 @@ interface SaleListResponse {
 
 export default function StoreSale() {
   const insets = useSafeAreaInsets();
+  const flatListRef = useRef<FlatList<SaleItem>>(null);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedProductCode, setSelectedProductCode] = useState<string | null>(null);
   const [saleList, setSaleList] = useState<SaleItem[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const fetchSaleList = async () => {
     setLoading(true);
@@ -141,6 +146,7 @@ export default function StoreSale() {
         </View>
       ) : (
         <FlatList
+          ref={flatListRef}
           contentContainerStyle={{
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
           }}
@@ -227,6 +233,12 @@ export default function StoreSale() {
           )}
         />
       )}
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       <Modal
         visible={deleteModal}

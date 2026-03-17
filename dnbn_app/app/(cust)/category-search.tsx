@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -53,6 +53,11 @@ export default function SearchView() {
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [sortType, setSortType] = useState("LATEST");
+  const flatListRef = useRef<FlatList<SearchProduct>>(null);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const filterOptions = [
     "LATEST",
@@ -202,8 +207,13 @@ export default function SearchView() {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#EF7810" />
             </View>
+          ) : products.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+            </View>
           ) : (
             <FlatList
+              ref={flatListRef}
               data={products}
               keyExtractor={(item) => item.productCode}
               numColumns={2}
@@ -336,6 +346,13 @@ export default function SearchView() {
             </TouchableOpacity>
           </View>
         </Modal>
+
+        <TouchableOpacity
+          style={styles.scrollToTopButton}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#EF7810" />
+        </TouchableOpacity>
       </View>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
