@@ -266,7 +266,6 @@ export default function PracticeView() {
       const telNoWithoutHyphen = `${phoneFirst}${phoneMiddle}${phoneLast}`;
 
       const fcmToken = isMarketingAgreed ? await permitCheck() : null;
-      const pushSet = isMarketingAgreed ? true : false;
 
       const requestBody = {
         email,
@@ -279,7 +278,6 @@ export default function PracticeView() {
         custGender,
         custMarketAgreed: isMarketingAgreed,
         fcmToken,
-        pushSet,
       };
 
       const response = await apiPost("/cust/signup", requestBody);
