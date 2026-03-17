@@ -258,6 +258,20 @@ export default function StoreProducts() {
           <View style={styles.content}>
             <View style={styles.productContainer}>
               <View style={styles.productImageContainer}>
+                {(product.isSale || product.isNego) && (
+                  <View style={styles.imageBadgeOverlay}>
+                    {product.isSale && (
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>할인 중</Text>
+                      </View>
+                    )}
+                    {product.isNego && (
+                      <View style={styles.negoBadge}>
+                        <Text style={styles.negoBadgeText}>네고 중</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
                 {product.images?.files?.[0]?.fileUrl ? (
                   <Image
                     source={{ uri: product.images.files[0].fileUrl }}
@@ -271,20 +285,6 @@ export default function StoreProducts() {
                 )}
               </View>
               <View style={styles.productInfoContainer}>
-                {(product.isSale || product.isNego) && (
-                  <View style={styles.statusBadgeRow}>
-                    {product.isSale && (
-                      <View style={styles.saleBadge}>
-                        <Text style={styles.saleBadgeText}>할인 중</Text>
-                      </View>
-                    )}
-                    {product.isNego && (
-                      <View style={styles.negoBadge}>
-                        <Text style={styles.negoBadgeText}>네고 중</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
                 <View style={styles.categoryTag}>
                   <Text style={styles.categoryName}>{product.categoryNm}</Text>
                 </View>

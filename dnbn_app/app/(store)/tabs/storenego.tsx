@@ -428,7 +428,15 @@ export default function StoreNego() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.negoStatus}</Text>
+                    <Text
+                      style={
+                         item.negoStatus === "진행 중"
+                          ? styles.negoActiveBadge
+                          : styles.negoBeforeBadge
+                      }
+                    >
+                      {item.negoStatus}
+                    </Text>
 
                     <Text
                       numberOfLines={1}

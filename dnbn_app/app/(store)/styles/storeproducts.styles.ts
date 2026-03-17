@@ -87,6 +87,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#f5f5f5",
+    position: "relative",
   },
   productImage: {
     width: "100%",
@@ -116,10 +117,13 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "600",
   },
-  statusBadgeRow: {
+  imageBadgeOverlay: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    zIndex: 2,
     flexDirection: "row",
     gap: 6,
-    marginTop: 4,
   },
   saleBadge: {
     alignSelf: "flex-start",
