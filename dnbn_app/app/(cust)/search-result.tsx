@@ -180,7 +180,7 @@ export default function SearchView() {
         <View style={styles.searchContainer}>
           <View style={styles.searchBarContainer}>
             <TextInput
-              placeholder={"어떤 가게나 메뉴를 검색하고 싶으세요?"}
+              placeholder={"어떤 가게나 상품을 검색하고 싶으세요?"}
               placeholderTextColor="#999"
               style={styles.searchBar}
               value={searchKeyword}

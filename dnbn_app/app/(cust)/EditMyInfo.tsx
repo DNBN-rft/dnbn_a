@@ -28,6 +28,7 @@ export default function EditMyInfoScreen() {
   const [phoneNumber, setPhoneNumber] = useState("02-123-4567");
   const [gender, setGender] = useState("M");
   const [loading, setLoading] = useState(true);
+  const [isSocial, setIsSocial] = useState(false);
 
   // 비밀번호 변경 모달
   const [passwordModalStep, setPasswordModalStep] = useState<
@@ -285,11 +286,18 @@ export default function EditMyInfoScreen() {
     try {
       setLoading(true);
       let custCode = null;
+      let isSocialValue = null;
 
       if (Platform.OS === "web") {
         custCode = localStorage.getItem("custCode");
+        isSocialValue = localStorage.getItem("isSocial");
       } else {
         custCode = await SecureStore.getItemAsync("custCode");
+        isSocialValue = await SecureStore.getItemAsync("isSocial");  
+      }
+
+      if (isSocialValue === "true") {
+        setIsSocial(true);
       }
 
       if (custCode) {
@@ -356,13 +364,15 @@ export default function EditMyInfoScreen() {
             <Text style={styles.helpText}>아이디는 변경할 수 없습니다</Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.passwordChangeButton}
-            onPress={() => setPasswordModalStep("verify")}
-          >
-            <Ionicons name="lock-closed" size={18} color="#EF7810" />
-            <Text style={styles.passwordChangeButtonText}>비밀번호 변경</Text>
-          </TouchableOpacity>
+          {!isSocial && (
+            <TouchableOpacity
+              style={styles.passwordChangeButton}
+              onPress={() => setPasswordModalStep("verify")}
+            >
+              <Ionicons name="lock-closed" size={18} color="#EF7810" />
+              <Text style={styles.passwordChangeButtonText}>비밀번호 변경</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* 사용자 정보수정 */}

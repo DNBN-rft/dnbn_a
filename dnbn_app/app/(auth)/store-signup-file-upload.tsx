@@ -154,7 +154,7 @@ export default function StoreSignupFileUploadScreen() {
 
     try {
       const fcmToken = agreement.marketing ? await permitCheck() : null;
-      const pushSet = agreement.marketing ? true : false;
+      const marketingAgreed = agreement.marketing ? true : false;
 
       const formData = buildStoreSignupFormData(
         memberInfo,
@@ -162,7 +162,7 @@ export default function StoreSignupFileUploadScreen() {
         storeInfo,
         fileUpload,
         fcmToken,
-        pushSet,
+        marketingAgreed,
       );
 
       const response = await apiPostFormDataWithImage(

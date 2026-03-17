@@ -64,7 +64,6 @@ export default function NotificationSetting() {
       }
 
       const response = await apiPost("/cust/alarm", {
-        pushSet: appPushEnabled,
         alarmSet: notificationEnabled,
         marketAgreed: marketingEnabled,
         fcmToken,
