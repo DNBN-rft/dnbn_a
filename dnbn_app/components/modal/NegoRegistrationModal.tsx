@@ -120,6 +120,7 @@ export default function NegoRegistrationModal({
           >
             <View style={styles.saleModalHeader}>
               <Text style={styles.saleModalTitle}>네고 등록</Text>
+              <Text style={styles.helperText}>고객이 흥정(에누리) 요청하면, 수락 여부를 직접 결정할 수 있습니다.</Text>
             </View>
 
             <View style={styles.saleInputGroup}>

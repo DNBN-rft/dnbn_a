@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   saleModalHeader: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
@@ -36,6 +36,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#1F2937",
+  },
+  helperText: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    marginTop: 6,
+    lineHeight: 18,
   },
   saleLabel: {
     fontSize: 13,
