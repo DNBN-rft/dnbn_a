@@ -3,7 +3,7 @@ import NegoRegistrationModal from "@/components/modal/NegoRegistrationModal";
 import { apiDelete, apiGet, apiPost } from "@/utils/api";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -41,6 +41,7 @@ interface File {
 
 export default function StoreProducts() {
   const insets = useSafeAreaInsets();
+  const flatListRef = useRef<FlatList<ProductItem>>(null);
   const [detailModal, setDetailModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedProductCode, setSelectedProductCode] = useState<string | null>(
@@ -51,9 +52,12 @@ export default function StoreProducts() {
 
   // API 연동용 state
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage] = useState(0);
   const [limitTime, setLimitTime] = useState<number>(24);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   // 성공 메시지 표시 (웹/앱 분기 처리)
   const showSuccessMessage = (message: string) => {
@@ -87,7 +91,6 @@ export default function StoreProducts() {
   // 상품 목록 조회 함수
   const loadProducts = useCallback(async (page: number = currentPage) => {
     try {
-      setIsLoading(true);
       const response = await apiGet(`/store/app/product?page=${page}&size=10`);
       if (response.ok) {
         const data = await response.json();
@@ -99,10 +102,8 @@ export default function StoreProducts() {
       }
     } catch (error) {
       console.error("상품 목록 로드 오류:", error);
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  }, [currentPage]);
 
   // 페이지 변경 시 상품 조회
   useEffect(() => {
@@ -250,6 +251,7 @@ export default function StoreProducts() {
       </View>
 
       <FlatList
+        ref={flatListRef}
         data={products}
         keyExtractor={(item) => item.productCode}
         showsVerticalScrollIndicator={false}
@@ -262,6 +264,20 @@ export default function StoreProducts() {
           <View style={styles.content}>
             <View style={styles.productContainer}>
               <View style={styles.productImageContainer}>
+                {(product.isSale || product.isNego) && (
+                  <View style={styles.imageBadgeOverlay}>
+                    {product.isSale && (
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>할인 중</Text>
+                      </View>
+                    )}
+                    {product.isNego && (
+                      <View style={styles.negoBadge}>
+                        <Text style={styles.negoBadgeText}>네고 중</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
                 {product.images?.files?.[0]?.fileUrl ? (
                   <Image
                     source={{ uri: product.images.files[0].fileUrl }}
@@ -324,6 +340,13 @@ export default function StoreProducts() {
           </View>
         )}
       />
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
 
       <Modal
         visible={detailModal}
@@ -440,7 +463,7 @@ export default function StoreProducts() {
         productPrice={
           selectedProductCode
             ? products.find((p) => p.productCode === selectedProductCode)
-                ?.productPrice
+              ?.productPrice
             : undefined
         }
         onConfirm={async (data) => {

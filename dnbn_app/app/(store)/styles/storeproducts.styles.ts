@@ -87,6 +87,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#f5f5f5",
+    position: "relative",
   },
   productImage: {
     width: "100%",
@@ -114,6 +115,38 @@ export const styles = StyleSheet.create({
   categoryName: {
     fontSize: 11,
     color: "#6B7280",
+    fontWeight: "600",
+  },
+  imageBadgeOverlay: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    zIndex: 2,
+    flexDirection: "row",
+    gap: 6,
+  },
+  saleBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FFF3E0",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  saleBadgeText: {
+    fontSize: 11,
+    color: "#EF7810",
+    fontWeight: "600",
+  },
+  negoBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  negoBadgeText: {
+    fontSize: 11,
+    color: "#3B82F6",
     fontWeight: "600",
   },
   productName: {
@@ -423,5 +456,19 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  scrollToTopButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    boxShadow: "0 0 5px rgba(0,0,0,0.2)",
   },
 });

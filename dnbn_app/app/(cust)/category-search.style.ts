@@ -239,6 +239,17 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 50,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 50,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    fontWeight: "500",
+  },
   imageContainer: {
     position: "relative",
     width: "100%",
@@ -281,5 +292,19 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     color: "#999",
     marginLeft: 2,
+  },
+  scrollToTopButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    boxShadow: "0 0 5px rgba(0,0,0,0.2)",
   },
 });
