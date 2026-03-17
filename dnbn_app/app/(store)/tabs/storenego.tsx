@@ -15,15 +15,22 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/storenego.styles";
+import { formatDateTime } from "@/utils/dateUtil";
 
 // 네고 리스트 API 응답 타입 정의
-interface NegoImages {
-  files: string[];
+interface ImageFile {
+  originalName: string;
+  fileUrl: string;
+  order: number;
 }
+
+interface NegoImages {
+  files: ImageFile[];
+}
+
 
 interface NegoListItem {
   negoIdx: number;
-  categoryNm: string;
   images: NegoImages;
   startDateTime: string;
   endDateTime: string;
@@ -407,13 +414,10 @@ export default function StoreNego() {
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  {item.images?.files &&
-                  item.images.files.length > 0 &&
-                  typeof item.images.files[0] === "string" &&
-                  item.images.files[0].trim() !== "" ? (
+                  {item.images?.files && item.images.files.length > 0 && item.images.files[0]?.fileUrl ? (
                     <Image
                       style={styles.productImage}
-                      source={{ uri: item.images.files[0] }}
+                      source={{ uri: item.images.files[0].fileUrl }}
                     />
                   ) : (
                     <View style={[styles.productImage, styles.noImageBox]}>
@@ -424,7 +428,7 @@ export default function StoreNego() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.categoryNm}</Text>
+                    <Text style={styles.categoryText}>{item.negoStatus}</Text>
 
                     <Text
                       numberOfLines={1}
@@ -440,7 +444,13 @@ export default function StoreNego() {
                       {item.productPrice.toLocaleString()}원
                     </Text>
 
-                    <Text style={styles.negoStatusText}>{item.negoStatus}</Text>
+                    <Text style={styles.negoDateText}>
+                      {item.negoStatus === "진행 중"
+                        ? `종료: ${formatDateTime(item.endDateTime)}`
+                        : item.negoStatus === "예정"
+                        ? `시작: ${formatDateTime(item.startDateTime)}`
+                        : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -490,13 +500,10 @@ export default function StoreNego() {
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
                 <View style={styles.negoRequestProductImageContainer}>
-                  {item.images?.files &&
-                  item.images.files.length > 0 &&
-                  typeof item.images.files[0] === "string" &&
-                  item.images.files[0].trim() !== "" ? (
+                  {item.images?.files && item.images.files.length > 0 && item.images.files[0]?.fileUrl ? (
                     <Image
-                      style={styles.negoRequestProductImage}
-                      source={{ uri: item.images.files[0] }}
+                      style={styles.productImage}
+                      source={{ uri: item.images.files[0].fileUrl }}
                     />
                   ) : (
                     <View

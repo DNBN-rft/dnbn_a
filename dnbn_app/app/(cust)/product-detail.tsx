@@ -1,4 +1,5 @@
 import CartAddModal from "@/components/modal/CartAddModal";
+import ProductReportModal from "@/components/modal/ProductReportModal";
 import PurchaseModal from "@/components/modal/PurchaseModal";
 import { apiGet, apiPost } from "@/utils/api";
 import { shareProduct } from "@/utils/kakaoShareUtil";
@@ -65,6 +66,7 @@ export default function ProductDetailScreen() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [cartModalVisible, setCartModalVisible] = useState(false);
   const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const { productCode } = useLocalSearchParams();
 
@@ -228,6 +230,9 @@ export default function ProductDetailScreen() {
             }
           >
             <Ionicons name="share-social-outline" size={24} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.reportButton} onPress={() => setReportModalVisible(true)}>
+            <Ionicons name="alert" size={18} color="#333" />
           </TouchableOpacity>
         </View>
       </View>
@@ -412,7 +417,6 @@ export default function ProductDetailScreen() {
             }}
           >
             <Text style={styles.storeName}>{productData.storeNm}</Text>
-
             <Ionicons name="home-outline" size={16} color="#999" />
           </Pressable>
 
@@ -668,6 +672,14 @@ export default function ProductDetailScreen() {
           stock={productData.productAmount}
           onClose={() => setPurchaseModalVisible(false)}
           onPurchase={handlePurchase}
+        />
+      )}
+
+      {productData && (
+        <ProductReportModal
+          visible={reportModalVisible}
+          onClose={() => setReportModalVisible(false)}
+          productCode={productData.productCode}
         />
       )}
 

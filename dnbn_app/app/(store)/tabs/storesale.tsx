@@ -1,4 +1,5 @@
 import { apiDelete, apiGet } from "@/utils/api";
+import { formatDateTime } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -190,6 +191,13 @@ export default function StoreSale() {
                         {item.discountedPrice.toLocaleString()}원
                       </Text>
                     </View>
+                    <Text style={styles.saleDateText}>
+                      {item.saleStatus === "할인 중"
+                        ? `종료: ${formatDateTime(item.endDateTime)}`
+                        : item.saleStatus === "할인 전"
+                        ? `시작: ${formatDateTime(item.startDateTime)}`
+                        : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
+                    </Text>
                   </View>
                 </View>
               </View>

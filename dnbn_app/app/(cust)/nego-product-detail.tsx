@@ -1,3 +1,4 @@
+import ProductReportModal from "@/components/modal/ProductReportModal";
 import { apiGet, apiPost } from "@/utils/api";
 import { shareProduct } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
@@ -83,6 +84,7 @@ export default function ProductDetailScreen() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -177,6 +179,12 @@ export default function ProductDetailScreen() {
             }
           >
             <Ionicons name="share-social-outline" size={24} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={() => setReportModalVisible(true)}
+          >
+            <Ionicons name="alert" size={18} color="#333" />
           </TouchableOpacity>
         </View>
       </View>
@@ -356,7 +364,6 @@ export default function ProductDetailScreen() {
               }}
             >
               <Text style={styles.storeName}>{product.storeNm}</Text>
-
               <Ionicons name="home-outline" size={16} color="#999" />
             </Pressable>
 
@@ -652,6 +659,14 @@ export default function ProductDetailScreen() {
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+      )}
+
+      {product && (
+        <ProductReportModal
+          visible={reportModalVisible}
+          onClose={() => setReportModalVisible(false)}
+          productCode={product.productCode}
+        />
       )}
     </View>
   );
