@@ -87,7 +87,8 @@
         {
           "nativeAppKey": "bbbf21a6976b000c1889068c4e6564f7"
         }
-      ]
+      ],
+      "expo-tosspayments-webview"
     ],
     "experiments": {
       "typedRoutes": true,
