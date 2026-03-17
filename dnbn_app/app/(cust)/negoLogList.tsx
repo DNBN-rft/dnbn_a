@@ -86,7 +86,6 @@ export default function NegoLogListScreen() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`네고 ${status} 목록:`, data);
         if (status === "CURRENT") {
           setCurrentNegoList(data || []);
         } else {

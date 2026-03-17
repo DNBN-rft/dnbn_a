@@ -1,6 +1,6 @@
 import {
-    shareCommerceTemplate,
-    shareFeedTemplate,
+  shareCommerceTemplate,
+  shareFeedTemplate,
 } from "@react-native-kakao/share";
 import { Alert } from "react-native";
 
@@ -19,7 +19,6 @@ export interface ProductShareParams {
   storeNm: string;
   price: number;
   imageUrl?: string;
-  /** regular: 일반 상품, sale: 할인 상품, nego: 네고 상품 */
   type: ProductShareType;
 }
 
