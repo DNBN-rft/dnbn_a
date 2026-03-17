@@ -534,7 +534,7 @@ export default function OrderPage() {
 
       {/* 하단 플로팅 결제 버튼 (조건부 표시) */}
       {showFloatingButton && (
-        <View style={styles.floatingButtonContainer}>
+        <View style={[styles.floatingButtonContainer, { bottom: insets.bottom }]}>
           <Text style={styles.floatingAgreementText}>
             주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
           </Text>

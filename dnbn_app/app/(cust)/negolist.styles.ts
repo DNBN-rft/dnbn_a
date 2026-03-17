@@ -205,6 +205,7 @@ export const styles = StyleSheet.create({
   scrollToTopButton: {
     position: "absolute",
     right: 20,
+    bottom: 30,
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -213,10 +214,6 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+    boxShadow: "0 0 5px rgba(0,0,0,0.2)",
   },
 });
