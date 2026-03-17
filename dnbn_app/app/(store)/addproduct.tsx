@@ -266,7 +266,6 @@ export default function AddProduct() {
                 일반
               </Text>
             </TouchableOpacity>
-{/* 성인 선택 버튼 - 추후 구현 예정
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -283,7 +282,7 @@ export default function AddProduct() {
                 성인
               </Text>
             </TouchableOpacity>
-*/}
+
           </View>
         </View>
 
@@ -306,7 +305,7 @@ export default function AddProduct() {
                 일반
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={[
                 styles.toggleButton,
                 serviceType === "서비스" && styles.toggleButtonActive,
@@ -321,7 +320,7 @@ export default function AddProduct() {
               >
                 서비스
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 

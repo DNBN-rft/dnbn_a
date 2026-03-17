@@ -167,7 +167,17 @@ export default function StoreSale() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.saleStatus}</Text>
+                    <Text
+                      style={
+                        item.saleStatus === "할인 중"
+                          ? styles.saleActiveBadge
+                          : item.saleStatus === "할인 전"
+                          ? styles.saleBeforeBadge
+                          : styles.categoryText
+                      }
+                    >
+                      {item.saleStatus}
+                    </Text>
 
                     <Text
                       numberOfLines={1}

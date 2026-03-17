@@ -116,6 +116,35 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "600",
   },
+  statusBadgeRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 4,
+  },
+  saleBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FFF3E0",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  saleBadgeText: {
+    fontSize: 11,
+    color: "#EF7810",
+    fontWeight: "600",
+  },
+  negoBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  negoBadgeText: {
+    fontSize: 11,
+    color: "#3B82F6",
+    fontWeight: "600",
+  },
   productName: {
     fontSize: 15,
     fontWeight: "600",

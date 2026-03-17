@@ -271,6 +271,20 @@ export default function StoreProducts() {
                 )}
               </View>
               <View style={styles.productInfoContainer}>
+                {(product.isSale || product.isNego) && (
+                  <View style={styles.statusBadgeRow}>
+                    {product.isSale && (
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>할인 중</Text>
+                      </View>
+                    )}
+                    {product.isNego && (
+                      <View style={styles.negoBadge}>
+                        <Text style={styles.negoBadgeText}>네고 중</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
                 <View style={styles.categoryTag}>
                   <Text style={styles.categoryName}>{product.categoryNm}</Text>
                 </View>
@@ -436,7 +450,7 @@ export default function StoreProducts() {
         productPrice={
           selectedProductCode
             ? products.find((p) => p.productCode === selectedProductCode)
-                ?.productPrice
+              ?.productPrice
             : undefined
         }
         onConfirm={async (data) => {
