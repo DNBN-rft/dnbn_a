@@ -41,6 +41,16 @@ export const formatWebDateInput = (
 };
 
 /**
+ * 남은 초를 'HH:MM:SS' 형식의 카운트다운 문자열로 변환합니다.
+ */
+export const formatCountdown = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+};
+
+/**
  * ISO 날짜 문자열을 'YYYY.MM.DD HH:mm' 형식(24시간제)으로 변환합니다.
  */
 export const formatDateTime = (isoString: string): string => {

@@ -264,7 +264,7 @@ export default function NegoAcceptedScreen() {
       ) : approvedList.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="checkmark-circle-outline" size={60} color="#999" />
-          <Text style={styles.emptyText}>승인된 네고 요청이 없습니다</Text>
+          <Text style={styles.emptyText}>결제 내역이 없습니다</Text>
         </View>
       ) : (
         <>

@@ -1,4 +1,4 @@
-import { apiGet } from "@/utils/api";
+import { apiGet, apiPut } from "@/utils/api";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -14,20 +14,43 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./notifications.styles";
 
-// AlarmType (API에서 한글로 내려옴)
-const AlarmType = {
-  PRODUCT: "주문/픽업",
-  REVIEW: "리뷰",
-  STORE: "관심매장",
-  CS: "고객센터",
-} as const;
+type CustAlarmType =
+  | "결제"
+  | "주문취소"
+  | "주문환불"
+  | "네고 요청"
+  | "네고 요청 승인"
+  | "네고 요청 거절"
+  | "네고 요청 취소"
+  | "리뷰요청"
+  | "리뷰답변"
+  | "관심매장 할인"
+  | "관심매장 네고"
+  | "신고 답변"
+  | "문의 답변";
 
-type AlarmType = (typeof AlarmType)[keyof typeof AlarmType];
+type TabType = "주문/상품" | "리뷰" | "관심매장" | "고객센터";
+
+const TAB_TYPE_MAP: Record<CustAlarmType, TabType> = {
+  결제: "주문/상품",
+  주문취소: "주문/상품",
+  주문환불: "주문/상품",
+  "네고 요청": "주문/상품",
+  "네고 요청 승인": "주문/상품",
+  "네고 요청 거절": "주문/상품",
+  "네고 요청 취소": "주문/상품",
+  리뷰요청: "리뷰",
+  리뷰답변: "리뷰",
+  "관심매장 할인": "관심매장",
+  "관심매장 네고": "관심매장",
+  "신고 답변": "고객센터",
+  "문의 답변": "고객센터",
+};
 
 // Alarm 인터페이스
 interface Alarm {
   custAlarmIdx: number;
-  type: AlarmType;
+  type: CustAlarmType;
   title: string;
   content: string;
   navigationLink: string;
@@ -41,7 +64,7 @@ interface CustAlarmListResponse {
   content: string;
   sendDateTime: string;
   readDateTime: string | null;
-  custAlarmType: AlarmType;
+  custAlarmType: CustAlarmType;
   alarmLink: string;
   custAlarmIdx: number;
 }
@@ -93,20 +116,74 @@ function formatTime(date: Date): string {
   });
 }
 
-function AlarmItemComponent({ alarm }: { alarm: Alarm }) {
-  const handlePress = () => {
-    // alarmLink가 상품 코드라면 상품 상세 페이지로 이동
-    // 예: "PRD_001" -> product-detail 페이지
-    if (alarm.navigationLink.startsWith("PRD_")) {
-      router.push({
-        pathname: "/(cust)/product-detail",
-        params: {
-          productCode: alarm.navigationLink,
-        },
-      });
-    } else {
-      // 기타 경로는 그대로 사용
-      router.push(alarm.navigationLink as any);
+function AlarmItemComponent({
+  alarm,
+  onRead,
+}: {
+  alarm: Alarm;
+  onRead: (custAlarmIdx: number) => void;
+}) {
+  const handlePress = async () => {
+    if (!alarm.isRead) {
+      await onRead(alarm.custAlarmIdx);
+    }
+
+    switch (alarm.type) {
+      case "결제":
+      case "주문취소":
+      case "주문환불":
+        router.push({
+          pathname: "/(cust)/orderDetail",
+          params: { orderCode: alarm.navigationLink },
+        });
+        break;
+
+      case "네고 요청":
+        router.push("/(cust)/negoList");
+        break;
+
+      case "네고 요청 승인":
+      case "네고 요청 거절":
+      case "네고 요청 취소":
+        router.push("/(cust)/negoLogList");
+        break;
+
+      case "리뷰요청":
+        router.push("/(cust)/review");
+        break;
+
+      case "리뷰답변":
+        router.push({
+          pathname: "/(cust)/reviewDetail",
+          params: { reviewIdx: alarm.navigationLink },
+        });
+        break;
+
+      case "관심매장 할인":
+      case "관심매장 네고":
+        router.push({
+          pathname: "/(cust)/storeInfo",
+          params: { storeCode: alarm.navigationLink },
+        });
+        break;
+
+      case "문의 답변":
+        if (alarm.navigationLink) {
+          router.push({
+            pathname: "/(cust)/question-answer",
+            params: { questionId: alarm.navigationLink },
+          });
+        } else {
+          router.push("/(cust)/faqList");
+        }
+        break;
+
+      case "신고 답변":
+        router.push("/(cust)/faqList");
+        break;
+
+      default:
+        break;
     }
   };
 
@@ -142,7 +219,7 @@ function mapResponseToAlarm(response: CustAlarmListResponse): Alarm {
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedTab, setSelectedTab] = useState<AlarmType>(AlarmType.PRODUCT);
+  const [selectedTab, setSelectedTab] = useState<TabType>("주문/상품");
   const [notifications, setNotifications] = useState<Alarm[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -210,16 +287,36 @@ export default function NotificationsScreen() {
     }
   };
 
+  const handleReadAlarm = async (custAlarmIdx: number) => {
+    try {
+      const response = await apiPut(
+        `/cust/alarm/read?custAlarmIdx=${custAlarmIdx}`,
+        null,
+      );
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.map((alarm) =>
+            alarm.custAlarmIdx === custAlarmIdx
+              ? { ...alarm, isRead: true }
+              : alarm,
+          ),
+        );
+      }
+    } catch (error) {
+      console.error("알림 읽음 처리 실패:", error);
+    }
+  };
+
   const filteredNotifications = notifications.filter(
-    (alarm) => alarm.type === selectedTab,
+    (alarm) => TAB_TYPE_MAP[alarm.type] === selectedTab,
   );
 
-  const tabs = [
-    { id: AlarmType.PRODUCT, label: "주문/픽업" },
-    { id: AlarmType.STORE, label: "관심매장" },
-    { id: AlarmType.REVIEW, label: "리뷰" },
-    { id: AlarmType.CS, label: "고객센터" },
-  ] as const;
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "주문/상품", label: "주문/상품" },
+    { id: "리뷰", label: "리뷰" },
+    { id: "관심매장", label: "관심매장" },
+    { id: "고객센터", label: "고객센터" },
+  ];
 
   return (
     <View style={styles.container}>
@@ -268,7 +365,9 @@ export default function NotificationsScreen() {
         <FlatList
           data={filteredNotifications}
           keyExtractor={(item) => item.custAlarmIdx.toString()}
-          renderItem={({ item }) => <AlarmItemComponent alarm={item} />}
+          renderItem={({ item }) => (
+            <AlarmItemComponent alarm={item} onRead={handleReadAlarm} />
+          )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={

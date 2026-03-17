@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -13,6 +13,34 @@ import { requestNotificationPermission } from '@/utils/notificationUtil';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 
+/** 카카오 공유 링크 클릭 시 앱이 실행될 때의 딥링크를 처리합니다.
+ *  URL 형식: kakao{nativeAppKey}://kakaolink?screen=XXX&productCode=YYY
+ */
+function handleKakaoDeepLink(url: string) {
+  if (!url.startsWith('kakao')) return;
+  try {
+    const queryString = url.split('?')[1];
+    if (!queryString) return;
+    const params: Record<string, string> = {};
+    queryString.split('&').forEach((pair) => {
+      const [key, value] = pair.split('=');
+      if (key) params[decodeURIComponent(key)] = decodeURIComponent(value ?? '');
+    });
+    const { screen, productCode, storeCode } = params;
+    if (screen === 'product-detail' && productCode) {
+      router.push({ pathname: '/(cust)/product-detail', params: { productCode } });
+    } else if (screen === 'sale-product-detail' && productCode) {
+      router.push({ pathname: '/(cust)/sale-product-detail', params: { productCode } });
+    } else if (screen === 'nego-product-detail' && productCode) {
+      router.push({ pathname: '/(cust)/nego-product-detail', params: { productCode } });
+    } else if (screen === 'storeInfo' && storeCode) {
+      router.push({ pathname: '/(cust)/storeInfo', params: { storeCode } });
+    }
+  } catch (err) {
+    console.error('카카오 딥링크 처리 오류:', err);
+  }
+}
+
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
 
@@ -21,6 +49,19 @@ function RootLayoutContent() {
     setLogoutCallback(() => {
       router.replace('/(auth)/login');
     });
+  }, []);
+
+  // 카카오 공유 딥링크 처리
+  useEffect(() => {
+    // 앱이 종료된 상태에서 딥링크로 진입한 경우
+    Linking.getInitialURL().then((url) => {
+      if (url) handleKakaoDeepLink(url);
+    });
+    // 앱이 백그라운드 상태에서 딥링크로 진입한 경우
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleKakaoDeepLink(url);
+    });
+    return () => subscription.remove();
   }, []);
 
   // 앱 최초 실행 시 알림 권한 1회 요청 + Android 채널 설정
