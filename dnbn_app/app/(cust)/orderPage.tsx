@@ -1,10 +1,11 @@
 import PrivacyConsentModal from "@/components/modal/PrivacyConsentModal";
-import { apiGet } from "@/utils/api";
+import { apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -202,6 +203,51 @@ export default function OrderPage() {
 
   const handlePrivacyInfo = () => {
     setPrivacyModalVisible(true);
+  };
+
+  const handlePayment = async () => {
+    if (!selectedPayment) {
+      Alert.alert("알림", "결제 수단을 선택해주세요.");
+      return;
+    }
+
+    try {
+      // 백엔드에 결제 준비 요청 → paymentUrl 반환
+      const body = isCartMode
+        ? {
+            paymentType: selectedPayment,
+            cartItems: parsedCartStores,
+          }
+        : {
+            paymentType: selectedPayment,
+            productCode,
+            orderQty: Number(orderQty) || 1,
+          };
+
+      const response = await apiPost("/cust/payment/toss/prepare", body);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        Alert.alert("결제 오류", errorData.message || "결제 준비에 실패했습니다.");
+        return;
+      }
+
+      const data = await response.json();
+      const paymentUrl: string = data.paymentUrl;
+
+      if (!paymentUrl) {
+        Alert.alert("결제 오류", "결제 URL을 받아오지 못했습니다.");
+        return;
+      }
+
+      router.push({
+        pathname: "/(cust)/toss-payment-webview" as any,
+        params: { paymentUrl },
+      });
+    } catch (error) {
+      console.error("결제 준비 오류:", error);
+      Alert.alert("결제 오류", "결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleRecommendedProduct = (productCode: string) => {
@@ -478,7 +524,7 @@ export default function OrderPage() {
           <Text style={styles.agreementText}>
             주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
           </Text>
-          <TouchableOpacity style={styles.purchaseButton}>
+          <TouchableOpacity style={styles.purchaseButton} onPress={handlePayment}>
             <Text style={styles.purchaseButtonText}>
               {totalPrice.toLocaleString()}원 결제하기
             </Text>
@@ -492,7 +538,7 @@ export default function OrderPage() {
           <Text style={styles.floatingAgreementText}>
             주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
           </Text>
-          <TouchableOpacity style={styles.floatingButton}>
+          <TouchableOpacity style={styles.floatingButton} onPress={handlePayment}>
             <Text style={styles.floatingButtonText}>
               {totalPrice.toLocaleString()}원 결제하기
             </Text>
