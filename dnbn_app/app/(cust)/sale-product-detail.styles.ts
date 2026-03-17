@@ -28,6 +28,10 @@ export const styles = StyleSheet.create({
   },
   rightSection: {
     flex: 1,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 10,
   },
   backButton: {
     width: 44,
@@ -194,6 +198,17 @@ export const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reportButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#555",
+    justifyContent: "center",
+    alignItems: "center",
   },
   priceAndStockContainer: {
     flexDirection: "row",
