@@ -1,6 +1,6 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -97,7 +97,8 @@ interface NegoRequestLogResponse {
 
 export default function NegoHistory() {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<"product" | "request">("product");
+  const { activeTab: initialTab } = useLocalSearchParams<{ activeTab?: "product" | "request" }>();
+  const [activeTab, setActiveTab] = useState<"product" | "request">(initialTab ?? "product");
 
   // 네고 로그 리스트 상태 (상품 탭)
   const [productList, setProductList] = useState<NegoLogItem[]>([]);
