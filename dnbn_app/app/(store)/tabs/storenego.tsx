@@ -2,7 +2,7 @@ import { apiDelete, apiGet, apiPost } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -101,6 +101,7 @@ interface NegoRequestResponse {
 
 export default function StoreNego() {
   const insets = useSafeAreaInsets();
+  const flatListRef = useRef<FlatList<any>>(null);
   const { tab } = useLocalSearchParams<{ tab?: "list" | "request" }>();
   const [activeTab, setActiveTab] = useState<"list" | "request">("list");
 
@@ -288,6 +289,10 @@ export default function StoreNego() {
     isAccept: boolean;
   } | null>(null);
 
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   // 네고 요청 승인/거절 API 호출
   const handleApprove = async () => {
     if (!selectedRequest) return;
@@ -393,6 +398,7 @@ export default function StoreNego() {
 
       {activeTab === "list" ? (
         <FlatList
+          ref={flatListRef}
           contentContainerStyle={{
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
           }}
@@ -428,7 +434,15 @@ export default function StoreNego() {
 
                 <View style={styles.productInfoContainer}>
                   <View>
-                    <Text style={styles.categoryText}>{item.negoStatus}</Text>
+                    <Text
+                      style={
+                         item.negoStatus === "진행 중"
+                          ? styles.negoActiveBadge
+                          : styles.negoBeforeBadge
+                      }
+                    >
+                      {item.negoStatus}
+                    </Text>
 
                     <Text
                       numberOfLines={1}
@@ -479,6 +493,7 @@ export default function StoreNego() {
         />
       ) : (
         <FlatList
+          ref={flatListRef}
           contentContainerStyle={{
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 60 : 0,
           }}
@@ -574,6 +589,14 @@ export default function StoreNego() {
           )}
         ></FlatList>
       )}
+
+      <TouchableOpacity
+        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        onPress={scrollToTop}
+      >
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
+      </TouchableOpacity>
+
       <Modal
         visible={isModalVisible}
         transparent={true}

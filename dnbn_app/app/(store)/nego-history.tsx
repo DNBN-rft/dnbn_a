@@ -524,10 +524,10 @@ export default function NegoHistory() {
       )}
 
       <TouchableOpacity
-        style={[styles.scrollTopButton, { bottom: insets.bottom + 20 }]}
+        style={[styles.scrollTopButton, { bodttom: insets.bottom + 20 }]}
         onPress={scrollToTop}
       >
-        <Ionicons name="chevron-up" size={24} color="#fff" />
+        <Ionicons name="chevron-up" size={24} color="#EF7810" />
       </TouchableOpacity>
     </View>
   );

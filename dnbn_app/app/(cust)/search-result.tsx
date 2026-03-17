@@ -207,6 +207,10 @@ export default function SearchView() {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#EF7810" />
             </View>
+          ) : products.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+            </View>
           ) : (
             <FlatList
               ref={flatListRef}

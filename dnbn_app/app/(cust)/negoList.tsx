@@ -41,6 +41,12 @@ interface NegoProduct {
   reviewAvg: number;
 }
 
+interface NegoProductPageResponse {
+  content: NegoProduct[];
+  last: boolean;
+  number: number;
+}
+
 interface NegoProductCardProps {
   item: NegoProduct;
   productCode?: string;
@@ -133,46 +139,87 @@ export default function NegoListScreen() {
   const [timeLeft, setTimeLeft] = useState<{ [key: string]: number }>({});
   const [negoProducts, setNegoProducts] = useState<NegoProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const flatListRef = useRef<import("react-native").FlatList>(null);
 
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  // 초기 timeLeft 설정 및 카운트다운
-  useEffect(() => {
-    const fetchNegoProducts = async () => {
-      try {
+  const buildTimeLeftMap = (products: NegoProduct[]) => {
+    const nextTimeLeft: { [key: string]: number } = {};
+    const nowTime = new Date().getTime();
+
+    products.forEach((product) => {
+      const endTime = new Date(product.endDateTime).getTime();
+      nextTimeLeft[product.productCode] = Math.max(
+        0,
+        Math.floor((endTime - nowTime) / 1000),
+      );
+    });
+
+    return nextTimeLeft;
+  };
+
+  const fetchNegoProducts = async (
+    pageNum: number,
+    isRefresh: boolean = false,
+  ) => {
+    if (loadingMore || (pageNum > 0 && !hasMore)) return;
+
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (pageNum === 0) {
         setLoading(true);
-        const apiUrl =
-          from === "search" ? `/cust/search/nego-list` : `/cust/negoproducts`;
-        const response = await apiGet(apiUrl);
-        const data = await response.json();
-
-        setNegoProducts(data);
-
-        // 초기값 설정
-        const initialTimeLeft: { [key: string]: number } = {};
-        data.forEach((product: NegoProduct) => {
-          const endTime = new Date(product.endDateTime).getTime();
-          const nowTime = new Date().getTime();
-          const remainingSeconds = Math.max(
-            0,
-            Math.floor((endTime - nowTime) / 1000),
-          );
-          initialTimeLeft[product.productCode] = remainingSeconds;
-        });
-        setTimeLeft(initialTimeLeft);
-      } catch (error) {
-        console.error("협상 상품 목록 조회 실패:", error);
-        setNegoProducts([]);
-      } finally {
-        setLoading(false);
+      } else {
+        setLoadingMore(true);
       }
-    };
 
-    fetchNegoProducts();
-  }, []);
+      const apiBaseUrl =
+        from === "search" ? `/cust/search/nego-list` : `/cust/negoproducts`;
+      const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
+      const data: NegoProductPageResponse = await response.json();
+
+      const content = data?.content || [];
+      const mergedProducts =
+        pageNum === 0
+          ? content
+          : [
+              ...negoProducts,
+              ...content.filter(
+                (newItem) =>
+                  !negoProducts.some(
+                    (prevItem) => prevItem.productCode === newItem.productCode,
+                  ),
+              ),
+            ];
+
+      setNegoProducts(mergedProducts);
+      setTimeLeft(buildTimeLeftMap(mergedProducts));
+      setPage(data?.number ?? pageNum);
+      setHasMore(!data?.last);
+    } catch (error) {
+      console.error("협상 상품 목록 조회 실패:", error);
+      if (pageNum === 0) {
+        setNegoProducts([]);
+        setTimeLeft({});
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    setHasMore(true);
+    setPage(0);
+    fetchNegoProducts(0);
+  }, [from]);
 
   // 카운트다운 타이머
   useEffect(() => {
@@ -191,6 +238,18 @@ export default function NegoListScreen() {
 
     return () => clearInterval(interval);
   }, [negoProducts]);
+
+  const handleRefresh = () => {
+    setHasMore(true);
+    setPage(0);
+    fetchNegoProducts(0, true);
+  };
+
+  const handleLoadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      fetchNegoProducts(page + 1);
+    }
+  };
 
   const getSortedProducts = () => {
     const sorted = [...negoProducts].map((product) => ({
@@ -285,6 +344,17 @@ export default function NegoListScreen() {
           showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.productCode}
           contentContainerStyle={{ paddingVertical: 8 }}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 16 }}>
+                <ActivityIndicator size="small" color="#FF6B00" />
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => {
             const distanceInMeters = item.distanceM;
 
