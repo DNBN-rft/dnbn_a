@@ -13,29 +13,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./notifications.styles";
 
-// AlarmType
-const AlarmType = {
-  ORDER_COMPLETED: "ORDER_COMPLETED",
-  PAYMENT_COMPLETED: "PAYMENT_COMPLETED",
-  NEGO_APPROVED: "NEGO_APPROVED",
-  NEGO_REJECTED: "NEGO_REJECTED",
-  PAYMENT_FAILED: "PAYMENT_FAILED",
-  PICKUP_COMPLETED: "PICKUP_COMPLETED",
-  ORDER_CANCELLED: "ORDER_CANCELLED",
-  ORDER_REFUNDED: "ORDER_REFUNDED",
-  REVIEW_REQUEST: "REVIEW_REQUEST",
-  REVIEW_STORE_ANSWER: "REVIEW_STORE_ANSWER",
-  FAVORITE_STORE_DISCOUNT: "FAVORITE_STORE_DISCOUNT",
-  FAVORITE_STORE_NEGOTIATION: "FAVORITE_STORE_NEGOTIATION",
-  REPORT_ANSWERED: "REPORT_ANSWERED",
-  REPORT_ANSWERED_MODIFIED: "REPORT_ANSWERED_MODIFIED",
-  QUESTION_ANSWERED: "QUESTION_ANSWERED",
-  QUESTION_ANSWERED_MODIFIED: "QUESTION_ANSWERED_MODIFIED",
-  NEW_NOTICE: "NEW_NOTICE",
-} as const;
-
-type AlarmType = (typeof AlarmType)[keyof typeof AlarmType];
-
 // Alarm 인터페이스
 interface Alarm {
   alarmIdx: number;
@@ -98,7 +75,68 @@ function AlarmItemComponent({
     if (!isRead) {
       await onRead(alarm.alarmIdx);
     }
-    router.push(alarm.alarmLink as any);
+
+    switch (alarm.alarmType) {
+      case "주문":
+        router.push({
+          pathname: "/(store)/order-detail",
+          params: { orderCode: alarm.alarmLink },
+        });
+        break;
+
+      case "리뷰":
+      case "리뷰신고":
+        router.push({
+          pathname: "/(store)/review-answer",
+          params: { reviewIdx: alarm.alarmLink },
+        });
+        break;
+
+      case "상품신고":
+      case "상품 제재":
+        router.push({
+          pathname: "/(store)/detailproduct",
+          params: { productCode: alarm.alarmLink },
+        });
+        break;
+
+      case "가맹신고":
+        router.push("/(store)/storeinfo");
+        break;
+
+      case "네고":
+        router.push({
+          pathname: "/(store)/nego-history",
+          params: { activeTab: "product" },
+        });
+        break;
+
+      case "네고 요청":
+        router.push({
+          pathname: "/(store)/nego-history",
+          params: { activeTab: "request" },
+        });
+        break;
+
+      case "리뷰 숨김":
+      case "리뷰 요청":
+        router.push("/(store)/review-manage");
+        break;
+
+      case "할인":
+        router.push("/(store)/discounthistory");
+        break;
+
+      case "문의":
+        router.push({
+          pathname: "/(store)/storeQuestion-answer",
+          params: { questionId: alarm.alarmLink },
+        });
+        break;
+
+      default:
+        break;
+    }
   };
 
   return (

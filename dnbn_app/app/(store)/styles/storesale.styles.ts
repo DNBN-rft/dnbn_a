@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
   productInfoContainer: {
     flex: 1,
     justifyContent: "center",
-    gap: 6,
+    gap: 3,
   },
   categoryText: {
     fontSize: 11,
@@ -109,6 +109,11 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     color: "#EF7810",
+  },
+  saleDateText: {
+    fontSize: 11,
+    color: "#888",
+    marginTop: 4,
   },
   buttonContainer: {
     borderTopWidth: 1,

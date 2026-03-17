@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { shareStore } from "@/utils/kakaoShareUtil";
 
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
@@ -116,7 +117,16 @@ export default function StoreDetailPanel({
             <TouchableOpacity style={styles.storeActionBtn}>
               <Ionicons name="heart-outline" size={22} color="#333" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.storeActionBtn}>
+            <TouchableOpacity
+              style={styles.storeActionBtn}
+              onPress={() =>
+                shareStore({
+                  storeCode: selectedStore.storeCode ?? "",
+                  storeNm: selectedStore.name,
+                  imageUrl: selectedStore.imageUrl,
+                })
+              }
+            >
               <Ionicons name="share-social-outline" size={22} color="#333" />
             </TouchableOpacity>
           </View>

@@ -152,7 +152,7 @@ export default function ReportPage() {
             }
 
             const response = await apiPostFormDataWithImage(
-              `/cust/report/register`,
+              `/cust/report/store`,
               formData,
             );
 

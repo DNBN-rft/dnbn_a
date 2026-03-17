@@ -171,6 +171,10 @@ export const styles = StyleSheet.create({
     color: "#EF7810",
     marginTop: 2,
   },
+  negoDateText: {
+    fontSize: 11,
+    color: "#888",
+  },
   requestor: {
     flexDirection: "row",
     gap: 10,

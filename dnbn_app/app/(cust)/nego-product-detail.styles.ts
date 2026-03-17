@@ -28,7 +28,10 @@ export const styles = StyleSheet.create({
   },
   rightSection: {
     flex: 1,
-    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 10,
   },
   backButton: {
     width: 44,
@@ -194,6 +197,17 @@ export const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reportButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#555",
+    justifyContent: "center",
+    alignItems: "center",
   },
   priceAndStockContainer: {
     flexDirection: "row",
@@ -238,6 +252,24 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#777",
     marginLeft: 4,
+  },
+  timeLimitBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingVertical: 7,
+    backgroundColor: "#fff8f2",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0e0d0",
+  },
+  timeLimitBarText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgb(239, 120, 16)",
+  },
+  timeLimitBarTextExpired: {
+    color: "#999",
   },
   tabsContainer: {
     borderTopWidth: 8,
