@@ -2,6 +2,7 @@ import CartAddModal from "@/components/modal/CartAddModal";
 import ProductReportModal from "@/components/modal/ProductReportModal";
 import PurchaseModal from "@/components/modal/PurchaseModal";
 import { apiGet, apiPost } from "@/utils/api";
+import { formatCountdown } from "@/utils/dateUtil";
 import { shareProduct } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -39,6 +40,7 @@ interface ProductImageFile {
 interface SaleProductDetailResponse {
   isSale: boolean;
   discountPrice: number;
+  endDateTime: string;
   response: {
     storeCode: string;
     productCode: string;
@@ -75,6 +77,7 @@ export default function ProductDetailScreen() {
   const [cartModalVisible, setCartModalVisible] = useState(false);
   const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const screenWidth = Dimensions.get("window").width;
@@ -115,6 +118,32 @@ export default function ProductDetailScreen() {
 
     fetchProductDetail();
   }, [productCode]);
+
+  // 종료 시간 카운트다운
+  useEffect(() => {
+    if (!productData?.endDateTime) return;
+
+    const endTime = new Date(productData.endDateTime).getTime();
+    const initialSeconds = Math.max(
+      0,
+      Math.floor((endTime - Date.now()) / 1000),
+    );
+    setTimeLeft(initialSeconds);
+
+    if (initialSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [productData?.endDateTime]);
 
   // 장바구니 추가 핸들러
   const handleAddToCart = async (quantity: number) => {
@@ -211,7 +240,10 @@ export default function ProductDetailScreen() {
           >
             <Ionicons name="share-social-outline" size={24} color="#333" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.reportButton} onPress={() => setReportModalVisible(true)}>
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={() => setReportModalVisible(true)}
+          >
             <Ionicons name="alert" size={18} color="#333" />
           </TouchableOpacity>
         </View>
@@ -315,6 +347,27 @@ export default function ProductDetailScreen() {
                 </View>
               )}
           </View>
+
+          {/* 남은 시간 */}
+          {productData.endDateTime && (
+            <View style={styles.timeLimitBar}>
+              <Ionicons
+                name="time-outline"
+                size={13}
+                color={timeLeft <= 0 ? "#999" : "rgb(239, 120, 16)"}
+              />
+              <Text
+                style={[
+                  styles.timeLimitBarText,
+                  timeLeft <= 0 && styles.timeLimitBarTextExpired,
+                ]}
+              >
+                {timeLeft <= 0
+                  ? "판매 종료"
+                  : `남은 시간: ${formatCountdown(timeLeft)}`}
+              </Text>
+            </View>
+          )}
 
           {/* 이미지 확대 모달 */}
           <Modal
