@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Image, Linking, Pressable, Text, View } from "react-native";
+import { shareStore } from "@/utils/kakaoShareUtil";
 import { styles } from "../storeInfo.styles";
 import type { StoreInfoResponse } from "../types/storeInfo.types";
 
@@ -40,7 +41,16 @@ export function StoreHeader({
 
       {/* 기능 버튼들 */}
       <View style={styles.actionButtonsRow}>
-        <Pressable style={styles.actionButton}>
+        <Pressable
+          style={styles.actionButton}
+          onPress={() =>
+            shareStore({
+              storeCode: storeInfo.storeCode,
+              storeNm: storeInfo.storeNm,
+              imageUrl: storeInfo.storeImage?.files?.[0]?.fileUrl,
+            })
+          }
+        >
           <Ionicons name="share-social-outline" size={24} color="#666" />
           <Text style={styles.actionButtonText}>공유</Text>
         </Pressable>

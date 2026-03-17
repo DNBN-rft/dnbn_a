@@ -254,6 +254,48 @@ export const styles = StyleSheet.create({
     color: "#777",
     marginLeft: 4,
   },
+  timeLimitBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingVertical: 7,
+    backgroundColor: "#fff8f2",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0e0d0",
+  },
+  timeLimitBarText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgb(239, 120, 16)",
+  },
+  timeLimitBarTextExpired: {
+    color: "#999",
+  },
+  timeLimitBanner: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgb(239, 120, 16)",
+    borderRadius: 10,
+  },
+  timeLimitBannerExpired: {
+    backgroundColor: "#f5f5f5",
+    borderColor: "#999",
+  },
+  timeLimitBannerText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "rgb(239, 120, 16)",
+  },
+  timeLimitBannerTextExpired: {
+    color: "#999",
+  },
   tabsContainer: {
     borderTopWidth: 8,
     borderTopColor: "#f5f5f5",

@@ -1,4 +1,5 @@
 import { apiGet } from "@/utils/api";
+import { formatCountdown } from "@/utils/dateUtil";
 import { formatDistance } from "@/utils/distance";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -68,13 +69,6 @@ interface SaleProduct {
   timeLimitSeconds: number;
   saleType: SaleType;
 }
-
-const formatCountdown = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-};
 
 export default function SaleProductListScreen() {
   const insets = useSafeAreaInsets();
