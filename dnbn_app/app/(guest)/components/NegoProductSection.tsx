@@ -51,14 +51,16 @@ export default function NegoProductSection({
                 style={styles.productCard}
                 onPress={() =>
                   router.push(
-                    `/(cust)/nego-product-detail?productCode=${item.id}`,
+                    `/(guest)/nego-product-detail?productCode=${item.id}`,
                   )
                 }
               >
                 {item.uri ? (
                   <Image
                     source={
-                      typeof item.uri === "string" ? { uri: item.uri } : item.uri
+                      typeof item.uri === "string"
+                        ? { uri: item.uri }
+                        : item.uri
                     }
                     style={styles.productImage}
                   />
@@ -66,7 +68,11 @@ export default function NegoProductSection({
                   <View
                     style={[
                       styles.productImage,
-                      { backgroundColor: "#f0f0f0", justifyContent: "center", alignItems: "center" },
+                      {
+                        backgroundColor: "#f0f0f0",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      },
                     ]}
                   >
                     <Ionicons name="image-outline" size={40} color="#ccc" />
@@ -88,7 +94,7 @@ export default function NegoProductSection({
           />
           <TouchableOpacity
             style={styles.arrowButton}
-            onPress={() => router.push("/(cust)/negoList")}
+            onPress={() => router.push("/(guest)/negoList")}
           >
             <Ionicons name="chevron-forward" size={28} color="#666" />
           </TouchableOpacity>

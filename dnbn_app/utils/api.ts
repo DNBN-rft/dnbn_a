@@ -5,7 +5,7 @@ import {
 } from "@/utils/storageUtil";
 //소윤: 180, 형운: 31, 진용: 136
 
-// const API_BASE_URL = "http://192.168.0.31:8080/api";
+// const API_BASE_URL = "http://192.168.0.136:8080/api";
 const API_BASE_URL = "https://dnbn-x5or.onrender.com/api";
 
 // 글로벌 로그아웃 콜백
@@ -143,6 +143,9 @@ const PUBLIC_ENDPOINTS = [
   "/cust/mms/send",
   "/cust/mms/verify",
   "/payment/page",
+  "/guest/negoproducts/home",
+  "/guest/sales/**",
+  "/guest/regular/home",
 ];
 
 /**

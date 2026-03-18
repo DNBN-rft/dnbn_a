@@ -91,7 +91,7 @@ export default function SaleProductSection({
           />
           <TouchableOpacity
             style={styles.arrowButton}
-            onPress={() => router.push("/(cust)/saleProductList")}
+            onPress={() => router.push("/(guest)/saleProductList")}
           >
             <Ionicons name="chevron-forward" size={28} color="#666" />
           </TouchableOpacity>
