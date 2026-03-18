@@ -78,7 +78,7 @@ export default function SearchView() {
 
       // 카테고리: categoryItemList → { categoryIdx, categoryNm, categoryImgUrl }
       const categoriesData =
-        data.categoryItemList?.map((item: any, index: number) => ({
+        data.guestCategoryItemList?.map((item: any, index: number) => ({
           id: String(index + 1),
           categoryId: item.categoryIdx,
           name: item.categoryNm,
