@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./productlist.styles";
 
 type FilterType = "distance" | "price" | "rating" | null;
@@ -53,12 +54,59 @@ export default function ProductListScreen() {
   };
 
   const fetchProductList = async (
-    _pageNum: number,
-    _isRefresh: boolean = false,
+    pageNum: number,
+    isRefresh: boolean = false,
   ) => {
-    setLoading(false);
-    setRefreshing(false);
-    setLoadingMore(false);
+    if (loadingMore || (pageNum > 0 && !hasMore)) return;
+
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else if (pageNum === 0) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await apiGet(`/guest/regular?page=${pageNum}&size=20`);
+
+      if (response.ok) {
+        const data: ProductPageResponse = await response.json();
+        const content = data?.content || [];
+
+        setProductList((prev) =>
+          pageNum === 0
+            ? content
+            : [
+                ...prev,
+                ...content.filter(
+                  (nextItem) =>
+                    !prev.some(
+                      (prevItem) =>
+                        prevItem.productCode === nextItem.productCode,
+                    ),
+                ),
+              ],
+        );
+
+        setPage(data?.number ?? pageNum);
+        setHasMore(!data?.last);
+      } else {
+        console.error("API 요청 실패:", response.status, response.statusText);
+        if (pageNum === 0) {
+          setProductList([]);
+        }
+      }
+    } catch (error) {
+      console.error("일반상품 목록 불러오기 실패:", error);
+      if (pageNum === 0) {
+        setProductList([]);
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+      setLoadingMore(false);
+    }
   };
 
   useEffect(() => {
