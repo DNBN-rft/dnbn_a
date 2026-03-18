@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./saleproductlist.styles";
 
 type SortType = "distance" | "price" | "rating" | "new";
@@ -101,7 +102,22 @@ export default function SaleProductListScreen() {
         setLoadingMore(true);
       }
 
-      const products: SaleProduct[] = [].map((item: CustSaleListResponse) => {
+      const apiBaseUrl =
+        from === "search" ? `/guest/search/sale-list` : `/guest/sales`;
+      const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch sale products");
+      }
+
+      const raw = await response.json();
+      const isArray = Array.isArray(raw);
+      const data: CustSaleListPageResponse | null = isArray ? null : raw;
+      const content: CustSaleListResponse[] = isArray
+        ? raw
+        : raw?.content || [];
+
+      const products: SaleProduct[] = content.map((item) => {
         // 종료 시간까지 남은 시간 계산 (초 단위)
         const endTime = new Date(item.endDateTime).getTime();
         const now = Date.now();
@@ -141,9 +157,37 @@ export default function SaleProductListScreen() {
         };
       });
 
-      setSaleProducts([]);
+      setSaleProducts((prev) => {
+        const merged =
+          pageNum === 0
+            ? products
+            : [
+                ...prev,
+                ...products.filter(
+                  (nextItem) =>
+                    !prev.some(
+                      (prevItem) =>
+                        prevItem.productCode === nextItem.productCode,
+                    ),
+                ),
+              ];
+
+        const initialTimeLeft: { [key: string]: number } = {};
+        merged.forEach((product) => {
+          initialTimeLeft[product.productCode] = product.timeLimitSeconds;
+        });
+        setTimeLeft(initialTimeLeft);
+
+        return merged;
+      });
+      setPage(data?.number ?? pageNum);
+      setHasMore(isArray ? false : !data?.last);
     } catch (error) {
       console.error("할인 상품 목록 조회 실패:", error);
+      if (pageNum === 0) {
+        setSaleProducts([]);
+        setTimeLeft({});
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
