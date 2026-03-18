@@ -76,9 +76,9 @@ export default function SearchView() {
 
       const data = await response.json();
 
-      // 카테고리: categoryItemList → { categoryIdx, categoryNm, categoryImgUrl }
+      // 카테고리: guestCategoryItems → { categoryIdx, categoryNm, categoryImgUrl }
       const categoriesData =
-        data.guestCategoryItemList?.map((item: any, index: number) => ({
+        data.guestCategoryItems?.map((item: any, index: number) => ({
           id: String(index + 1),
           categoryId: item.categoryIdx,
           name: item.categoryNm,
