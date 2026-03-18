@@ -7,18 +7,18 @@ import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Modal,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./product-detail.styles";
 
 interface ProductImage {
@@ -78,8 +78,26 @@ export default function ProductDetailScreen() {
   };
 
   useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        setLoading(true);
+        const response = await apiGet(`/guest/regular/${productCode}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setProductData(data);
+        } else {
+          console.error("상품 조회 실패:", response.status);
+        }
+      } catch (error) {
+        console.error("API 호출 에러:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (productCode) {
-      setLoading(false);
+      fetchProductData();
     }
   }, [productCode]);
 
@@ -374,13 +392,9 @@ export default function ProductDetailScreen() {
 
             <Text style={styles.productName}>{productData.productNm}</Text>
 
-            {productData.isAdult ? (
+            {productData.isAdult && (
               <View style={styles.adultTag}>
-                <Text style={styles.adultTagText}>서비스</Text>
-              </View>
-            ) : (
-              <View style={styles.serviceTag}>
-                <Text style={styles.serviceTagText}>서비스</Text>
+                <Text style={styles.adultTagText}>성인</Text>
               </View>
             )}
           </View>

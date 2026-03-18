@@ -352,29 +352,29 @@ export default function SaleProductListScreen() {
                 {/* 시간 제한 배너 */}
                 {item.timeLimitSeconds &&
                   timeLeft[item.productCode] !== undefined && (
-                  <View
-                    style={[
-                      styles.timeLimitBanner,
-                      isExpired && styles.timeLimitBannerExpired,
-                    ]}
-                  >
-                    <Ionicons
-                      name={isExpired ? "close-circle" : "time"}
-                      size={16}
-                      color={isExpired ? "#999" : "rgb(239, 120, 16)"}
-                    />
-                    <Text
+                    <View
                       style={[
-                        styles.timeLimitBannerText,
-                        isExpired && styles.timeLimitBannerTextExpired,
+                        styles.timeLimitBanner,
+                        isExpired && styles.timeLimitBannerExpired,
                       ]}
                     >
-                      {isExpired
-                        ? "등록 시간 만료"
-                        : `남은 시간: ${formatCountdown(timeLeft[item.productCode])}`}
-                    </Text>
-                  </View>
-                )}
+                      <Ionicons
+                        name={isExpired ? "close-circle" : "time"}
+                        size={16}
+                        color={isExpired ? "#999" : "rgb(239, 120, 16)"}
+                      />
+                      <Text
+                        style={[
+                          styles.timeLimitBannerText,
+                          isExpired && styles.timeLimitBannerTextExpired,
+                        ]}
+                      >
+                        {isExpired
+                          ? "등록 시간 만료"
+                          : `남은 시간: ${formatCountdown(timeLeft[item.productCode])}`}
+                      </Text>
+                    </View>
+                  )}
 
                 {/* 이미지와 정보 */}
                 <View style={styles.productContentRow}>
@@ -397,11 +397,7 @@ export default function SaleProductListScreen() {
                           isExpired && styles.productImageExpired,
                         ]}
                       >
-                        <Ionicons
-                          name="image-outline"
-                          size={50}
-                          color="#ccc"
-                        />
+                        <Ionicons name="image-outline" size={50} color="#ccc" />
                       </View>
                     )}
                     {/* 할인 배지 */}
