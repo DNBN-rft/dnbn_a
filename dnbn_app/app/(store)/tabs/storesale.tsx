@@ -178,8 +178,8 @@ export default function StoreSale() {
                         item.saleStatus === "할인 중"
                           ? styles.saleActiveBadge
                           : item.saleStatus === "할인 전"
-                          ? styles.saleBeforeBadge
-                          : styles.categoryText
+                            ? styles.saleBeforeBadge
+                            : styles.categoryText
                       }
                     >
                       {item.saleStatus}
@@ -211,8 +211,8 @@ export default function StoreSale() {
                       {item.saleStatus === "할인 중"
                         ? `종료: ${formatDateTime(item.endDateTime)}`
                         : item.saleStatus === "할인 전"
-                        ? `시작: ${formatDateTime(item.startDateTime)}`
-                        : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
+                          ? `시작: ${formatDateTime(item.startDateTime)}`
+                          : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
                     </Text>
                   </View>
                 </View>
@@ -233,12 +233,13 @@ export default function StoreSale() {
                         }
                       } else {
                         Alert.alert("알림", message, [
-                          { text: "아니오", style: "cancel" },
                           {
                             text: "네",
                             style: "destructive",
                             onPress: () => handleDelete(item.productCode),
                           },
+                          { text: "아니오", style: "cancel" },
+
                         ]);
                       }
                       return;
