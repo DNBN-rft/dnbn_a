@@ -392,6 +392,18 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
   },
+  detailDropdownContent: {
+    paddingHorizontal: 4,
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  detailDropdownText: {
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
+  },
   actionButtonsContainer: {
     flexDirection: "row",
     padding: 16,
