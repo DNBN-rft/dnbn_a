@@ -373,85 +373,89 @@ export default function OrderPage() {
           </View>
         )}
 
-        {/* 결제 수단 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>결제 수단</Text>
-          {selectedPayment === null ? (
-            <View style={styles.paymentOptionsContainer}>
-              <TouchableOpacity
-                style={styles.paymentOption}
-                onPress={() => setSelectedPayment("account")}
-              >
-                <View style={styles.radioButton}>
-                  <View style={styles.radioButtonOuter} />
-                </View>
-                <Text style={styles.paymentOptionText}>계좌 간편결제</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.paymentOption}
-                onPress={() => setSelectedPayment("card")}
-              >
-                <View style={styles.radioButton}>
-                  <View style={styles.radioButtonOuter} />
-                </View>
-                <Text style={styles.paymentOptionText}>카드 간편결제</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.paymentOption}
-                onPress={() => setSelectedPayment("general")}
-              >
-                <View style={styles.radioButton}>
-                  <View style={styles.radioButtonOuter} />
-                </View>
-                <Text style={styles.paymentOptionText}>일반결제</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.selectedPaymentContainer}>
-              <View style={styles.selectedPaymentHeader}>
-                <View style={styles.radioButton}>
-                  <View style={styles.radioButtonOuter}>
-                    <View style={styles.radioButtonInner} />
+        {/* 결제 수단  - 일단 막아놓았음*/}
+        {false && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>결제 수단</Text>
+            {selectedPayment === null ? (
+              <View style={styles.paymentOptionsContainer}>
+                <TouchableOpacity
+                  style={styles.paymentOption}
+                  onPress={() => setSelectedPayment("account")}
+                >
+                  <View style={styles.radioButton}>
+                    <View style={styles.radioButtonOuter} />
                   </View>
-                </View>
-                <Text style={styles.selectedPaymentText}>
-                  {selectedPayment === "account"
-                    ? "계좌 간편결제"
-                    : selectedPayment === "card"
-                      ? "카드 간편결제"
-                      : "일반결제"}
-                </Text>
+                  <Text style={styles.paymentOptionText}>계좌 간편결제</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.paymentOption}
+                  onPress={() => setSelectedPayment("card")}
+                >
+                  <View style={styles.radioButton}>
+                    <View style={styles.radioButtonOuter} />
+                  </View>
+                  <Text style={styles.paymentOptionText}>카드 간편결제</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.paymentOption}
+                  onPress={() => setSelectedPayment("general")}
+                >
+                  <View style={styles.radioButton}>
+                    <View style={styles.radioButtonOuter} />
+                  </View>
+                  <Text style={styles.paymentOptionText}>일반결제</Text>
+                </TouchableOpacity>
               </View>
+            ) : (
+              <View style={styles.selectedPaymentContainer}>
+                <View style={styles.selectedPaymentHeader}>
+                  <View style={styles.radioButton}>
+                    <View style={styles.radioButtonOuter}>
+                      <View style={styles.radioButtonInner} />
+                    </View>
+                  </View>
+                  <Text style={styles.selectedPaymentText}>
+                    {selectedPayment === "account"
+                      ? "계좌 간편결제"
+                      : selectedPayment === "card"
+                        ? "카드 간편결제"
+                        : "일반결제"}
+                  </Text>
+                </View>
 
-              {/* 수평 스크롤 결제 수단 목록 */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.paymentMethodScroll}
-              >
-                <View style={styles.paymentMethodCard}>
-                  <Text style={styles.paymentMethodText}>결제 수단 1</Text>
-                </View>
-                <View style={styles.paymentMethodCard}>
-                  <Text style={styles.paymentMethodText}>결제 수단 2</Text>
-                </View>
-                <View style={styles.paymentMethodCard}>
-                  <Text style={styles.paymentMethodText}>결제 수단 3</Text>
-                </View>
-              </ScrollView>
+                {/* 수평 스크롤 결제 수단 목록 */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.paymentMethodScroll}
+                >
+                  <View style={styles.paymentMethodCard}>
+                    <Text style={styles.paymentMethodText}>결제 수단 1</Text>
+                  </View>
+                  <View style={styles.paymentMethodCard}>
+                    <Text style={styles.paymentMethodText}>결제 수단 2</Text>
+                  </View>
+                  <View style={styles.paymentMethodCard}>
+                    <Text style={styles.paymentMethodText}>결제 수단 3</Text>
+                  </View>
+                </ScrollView>
 
-              {/* 변경 버튼 */}
-              <TouchableOpacity
-                style={styles.changeButtonContainer}
-                onPress={() => setSelectedPayment(null)}
-              >
-                <Text style={styles.changeButtonText}>다른 결제 수단 선택</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+                {/* 변경 버튼 */}
+                <TouchableOpacity
+                  style={styles.changeButtonContainer}
+                  onPress={() => setSelectedPayment(null)}
+                >
+                  <Text style={styles.changeButtonText}>
+                    다른 결제 수단 선택
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* 개인정보 제공 동의 */}
         <View style={styles.section}>
@@ -460,12 +464,19 @@ export default function OrderPage() {
               <Text style={styles.privacyConsentText}>
                 개인정보 제공 동의 :{" "}
               </Text>
-              <TouchableOpacity style={styles.privacyConsentLinkTouchable} onPress={handlePrivacyInfo}>
-                <Text style={styles.privacyConsentLink} numberOfLines={1} ellipsizeMode="tail">
+              <TouchableOpacity
+                style={styles.privacyConsentLinkTouchable}
+                onPress={handlePrivacyInfo}
+              >
+                <Text
+                  style={styles.privacyConsentLink}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {displayStoreName}
                 </Text>
               </TouchableOpacity>
-              <Text style={styles.privacyConsentText}>{" "}</Text>
+              <Text style={styles.privacyConsentText}> </Text>
               <TouchableOpacity onPress={handlePrivacyInfo}>
                 <Text style={styles.privacyConsentDetail}>상세보기</Text>
               </TouchableOpacity>
@@ -488,7 +499,9 @@ export default function OrderPage() {
 
       {/* 하단 플로팅 결제 버튼 (조건부 표시) */}
       {showFloatingButton && (
-        <View style={[styles.floatingButtonContainer, { bottom: insets.bottom }]}>
+        <View
+          style={[styles.floatingButtonContainer, { bottom: insets.bottom }]}
+        >
           <Text style={styles.floatingAgreementText}>
             주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
           </Text>
