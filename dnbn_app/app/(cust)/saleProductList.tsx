@@ -110,8 +110,10 @@ export default function SaleProductListScreen() {
         throw new Error("Failed to fetch sale products");
       }
 
-      const data: CustSaleListPageResponse = await response.json();
-      const content = data?.content || [];
+      const raw = await response.json();
+      const isArray = Array.isArray(raw);
+      const data: CustSaleListPageResponse | null = isArray ? null : raw;
+      const content: CustSaleListResponse[] = isArray ? raw : (raw?.content || []);
 
       const products: SaleProduct[] = content.map((item) => {
         // 종료 시간까지 남은 시간 계산 (초 단위)
@@ -176,7 +178,7 @@ export default function SaleProductListScreen() {
         return merged;
       });
       setPage(data?.number ?? pageNum);
-      setHasMore(!data?.last);
+      setHasMore(isArray ? false : !data?.last);
     } catch (error) {
       console.error("할인 상품 목록 조회 실패:", error);
       if (pageNum === 0) {

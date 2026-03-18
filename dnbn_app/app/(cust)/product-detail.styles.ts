@@ -346,12 +346,14 @@ export const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
   detailLabel: {
-    width: 100,
+    flex: 1,
     fontSize: 14,
     fontWeight: "600",
     color: "#666",
@@ -359,7 +361,19 @@ export const styles = StyleSheet.create({
   detailValue: {
     flex: 1,
     fontSize: 14,
-    color: "#000",
+    color: "#333",
+  },
+  detailDropdownContent: {
+    paddingHorizontal: 4,
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  detailDropdownText: {
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
   },
   actionButtonsContainer: {
     flexDirection: "row",
