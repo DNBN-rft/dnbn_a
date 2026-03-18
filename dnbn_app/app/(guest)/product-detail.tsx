@@ -7,18 +7,18 @@ import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Modal,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./product-detail.styles";
 
 interface ProductImage {
@@ -78,8 +78,26 @@ export default function ProductDetailScreen() {
   };
 
   useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        setLoading(true);
+        const response = await apiGet(`/guest/regular/${productCode}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setProductData(data);
+        } else {
+          console.error("상품 조회 실패:", response.status);
+        }
+      } catch (error) {
+        console.error("API 호출 에러:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (productCode) {
-      setLoading(false);
+      fetchProductData();
     }
   }, [productCode]);
 

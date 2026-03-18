@@ -52,7 +52,7 @@ export default function SaleProductSection({
                 style={styles.productCard}
                 onPress={() =>
                   router.push(
-                    `/(cust)/sale-product-detail?productCode=${item.id}`,
+                    `/(guest)/sale-product-detail?productCode=${item.id}`,
                   )
                 }
               >

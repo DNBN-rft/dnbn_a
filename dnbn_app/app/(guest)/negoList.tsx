@@ -65,7 +65,7 @@ function NegoProductCard({
     <TouchableOpacity
       style={styles.productItemContainer}
       onPress={() =>
-        router.push(`/(cust)/nego-product-detail?productCode=${code}`)
+        router.push(`/(guest)/nego-product-detail?productCode=${code}`)
       }
       activeOpacity={0.7}
     >

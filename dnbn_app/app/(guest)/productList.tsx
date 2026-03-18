@@ -172,75 +172,75 @@ export default function ProductListScreen() {
         </View>
       ) : (
         <FlatList
-        ref={flatListRef}
-        data={sortedProducts}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => item.productCode}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        contentContainerStyle={styles.listContent}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={styles.listFooterLoading}>
-              <ActivityIndicator size="small" color="#EF7810" />
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <View style={styles.listItemWrapper}>
-            <TouchableOpacity
-              style={styles.productItemContainer}
-              onPress={() =>
-                router.push({
-                  pathname: "/(cust)/product-detail",
-                  params: { productCode: item.productCode },
-                })
-              }
-            >
-              {item.productImg?.fileUrl ? (
-                <Image
-                  resizeMode="stretch"
-                  source={{ uri: item.productImg.fileUrl }}
-                  style={styles.productImage}
-                />
-              ) : (
-                <View style={[styles.productImage, styles.noImageBox]}>
-                  <Ionicons name="image-outline" size={40} color="#ccc" />
-                </View>
-              )}
-              <View style={styles.productInfo}>
-                <Text
-                  style={styles.storeName}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {item.storeNm}
-                </Text>
-                <Text
-                  style={styles.productName}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {item.productNm}
-                </Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.priceText}>
-                    {item.price.toLocaleString()}원
+          ref={flatListRef}
+          data={sortedProducts}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.productCode}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+          contentContainerStyle={styles.listContent}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.listFooterLoading}>
+                <ActivityIndicator size="small" color="#EF7810" />
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <View style={styles.listItemWrapper}>
+              <TouchableOpacity
+                style={styles.productItemContainer}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(guest)/product-detail",
+                    params: { productCode: item.productCode },
+                  })
+                }
+              >
+                {item.productImg?.fileUrl ? (
+                  <Image
+                    resizeMode="stretch"
+                    source={{ uri: item.productImg.fileUrl }}
+                    style={styles.productImage}
+                  />
+                ) : (
+                  <View style={[styles.productImage, styles.noImageBox]}>
+                    <Ionicons name="image-outline" size={40} color="#ccc" />
+                  </View>
+                )}
+                <View style={styles.productInfo}>
+                  <Text
+                    style={styles.storeName}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.storeNm}
+                  </Text>
+                  <Text
+                    style={styles.productName}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item.productNm}
+                  </Text>
+                  <View style={styles.priceContainer}>
+                    <Text style={styles.priceText}>
+                      {item.price.toLocaleString()}원
+                    </Text>
+                  </View>
+                  <Text style={styles.reviewText}>
+                    <Ionicons name="star" size={16} color="#FFD700" />
+                    {item.rate.toFixed(1)}({item.reviewCnt})
                   </Text>
                 </View>
-                <Text style={styles.reviewText}>
-                  <Ionicons name="star" size={16} color="#FFD700" />
-                  {item.rate.toFixed(1)}({item.reviewCnt})
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
-      ></FlatList>
+              </TouchableOpacity>
+            </View>
+          )}
+        ></FlatList>
       )}
 
       <TouchableOpacity

@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { ReviewCard } from "./components/ReviewCard";
 import { styles } from "./nego-product-detail.styles";
 import type { Review } from "./types/storeInfo.types";
@@ -99,7 +100,36 @@ export default function ProductDetailScreen() {
 
   // 백엔드에서 상품 상세 정보 조회
   useEffect(() => {
-    setLoading(false);
+    const fetchProductDetail = async () => {
+      if (!productCode) {
+        setError("등록된 상품 정보가 없습니다.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiGet(`/guest/negoproducts/${productCode}`);
+
+        if (!response.ok) {
+          throw new Error("상품 정보를 불러오는데 실패했습니다.");
+        }
+
+        const data: NegoProductDetailResponse = await response.json();
+        setProductData(data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "알 수 없는 오류가 발생했습니다.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
   }, [productCode]);
 
   // 종료 시간 카운트다운
