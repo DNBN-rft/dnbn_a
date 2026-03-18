@@ -13,9 +13,8 @@
       "icon": "./assets/images/iosIcon.png",
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "카메라 접근 권한이 필요합니다.",
-        "NSPhotoLibraryUsageDescription": "라이브러리 접근 권한이 필요합니다.",
-        "NSPhotoLibraryAddUsageDescription": "라이브러리 접근 권한이 필요합니다.",
+        "NSCameraUsageDescription": "리뷰 작성 시 사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "리뷰 작성, 상품 등록/수정, 가게 정보 수정, 문의·신고 이미지 첨부를 위해 사진 라이브러리 접근 권한이 필요합니다.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.neoclue.dnbnapp"
@@ -49,8 +48,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "라이브러리 접근 권한이 필요합니다.",
-          "cameraPermission": "카메라 접근 권한이 필요합니다."
+          "photosPermission": "리뷰 작성, 상품 등록/수정, 가게 정보 수정, 문의·신고 이미지 첨부를 위해 사진 라이브러리 접근 권한이 필요합니다.",
+          "cameraPermission": "리뷰 작성 시 사진 촬영을 위해 카메라 접근 권한이 필요합니다."
         }
       ],
       [
@@ -69,7 +68,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "지도에서 내 주변 가게를 확인하고 위치 기반 서비스를 이용하기 위해 위치 접근 권한이 필요합니다."
         }
       ],
       "expo-secure-store",
