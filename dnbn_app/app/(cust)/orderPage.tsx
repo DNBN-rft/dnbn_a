@@ -206,10 +206,10 @@ export default function OrderPage() {
   };
 
   const handlePayment = async () => {
-    if (!selectedPayment) {
-      Alert.alert("알림", "결제 수단을 선택해주세요.");
-      return;
-    }
+    // if (!selectedPayment) {
+    //   Alert.alert("알림", "결제 수단을 선택해주세요.");
+    //   return;
+    // }
 
     try {
       // 백엔드에 결제 준비 요청 → paymentUrl 반환
