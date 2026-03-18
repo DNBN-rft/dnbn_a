@@ -182,10 +182,8 @@ export default function NegoListScreen() {
       const apiBaseUrl =
         from === "search" ? `/cust/search/nego-list` : `/cust/negoproducts`;
       const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
-      const raw = await response.json();
-      const isArray = Array.isArray(raw);
-      const data: NegoProductPageResponse | null = isArray ? null : raw;
-      const content: NegoProduct[] = isArray ? raw : (raw?.content || []);
+      const data: NegoProductPageResponse = await response.json();
+      const content: NegoProduct[] = data?.content || [];
       const mergedProducts =
         pageNum === 0
           ? content
@@ -202,7 +200,7 @@ export default function NegoListScreen() {
       setNegoProducts(mergedProducts);
       setTimeLeft(buildTimeLeftMap(mergedProducts));
       setPage(data?.number ?? pageNum);
-      setHasMore(isArray ? false : !data?.last);
+  setHasMore(!data?.last);
     } catch (error) {
       console.error("협상 상품 목록 조회 실패:", error);
       if (pageNum === 0) {

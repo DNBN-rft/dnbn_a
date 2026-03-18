@@ -20,6 +20,7 @@ import {
   getRecentSearches,
   removeRecentSearch,
 } from "../../../utils/recentSearchStorage";
+import { apiGet } from "../../../utils/api";
 import { styles } from "../styles/search.styles";
 
 export default function SearchView() {
@@ -65,7 +66,66 @@ export default function SearchView() {
 
   // 검색 페이지 내부 렌더링 할 데이터 로드
   const fetchSearchData = async () => {
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+      const response = await apiGet("/guest/search");
+
+      if (!response.ok) {
+        throw new Error("데이터 조회에 실패했습니다.");
+      }
+
+      const data = await response.json();
+
+      // 카테고리: categoryItemList → { categoryIdx, categoryNm, categoryImgUrl }
+      const categoriesData =
+        data.categoryItemList?.map((item: any, index: number) => ({
+          id: String(index + 1),
+          categoryId: item.categoryIdx,
+          name: item.categoryNm,
+          icon: item.categoryImgUrl ? { uri: item.categoryImgUrl } : null,
+        })) || [];
+
+      // 할인 상품: guestRecommendSaleItems
+      const discountData =
+        data.guestRecommendSaleItems?.map((item: any) => ({
+          id: item.productCode,
+          uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
+          storeName: item.storeNm,
+          name: item.productNm,
+          originalPrice: item.productPrice,
+          discountValue: item.discountValue,
+          price: item.discountedPrice,
+        })) || [];
+
+      // 네고 상품: guestRecommendNegoItems
+      const negoData =
+        data.guestRecommendNegoItems?.map((item: any) => ({
+          id: item.productCode,
+          uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
+          storeName: item.storeNm,
+          name: item.productNm,
+          price: "협상가능",
+        })) || [];
+
+      // 일반 상품: guestRecommendCommonItems
+      const normalData =
+        data.guestRecommendCommonItems?.map((item: any) => ({
+          id: item.productCode,
+          uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
+          storeName: item.storeNm,
+          name: item.productNm,
+          price: item.productPrice,
+        })) || [];
+
+      setCategories(categoriesData);
+      setDiscountProducts(discountData);
+      setNegoProducts(negoData);
+      setNormalProducts(normalData);
+    } catch (error) {
+      console.error("검색 데이터 조회 오류:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 검색 실행
@@ -211,7 +271,7 @@ export default function SearchView() {
                   <TouchableOpacity
                     onPress={() =>
                       router.push({
-                        pathname: "/(cust)/category-search",
+                        pathname: "/(guest)/category-search",
                         params: {
                           categoryId: item.categoryId,
                         },
@@ -259,7 +319,7 @@ export default function SearchView() {
                         <TouchableOpacity
                           onPress={() =>
                             router.push({
-                              pathname: "/(cust)/saleProductList",
+                              pathname: "/(guest)/saleProductList",
                               params: { from: "search" },
                             })
                           }
@@ -277,7 +337,7 @@ export default function SearchView() {
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
-                            `/(cust)/sale-product-detail?productCode=${item.id}`,
+                            `/(guest)/sale-product-detail?productCode=${item.id}`,
                           )
                         }
                         style={styles.galleryItem}
@@ -346,7 +406,7 @@ export default function SearchView() {
                         <TouchableOpacity
                           onPress={() =>
                             router.push({
-                              pathname: "/(cust)/negoList",
+                              pathname: "/(guest)/negoList",
                               params: { from: "search" },
                             })
                           }
@@ -364,7 +424,7 @@ export default function SearchView() {
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
-                            `/(cust)/nego-product-detail?productCode=${item.id}`,
+                            `/(guest)/nego-product-detail?productCode=${item.id}`,
                           )
                         }
                         style={styles.galleryItem}
@@ -420,7 +480,7 @@ export default function SearchView() {
                     if (item.isMore) {
                       return (
                         <TouchableOpacity
-                          onPress={() => router.push("/(cust)/productList")}
+                          onPress={() => router.push("/(guest)/productList")}
                           style={styles.moreButton}
                         >
                           <Ionicons
@@ -435,7 +495,7 @@ export default function SearchView() {
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
-                            `/(cust)/product-detail?productCode=${item.id}`,
+                            `/(guest)/product-detail?productCode=${item.id}`,
                           )
                         }
                         style={styles.galleryItem}

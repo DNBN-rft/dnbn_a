@@ -1,4 +1,5 @@
 import { formatDistance } from "@/utils/distance";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -65,7 +66,7 @@ function NegoProductCard({
     <TouchableOpacity
       style={styles.productItemContainer}
       onPress={() =>
-        router.push(`/(cust)/nego-product-detail?productCode=${code}`)
+        router.push(`/(guest)/nego-product-detail?productCode=${code}`)
       }
       activeOpacity={0.7}
     >
@@ -178,10 +179,39 @@ export default function NegoListScreen() {
         setLoadingMore(true);
       }
 
-      setNegoProducts([]);
-      setTimeLeft({});
+      const apiBaseUrl =
+        from === "search" ? `/guest/search/nego-list` : `/guest/negoproducts`;
+      const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch nego products");
+      }
+
+      const data: NegoProductPageResponse = await response.json();
+      const content: NegoProduct[] = data?.content || [];
+      const mergedProducts =
+        pageNum === 0
+          ? content
+          : [
+              ...negoProducts,
+              ...content.filter(
+                (newItem) =>
+                  !negoProducts.some(
+                    (prev) => prev.productCode === newItem.productCode,
+                  ),
+              ),
+            ];
+
+      setNegoProducts(mergedProducts);
+      setTimeLeft(buildTimeLeftMap(mergedProducts));
+      setPage(data?.number ?? pageNum);
+      setHasMore(!data?.last);
     } catch (error) {
       console.error("협상 상품 목록 조회 실패:", error);
+      if (pageNum === 0) {
+        setNegoProducts([]);
+        setTimeLeft({});
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

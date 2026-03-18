@@ -1,5 +1,6 @@
 import { formatCountdown } from "@/utils/dateUtil";
 import { formatDistance } from "@/utils/distance";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -101,7 +102,18 @@ export default function SaleProductListScreen() {
         setLoadingMore(true);
       }
 
-      const products: SaleProduct[] = [].map((item: CustSaleListResponse) => {
+      const apiBaseUrl =
+        from === "search" ? `/guest/search/sale-list` : `/guest/sales`;
+      const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch sale products");
+      }
+
+      const data: CustSaleListPageResponse = await response.json();
+      const content: CustSaleListResponse[] = data?.content || [];
+
+      const products: SaleProduct[] = content.map((item) => {
         // 종료 시간까지 남은 시간 계산 (초 단위)
         const endTime = new Date(item.endDateTime).getTime();
         const now = Date.now();
@@ -141,9 +153,32 @@ export default function SaleProductListScreen() {
         };
       });
 
-      setSaleProducts([]);
+      setSaleProducts((prev) => {
+        const merged =
+          pageNum === 0
+            ? products
+            : [
+                ...prev,
+                ...products.filter(
+                  (next) =>
+                    !prev.some((p) => p.productCode === next.productCode),
+                ),
+              ];
+        const initialTimeLeft: { [key: string]: number } = {};
+        merged.forEach((p) => {
+          initialTimeLeft[p.productCode] = p.timeLimitSeconds;
+        });
+        setTimeLeft(initialTimeLeft);
+        return merged;
+      });
+      setPage(data?.number ?? pageNum);
+      setHasMore(!data?.last);
     } catch (error) {
       console.error("할인 상품 목록 조회 실패:", error);
+      if (pageNum === 0) {
+        setSaleProducts([]);
+        setTimeLeft({});
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -307,7 +342,7 @@ export default function SaleProductListScreen() {
                 ]}
                 onPress={() => {
                   router.push({
-                    pathname: "/(cust)/sale-product-detail",
+                    pathname: "/(guest)/sale-product-detail",
                     params: { productCode: item.productCode },
                   });
                 }}

@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -34,13 +34,14 @@ interface SearchResponse {
   totalElements: number;
 }
 
-export default function SearchView() {
+export default function GuestCategorySearchView() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  const categoryId = Number(params.categoryId);
+
   const [searchKeyword, setSearchKeyword] = useState(
     (params.keyword as string) || "",
   );
-  const flatListRef = useRef<import("react-native").FlatList>(null);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [products, setProducts] = useState<SearchProduct[]>([]);
@@ -48,6 +49,11 @@ export default function SearchView() {
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [sortType, setSortType] = useState("LATEST");
+  const flatListRef = useRef<FlatList<SearchProduct>>(null);
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const filterOptions = [
     "LATEST",
@@ -57,8 +63,7 @@ export default function SearchView() {
     "HIGHEST_PRICE",
   ];
 
-  // 정렬 타입에 따른 표시 텍스트
-  const getSortLabel = (sortType: string) => {
+  const getSortLabel = (type: string) => {
     const labels: Record<string, string> = {
       LATEST: "최신순",
       MOST_REVIEWED: "리뷰 많은 순",
@@ -66,43 +71,47 @@ export default function SearchView() {
       LOWEST_PRICE: "낮은 가격 순",
       HIGHEST_PRICE: "높은 가격 순",
     };
-    return labels[sortType] || "최신순";
+    return labels[type] || "최신순";
   };
 
-  // 상품 목록 조회
+  // GET /guest/search/{categoryIdx}?keyword=&productSortType=&page=&size=
   const fetchProducts = async (
-    keyword: string,
-    sort: string = sortType,
-    pg: number = page,
+    searchTerm: string = "",
+    currentPage: number = 0,
+    sortValue: string = "LATEST",
   ) => {
-    if (!keyword.trim()) return;
-
+    if (!categoryId || isNaN(categoryId)) {
+      console.error("유효하지 않은 categoryId:", params.categoryId);
+      return;
+    }
     setLoading(true);
     try {
       const response = await apiGet(
-        `/guest/search/products?keyword=${encodeURIComponent(keyword)}&productSortType=${sort}&page=${pg}&size=15`,
+        `/guest/search/${categoryId}?keyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
       );
 
-      if (!response.ok) {
-        throw new Error("상품 검색 실패: " + response.status);
+      if (response.ok) {
+        const data: SearchResponse = await response.json();
+        // 백엔드 productImaegUrl 오타 대응 및 필드명 매핑
+        const mapped: SearchProduct[] = (data.content || []).map(
+          (item: any) => ({
+            productCode: item.productCode,
+            productImageUrl: item.productImaegUrl || item.productImageUrl || "",
+            storeName: item.storeNm,
+            productName: item.productNm,
+            price: item.price,
+            averageRate: item.avgRate,
+            reviewCount: item.reviewCnt,
+            isNego: item.isNego,
+            isSale: item.isSale,
+          }),
+        );
+        setProducts(mapped);
+        setTotalElements(data.totalElements ?? 0);
+        setPage(data.number ?? currentPage);
+      } else {
+        console.error("상품 검색 실패:", response.status);
       }
-
-      const data: SearchResponse = await response.json();
-      // 백엔드 productImaegUrl 오타 대응: productImaegUrl 필드 사용
-      const mapped: SearchProduct[] = (data.content || []).map((item: any) => ({
-        productCode: item.productCode,
-        productImageUrl: item.productImaegUrl || item.productImageUrl || "",
-        storeName: item.storeNm,
-        productName: item.productNm,
-        price: item.price,
-        averageRate: item.avgRate,
-        reviewCount: item.reviewCnt,
-        isNego: item.isNego,
-        isSale: item.isSale,
-      }));
-      setProducts(mapped);
-      setTotalElements(data.totalElements ?? 0);
-      setPage(data.number ?? pg);
     } catch (error) {
       console.error("상품 검색 오류:", error);
     } finally {
@@ -110,42 +119,22 @@ export default function SearchView() {
     }
   };
 
-  // 페이지가 focus될 때마다 params.keyword로 검색 실행
-  useFocusEffect(
-    useCallback(() => {
-      const keyword = params.keyword as string;
-      if (keyword) {
-        setSearchKeyword(keyword);
-        setSortType("LATEST");
-        setPage(0);
-        // params.keyword로 검색 실행 (초기값으로 명시적 전달)
-        fetchProducts(keyword, "LATEST", 0);
-      }
-    }, [params.keyword]),
-  );
+  useEffect(() => {
+    fetchProducts("", 0, sortType);
+  }, []);
 
-  // 검색 버튼 클릭 (search-result 페이지 내에서)
+  useEffect(() => {
+    const keyword = params.keyword as string;
+    if (keyword && categoryId && !isNaN(categoryId)) {
+      setSearchKeyword(keyword);
+      setSortType("LATEST");
+      fetchProducts(keyword, 0, "LATEST");
+    }
+  }, [params.keyword, params.categoryId]);
+
   const handleSearch = () => {
-    if (!searchKeyword.trim()) return;
-
-    // 정렬 및 페이지 초기화 후 검색
     setSortType("LATEST");
-    setPage(0);
-    // 초기값으로 명시적 전달
-    fetchProducts(searchKeyword, "LATEST", 0);
-  };
-
-  const scrollToTop = () => {
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-  };
-
-  //필터 선택
-  const handleFilterSelect = (value: string) => {
-    setSortType(value);
-    setPage(0);
-    // 필터 변경 시 현재 검색어로 재검색
-    fetchProducts(searchKeyword, value, 0);
-    closeFilterModal();
+    fetchProducts(searchKeyword, 0, "LATEST");
   };
 
   const openFilterModal = () => {
@@ -160,6 +149,12 @@ export default function SearchView() {
     setTimeout(() => {
       setIsOverlayVisible(false);
     }, 300);
+  };
+
+  const handleFilterSelect = (value: string) => {
+    setSortType(value);
+    closeFilterModal();
+    fetchProducts(searchKeyword, 0, value);
   };
 
   return (
@@ -193,12 +188,14 @@ export default function SearchView() {
               style={styles.searchBar}
               value={searchKeyword}
               onChangeText={setSearchKeyword}
+              onSubmitEditing={handleSearch}
             />
             <Pressable style={styles.searchButton} onPress={handleSearch}>
               <Text style={styles.searchButtonText}>검색</Text>
             </Pressable>
           </View>
         </View>
+
         {/* 필터 헤더 */}
         <View style={styles.filterHeader}>
           <Text style={styles.resultCountText}>총 {totalElements}개 상품</Text>
@@ -210,6 +207,7 @@ export default function SearchView() {
             <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.productResultContainer}>
           {loading ? (
             <View style={styles.loadingContainer}>
@@ -300,13 +298,6 @@ export default function SearchView() {
             />
           )}
         </View>
-        {/* 최상단 스크롤 버튼 */}
-        <TouchableOpacity
-          style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
-          onPress={scrollToTop}
-        >
-          <Ionicons name="chevron-up" size={24} color="#EF7810" />
-        </TouchableOpacity>
 
         {/* 필터 모달 */}
         {isOverlayVisible && (
@@ -362,6 +353,13 @@ export default function SearchView() {
             </TouchableOpacity>
           </View>
         </Modal>
+
+        <TouchableOpacity
+          style={styles.scrollToTopButton}
+          onPress={scrollToTop}
+        >
+          <Ionicons name="chevron-up" size={24} color="#EF7810" />
+        </TouchableOpacity>
       </View>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
