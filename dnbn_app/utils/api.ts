@@ -59,6 +59,17 @@ const handle401Response = async (
     isRefreshing = true;
     try {
       const refreshToken = await getStorageItem("refreshToken");
+
+      // 비회원(게스트): refreshToken이 없으면 로그인 리다이렉트 없이 401 반환
+      if (!refreshToken) {
+        processQueue(new Error("No refresh token"), null);
+        isRefreshing = false;
+        return new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
       const userType = await getStorageItem("userType");
       const custCode = await getStorageItem("custCode");
 
