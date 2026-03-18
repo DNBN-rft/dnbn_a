@@ -92,11 +92,11 @@ export default function StoreSale() {
     fetchSaleList();
   }, []);
 
-  const handleDelete = async () => {
-    if (!selectedProductCode) return;
+  const handleDelete = async (productCode: string) => {
+    if (!productCode) return;
 
     try {
-      const response = await apiDelete(`/store/app/sale/${selectedProductCode}`);
+      const response = await apiDelete(`/store/app/sale/${productCode}`);
 
       if (response.ok) {
         Alert.alert("성공", "할인이 삭제되었습니다.");
@@ -178,8 +178,8 @@ export default function StoreSale() {
                         item.saleStatus === "할인 중"
                           ? styles.saleActiveBadge
                           : item.saleStatus === "할인 전"
-                          ? styles.saleBeforeBadge
-                          : styles.categoryText
+                            ? styles.saleBeforeBadge
+                            : styles.categoryText
                       }
                     >
                       {item.saleStatus}
@@ -211,8 +211,8 @@ export default function StoreSale() {
                       {item.saleStatus === "할인 중"
                         ? `종료: ${formatDateTime(item.endDateTime)}`
                         : item.saleStatus === "할인 전"
-                        ? `시작: ${formatDateTime(item.startDateTime)}`
-                        : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
+                          ? `시작: ${formatDateTime(item.startDateTime)}`
+                          : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
                     </Text>
                   </View>
                 </View>
@@ -222,6 +222,29 @@ export default function StoreSale() {
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => {
+                    if (item.saleStatus === "할인 중") {
+                      const message =
+                        "할인이 진행중입니다. 정말로 취소하시겠습니까?";
+
+                      if (Platform.OS === "web") {
+                        const confirmed = window.confirm(message);
+                        if (confirmed) {
+                          handleDelete(item.productCode);
+                        }
+                      } else {
+                        Alert.alert("알림", message, [
+                          {
+                            text: "네",
+                            style: "destructive",
+                            onPress: () => handleDelete(item.productCode),
+                          },
+                          { text: "아니오", style: "cancel" },
+
+                        ]);
+                      }
+                      return;
+                    }
+
                     setSelectedProductCode(item.productCode);
                     setDeleteModal(true);
                   }}
@@ -256,7 +279,11 @@ export default function StoreSale() {
             <View style={styles.deleteModalButtons}>
               <TouchableOpacity
                 style={[styles.deleteModalButton, styles.confirmButton]}
-                onPress={handleDelete}
+                onPress={() => {
+                  if (selectedProductCode) {
+                    handleDelete(selectedProductCode);
+                  }
+                }}
               >
                 <Text style={styles.confirmButtonText}>네</Text>
               </TouchableOpacity>

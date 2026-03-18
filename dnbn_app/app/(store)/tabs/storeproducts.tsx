@@ -54,6 +54,8 @@ export default function StoreProducts() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [currentPage] = useState(0);
   const [limitTime, setLimitTime] = useState<number>(24);
+  const [saleCnt, setSaleCnt] = useState<number>(0);
+  const [negoCnt, setNegoCnt] = useState<number>(0);
 
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -73,7 +75,7 @@ export default function StoreProducts() {
     if (Platform.OS === "web") {
       alert(message);
     } else {
-      Alert.alert("오류", message);
+      Alert.alert("안내", message);
     }
   };
 
@@ -96,6 +98,8 @@ export default function StoreProducts() {
         const data = await response.json();
         const productList = data.products?.content || [];
         setLimitTime(data.limitTime ?? 24);
+        setSaleCnt(data.saleCnt ?? 0);
+        setNegoCnt(data.negoCnt ?? 0);
         setProducts(productList);
       } else {
         console.error("상품 목록 로드 실패:", response.status);
@@ -303,26 +307,59 @@ export default function StoreProducts() {
               </View>
             </View>
             <View style={styles.productButtonContainer}>
+              {(() => {
+                const isSaleDisabled = product.isSale || saleCnt === 0;
+                const isNegoDisabled = product.isNego || negoCnt === 0;
+
+                return (
+                  <>
               <TouchableOpacity
-                style={styles.saleButton}
+                style={[styles.saleButton, isSaleDisabled && styles.disabledActionButton]}
+                disabled={isSaleDisabled}
                 onPress={() => {
                   setSelectedProductCode(product.productCode);
                   setSaleModal(true);
                 }}
               >
-                <Ionicons name="pricetag-outline" size={16} color="#EF7810" />
-                <Text style={styles.saleButtonText}>할인 등록</Text>
+                <Ionicons
+                  name="pricetag-outline"
+                  size={16}
+                  color={isSaleDisabled ? "#9CA3AF" : "#EF7810"}
+                />
+                <Text
+                  style={[
+                    styles.saleButtonText,
+                    isSaleDisabled && styles.disabledActionButtonText,
+                  ]}
+                >
+                  할인 등록
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.negoButton}
+                style={[styles.negoButton, isNegoDisabled && styles.disabledActionButton]}
+                disabled={isNegoDisabled}
                 onPress={() => {
                   setSelectedProductCode(product.productCode);
                   setNegoModal(true);
                 }}
               >
-                <Ionicons name="chatbubble-outline" size={16} color="#4B5563" />
-                <Text style={styles.negoButtonText}>네고 등록</Text>
+                <Ionicons
+                  name="chatbubble-outline"
+                  size={16}
+                  color={isNegoDisabled ? "#9CA3AF" : "#4B5563"}
+                />
+                <Text
+                  style={[
+                    styles.negoButtonText,
+                    isNegoDisabled && styles.disabledActionButtonText,
+                  ]}
+                >
+                  네고 등록
+                </Text>
               </TouchableOpacity>
+                  </>
+                );
+              })()}
               <TouchableOpacity
                 style={styles.moreButton}
                 onPress={() => {

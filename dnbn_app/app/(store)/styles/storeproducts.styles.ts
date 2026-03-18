@@ -205,6 +205,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  disabledActionButton: {
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F3F4F6",
+  },
+  disabledActionButtonText: {
+    color: "#9CA3AF",
+  },
   moreButton: {
     backgroundColor: "#F9FAFB",
     borderColor: "#D1D5DB",
