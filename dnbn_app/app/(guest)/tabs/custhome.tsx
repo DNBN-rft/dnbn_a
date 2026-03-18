@@ -1,6 +1,6 @@
 ﻿import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BannerCarousel from "../components/BannerCarousel";
@@ -8,15 +8,89 @@ import NegoProductSection from "../components/NegoProductSection";
 import RegularProductSection from "../components/RegularProductSection";
 import SaleProductSection from "../components/SaleProductSection";
 import { styles } from "../styles/custhome.styles";
+import { apiGet } from "../../../utils/api";
 
 export default function CustHomeScreen() {
   const insets = useSafeAreaInsets();
   const [loginVisible, setLoginVisible] = useState(false);
 
-  const negoProducts: any[] = [];
-  const saleProducts: any[] = [];
-  const regularProducts: any[] = [];
-  const bannerProducts: any[] = [];
+  const [negoProducts, setNegoProducts] = useState<any[]>([]);
+  const [saleProducts, setSaleProducts] = useState<any[]>([]);
+  const [regularProducts, setRegularProducts] = useState<any[]>([]);
+  const [bannerProducts, setBannerProducts] = useState<any[]>([]);
+  
+  
+    // 페이지가 포커스될 때마다 모든 상품 데이터를 가져오기
+    useFocusEffect(
+      useCallback(() => {
+        const fetchAllProducts = async () => {
+          try {
+            const [negoResponse, saleResponse, regularResponse, bannerResponse] =
+              await Promise.all([
+                apiGet(`/guest/negoproducts/home`),
+                apiGet(`/guest/sales/home`),
+                apiGet(`/guest/regular/home`),
+                apiGet(`/guest/sales/banner`), // 배너용 할인율 높은 상품
+              ]);
+  
+            // 네고 상품 처리
+            try {
+              const negoData = await negoResponse.json();
+              if (negoResponse.ok && Array.isArray(negoData)) {
+                setNegoProducts(negoData);
+              } else {
+                console.error("네고 상품 로드 실패:", negoData);
+              }
+            } catch (error) {
+              console.error("네고 상품 데이터 파싱 실패:", error);
+            }
+  
+            // 할인 상품 처리
+            try {
+              const saleData = await saleResponse.json();
+              if (saleResponse.ok && Array.isArray(saleData)) {
+                setSaleProducts(saleData);
+              } else {
+                console.error("할인 상품 로드 실패:", saleData);
+              }
+            } catch (error) {
+              console.error("할인 상품 데이터 파싱 실패:", error);
+            }
+  
+            // 일반 상품 처리
+            try {
+              const regularData = await regularResponse.json();
+              if (regularResponse.ok && Array.isArray(regularData)) {
+                setRegularProducts(regularData);
+              } else {
+                console.error("일반 상품 로드 실패:", regularData);
+              }
+            } catch (error) {
+              console.error("일반 상품 데이터 파싱 실패:", error);
+            }
+  
+            // 배너 상품 처리
+            try {
+              const bannerData = await bannerResponse.json();
+              if (bannerResponse.ok && Array.isArray(bannerData)) {
+                setBannerProducts(bannerData);
+              } else {
+                console.error("배너 상품 로드 실패:", bannerData);
+              }
+            } catch (error) {
+              console.error("배너 상품 데이터 파싱 실패:", error);
+            }
+          } catch (error) {
+            console.error("상품 API 호출 실패:", error);
+          }
+        };
+  
+        fetchAllProducts();
+      }, []),
+    );
+  
+  
+  
 
   const transformedNegoProducts = negoProducts.map((item) => ({
     id: item.productCode,

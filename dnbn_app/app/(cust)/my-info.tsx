@@ -165,7 +165,7 @@ export default function MyInfoScreen() {
             </View>
           </View>
 
-          {/*결제 정보 */}
+          {/* 결제 정보
           <View style={styles.sectionCard}>
             <Pressable
               style={styles.sectionHeaderPressable}
@@ -194,7 +194,7 @@ export default function MyInfoScreen() {
                 </Text>
               </View>
             </View>
-          </View>
+          </View> */}
 
           {/* 내 위치 */}
           <View style={styles.sectionCard}>

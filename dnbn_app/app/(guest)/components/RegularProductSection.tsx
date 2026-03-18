@@ -50,13 +50,15 @@ export default function RegularProductSection({
               <Pressable
                 style={styles.productCard}
                 onPress={() =>
-                  router.push(`/(cust)/product-detail?productCode=${item.id}`)
+                  router.push(`/(guest)/product-detail?productCode=${item.id}`)
                 }
               >
                 {item.uri ? (
                   <Image
                     source={
-                      typeof item.uri === "string" ? { uri: item.uri } : item.uri
+                      typeof item.uri === "string"
+                        ? { uri: item.uri }
+                        : item.uri
                     }
                     style={styles.productImage}
                   />
@@ -64,7 +66,11 @@ export default function RegularProductSection({
                   <View
                     style={[
                       styles.productImage,
-                      { backgroundColor: "#f0f0f0", justifyContent: "center", alignItems: "center" },
+                      {
+                        backgroundColor: "#f0f0f0",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      },
                     ]}
                   >
                     <Ionicons name="image-outline" size={40} color="#ccc" />
@@ -86,7 +92,7 @@ export default function RegularProductSection({
           />
           <TouchableOpacity
             style={styles.arrowButton}
-            onPress={() => router.push("/(cust)/productList")}
+            onPress={() => router.push("/(guest)/productList")}
           >
             <Ionicons name="chevron-forward" size={28} color="#666" />
           </TouchableOpacity>

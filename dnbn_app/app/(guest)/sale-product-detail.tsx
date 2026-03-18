@@ -9,7 +9,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   FlatList,
   Modal,
@@ -20,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiGet } from "../../utils/api";
 import { styles } from "./sale-product-detail.styles";
 
 interface ReviewItem {
@@ -87,8 +87,63 @@ export default function ProductDetailScreen() {
   };
 
   useEffect(() => {
-    setLoading(false);
+    const fetchProductDetail = async () => {
+      if (!productCode) {
+        setError("등록된 상품 정보가 없습니다.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiGet(`/guest/sales/${productCode}`);
+
+        if (!response.ok) {
+          throw new Error("상품 정보를 불러오는데 실패했습니다.");
+        }
+
+        const data = await response.json();
+        setProductData(data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "알 수 없는 오류가 발생했습니다.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
   }, [productCode]);
+
+  // 종료 시간 카운트다운
+  useEffect(() => {
+    if (!productData?.endDateTime) return;
+
+    const endTime = new Date(productData.endDateTime).getTime();
+    const initialSeconds = Math.max(
+      0,
+      Math.floor((endTime - Date.now()) / 1000),
+    );
+    setTimeLeft(initialSeconds);
+
+    if (initialSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [productData?.endDateTime]);
 
   // 장바구니 추가 핸들러
   const handleAddToCart = async (_quantity: number) => {
@@ -681,4 +736,3 @@ export default function ProductDetailScreen() {
     </View>
   );
 }
-

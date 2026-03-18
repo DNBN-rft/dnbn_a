@@ -211,7 +211,7 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
             onPress={() => {
               if (item.productCode) {
                 router.push({
-                  pathname: "/(cust)/sale-product-detail",
+                  pathname: "/(guest)/sale-product-detail",
                   params: { productCode: item.productCode },
                 });
               }
