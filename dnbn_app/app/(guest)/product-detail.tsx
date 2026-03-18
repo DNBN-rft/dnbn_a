@@ -392,13 +392,9 @@ export default function ProductDetailScreen() {
 
             <Text style={styles.productName}>{productData.productNm}</Text>
 
-            {productData.isAdult ? (
+            {productData.isAdult && (
               <View style={styles.adultTag}>
-                <Text style={styles.adultTagText}>서비스</Text>
-              </View>
-            ) : (
-              <View style={styles.serviceTag}>
-                <Text style={styles.serviceTagText}>서비스</Text>
+                <Text style={styles.adultTagText}>성인</Text>
               </View>
             )}
           </View>

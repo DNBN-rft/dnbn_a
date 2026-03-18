@@ -8,16 +8,16 @@ import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Modal,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./product-detail.styles";
@@ -429,13 +429,9 @@ export default function ProductDetailScreen() {
 
             <Text style={styles.productName}>{productData.productNm}</Text>
 
-            {productData.isAdult ? (
+            {productData.isAdult && (
               <View style={styles.adultTag}>
-                <Text style={styles.adultTagText}>서비스</Text>
-              </View>
-            ) : (
-              <View style={styles.serviceTag}>
-                <Text style={styles.serviceTagText}>서비스</Text>
+                <Text style={styles.adultTagText}>성인</Text>
               </View>
             )}
           </View>
