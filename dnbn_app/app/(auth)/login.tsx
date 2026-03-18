@@ -25,7 +25,9 @@ let initialUrlHandled = false;
 export default function LoginScreen() {
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
-  const [userType, setUserType] = useState<"cust" | "store">(tab === "store" ? "store" : "cust");
+  const [userType, setUserType] = useState<"cust" | "store">(
+    tab === "store" ? "store" : "cust",
+  );
   const insets = useSafeAreaInsets();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +50,7 @@ export default function LoginScreen() {
           custCode,
           isExistLocation,
           isExistCategory,
-          isSocial
+          isSocial,
         } = params;
 
         console.log("소셜 로그인 성공:", {
@@ -58,7 +60,7 @@ export default function LoginScreen() {
           nickname,
           isExistLocation,
           isExistCategory,
-          isSocial
+          isSocial,
         });
 
         // 토큰 저장
@@ -428,6 +430,7 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
+            {/* 소셜 로그인 버튼 (임시 비활성화)
             {userType === "cust" && (
               <View style={styles.snsContainer}>
                 <TouchableOpacity
@@ -444,6 +447,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </View>
             )}
+            */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

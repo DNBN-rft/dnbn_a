@@ -136,7 +136,7 @@ export const fetchNearbyStores = async (
     const response = await apiGet(
       `/map-stores?lat=${latitude}&lng=${longitude}`,
     );
-    if (!response.ok) throw new Error("Failed to fetch nearby stores");
+    if (!response.ok) return [];
     const data = await response.json();
     const stores: Store[] = (data ?? []).map((item: any) => ({
       id: String(item.storeCode),
@@ -151,7 +151,8 @@ export const fetchNearbyStores = async (
       reviewAvg: item.reviewRatioAvg ?? undefined,
       reviewCount: item.reviewCnt ?? undefined,
       category: item.bizType ?? undefined,
-      distance: item.distance ?? calculateDistance(latitude, longitude, item.storeLat, item.storeLng),
+      // 백엔드 distance는 미터(m) 단위, calculateDistance는 km 단위 → m를 km로 변환
+      distance: item.distance != null ? item.distance / 1000 : calculateDistance(latitude, longitude, item.storeLat, item.storeLng),
     }));
     return stores.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   } catch (error) {
@@ -170,7 +171,7 @@ export const fetchStoreDetail = async (
     const response = await apiGet(
       `/map-store/${storeCode}?lat=${latitude}&lng=${longitude}`,
     );
-    if (!response.ok) throw new Error("Failed to fetch store detail");
+    if (!response.ok) return null;
     const item = await response.json();
     return {
       phone: item.storeTelNo ?? undefined,

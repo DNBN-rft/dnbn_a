@@ -1,0 +1,167 @@
+import { Dimensions, StyleSheet } from "react-native";
+
+const screenWidth = Dimensions.get("window").width;
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  addr: {
+    paddingVertical: 6,
+    flexDirection: "row",
+    gap: 30,
+  },
+  addrText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  headerButton: {
+    padding: 6,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF6B6B",
+  },
+  cartBadge: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#EF7810",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  bannerContainer: {
+    height: 370,
+    marginBottom: 30,
+  },
+  bannerSlide: {
+    width: screenWidth,
+    height: 310,
+    overflow: "hidden",
+  },
+  bannerImage: {
+    width: screenWidth,
+    height: 310,
+  },
+  contentSection: {
+    marginBottom: 20,
+  },
+  productListWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  arrowButton: {
+    width: 50,
+    height: 60,
+    marginHorizontal: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+  },
+  sectionHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginLeft: 10,
+    alignItems: "center",
+  },
+  sectionMore: {
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  sectionMoreText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#333",
+  },
+  productCard: {
+    width: 150,
+    marginHorizontal: 8,
+  },
+  productImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  productInfo: {
+    paddingTop: 8,
+    gap: 4,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  storeName: {
+    fontSize: 12,
+    color: "#666",
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  discount: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#ff4444",
+  },
+  price: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  emptyProductContainer: {
+    height: 210,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 16,
+    borderRadius: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 12,
+  },
+});
