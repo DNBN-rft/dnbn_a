@@ -1,4 +1,5 @@
 import { formatDistance } from "@/utils/distance";
+import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +13,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiGet } from "../../utils/api";
 import { styles } from "./negolist.styles";
 
 type SortType = "distance" | "price" | "rating" | "new";
@@ -182,10 +182,13 @@ export default function NegoListScreen() {
       const apiBaseUrl =
         from === "search" ? `/guest/search/nego-list` : `/guest/negoproducts`;
       const response = await apiGet(`${apiBaseUrl}?page=${pageNum}&size=10`);
-      const raw = await response.json();
-      const isArray = Array.isArray(raw);
-      const data: NegoProductPageResponse | null = isArray ? null : raw;
-      const content: NegoProduct[] = isArray ? raw : raw?.content || [];
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch nego products");
+      }
+
+      const data: NegoProductPageResponse = await response.json();
+      const content: NegoProduct[] = data?.content || [];
       const mergedProducts =
         pageNum === 0
           ? content
@@ -194,7 +197,7 @@ export default function NegoListScreen() {
               ...content.filter(
                 (newItem) =>
                   !negoProducts.some(
-                    (prevItem) => prevItem.productCode === newItem.productCode,
+                    (prev) => prev.productCode === newItem.productCode,
                   ),
               ),
             ];
@@ -202,7 +205,7 @@ export default function NegoListScreen() {
       setNegoProducts(mergedProducts);
       setTimeLeft(buildTimeLeftMap(mergedProducts));
       setPage(data?.number ?? pageNum);
-      setHasMore(isArray ? false : !data?.last);
+      setHasMore(!data?.last);
     } catch (error) {
       console.error("협상 상품 목록 조회 실패:", error);
       if (pageNum === 0) {
