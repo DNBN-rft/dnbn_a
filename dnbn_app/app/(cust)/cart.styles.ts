@@ -279,7 +279,7 @@ export const styles = StyleSheet.create({
     color: "#EF7810",
   },
   purchaseButtonContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: "#EF7810",
     paddingVertical: 18,
     alignItems: "center",
     borderRadius: 8,
@@ -297,7 +297,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   purchaseButtonText: {
-    color: "#EF7810",
+    color: "#fff",
     fontSize: 18,
     fontWeight: "700",
   },

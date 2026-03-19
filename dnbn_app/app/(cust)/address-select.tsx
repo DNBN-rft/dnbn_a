@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   BackHandler,
   KeyboardAvoidingView,
@@ -40,6 +41,7 @@ export default function AddressSelectScreen() {
   const [isSelected, setIsSelected] = useState(false);
   const [custCode, setCustCode] = useState("");
   const [isInitialSetup, setIsInitialSetup] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchCustCode = async () => {
@@ -123,6 +125,7 @@ export default function AddressSelectScreen() {
 
   // 주소 저장 또는 수정
   const handleSaveAddress = useCallback(async () => {
+    if (isSaving) return;
     if (!selectedAddress) {
       if (Platform.OS === "web") {
         window.alert("주소를 검색해주세요.");
@@ -141,6 +144,7 @@ export default function AddressSelectScreen() {
     }
 
     try {
+      setIsSaving(true);
       const addressData = {
         custCode: custCode,
         label: addressLabel,
@@ -218,14 +222,15 @@ export default function AddressSelectScreen() {
       } else {
         Alert.alert("오류", errorMessage);
       }
+    } finally {
+      setIsSaving(false);
     }
   }, [
     custCode,
     selectedAddress,
     addressLabel,
     isSelected,
-    isEditMode,
-    params.locationIdx,
+    isEditMode,    isSaving,    params.locationIdx,
   ]);
 
   const handleBack = useCallback(() => {
@@ -348,13 +353,17 @@ export default function AddressSelectScreen() {
           <Pressable
             style={[
               styles.saveButton,
-              (!selectedAddress || !addressLabel.trim()) &&
+              (!selectedAddress || !addressLabel.trim() || isSaving) &&
                 styles.saveButtonDisabled,
             ]}
             onPress={handleSaveAddress}
-            disabled={!selectedAddress || !addressLabel.trim()}
+            disabled={!selectedAddress || !addressLabel.trim() || isSaving}
           >
-            <Text style={styles.saveButtonText}>저장하기</Text>
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#EF7810" />
+            ) : (
+              <Text style={styles.saveButtonText}>저장하기</Text>
+            )}
           </Pressable>
         </View>
       </KeyboardAvoidingView>

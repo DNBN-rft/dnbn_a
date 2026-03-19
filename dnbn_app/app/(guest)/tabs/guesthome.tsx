@@ -7,7 +7,7 @@ import BannerCarousel from "../components/BannerCarousel";
 import NegoProductSection from "../components/NegoProductSection";
 import RegularProductSection from "../components/RegularProductSection";
 import SaleProductSection from "../components/SaleProductSection";
-import { styles } from "../styles/custhome.styles";
+import { styles } from "../styles/guesthome.styles";
 import { apiGet } from "../../../utils/api";
 
 export default function CustHomeScreen() {
@@ -89,9 +89,6 @@ export default function CustHomeScreen() {
       }, []),
     );
   
-  
-  
-
   const transformedNegoProducts = negoProducts.map((item) => ({
     id: item.productCode,
     uri: item.images?.files?.[0]?.fileUrl
@@ -99,7 +96,6 @@ export default function CustHomeScreen() {
       : null,
     productName: item.productNm,
     storeName: item.storeNm,
-    price: item.price,
   }));
 
   const transformedSaleProducts = saleProducts.map((item) => {

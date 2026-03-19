@@ -68,6 +68,7 @@ interface SaleProduct {
   category: string;
   timeLimitSeconds: number;
   saleType: SaleType;
+  saleValue: number;  
 }
 
 export default function SaleProductListScreen() {
@@ -150,6 +151,7 @@ export default function SaleProductListScreen() {
           category: "",
           timeLimitSeconds: timeLimitSeconds,
           saleType: item.saleType,
+          saleValue: item.saleValue,
         };
       });
 
@@ -410,7 +412,7 @@ export default function SaleProductListScreen() {
                       <Text style={styles.discountBadgeText}>
                         {item.saleType === "할인률"
                           ? `${item.discount}%`
-                          : `${item.price.toLocaleString()}원`}
+                          : `${item.saleValue.toLocaleString()}원`}
                       </Text>
                     </View>
                   </View>

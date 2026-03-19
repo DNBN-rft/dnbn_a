@@ -11,7 +11,7 @@ export default function SplashScreen() {
     useEffect(() => {
         // 2초 후 비회원 홈 화면으로 이동
         const timer = setTimeout(() => {
-            router.replace('/(guest)/tabs/custhome');
+            router.replace('/(guest)/tabs/guesthome');
         }, 2000);
 
         return () => clearTimeout(timer);

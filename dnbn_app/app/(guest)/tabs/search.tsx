@@ -89,11 +89,14 @@ export default function SearchView() {
       const discountData =
         data.guestRecommendSaleItems?.map((item: any) => ({
           id: item.productCode,
-          uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
+          uri: item.productImageUrl
+            ? { uri: item.productImageUrl }
+            : null,
           storeName: item.storeNm,
           name: item.productNm,
+          saleType: item.saleType,
           originalPrice: item.productPrice,
-          discountValue: item.discountValue,
+          saleValue: item.discountValue,
           price: item.discountedPrice,
         })) || [];
 
@@ -104,7 +107,6 @@ export default function SearchView() {
           uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
           storeName: item.storeNm,
           name: item.productNm,
-          price: "협상가능",
         })) || [];
 
       // 일반 상품: guestRecommendCommonItems
@@ -366,14 +368,16 @@ export default function SearchView() {
                           </Text>
                           <View style={styles.priceRow}>
                             <Text style={styles.originalPrice}>
-                              {item.originalPrice}
+                              {item.originalPrice?.toLocaleString()}원
                             </Text>
                             <Text style={styles.discountPrice}>
-                              {item.discountValue}
+                              {item.saleType === "할인률"
+                                ? `${item.saleValue}%`
+                                : `${item.saleValue?.toLocaleString()}원`}
                             </Text>
                           </View>
                           <Text style={styles.productPrice}>
-                            {item.price}원
+                            {item.price?.toLocaleString()}원
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -523,7 +527,7 @@ export default function SearchView() {
                             {item.name}
                           </Text>
                           <Text style={styles.productPrice}>
-                            {item.price}원
+                            {Number(item.price).toLocaleString()}원
                           </Text>
                         </View>
                       </TouchableOpacity>

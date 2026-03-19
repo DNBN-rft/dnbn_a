@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   Animated,
   Image,
@@ -10,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { shareStore } from "@/utils/kakaoShareUtil";
+import { apiDelete, apiPost } from "@/utils/api";
 
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
@@ -28,6 +30,26 @@ export default function StoreDetailPanel({
   maxHeight,
   onClose,
 }: StoreDetailPanelProps) {
+  const [isWished, setIsWished] = useState(false);
+
+  const handleWishToggle = async () => {
+    const storeCode = selectedStore.storeCode;
+    if (!storeCode) return;
+    try {
+      if (isWished) {
+        const res = await apiDelete("/cust/wish", {
+          body: JSON.stringify({ storeCodes: [storeCode] }),
+        });
+        if (res.ok) setIsWished(false);
+      } else {
+        const res = await apiPost("/cust/wish", { storeCodes: [storeCode] });
+        if (res.ok) setIsWished(true);
+      }
+    } catch (e) {
+      console.error("찜 처리 오류:", e);
+    }
+  };
+
   return (
     <DraggableBottomSheet
       slideAnim={slideAnim}
@@ -45,14 +67,23 @@ export default function StoreDetailPanel({
           {/* 왼쪽: 가게 정보 */}
           <View style={styles.storeDetailInfo}>
             {/* 가게 이름 & 업태 */}
-            <View style={styles.storeNameRow}>
+            <TouchableOpacity
+              style={styles.storeNameRow}
+              onPress={() =>
+                selectedStore.storeCode &&
+                router.push({
+                  pathname: "/(cust)/storeInfo",
+                  params: { storeCode: selectedStore.storeCode },
+                })
+              }
+            >
               <Text style={styles.storeName}>{selectedStore.name}</Text>
               {selectedStore.category && (
                 <Text style={styles.storeCategory}>
                   {selectedStore.category}
                 </Text>
               )}
-            </View>
+            </TouchableOpacity>
             {/* 별점 & 총 리뷰수 */}
             {selectedStore.reviewAvg != null && (
               <View style={styles.storeRatingRow}>
@@ -82,7 +113,16 @@ export default function StoreDetailPanel({
             </View>
           </View>
           {/* 오른쪽: 대표 이미지 */}
-          <View style={styles.storeDetailImageWrapper}>
+          <TouchableOpacity
+            style={styles.storeDetailImageWrapper}
+            onPress={() =>
+              selectedStore.storeCode &&
+              router.push({
+                pathname: "/(cust)/storeInfo",
+                params: { storeCode: selectedStore.storeCode },
+              })
+            }
+          >
             {selectedStore.imageUrl ? (
               <Image
                 source={{ uri: selectedStore.imageUrl }}
@@ -94,7 +134,7 @@ export default function StoreDetailPanel({
                 <Ionicons name="storefront-outline" size={32} color="#ccc" />
               </View>
             )}
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={{ width: "100%" }}>
           {/* 기능 탭: 연락처 / 관심매장 / 공유 */}
@@ -114,8 +154,8 @@ export default function StoreDetailPanel({
                 color={selectedStore.phone ? "#333" : "#ccc"}
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.storeActionBtn}>
-              <Ionicons name="heart-outline" size={22} color="#333" />
+            <TouchableOpacity style={styles.storeActionBtn} onPress={handleWishToggle}>
+              <Ionicons name={isWished ? "heart" : "heart-outline"} size={22} color={isWished ? "#EF7810" : "#333"} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.storeActionBtn}
