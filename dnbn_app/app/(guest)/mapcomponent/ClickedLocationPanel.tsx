@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Animated, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Platform, Text, TouchableOpacity, View } from "react-native";
+import { EdgeInsets } from "react-native-safe-area-context";
 import { ClickedLocation } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
 
@@ -8,6 +9,7 @@ interface ClickedLocationPanelProps {
   clickedLocationAnim: Animated.Value;
   onClose: () => void;
   onSearchNearbyStores: () => void;
+  insets: EdgeInsets;
 }
 
 export default function ClickedLocationPanel({
@@ -15,14 +17,17 @@ export default function ClickedLocationPanel({
   clickedLocationAnim,
   onClose,
   onSearchNearbyStores,
+  insets,
 }: ClickedLocationPanelProps) {
   return (
     <Animated.View
       style={[
         styles.clickedLocationContainer,
-        { 
+        {
           transform: [{ translateY: clickedLocationAnim }],
           pointerEvents: "auto",
+          bottom: Platform.OS === "ios" ? insets.bottom + 49 : 0,
+          paddingBottom: 16,
         },
       ]}
     >

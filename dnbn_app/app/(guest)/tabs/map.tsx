@@ -253,6 +253,7 @@ export default function CustMapScreen() {
           clickedLocationAnim={clickedLocationAnim}
           onClose={handleCloseClickedLocation}
           onSearchNearbyStores={handleSearchNearbyStores}
+          insets={insets}
         />
       )}
 
