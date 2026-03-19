@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../styles/custhome.styles";
+import { styles } from "../styles/guesthome.styles";
 
 const screenWidth = Dimensions.get("window").width;
 

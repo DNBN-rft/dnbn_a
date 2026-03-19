@@ -18,7 +18,7 @@ export default function GuestTabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="custhome"
+        name="guesthome"
         options={{
           title: "홈",
           tabBarIcon: ({ color, size, focused }) => (

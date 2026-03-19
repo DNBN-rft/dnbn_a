@@ -1,16 +1,21 @@
 import { shareStore } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   Animated,
   Image,
   Linking,
+  Modal,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { shareStore } from "@/utils/kakaoShareUtil";
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
 import DraggableBottomSheet from "./DraggableBottomSheet";
@@ -28,7 +33,37 @@ export default function StoreDetailPanel({
   maxHeight,
   onClose,
 }: StoreDetailPanelProps) {
+  const [loginVisible, setLoginVisible] = useState(false);
+  const insets = useSafeAreaInsets();
+
   return (
+    <>
+    <Modal
+      visible={loginVisible}
+      animationType="none"
+      transparent={false}
+      onRequestClose={() => setLoginVisible(false)}
+    >
+      <View style={[loginStyles.container, { paddingTop: insets.top }]}>
+        <Ionicons name="lock-closed-outline" size={64} color="#EF7810" />
+        <Text style={loginStyles.message}>로그인 후 이용 가능합니다</Text>
+        <TouchableOpacity
+          style={loginStyles.backButton}
+          onPress={() => setLoginVisible(false)}
+        >
+          <Text style={loginStyles.backButtonText}>뒤로 가기</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={loginStyles.loginButton}
+          onPress={() => {
+            setLoginVisible(false);
+            router.push("/(auth)/login");
+          }}
+        >
+          <Text style={loginStyles.loginButtonText}>로그인 하러 가기</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
     <DraggableBottomSheet
       slideAnim={slideAnim}
       collapsedHeight={380}
@@ -36,6 +71,7 @@ export default function StoreDetailPanel({
       onClose={onClose}
       zIndex={30}
     >
+      <>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.storeDetailContent}
@@ -46,7 +82,9 @@ export default function StoreDetailPanel({
           <View style={styles.storeDetailInfo}>
             {/* 가게 이름 & 업태 */}
             <View style={styles.storeNameRow}>
-              <Text style={styles.storeName}>{selectedStore.name}</Text>
+              <TouchableOpacity onPress={() => router.push({ pathname: "/(guest)/storeInfo", params: { storeCode: selectedStore.storeCode ?? "" } })}>
+                <Text style={styles.storeName}>{selectedStore.name}</Text>
+              </TouchableOpacity>
               {selectedStore.category && (
                 <Text style={styles.storeCategory}>
                   {selectedStore.category}
@@ -82,7 +120,10 @@ export default function StoreDetailPanel({
             </View>
           </View>
           {/* 오른쪽: 대표 이미지 */}
-          <View style={styles.storeDetailImageWrapper}>
+          <TouchableOpacity
+            style={styles.storeDetailImageWrapper}
+            onPress={() => router.push({ pathname: "/(guest)/storeInfo", params: { storeCode: selectedStore.storeCode ?? "" } })}
+          >
             {selectedStore.imageUrl ? (
               <Image
                 source={{ uri: selectedStore.imageUrl }}
@@ -94,7 +135,7 @@ export default function StoreDetailPanel({
                 <Ionicons name="storefront-outline" size={32} color="#ccc" />
               </View>
             )}
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={{ width: "100%" }}>
           {/* 기능 탭: 연락처 / 관심매장 / 공유 */}
@@ -114,7 +155,10 @@ export default function StoreDetailPanel({
                 color={selectedStore.phone ? "#333" : "#ccc"}
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.storeActionBtn}>
+            <TouchableOpacity
+              style={styles.storeActionBtn}
+              onPress={() => setLoginVisible(true)}
+            >
               <Ionicons name="heart-outline" size={22} color="#333" />
             </TouchableOpacity>
             <TouchableOpacity
@@ -226,7 +270,7 @@ export default function StoreDetailPanel({
         style={styles.storeDetailViewButton}
         onPress={() =>
           router.push({
-            pathname: "/(cust)/storeInfo",
+            pathname: "/(guest)/storeInfo",
             params: { storeCode: selectedStore.storeCode ?? selectedStore.id },
           })
         }
@@ -234,6 +278,51 @@ export default function StoreDetailPanel({
         <Text style={styles.storeDetailViewButtonText}>더보기</Text>
         <Ionicons name="chevron-forward" size={16} color="#fff" />
       </TouchableOpacity>
+      </>
     </DraggableBottomSheet>
+    </>
   );
 }
+
+const loginStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 24,
+  },
+  message: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 12,
+  },
+  backButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#EF7810",
+    fontWeight: "500",
+  },
+  loginButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: "#EF7810",
+    alignItems: "center",
+  },
+  loginButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

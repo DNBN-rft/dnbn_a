@@ -13,6 +13,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -87,6 +88,7 @@ export default function ProductDetailScreen() {
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [loginVisible, setLoginVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
@@ -212,7 +214,7 @@ export default function ProductDetailScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.reportButton}
-            onPress={() => setReportModalVisible(true)}
+            onPress={() => setLoginVisible(true)}
           >
             <Ionicons name="alert" size={18} color="#333" />
           </TouchableOpacity>
@@ -388,7 +390,7 @@ export default function ProductDetailScreen() {
               style={styles.storeNameContainer}
               onPress={() => {
                 router.push({
-                  pathname: "/(cust)/storeInfo",
+                  pathname: "/(guest)/storeInfo",
                   params: { storeCode: product.storeCode },
                 });
               }}
@@ -633,7 +635,7 @@ export default function ProductDetailScreen() {
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             style={styles.purchaseButton}
-            onPress={() => setNegoModalVisible(true)}
+            onPress={() => setLoginVisible(true)}
           >
             <Text style={styles.purchaseButtonText}>네고 요청하기</Text>
           </TouchableOpacity>
@@ -740,6 +742,76 @@ export default function ProductDetailScreen() {
           productCode={product.productCode}
         />
       )}
+
+      <Modal
+        visible={loginVisible}
+        animationType="none"
+        transparent={false}
+        onRequestClose={() => setLoginVisible(false)}
+      >
+        <View style={[loginScreenStyles.container, { paddingTop: insets.top }]}>
+          <Ionicons name="lock-closed-outline" size={64} color="#EF7810" />
+          <Text style={loginScreenStyles.message}>로그인 후 이용 가능합니다</Text>
+          <TouchableOpacity
+            style={loginScreenStyles.backButton}
+            onPress={() => setLoginVisible(false)}
+          >
+            <Text style={loginScreenStyles.backButtonText}>뒤로 가기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={loginScreenStyles.loginButton}
+            onPress={() => {
+              setLoginVisible(false);
+              router.push("/(auth)/login");
+            }}
+          >
+            <Text style={loginScreenStyles.loginButtonText}>로그인 하러 가기</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const loginScreenStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 24,
+  },
+  message: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 12,
+  },
+  backButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#EF7810",
+    fontWeight: "500",
+  },
+  loginButton: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    backgroundColor: "#EF7810",
+    alignItems: "center",
+  },
+  loginButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

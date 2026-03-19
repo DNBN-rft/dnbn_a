@@ -9,14 +9,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../styles/custhome.styles";
+import { styles } from "../styles/guesthome.styles";
 
 interface NegoProduct {
   id: string;
   uri: any;
   productName: string;
   storeName: string;
-  price: number;
 }
 
 interface NegoProductSectionProps {
@@ -84,9 +83,6 @@ export default function NegoProductSection({
                   </Text>
                   <Text style={styles.storeName} numberOfLines={1}>
                     {item.storeName}
-                  </Text>
-                  <Text style={styles.price}>
-                    {item.price.toLocaleString()}원
                   </Text>
                 </View>
               </Pressable>

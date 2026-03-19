@@ -184,7 +184,8 @@ export default function CartScreen() {
     cartData.forEach((store) => {
       store.items.forEach((item) => {
         if (item.selected) {
-          totalAmount += (item.price - item.discountPrice) * item.quantity;
+          const finalPrice = item.discountPrice > 0 ? item.discountPrice : item.price;
+          totalAmount += finalPrice * item.quantity;
           totalCount += 1;
         }
       });
@@ -249,12 +250,12 @@ export default function CartScreen() {
               </Text>
               {item.discountPrice > 0 && (
                 <Text style={styles.discountPriceText}>
-                  {formatPrice(item.discountPrice)}
+                  {formatPrice(item.price)}
                 </Text>
               )}
               <View style={styles.cartItemPriceContainer}>
                 <Text style={styles.cartItemSalePriceText}>
-                  {formatPrice(item.price)}
+                  {formatPrice(item.discountPrice > 0 ? item.discountPrice : item.price)}
                 </Text>
               </View>
               {/* 수량 조절 */}
@@ -306,7 +307,7 @@ export default function CartScreen() {
             store.items.reduce(
               (sum, item) =>
                 item.selected
-                  ? sum + (item.price - item.discountPrice) * item.quantity
+                  ? sum + (item.discountPrice > 0 ? item.discountPrice : item.price) * item.quantity
                   : sum,
               0,
             ),

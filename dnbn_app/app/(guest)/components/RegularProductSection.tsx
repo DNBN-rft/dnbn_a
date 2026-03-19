@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../styles/custhome.styles";
+import { styles } from "../styles/guesthome.styles";
 
 interface RegularProduct {
   id: string;

@@ -197,7 +197,6 @@ export default function CustHomeScreen() {
       : null,
     productName: item.productNm,
     storeName: item.storeNm,
-    price: item.price,
   }));
 
   const transformedSaleProducts = saleProducts.map((item) => {
