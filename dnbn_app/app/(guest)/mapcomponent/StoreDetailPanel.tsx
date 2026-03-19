@@ -15,7 +15,6 @@ import {
 } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { shareStore } from "@/utils/kakaoShareUtil";
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
 import DraggableBottomSheet from "./DraggableBottomSheet";
