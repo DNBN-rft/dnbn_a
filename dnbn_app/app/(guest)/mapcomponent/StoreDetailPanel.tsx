@@ -1,3 +1,4 @@
+import { shareStore } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
@@ -9,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { shareStore } from "@/utils/kakaoShareUtil";
 
 import { Store } from "../../../utils/map";
 import { styles } from "../styles/map.styles";
@@ -144,7 +144,7 @@ export default function StoreDetailPanel({
                     onPress={() =>
                       product.productCode &&
                       router.push({
-                        pathname: "/(cust)/product-detail",
+                        pathname: "/(guest)/product-detail",
                         params: { productCode: product.productCode },
                       })
                     }

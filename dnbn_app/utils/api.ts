@@ -146,6 +146,8 @@ const PUBLIC_ENDPOINTS = [
   "/guest/negoproducts/home",
   "/guest/sales/**",
   "/guest/regular/home",
+  "/map-stores",
+  "/map-store",
 ];
 
 /**
