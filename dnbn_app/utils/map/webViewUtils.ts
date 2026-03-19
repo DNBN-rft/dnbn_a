@@ -69,49 +69,25 @@ export const moveMapToLocation = (
 };
 
 /**
- * 검색 주소 위치에 핀을 표시합니다 (JS 직접 주입)
+ * 검색 주소 위치에 핀을 표시합니다
  */
 export const addSearchPin = (
   webViewRef: React.RefObject<WebView | null>,
   latitude: number,
   longitude: number,
 ) => {
-  if (!webViewRef.current) return;
-  const script = `
-    (function() {
-      try {
-        if (window._searchPin) {
-          window._searchPin.setMap(null);
-          window._searchPin = null;
-        }
-        var pos = new kakao.maps.LatLng(${latitude}, ${longitude});
-        window._searchPin = new kakao.maps.Marker({ position: pos, map: window.map, zIndex: 10 });
-      } catch(e) {
-        console.warn('[searchPin error]', e && e.message);
-      }
-    })();
-    true;
-  `;
-  webViewRef.current.injectJavaScript(script);
+  sendMessageToWebView(webViewRef, {
+    type: "addSearchPin",
+    latitude,
+    longitude,
+  });
 };
 
 /**
  * 검색 핀을 제거합니다
  */
 export const clearSearchPin = (webViewRef: React.RefObject<WebView | null>) => {
-  if (!webViewRef.current) return;
-  const script = `
-    (function() {
-      try {
-        if (window._searchPin) {
-          window._searchPin.setMap(null);
-          window._searchPin = null;
-        }
-      } catch(e) {}
-    })();
-    true;
-  `;
-  webViewRef.current.injectJavaScript(script);
+  sendMessageToWebView(webViewRef, { type: "clearSearchPin" });
 };
 
 /**

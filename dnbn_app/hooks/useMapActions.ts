@@ -352,6 +352,9 @@ export function useMapActions({
             }
           }
         } else if (data.type === "mapClicked") {
+          // 검색 핀 제거
+          sendMessageToWebView(webViewRef, { type: "clearSearchPin" });
+
           // 새 위치 클릭 시 기존 패널들 닫기 (순차적으로)
           const closePromises: Promise<void>[] = [];
 
