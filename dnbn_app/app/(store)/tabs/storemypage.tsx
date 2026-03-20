@@ -23,7 +23,7 @@ export default function StoreMypage() {
     } catch (error) {
       // Storage 정리 실패 시도 로그인 페이지로 이동
     } finally {
-      router.replace("/(auth)/login");
+      router.replace("/(guest)/tabs/custhome");
     }
   };
 

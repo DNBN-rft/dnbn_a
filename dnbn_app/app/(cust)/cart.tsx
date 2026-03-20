@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPut } from "@/utils/api";
+import { apiDelete, apiGet, apiPost, apiPut } from "@/utils/api";
 import {
   isAllSelected,
   isStoreAllSelected,
@@ -11,6 +11,7 @@ import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   Pressable,
@@ -195,6 +196,53 @@ export default function CartScreen() {
   };
 
   const { totalAmount, totalCount } = calculateTotal();
+
+  // 장바구니에서 직접 토스 결제 호출
+  const handleTossPayment = async () => {
+    const selectedStores = cartData
+      .map((store) => ({
+        storeNm: store.storeNm,
+        items: store.items.filter((item) => item.selected),
+      }))
+      .filter((store) => store.items.length > 0);
+
+    if (selectedStores.length === 0) return;
+
+    const body = {
+      paymentType: null,
+      cartItems: selectedStores,
+    };
+
+    try {
+      console.log('[Toss 결제 요청 데이터 - 장바구니]', JSON.stringify(body, null, 2));
+
+      const response = await apiPost("/cust/payment/toss/prepare", body);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[Toss 결제 준비 실패]', errorData);
+        Alert.alert("결제 오류", errorData.message || "결제 준비에 실패했습니다.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log('[Toss 결제 준비 응답 데이터 - 장바구니]', JSON.stringify(data, null, 2));
+
+      const paymentUrl: string = data.paymentUrl;
+      if (!paymentUrl) {
+        Alert.alert("결제 오류", "결제 URL을 받아오지 못했습니다.");
+        return;
+      }
+
+      router.push({
+        pathname: "/(cust)/toss-payment-webview" as any,
+        params: { paymentUrl },
+      });
+    } catch (error) {
+      console.error('[Toss 결제 준비 오류 - 장바구니]', error);
+      Alert.alert("결제 오류", "결제 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
 
   // 가맹점별 렌더링
   const renderStoreItem = ({ item: store }: { item: CartStore }) => (
@@ -407,18 +455,7 @@ export default function CartScreen() {
                 totalCount === 0 && styles.purchaseButtonDisabled,
               ]}
               disabled={totalCount === 0}
-              onPress={() => {
-                const selectedStores = cartData
-                  .map((store) => ({
-                    storeNm: store.storeNm,
-                    items: store.items.filter((item) => item.selected),
-                  }))
-                  .filter((store) => store.items.length > 0);
-                router.push({
-                  pathname: "/(cust)/orderPage",
-                  params: { cartItems: JSON.stringify(selectedStores) },
-                });
-              }}
+              onPress={handleTossPayment}
             >
               <Text
                 style={[

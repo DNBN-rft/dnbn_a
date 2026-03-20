@@ -2,7 +2,7 @@ import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -61,39 +61,42 @@ export default function UseGift() {
     order: number;
   }
 
-  useEffect(() => {
-    const fetchPurchaseDetail = async () => {
-      try {
-        setLoading(true);
-        const orderDetailIdx = searchParams.orderDetailIdx as string;
+  const fetchPurchaseDetail = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const orderDetailIdx = searchParams.orderDetailIdx as string;
 
-        if (!orderDetailIdx) {
-          setError("주문 상세 정보를 찾을 수 없습니다.");
-          return;
-        }
-
-        const response = await apiGet(
-          `/cust/purchase-list/unused/${orderDetailIdx}`,
-        );
-
-        if (!response.ok) {
-          throw new Error("구매 정보를 가져오는데 실패했습니다.");
-        }
-
-        const data = await response.json();
-
-        setPurchaseData(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
-        console.error("Purchase detail fetch error:", err);
-      } finally {
+      if (!orderDetailIdx) {
+        setError("주문 상세 정보를 찾을 수 없습니다.");
         setLoading(false);
+        return;
       }
-    };
 
-    fetchPurchaseDetail();
+      const response = await apiGet(
+        `/cust/purchase-list/unused/${orderDetailIdx}`,
+      );
+
+      if (!response.ok) {
+        setError("구매 정보를 가져오는데 실패했습니다.");
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      setPurchaseData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
+      console.error("Purchase detail fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [searchParams.orderDetailIdx]);
+
+  useEffect(() => {
+    fetchPurchaseDetail();
+  }, [fetchPurchaseDetail]);
 
   if (loading) {
     return (
@@ -116,14 +119,23 @@ export default function UseGift() {
           { justifyContent: "center", alignItems: "center" },
         ]}
       >
-        <Text style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 20 }}>
+        <Ionicons name="alert-circle-outline" size={60} color="#999" />
+        <Text style={{ fontSize: 16, color: "#FF6B6B", marginVertical: 20 }}>
           {error || "구매 정보를 불러올 수 없습니다."}
         </Text>
         <TouchableOpacity
-          style={styles.useButton}
+          style={[styles.useButton, { marginBottom: 12 }]}
+          onPress={fetchPurchaseDetail}
+        >
+          <Text style={styles.useButtonText}>다시 시도</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.useButton, { backgroundColor: "#ccc" }]}
           onPress={() => router.back()}
         >
-          <Text style={styles.useButtonText}>돌아가기</Text>
+          <Text style={[styles.useButtonText, { color: "#333" }]}>
+            돌아가기
+          </Text>
         </TouchableOpacity>
       </View>
     );
