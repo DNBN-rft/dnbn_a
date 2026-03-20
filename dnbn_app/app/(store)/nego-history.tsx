@@ -97,8 +97,12 @@ interface NegoRequestLogResponse {
 
 export default function NegoHistory() {
   const insets = useSafeAreaInsets();
-  const { activeTab: initialTab } = useLocalSearchParams<{ activeTab?: "product" | "request" }>();
-  const [activeTab, setActiveTab] = useState<"product" | "request">(initialTab ?? "product");
+  const { activeTab: initialTab } = useLocalSearchParams<{
+    activeTab?: "product" | "request";
+  }>();
+  const [activeTab, setActiveTab] = useState<"product" | "request">(
+    initialTab ?? "product",
+  );
 
   // 네고 로그 리스트 상태 (상품 탭)
   const [productList, setProductList] = useState<NegoLogItem[]>([]);
@@ -524,7 +528,7 @@ export default function NegoHistory() {
       )}
 
       <TouchableOpacity
-        style={[styles.scrollTopButton, { bodttom: insets.bottom + 20 }]}
+        style={[styles.scrollTopButton, { bottom: insets.bottom + 20 }]}
         onPress={scrollToTop}
       >
         <Ionicons name="chevron-up" size={24} color="#EF7810" />

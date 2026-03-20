@@ -113,7 +113,7 @@ function AlarmItemComponent({
 
       case "네고 요청":
         router.push({
-          pathname: "/(store)/nego-history",
+          pathname: "/(store)/tabs/storenego",
           params: { activeTab: "request" },
         });
         break;
