@@ -18,17 +18,30 @@ export default function PaymentComplete() {
   const confirmPayment = useCallback(async () => {
     setConfirming(true);
     try {
-      const response = await apiPost("/cust/payment/toss/confirm", {
+      const body = {
         paymentKey,
         orderId,
         amount: Number(amount),
-      });
+      };
+      console.log('[Toss confirm 요청 데이터]', JSON.stringify(body, null, 2));
 
-      if (!response.ok) {
-        console.error("결제 확인 실패:", response.status);
+      const response = await apiPost("/cust/payment/toss/confirm", body);
+
+      const data = await response.json().catch(() => ({}));
+      console.log('[Toss confirm 응답 데이터]', JSON.stringify(data, null, 2));
+
+      if (!response.ok || data.success === false) {
+        const errMsg = data.message || "결제 승인에 실패했습니다.";
+        console.error('[Toss confirm 실패]', errMsg);
+        router.replace({
+          pathname: "/(cust)/payment-fail",
+          params: { message: errMsg },
+        });
+        return;
       }
     } catch (error) {
       console.error("결제 확인 오류:", error);
+      router.replace("/(cust)/payment-fail");
     } finally {
       setConfirming(false);
     }

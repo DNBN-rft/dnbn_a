@@ -224,15 +224,20 @@ export default function OrderPage() {
             orderQty: Number(orderQty) || 1,
           };
 
+      console.log('[Toss 결제 요청 데이터 - 주문페이지]', JSON.stringify(body, null, 2));
+
       const response = await apiPost("/cust/payment/toss/prepare", body);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('[Toss 결제 준비 실패 - 주문페이지]', errorData);
         Alert.alert("결제 오류", errorData.message || "결제 준비에 실패했습니다.");
         return;
       }
 
       const data = await response.json();
+      console.log('[Toss 결제 준비 응답 데이터 - 주문페이지]', JSON.stringify(data, null, 2));
+
       const paymentUrl: string = data.paymentUrl;
 
       if (!paymentUrl) {
