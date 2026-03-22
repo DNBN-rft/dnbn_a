@@ -21,6 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiGet } from "../../utils/api";
 import { styles } from "./product-detail.styles";
+import WebView from "react-native-webview";
 
 interface ProductImage {
   originalName: string;
@@ -59,6 +60,7 @@ export default function ProductDetailScreen() {
   const [tab, setTab] = useState<"description" | "reviews" | "details">(
     "description",
   );
+  const [descriptionHeight, setDescriptionHeight] = useState(200);
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -451,7 +453,13 @@ export default function ProductDetailScreen() {
 
             <View style={styles.tabContentContainer}>
               <View style={styles.descriptionContent}>
-                <Text style={styles.tabContent}>{productData.description}</Text>
+                <WebView
+                  source={{ html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:8px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;}</style></head><body>${productData.description}</body></html>` }}
+                  style={{ height: descriptionHeight }}
+                  scrollEnabled={false}
+                  injectedJavaScript="(function(){function h(){window.ReactNativeWebView.postMessage(JSON.stringify({height:document.body.scrollHeight}));}h();setTimeout(h,500);})();true;"
+                  onMessage={(e) => { try { const d = JSON.parse(e.nativeEvent.data); if (d.height) setDescriptionHeight(d.height); } catch {} }}
+                />
               </View>
             </View>
           </View>

@@ -305,6 +305,7 @@ export default function PracticeView() {
   const radioButtons = [
     { id: "1", label: "남", value: "M" },
     { id: "2", label: "여", value: "F" },
+    { id: "3", label: "선택 안함", value: "N" },
   ];
 
   return (

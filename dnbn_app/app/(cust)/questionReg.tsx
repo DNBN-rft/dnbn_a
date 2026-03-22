@@ -5,12 +5,14 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -33,6 +35,7 @@ export default function NoticeDetailScreen() {
   const [questionTitle, setQuestionTitle] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
   const [questionFiles, setQuestionFiles] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   // 이미지 선택 함수
   const pickImage = async () => {
@@ -86,6 +89,7 @@ export default function NoticeDetailScreen() {
     }
 
     try {
+      setSubmitting(true);
       // custCode 가져오기
       const custCode = await getStorageItem("custCode");
 
@@ -187,6 +191,8 @@ export default function NoticeDetailScreen() {
       } else {
         Alert.alert("실패", "문의 등록 중 오류가 발생했습니다.");
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -292,7 +298,7 @@ export default function NoticeDetailScreen() {
         </View>
 
         <View style={styles.submitButtonContainer}>
-          <Pressable style={styles.submitButton} onPress={submitQuestion}>
+          <Pressable style={styles.submitButton} onPress={submitQuestion} disabled={submitting}>
             <Text style={styles.submitButtonText}>문의하기</Text>
           </Pressable>
           <Pressable style={styles.cancelButton} onPress={() => router.back()}>
@@ -372,6 +378,28 @@ export default function NoticeDetailScreen() {
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
+
+      <Modal visible={submitting} transparent animationType="none">
+        <View style={loadingOverlayStyles.container}>
+          <ActivityIndicator size="large" color="#EF7810" />
+          <Text style={loadingOverlayStyles.text}>문의 등록 중...</Text>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const loadingOverlayStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  text: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});

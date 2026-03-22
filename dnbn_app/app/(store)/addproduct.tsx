@@ -3,17 +3,23 @@ import { apiGet, apiPostFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import { styles } from "./addproduct.styles";
 
 interface Category {
@@ -43,6 +49,8 @@ export default function AddProduct() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(true);
+  const richEditorRef = useRef<RichEditor>(null);
+  const [editorHeight, setEditorHeight] = useState(200);
 
   // 카테고리 조회
   useEffect(() => {
@@ -95,6 +103,42 @@ export default function AddProduct() {
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const handleInsertDescriptionImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      try {
+        const asset = result.assets[0];
+        const formData = new FormData();
+        formData.append("file", {
+          uri: asset.uri,
+          type: "image/jpeg",
+          name: asset.uri.split("/").pop() || "desc_image.jpg",
+        } as any);
+
+        const response = await apiPostFormDataWithImage(
+          "/store/app/product/description-image",
+          formData,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          richEditorRef.current?.insertImage(
+            data.fileUrl,
+            'style="max-width:100%;height:auto;"',
+          );
+        } else {
+          Alert.alert("오류", "이미지 업로드에 실패했습니다");
+        }
+      } catch {
+        Alert.alert("오류", "이미지 업로드 중 오류가 발생했습니다");
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     // 유효성 검사
     if (!productName.trim()) {
@@ -117,7 +161,7 @@ export default function AddProduct() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
-    if (!description.trim()) {
+    if (!description.replace(/<[^>]*>/g, "").trim() && !description.includes("<img")) {
       Alert.alert("알림", "상품 상세 정보를 입력하세요");
       return;
     }
@@ -194,118 +238,123 @@ export default function AddProduct() {
         <View style={styles.rightSection} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품명</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="상품명을 입력하세요"
-            value={productName}
-            onChangeText={setProductName}
-          />
-        </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품명</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="상품명을 입력하세요"
+                value={productName}
+                onChangeText={setProductName}
+              />
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 가격</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="가격을 입력하세요"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-        </View>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 가격</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="가격을 입력하세요"
+                value={price}
+                onChangeText={setPrice}
+                keyboardType="numeric"
+              />
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>카테고리</Text>
-          <TouchableOpacity
-            style={styles.selectButton}
-            onPress={() => setShowCategoryModal(true)}
-            disabled={categoryLoading}
-          >
-            <Text
-              style={[
-                styles.selectButtonText,
-                !category && styles.selectButtonPlaceholder,
-              ]}
-            >
-              {categoryLoading
-                ? "로딩 중..."
-                : category
-                  ? category.categoryNm
-                  : "카테고리를 선택하세요"}
-            </Text>
-            <Ionicons name="chevron-down" size={20} color="#999" />
-          </TouchableOpacity>
-        </View>
-
-        <CategorySelectModal
-          visible={showCategoryModal}
-          categories={categories}
-          selectedCategory={category}
-          onSelect={setCategory}
-          onClose={() => setShowCategoryModal(false)}
-        />
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 구분</Text>
-          <View style={styles.toggleGroup}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                productType === "일반" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setProductType("일반")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  productType === "일반" && styles.toggleTextActive,
-                ]}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>카테고리</Text>
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => setShowCategoryModal(true)}
+                disabled={categoryLoading}
               >
-                일반
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                productType === "성인" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setProductType("성인")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  productType === "성인" && styles.toggleTextActive,
-                ]}
-              >
-                성인
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.selectButtonText,
+                    !category && styles.selectButtonPlaceholder,
+                  ]}
+                >
+                  {categoryLoading
+                    ? "로딩 중..."
+                    : category
+                      ? category.categoryNm
+                      : "카테고리를 선택하세요"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#999" />
+              </TouchableOpacity>
+            </View>
 
-          </View>
-        </View>
+            <CategorySelectModal
+              visible={showCategoryModal}
+              categories={categories}
+              selectedCategory={category}
+              onSelect={setCategory}
+              onClose={() => setShowCategoryModal(false)}
+            />
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>서비스 구분</Text>
-          <View style={styles.toggleGroup}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                serviceType === "일반" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setServiceType("일반")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  serviceType === "일반" && styles.toggleTextActive,
-                ]}
-              >
-                일반
-              </Text>
-            </TouchableOpacity>
-            {/* <TouchableOpacity
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 구분</Text>
+              <View style={styles.toggleGroup}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    productType === "일반" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setProductType("일반")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      productType === "일반" && styles.toggleTextActive,
+                    ]}
+                  >
+                    일반
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    productType === "성인" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setProductType("성인")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      productType === "성인" && styles.toggleTextActive,
+                    ]}
+                  >
+                    성인
+                  </Text>
+                </TouchableOpacity>
+
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>서비스 구분</Text>
+              <View style={styles.toggleGroup}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    serviceType === "일반" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setServiceType("일반")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      serviceType === "일반" && styles.toggleTextActive,
+                    ]}
+                  >
+                    일반
+                  </Text>
+                </TouchableOpacity>
+                {/* <TouchableOpacity
               style={[
                 styles.toggleButton,
                 serviceType === "서비스" && styles.toggleButtonActive,
@@ -321,101 +370,138 @@ export default function AddProduct() {
                 서비스
               </Text>
             </TouchableOpacity> */}
-          </View>
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>재고</Text>
-          <TextInput
-            style={[
-              styles.input,
-              serviceType === "서비스" && styles.inputDisabled,
-            ]}
-            placeholder="재고 수량을 입력하세요"
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="numeric"
-            editable={serviceType !== "서비스"}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 상세정보</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="상품에 대한 상세 설명을 입력하세요"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>
-            상품 이미지 <Text style={styles.requiredMark}>*</Text>
-          </Text>
-          <Text style={styles.imageHint}>최소 1개 이상 등록 필수 (최대 3개)</Text>
-          <TouchableOpacity
-            style={[
-              styles.imageUploadButton,
-              images.length >= 3 && styles.disabledButton,
-            ]}
-            onPress={pickImage}
-            disabled={isLoading || images.length >= 3}
-          >
-            <Ionicons
-              name="camera-outline"
-              size={32}
-              color={images.length >= 3 ? "#ccc" : "#999"}
-            />
-            <Text
-              style={[
-                styles.imageUploadText,
-                images.length >= 3 && styles.disabledText,
-              ]}
-            >
-              {images.length >= 3 ? "이미지 추가 완료" : "이미지 추가"}
-            </Text>
-          </TouchableOpacity>
-          {images.length > 0 && (
-            <View style={styles.imagePreviewContainer}>
-              {images.map((img, index) => (
-                <View key={index} style={styles.imagePreview}>
-                  <Image
-                    source={{ uri: img.uri }}
-                    style={styles.previewImage}
-                  />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => removeImage(index)}
-                    disabled={isLoading}
-                  >
-                    <Ionicons name="close-circle" size={24} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ))}
+              </View>
             </View>
-          )}
-        </View>
 
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isLoading && styles.submitButtonDisabled,
-          ]}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          <Text style={styles.submitButtonText}>
-            {isLoading ? "등록 중..." : "상품 등록"}
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>재고</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  serviceType === "서비스" && styles.inputDisabled,
+                ]}
+                placeholder="재고 수량을 입력하세요"
+                value={stock}
+                onChangeText={setStock}
+                keyboardType="numeric"
+                editable={serviceType !== "서비스"}
+              />
+            </View>
 
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 상세정보</Text>
+              <RichToolbar
+                editor={richEditorRef}
+                actions={[
+                  actions.setBold,
+                  actions.setItalic,
+                  actions.setUnderline,
+                  actions.insertBulletsList,
+                  actions.insertOrderedList,
+                  actions.insertImage,
+                ]}
+                onPressAddImage={handleInsertDescriptionImage}
+                style={richEditorStyles.toolbar}
+                iconTint="#333"
+                selectedIconTint="#EF7810"
+              />
+              <RichEditor
+                ref={richEditorRef}
+                style={[richEditorStyles.editor, { height: editorHeight }]}
+                placeholder="상품에 대한 상세 설명을 입력하세요"
+                onChange={setDescription}
+                onHeightChange={(h) => setEditorHeight(Math.max(200, h + 20))}
+                scrollEnabled={false}
+                initialHeight={200}
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>
+                상품 이미지 <Text style={styles.requiredMark}>*</Text>
+              </Text>
+              <Text style={styles.imageHint}>최소 1개 이상 등록 필수 (최대 3개)</Text>
+              <TouchableOpacity
+                style={[
+                  styles.imageUploadButton,
+                  images.length >= 3 && styles.disabledButton,
+                ]}
+                onPress={pickImage}
+                disabled={isLoading || images.length >= 3}
+              >
+                <Ionicons
+                  name="camera-outline"
+                  size={32}
+                  color={images.length >= 3 ? "#ccc" : "#999"}
+                />
+                <Text
+                  style={[
+                    styles.imageUploadText,
+                    images.length >= 3 && styles.disabledText,
+                  ]}
+                >
+                  {images.length >= 3 ? "이미지 추가 완료" : "이미지 추가"}
+                </Text>
+              </TouchableOpacity>
+              {images.length > 0 && (
+                <View style={styles.imagePreviewContainer}>
+                  {images.map((img, index) => (
+                    <View key={index} style={styles.imagePreview}>
+                      <Image
+                        source={{ uri: img.uri }}
+                        style={styles.previewImage}
+                      />
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={() => removeImage(index)}
+                        disabled={isLoading}
+                      >
+                        <Ionicons name="close-circle" size={24} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isLoading && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
+              <Text style={styles.submitButtonText}>
+                {isLoading ? "등록 중..." : "상품 등록"}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
 }
+
+const richEditorStyles = StyleSheet.create({
+  toolbar: {
+    backgroundColor: "#f5f5f5",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderBottomWidth: 0,
+  },
+  editor: {
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    minHeight: 200,
+    paddingHorizontal: 4,
+  },
+});

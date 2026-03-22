@@ -2,19 +2,25 @@ import CategorySelectModal from "@/components/modal/CategorySelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 
-import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
+import { apiGet, apiPostFormDataWithImage, apiPutFormDataWithImage } from "@/utils/api";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import { styles } from "./editproduct.styles";
 
 interface Category {
@@ -75,6 +81,9 @@ export default function EditProductPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(true);
+  const richEditorRef = useRef<RichEditor>(null);
+  const [editorHeight, setEditorHeight] = useState(200);
+  const [editorInitialized, setEditorInitialized] = useState(false);
 
   // 상품 상세 조회
   useEffect(() => {
@@ -107,6 +116,7 @@ export default function EditProductPage() {
               isNew: false,
             })) || [];
           setImages(imageList);
+          setEditorInitialized(false);
         } else {
           Alert.alert("알림", "상품 정보를 불러올 수 없습니다");
         }
@@ -210,6 +220,42 @@ export default function EditProductPage() {
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const handleInsertDescriptionImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      try {
+        const asset = result.assets[0];
+        const formData = new FormData();
+        formData.append("file", {
+          uri: asset.uri,
+          type: "image/jpeg",
+          name: asset.uri.split("/").pop() || "desc_image.jpg",
+        } as any);
+
+        const response = await apiPostFormDataWithImage(
+          "/store/app/product/description-image",
+          formData,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          richEditorRef.current?.insertImage(
+            data.fileUrl,
+            'style="max-width:100%;height:auto;"',
+          );
+        } else {
+          Alert.alert("오류", "이미지 업로드에 실패했습니다");
+        }
+      } catch {
+        Alert.alert("오류", "이미지 업로드 중 오류가 발생했습니다");
+      }
+    }
+  };
+
   const handleUpdate = async () => {
     // 유효성 검사
     if (!productName.trim()) {
@@ -228,7 +274,7 @@ export default function EditProductPage() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
-    if (!description.trim()) {
+    if (!description.replace(/<[^>]*>/g, "").trim() && !description.includes("<img")) {
       Alert.alert("알림", "상품 상세정보를 입력하세요");
       return;
     }
@@ -328,7 +374,12 @@ export default function EditProductPage() {
         <View style={styles.rightSection} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
         <View style={styles.formGroup}>
           <Text style={styles.label}>상품명</Text>
           <TextInput
@@ -478,13 +529,31 @@ export default function EditProductPage() {
           <Text style={styles.label}>
             상품 상세정보 <Text style={{ color: "#EF7810" }}>*</Text>
           </Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
+          <RichToolbar
+            editor={richEditorRef}
+            actions={[
+              actions.setBold,
+              actions.setItalic,
+              actions.setUnderline,
+              actions.insertBulletsList,
+              actions.insertOrderedList,
+              actions.insertImage,
+            ]}
+            onPressAddImage={handleInsertDescriptionImage}
+            style={richEditorStyles.toolbar}
+            iconTint="#333"
+            selectedIconTint="#EF7810"
+          />
+          <RichEditor
+            ref={richEditorRef}
+            style={[richEditorStyles.editor, { height: editorHeight }]}
             placeholder="상품에 대한 상세 설명을 입력하세요"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
+            initialContentHTML={description}
+            onChange={setDescription}
+            onHeightChange={(h) => setEditorHeight(Math.max(200, h + 20))}
+            scrollEnabled={false}
+            initialHeight={200}
+            onLoadEnd={() => setEditorInitialized(true)}
           />
         </View>
 
@@ -544,11 +613,32 @@ export default function EditProductPage() {
             {isSaving ? "수정 중..." : "수정 완료"}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
 }
+
+const richEditorStyles = StyleSheet.create({
+  toolbar: {
+    backgroundColor: "#f5f5f5",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderBottomWidth: 0,
+  },
+  editor: {
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    minHeight: 200,
+    paddingHorizontal: 4,
+  },
+});

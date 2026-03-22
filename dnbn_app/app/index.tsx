@@ -7,7 +7,7 @@ export default function SplashScreen() {
     const router = useRouter();
     const [imageLoaded, setImageLoaded] = useState(false);
     const insets = useSafeAreaInsets();
-    
+
     useEffect(() => {
         // 2초 후 비회원 홈 화면으로 이동
         const timer = setTimeout(() => {
@@ -20,23 +20,23 @@ export default function SplashScreen() {
     return (
         <View style={styles.container}>
             {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#FFFFFF"}} />
-      )}
-            <Image 
-                style={styles.imagebox} 
+                <View style={{ height: insets.top, backgroundColor: "#FFFFFF" }} />
+            )}
+            <Image
+                style={styles.imagebox}
                 source={require('@/assets/images/logo.png')}
                 onLoad={() => setImageLoaded(true)}
             />
             {imageLoaded && (
-                <ActivityIndicator 
-                    size="large" 
-                    color="#EF7810" 
+                <ActivityIndicator
+                    size="large"
+                    color="#EF7810"
                     style={styles.loader}
                 />
             )}
             {insets.bottom > 0 && (
-        <View style={{ height: insets.bottom, backgroundColor: "#000"}} />
-      )}
+                <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
+            )}
         </View>
     );
 }
