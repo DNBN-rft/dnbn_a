@@ -2,11 +2,13 @@ import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  BackHandler,
   Platform,
   ScrollView,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -19,6 +21,39 @@ import { styles } from "../styles/custhome.styles";
 
 export default function CustHomeScreen() {
   const insets = useSafeAreaInsets();
+  const backPressedOnce = useRef(false);
+  const backPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 홈 화면에 포커스될 때만 뒤로가기 처리 (2번 누르면 앱 종료)
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          if (backPressedOnce.current) {
+            BackHandler.exitApp();
+            return true;
+          }
+          backPressedOnce.current = true;
+          if (Platform.OS === "android") {
+            ToastAndroid.show(
+              "한 번 더 누르면 앱이 종료됩니다.",
+              ToastAndroid.SHORT,
+            );
+          }
+          backPressTimer.current = setTimeout(() => {
+            backPressedOnce.current = false;
+          }, 2000);
+          return true;
+        },
+      );
+      return () => {
+        backHandler.remove();
+        backPressedOnce.current = false;
+        if (backPressTimer.current) clearTimeout(backPressTimer.current);
+      };
+    }, []),
+  );
 
   const [negoProducts, setNegoProducts] = useState<any[]>([]);
   const [saleProducts, setSaleProducts] = useState<any[]>([]);

@@ -55,6 +55,12 @@ export default function StoreLayout() {
           headerTitle: "문의 수정",
         }}
       />
+      <Stack.Screen
+        name="qrcheckout"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
