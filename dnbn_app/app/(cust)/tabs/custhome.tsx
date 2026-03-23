@@ -2,8 +2,9 @@ import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
+  BackHandler,
   Platform,
   ScrollView,
   Text,
@@ -19,6 +20,17 @@ import { styles } from "../styles/custhome.styles";
 
 export default function CustHomeScreen() {
   const insets = useSafeAreaInsets();
+
+  // 홈 화면에 포커스될 때만 뒤로가기 차단 (다른 화면에서는 정상 동작)
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => backHandler.remove();
+    }, []),
+  );
 
   const [negoProducts, setNegoProducts] = useState<any[]>([]);
   const [saleProducts, setSaleProducts] = useState<any[]>([]);

@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
+  BackHandler,
   Platform,
   ScrollView,
   Text,
@@ -18,6 +19,17 @@ export default function StoreHome() {
   const insets = useSafeAreaInsets();
   const [memberNm, setMemberNm] = useState<string>("");
   const [authorities, setAuthorities] = useState<string[]>([]);
+
+  // 홈 화면에 포커스될 때만 뒤로가기 차단 (다른 화면에서는 정상 동작)
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => backHandler.remove();
+    }, []),
+  );
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
   const [progressOrderCount, setProgressOrderCount] = useState<number>(0);
   const [completeOrderCount, setCompleteOrderCount] = useState<number>(0);
@@ -258,13 +270,23 @@ export default function StoreHome() {
                 </TouchableOpacity>
               )}
 
-              <TouchableOpacity
+              {hasAuthority("STORE_ORDER") && (
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => router.push("/(store)/qrcheckout")} //qrCode 사용 페이지 작성 예정
+                >
+                  <Ionicons name="qr-code-outline" size={28} color="#FF9500" />
+                  <Text style={styles.menuText}>QR 사용</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* <TouchableOpacity
                 style={styles.menuItem}
                 onPress={handleCustomerView}
               >
                 <Ionicons name="storefront-outline" size={28} color="#FF9500" />
                 <Text style={styles.menuText}>고객 화면</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>
