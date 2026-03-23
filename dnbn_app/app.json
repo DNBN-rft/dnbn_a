@@ -84,7 +84,13 @@
       [
         "@react-native-kakao/core",
         {
-          "nativeAppKey": "bbbf21a6976b000c1889068c4e6564f7"
+          "nativeAppKey": "bbbf21a6976b000c1889068c4e6564f7",
+          "android": {
+            "forwardKakaoLinkIntentFilterToMainActivity": true
+          },
+          "ios": {
+            "handleKakaoOpenUrl": false
+          }
         }
       ],
       "expo-tosspayments-webview"

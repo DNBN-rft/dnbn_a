@@ -1,3 +1,4 @@
+import { getStorageItem } from "@/utils/storageUtil";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
@@ -9,13 +10,24 @@ export default function SplashScreen() {
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
-        // 2초 후 비회원 홈 화면으로 이동
-        const timer = setTimeout(() => {
-            router.replace('/(guest)/tabs/guesthome');
+        const timer = setTimeout(async () => {
+            try {
+                const accessToken = await getStorageItem('accessToken');
+                const storedUserType = await getStorageItem('userType');
+                if (accessToken && storedUserType === 'cust') {
+                    router.replace('/(cust)/tabs/custhome');
+                } else if (accessToken && storedUserType === 'store') {
+                    router.replace('/(store)/tabs/storehome');
+                } else {
+                    router.replace('/(guest)/tabs/guesthome');
+                }
+            } catch {
+                router.replace('/(guest)/tabs/guesthome');
+            }
         }, 2000);
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [router]);
 
     return (
         <View style={styles.container}>

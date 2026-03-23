@@ -112,9 +112,7 @@ export default function NegoAcceptedScreen() {
         `${item.productNm}을(를) ${item.requestPrice.toLocaleString()}원에 결제하시겠습니까?`,
       );
       if (confirmed) {
-        processPayment(item, true);
-      } else {
-        processPayment(item, false);
+        processPayment(item);
       }
     } else {
       Alert.alert(
@@ -123,44 +121,50 @@ export default function NegoAcceptedScreen() {
         [
           {
             text: "결제",
-            onPress: () => processPayment(item, true),
+            onPress: () => processPayment(item),
           },
           {
             text: "취소",
             style: "cancel",
-            onPress: () => processPayment(item, false),
           },
         ],
       );
     }
   };
 
-  // 결제 처리 로직
-  const processPayment = async (item: ApprovedNegoItem, status: boolean) => {
+  // 토스 결제 준비 및 웹뷰 이동
+  const processPayment = async (item: ApprovedNegoItem) => {
+    const body = {
+      orderCode: item.orderCode,
+    };
     try {
-      // 결제 확인 API 호출
-      const response = await apiPost("/cust/payment/confirm", {
-        orderCode: item.orderCode,
-        status: status,
-      });
+      console.log('[Toss 결제 요청 데이터 - 네고]', JSON.stringify(body, null, 2));
 
-      if (response.ok) {
-        const isSuccess = await response.json();
+      const response = await apiPost("/cust/payment/toss/prepare", body);
 
-        if (isSuccess) {
-          // 결제 성공
-          router.push("/payment-complete");
-        } else {
-          // 결제 실패
-          router.push("/payment-fail");
-        }
-      } else {
-        console.error("결제 확인 API 호출 실패:", response.status);
-        router.push("/payment-fail");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[Toss 결제 준비 실패 - 네고]', errorData);
+        Alert.alert("결제 오류", errorData.message || "결제 준비에 실패했습니다.");
+        return;
       }
+
+      const data = await response.json();
+      console.log('[Toss 결제 준비 응답 데이터 - 네고]', JSON.stringify(data, null, 2));
+
+      const paymentUrl: string = data.paymentUrl;
+      if (!paymentUrl) {
+        Alert.alert("결제 오류", "결제 URL을 받아오지 못했습니다.");
+        return;
+      }
+
+      router.push({
+        pathname: "/(cust)/toss-payment-webview" as any,
+        params: { paymentUrl },
+      });
     } catch (error) {
-      console.error("결제 처리 중 오류:", error);
-      router.push("/payment-fail");
+      console.error('[Toss 결제 준비 오류 - 네고]', error);
+      Alert.alert("결제 오류", "결제 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
