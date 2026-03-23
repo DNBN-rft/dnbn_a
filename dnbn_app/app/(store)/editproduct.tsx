@@ -56,6 +56,7 @@ interface ProductDetailResponse {
   imgs: {
     files: images[];
   };
+  descriptionFileMasterIdx: number | null;
 }
 
 interface ImageFile {
@@ -77,6 +78,7 @@ export default function EditProductPage() {
   const [serviceType, setServiceType] = useState<"일반" | "서비스">("일반");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionFileMasterIdx, setDescriptionFileMasterIdx] = useState<number | null>(null);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -107,6 +109,7 @@ export default function EditProductPage() {
           setServiceType(data.isStock ? "일반" : "서비스");
           setStock(data.productAmount.toString());
           setDescription(data.productDetailDescription);
+          setDescriptionFileMasterIdx(data.descriptionFileMasterIdx ?? null);
 
           // 이미지 설정
           const imageList =
@@ -228,29 +231,30 @@ export default function EditProductPage() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      try {
-        const asset = result.assets[0];
-        const formData = new FormData();
-        formData.append("file", {
-          uri: asset.uri,
-          type: "image/jpeg",
-          name: asset.uri.split("/").pop() || "desc_image.jpg",
-        } as any);
+      const asset = result.assets[0];
+      const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+      const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
+      const mimeType = asset.mimeType || "image/jpeg";
 
-        const response = await apiPostFormDataWithImage(
-          "/store/app/product/description-image",
-          formData,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          richEditorRef.current?.insertImage(
-            data.fileUrl,
-            'style="max-width:100%;height:auto;"',
-          );
-        } else {
+      try {
+        const formData = new FormData();
+        formData.append("file", { uri: asset.uri, name, type: mimeType } as any);
+
+        const url = descriptionFileMasterIdx
+          ? `/store/app/product/description-image?fileMasterIdx=${descriptionFileMasterIdx}`
+          : `/store/app/product/description-image`;
+
+        const response = await apiPostFormDataWithImage(url, formData);
+        if (!response.ok) {
           Alert.alert("오류", "이미지 업로드에 실패했습니다");
+          return;
         }
-      } catch {
+        const data = await response.json();
+        richEditorRef.current?.insertImage(data.fileUrl, 'style="max-width:100%;height:auto;"');
+        if (descriptionFileMasterIdx === null) {
+          setDescriptionFileMasterIdx(Number(data.fileMasterIdx));
+        }
+      } catch (e) {
         Alert.alert("오류", "이미지 업로드 중 오류가 발생했습니다");
       }
     }
@@ -295,6 +299,9 @@ export default function EditProductPage() {
         (serviceType === "서비스" ? 0 : parseInt(stock)).toString(),
       );
       formData.append("productDetailDescription", description);
+      if (descriptionFileMasterIdx !== null) {
+        formData.append("descriptionFileMasterIdx", descriptionFileMasterIdx.toString());
+      }
 
       // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
       // 유지할 기존 이미지(isNew: false) + 새 이미지(isNew: true) 모두 전송
