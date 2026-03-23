@@ -23,6 +23,9 @@ function RootLayoutContent() {
 
   // 카카오 SDK 초기화
   useEffect(() => {
+    setLogoutCallback(() => {
+      router.replace("/(guest)/tabs/guesthome");
+    });
     if (Platform.OS !== "web") {
       initializeKakaoSDK("bbbf21a6976b000c1889068c4e6564f7");
     }
