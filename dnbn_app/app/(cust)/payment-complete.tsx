@@ -23,16 +23,16 @@ export default function PaymentComplete() {
         orderId,
         amount: Number(amount),
       };
-      console.log('[Toss confirm 요청 데이터]', JSON.stringify(body, null, 2));
+      console.log("[Toss confirm 요청 데이터]", JSON.stringify(body, null, 2));
 
       const response = await apiPost("/cust/payment/toss/confirm", body);
 
       const data = await response.json().catch(() => ({}));
-      console.log('[Toss confirm 응답 데이터]', JSON.stringify(data, null, 2));
+      console.log("[Toss confirm 응답 데이터]", JSON.stringify(data, null, 2));
 
       if (!response.ok || data.success === false) {
         const errMsg = data.message || "결제 승인에 실패했습니다.";
-        console.error('[Toss confirm 실패]', errMsg);
+        console.error("[Toss confirm 실패]", errMsg);
         router.replace({
           pathname: "/(cust)/payment-fail",
           params: { message: errMsg },
@@ -53,13 +53,18 @@ export default function PaymentComplete() {
     }
   }, [paymentKey, orderId, amount, confirmPayment]);
 
-  const handleGoToNegoAccepted = () => {
-    router.replace("/(cust)/nego-accepted");
+  const handleGoToPaymentList = () => {
+    router.replace("/(cust)/PaymentList");
   };
 
   if (confirming) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#EF7810" />
         <Text style={{ marginTop: 12, color: "#999" }}>결제 확인 중...</Text>
       </View>
@@ -81,7 +86,7 @@ export default function PaymentComplete() {
 
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={handleGoToNegoAccepted}
+          onPress={handleGoToPaymentList}
         >
           <Ionicons name="chevron-back" size={20} color="#ef7810" />
           <Text style={styles.homeButtonText}>결제 목록으로 이동</Text>

@@ -47,7 +47,7 @@ function RootLayoutContent() {
   // 앱 시작 시 로그아웃 콜백 설정
   useEffect(() => {
     setLogoutCallback(() => {
-      router.replace('/(auth)/login');
+      router.replace('/(guest)/tabs/guesthome');
     });
   }, []);
 
