@@ -9,16 +9,16 @@ import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  FlatList,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    FlatList,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./sale-product-detail.styles";
@@ -234,6 +234,8 @@ export default function ProductDetailScreen() {
                 productNm: productData.response.productNm,
                 storeNm: productData.response.storeNm,
                 price: productData.response.price,
+                discountPrice: productData.discountPrice,
+                discountRate,
                 imageUrl: productData.response.productImgs?.files?.[0]?.fileUrl,
                 type: "sale",
               })

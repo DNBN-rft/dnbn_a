@@ -1,49 +1,91 @@
-import { shareListTemplate } from "@react-native-kakao/share";
+import {
+  shareCommerceTemplate,
+  shareFeedTemplate,
+} from "@react-native-kakao/share";
+
+const WEB_BASE_URL = "https://dnbn-x5or.onrender.com";
+
+const PRODUCT_SCREEN_MAP: Record<string, string> = {
+  regular: "product-detail",
+  sale: "sale-product-detail",
+  nego: "nego-product-detail",
+};
 
 export async function shareProduct(params: {
   productCode: string;
   productNm: string;
   storeNm: string;
   price: number;
+  discountPrice?: number;
+  discountRate?: number;
   imageUrl?: string;
   type: string;
 }) {
-  const fallbackImage = "https://your-domain.com/default-product.png"; // 기본 이미지 URL로 교체
+  const fallbackImage = `${WEB_BASE_URL}/default-product.png`;
   const imageUrl = params.imageUrl ?? fallbackImage;
+  const screen = PRODUCT_SCREEN_MAP[params.type] ?? "product-detail";
   const link = {
     androidExecutionParams: {
       productCode: params.productCode,
-      type: params.type,
+      screen,
     },
-    iosExecutionParams: { productCode: params.productCode, type: params.type },
-    mobileWebUrl: `https://your-domain.com/product/${params.productCode}`,
-    webUrl: `https://your-domain.com/product/${params.productCode}`,
+    iosExecutionParams: {
+      productCode: params.productCode,
+      screen,
+    },
+    mobileWebUrl: `${WEB_BASE_URL}/product/${params.productCode}`,
+    webUrl: `${WEB_BASE_URL}/product/${params.productCode}`,
   };
 
-  await shareListTemplate({
+  await shareCommerceTemplate({
     template: {
-      headerTitle: "지금 이 상품 어때요?",
-      headerLink: link,
-      contents: [
-        {
-          title: params.productNm,
-          description: `${params.price.toLocaleString()}원`,
-          imageUrl,
-          link,
-        },
-        {
-          title: params.storeNm,
-          description: "매장 바로가기",
-          imageUrl,
-          link,
-        },
-      ],
-      buttons: [
-        {
-          title: "앱에서 보기",
-          link,
-        },
-      ],
+      content: {
+        title: params.productNm,
+        imageUrl,
+        link,
+      },
+      commerce: {
+        productName: params.productNm,
+        regularPrice: params.price,
+        ...(params.discountPrice != null && {
+          discountPrice: params.discountPrice,
+        }),
+        ...(params.discountRate != null && {
+          discountRate: params.discountRate,
+        }),
+        currencyUnit: "원",
+        currencyUnitPosition: 0,
+      },
+      buttons: [{ title: "앱에서 보기", link }],
+    },
+  });
+}
+
+export async function shareStore(params: {
+  storeCode: string;
+  storeNm: string;
+  imageUrl?: string;
+}) {
+  const fallbackImage = `${WEB_BASE_URL}/default-store.png`;
+  const imageUrl = params.imageUrl ?? fallbackImage;
+  const link = {
+    androidExecutionParams: {
+      storeCode: params.storeCode,
+      screen: "storeInfo",
+    },
+    iosExecutionParams: { storeCode: params.storeCode, screen: "storeInfo" },
+    mobileWebUrl: `${WEB_BASE_URL}/store/${params.storeCode}`,
+    webUrl: `${WEB_BASE_URL}/store/${params.storeCode}`,
+  };
+
+  await shareFeedTemplate({
+    template: {
+      content: {
+        title: params.storeNm,
+        imageUrl,
+        link,
+      },
+      buttons: [{ title: "앱에서 보기", link }],
     },
   });
 }
