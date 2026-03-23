@@ -53,8 +53,8 @@ export default function PaymentComplete() {
     }
   }, [paymentKey, orderId, amount, confirmPayment]);
 
-  const handleGoToPaymentList = () => {
-    router.replace("/(cust)/PaymentList");
+  const handleGoToOrderList = () => {
+    router.replace("/(cust)/orderList");
   };
 
   if (confirming) {
@@ -86,7 +86,7 @@ export default function PaymentComplete() {
 
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={handleGoToPaymentList}
+          onPress={handleGoToOrderList}
         >
           <Ionicons name="chevron-back" size={20} color="#ef7810" />
           <Text style={styles.homeButtonText}>결제 목록으로 이동</Text>
