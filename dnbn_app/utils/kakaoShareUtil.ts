@@ -1,9 +1,49 @@
-/**
- * 상품 페이지를 카카오톡으로 공유합니다.
- * 공유 링크 클릭 시 앱이 설치된 경우 해당 상품 상세 페이지로 이동합니다.
- */
+import { shareListTemplate } from "@react-native-kakao/share";
 
-/**
- * 매장 페이지를 카카오톡으로 공유합니다.
- * 공유 링크 클릭 시 앱이 설치된 경우 해당 매장 페이지로 이동합니다.
- */
+export async function shareProduct(params: {
+  productCode: string;
+  productNm: string;
+  storeNm: string;
+  price: number;
+  imageUrl?: string;
+  type: string;
+}) {
+  const fallbackImage = "https://your-domain.com/default-product.png"; // 기본 이미지 URL로 교체
+  const imageUrl = params.imageUrl ?? fallbackImage;
+  const link = {
+    androidExecutionParams: {
+      productCode: params.productCode,
+      type: params.type,
+    },
+    iosExecutionParams: { productCode: params.productCode, type: params.type },
+    mobileWebUrl: `https://your-domain.com/product/${params.productCode}`,
+    webUrl: `https://your-domain.com/product/${params.productCode}`,
+  };
+
+  await shareListTemplate({
+    template: {
+      headerTitle: "지금 이 상품 어때요?",
+      headerLink: link,
+      contents: [
+        {
+          title: params.productNm,
+          description: `${params.price.toLocaleString()}원`,
+          imageUrl,
+          link,
+        },
+        {
+          title: params.storeNm,
+          description: "매장 바로가기",
+          imageUrl,
+          link,
+        },
+      ],
+      buttons: [
+        {
+          title: "앱에서 보기",
+          link,
+        },
+      ],
+    },
+  });
+}
