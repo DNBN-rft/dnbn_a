@@ -24,7 +24,7 @@ function RootLayoutContent() {
   // 카카오 SDK 초기화
   useEffect(() => {
     setLogoutCallback(() => {
-      router.replace('/(guest)/tabs/guesthome');
+      router.replace("/(guest)/tabs/guesthome");
     });
     if (Platform.OS !== "web") {
       initializeKakaoSDK("bbbf21a6976b000c1889068c4e6564f7");
@@ -34,7 +34,7 @@ function RootLayoutContent() {
   // 앱 시작 시 로그아웃 콜백 설정
   useEffect(() => {
     setLogoutCallback(() => {
-      router.replace("/(auth)/login");
+      router.replace("/(guest)/tabs/guesthome");
     });
   }, []);
 
