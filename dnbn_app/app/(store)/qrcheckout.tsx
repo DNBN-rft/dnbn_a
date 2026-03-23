@@ -80,11 +80,15 @@ export default function QRCheckoutScreen() {
     (async () => {
       try {
         // TODO: 백엔드 API 경로 및 파라미터 확인 후 수정
-        const response = await apiGet(`/store/qr/products?qrToken=${encodeURIComponent(data)}`);
+        const response = await apiGet(
+          `/store/qr/products?qrToken=${encodeURIComponent(data)}`,
+        );
         const result = await response.json();
 
         if (response.ok) {
-          const list: ProductItem[] = Array.isArray(result) ? result : (result.products ?? []);
+          const list: ProductItem[] = Array.isArray(result)
+            ? result
+            : (result.products ?? []);
           if (list.length === 0) {
             Alert.alert("알림", "교환할 상품이 없습니다.", [
               { text: "확인", onPress: resetScan },
@@ -133,7 +137,15 @@ export default function QRCheckoutScreen() {
         Alert.alert(
           "수령 처리 완료",
           `${selectedCodes.size}개 상품이 수령 처리되었습니다.`,
-          [{ text: "확인", onPress: () => { setModalVisible(false); router.back(); } }],
+          [
+            {
+              text: "확인",
+              onPress: () => {
+                setModalVisible(false);
+                router.back();
+              },
+            },
+          ],
           { cancelable: false },
         );
       } else {
@@ -195,7 +207,7 @@ export default function QRCheckoutScreen() {
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
-        <View style={{ height: insets.top, backgroundColor: "#000" }} />
+        <View style={{ height: insets.top, backgroundColor: "#fff" }} />
       )}
 
       {/* 헤더 */}
@@ -260,22 +272,33 @@ export default function QRCheckoutScreen() {
           {/* 모달 헤더 */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>교환 상품 목록</Text>
-            <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
+            <TouchableOpacity
+              onPress={closeModal}
+              style={styles.modalCloseButton}
+            >
               <Text style={styles.modalCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
 
           {/* 전체 선택 */}
-          <TouchableOpacity style={styles.selectAllRow} onPress={toggleSelectAll}>
-            <View style={[
-              styles.checkbox,
-              selectedCodes.size === products.length && products.length > 0 && styles.checkboxChecked,
-            ]}>
-              {selectedCodes.size === products.length && products.length > 0 && (
-                <Text style={styles.checkmark}>✓</Text>
-              )}
+          <TouchableOpacity
+            style={styles.selectAllRow}
+            onPress={toggleSelectAll}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                selectedCodes.size === products.length &&
+                  products.length > 0 &&
+                  styles.checkboxChecked,
+              ]}
+            >
+              {selectedCodes.size === products.length &&
+                products.length > 0 && <Text style={styles.checkmark}>✓</Text>}
             </View>
-            <Text style={styles.selectAllText}>전체 선택 ({selectedCodes.size}/{products.length})</Text>
+            <Text style={styles.selectAllText}>
+              전체 선택 ({selectedCodes.size}/{products.length})
+            </Text>
           </TouchableOpacity>
 
           {/* 상품 목록 */}
@@ -289,17 +312,22 @@ export default function QRCheckoutScreen() {
                 onPress={() => toggleSelect(item.productCode)}
                 activeOpacity={0.7}
               >
-                <View style={[
-                  styles.checkbox,
-                  selectedCodes.has(item.productCode) && styles.checkboxChecked,
-                ]}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    selectedCodes.has(item.productCode) &&
+                      styles.checkboxChecked,
+                  ]}
+                >
                   {selectedCodes.has(item.productCode) && (
                     <Text style={styles.checkmark}>✓</Text>
                   )}
                 </View>
                 <View style={styles.productInfo}>
                   <Text style={styles.productName}>{item.productNm}</Text>
-                  <Text style={styles.productDetail}>수량: {item.quantity}</Text>
+                  <Text style={styles.productDetail}>
+                    수량: {item.quantity}
+                  </Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -311,13 +339,16 @@ export default function QRCheckoutScreen() {
             <TouchableOpacity
               style={[
                 styles.confirmButton,
-                (selectedCodes.size === 0 || isSubmitting) && styles.confirmButtonDisabled,
+                (selectedCodes.size === 0 || isSubmitting) &&
+                  styles.confirmButtonDisabled,
               ]}
               onPress={handleConfirm}
               disabled={selectedCodes.size === 0 || isSubmitting}
             >
               <Text style={styles.confirmButtonText}>
-                {isSubmitting ? "처리 중..." : `선택 상품 수령 처리 (${selectedCodes.size}개)`}
+                {isSubmitting
+                  ? "처리 중..."
+                  : `선택 상품 수령 처리 (${selectedCodes.size}개)`}
               </Text>
             </TouchableOpacity>
             {insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
