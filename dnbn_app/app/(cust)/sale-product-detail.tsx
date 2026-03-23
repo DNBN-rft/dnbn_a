@@ -191,6 +191,7 @@ export default function ProductDetailScreen() {
       params: {
         productCode: productData?.response.productCode,
         orderQty: quantity.toString(),
+        discountPrice: (productData?.discountPrice ?? 0).toString(),
       },
     });
   };

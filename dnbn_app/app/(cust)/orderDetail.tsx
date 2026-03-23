@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -36,11 +37,10 @@ type OrderDetail = {
   orderDateTime: string;
   orderNumber: string;
   paymentMethod: string;
-  paymentInfo: string;
   totalPrice: number;
   discountPrice: number;
-  finalPrice: number;
   stores: Store[];
+  receiptUrl: string;
 };
 
 export default function OrderDetailScreen() {
@@ -124,7 +124,16 @@ export default function OrderDetailScreen() {
                   </Text>
                 </View>
 
-                <Pressable style={styles.receiptButton}>
+                <Pressable
+                  style={[
+                    styles.receiptButton,
+                    !item.receiptUrl && { opacity: 0.4 },
+                  ]}
+                  onPress={() =>
+                    item.receiptUrl && Linking.openURL(item.receiptUrl)
+                  }
+                  disabled={!item.receiptUrl}
+                >
                   <Text style={styles.receiptButtonText}>영수증</Text>
                 </Pressable>
               </View>
@@ -198,7 +207,8 @@ export default function OrderDetailScreen() {
                   <View style={styles.paymentRow}>
                     <Text style={styles.paymentLabelSub}>상품금액</Text>
                     <Text style={styles.paymentValueSub}>
-                      {item.totalPrice.toLocaleString()}원
+                      {(item.totalPrice + item.discountPrice).toLocaleString()}
+                      원
                     </Text>
                   </View>
                   <View style={styles.paymentRow}>
@@ -215,10 +225,9 @@ export default function OrderDetailScreen() {
                       {item.paymentMethod}
                     </Text>
                     <Text style={styles.finalPriceText}>
-                      {item.finalPrice.toLocaleString()}원
+                      {item.totalPrice.toLocaleString()}원
                     </Text>
                   </View>
-                  <Text style={styles.paymentInfoText}>{item.paymentInfo}</Text>
                 </View>
               </View>
             </View>

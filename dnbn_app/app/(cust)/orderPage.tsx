@@ -30,7 +30,7 @@ interface RecommendedProduct {
 
 export default function OrderPage() {
   const insets = useSafeAreaInsets();
-  const { productCode, orderQty, cartItems } = useLocalSearchParams();
+  const { productCode, orderQty, cartItems, discountPrice: discountPriceParam } = useLocalSearchParams();
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -122,6 +122,8 @@ export default function OrderPage() {
         address: "서울시 강남구 테헤란로 123",
       };
 
+  const parsedDiscountPrice = Number(discountPriceParam) || 0;
+
   const productInfo = orderData
     ? {
         storeName: orderData.storeNm,
@@ -130,14 +132,17 @@ export default function OrderPage() {
           orderData.fileMasterResponse?.files?.[0]?.fileUrl ||
           "https://via.placeholder.com/80",
         quantity: orderData.orderQty,
-        unitPrice: orderData.productPrice,
+        unitPrice:
+          parsedDiscountPrice > 0
+            ? parsedDiscountPrice
+            : orderData.productPrice,
       }
     : {
         storeName: "GS25 강남점",
         productName: "카페라떼 1+1 행사 상품",
         imageUrl: "https://via.placeholder.com/80",
         quantity: Number(orderQty) || 2,
-        unitPrice: 2500,
+        unitPrice: parsedDiscountPrice > 0 ? parsedDiscountPrice : 2500,
       };
 
   const totalPrice = isCartMode
@@ -145,7 +150,10 @@ export default function OrderPage() {
         (sum, store) =>
           sum +
           store.items.reduce(
-            (s, item) => s + (item.price - item.discountPrice) * item.quantity,
+            (s, item) =>
+              s +
+              (item.discountPrice > 0 ? item.discountPrice : item.price) *
+                item.quantity,
             0,
           ),
         0,
@@ -222,6 +230,7 @@ export default function OrderPage() {
             paymentType: selectedPayment,
             productCode,
             orderQty: Number(orderQty) || 1,
+            discountPrice: parsedDiscountPrice,
           };
 
       console.log('[Toss 결제 요청 데이터 - 주문페이지]', JSON.stringify(body, null, 2));
@@ -334,7 +343,7 @@ export default function OrderPage() {
                       </Text>
                       <Text style={styles.unitPrice}>
                         {(
-                          (item.price - item.discountPrice) *
+                          (item.discountPrice > 0 ? item.discountPrice : item.price) *
                           item.quantity
                         ).toLocaleString()}
                         원
