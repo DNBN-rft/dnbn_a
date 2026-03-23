@@ -687,7 +687,9 @@ export default function ProductDetailScreen() {
       >
         <View style={[loginScreenStyles.container, { paddingTop: insets.top }]}>
           <Ionicons name="lock-closed-outline" size={64} color="#EF7810" />
-          <Text style={loginScreenStyles.message}>로그인 후 이용 가능합니다</Text>
+          <Text style={loginScreenStyles.message}>
+            로그인 후 이용 가능합니다
+          </Text>
           <TouchableOpacity
             style={loginScreenStyles.backButton}
             onPress={() => setLoginVisible(false)}
@@ -701,7 +703,9 @@ export default function ProductDetailScreen() {
               router.push("/(auth)/login");
             }}
           >
-            <Text style={loginScreenStyles.loginButtonText}>로그인 하러 가기</Text>
+            <Text style={loginScreenStyles.loginButtonText}>
+              로그인 하러 가기
+            </Text>
           </TouchableOpacity>
         </View>
       </Modal>
