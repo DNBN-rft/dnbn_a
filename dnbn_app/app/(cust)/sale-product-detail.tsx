@@ -234,6 +234,8 @@ export default function ProductDetailScreen() {
                 productNm: productData.response.productNm,
                 storeNm: productData.response.storeNm,
                 price: productData.response.price,
+                discountPrice: productData.discountPrice,
+                discountRate: discountRate,
                 imageUrl: productData.response.productImgs?.files?.[0]?.fileUrl,
                 type: "sale",
               })
