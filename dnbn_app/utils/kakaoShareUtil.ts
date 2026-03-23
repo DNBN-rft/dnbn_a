@@ -33,8 +33,8 @@ export async function shareProduct(params: {
       productCode: params.productCode,
       screen,
     },
-    mobileWebUrl: `${WEB_BASE_URL}/product/${params.productCode}`,
-    webUrl: `${WEB_BASE_URL}/product/${params.productCode}`,
+    mobileWebUrl: `${WEB_BASE_URL}/product/${params.productCode}`, // 모바일인데 앱이 없을 경우 앱스토어로 연결
+    webUrl: `${WEB_BASE_URL}/product/${params.productCode}`, // 웹일 경우 아임웹 페이지로 연결
   };
 
   await shareCommerceTemplate({
@@ -74,10 +74,10 @@ export async function shareStore(params: {
       screen: "storeInfo",
     },
     iosExecutionParams: { storeCode: params.storeCode, screen: "storeInfo" },
-    mobileWebUrl: `${WEB_BASE_URL}/store/${params.storeCode}`,
-    webUrl: `${WEB_BASE_URL}/store/${params.storeCode}`,
+    mobileWebUrl: `${WEB_BASE_URL}/store/${params.storeCode}`, // 모바일인데 앱이 없을 경우 앱스토어로 연결
+    webUrl: `${WEB_BASE_URL}/store/${params.storeCode}`, // 웹일 경우 아임웹 페이지로 연결 
   };
-
+  
   await shareFeedTemplate({
     template: {
       content: {
