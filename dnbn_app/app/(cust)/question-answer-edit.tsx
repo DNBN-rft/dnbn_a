@@ -78,11 +78,6 @@ export default function QuestionAnswerEdit() {
       if (response.ok) {
         const data: QuestionDetailResponse = await response.json();
 
-        console.log(
-          "백엔드에서 받은 questionRequestType:",
-          data.questionRequestType,
-        );
-
         // 백엔드에서 한글 label로 오므로 그대로 사용
         setSelectedQuestionType(data.questionRequestType);
         setQuestionTitle(data.questionTitle);
@@ -121,17 +116,23 @@ export default function QuestionAnswerEdit() {
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-              { text: "취소", style: "cancel" },
-            ]);
+            Alert.alert(
+              "카메라 권한 필요",
+              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              [
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
+                { text: "취소", style: "cancel" },
+              ],
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
@@ -145,7 +146,6 @@ export default function QuestionAnswerEdit() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
