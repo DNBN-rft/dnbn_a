@@ -138,15 +138,6 @@ export default function NegoAcceptedScreen() {
     try {
       const response = await apiPost("/cust/payment/toss/prepare", body);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        Alert.alert(
-          "결제 오류 (디버그)",
-          `[요청 body]\n${JSON.stringify(body, null, 2)}\n\n[서버 응답]\n${JSON.stringify(errorData, null, 2)}`,
-        );
-        return;
-      }
-
       const data = await response.json();
 
       const paymentUrl: string = data.paymentUrl;
