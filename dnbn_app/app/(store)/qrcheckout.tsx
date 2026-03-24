@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
+  Image,
   Modal,
   Text,
   TouchableOpacity,
@@ -13,12 +14,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./qrcheckout.styles";
 
-// TODO: 백엔드 API 응답 구조에 맞게 수정
 type ProductItem = {
-  productCode: string;
+  orderDetailIdx: number;
   productNm: string;
-  quantity: number;
-  // 필요한 필드 추가
+  productCode: string;
+  categoryNm: string;
+  productAmount: number;
+  imgs?: { files: { originalName: string; fileUrl: string; order: number }[] };
+  paymentDateTime?: string;
+  isUsed?: boolean;
 };
 
 export default function QRCheckoutScreen() {
@@ -27,10 +31,11 @@ export default function QRCheckoutScreen() {
   const [scanned, setScanned] = useState(false);
   const isProcessing = useRef(false);
 
-  // 모달 상태
   const [modalVisible, setModalVisible] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
+  const [selectedIdxList, setSelectedIdxList] = useState<Set<number>>(
+    new Set(),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scannedToken = useRef<string>("");
 
@@ -39,25 +44,27 @@ export default function QRCheckoutScreen() {
     isProcessing.current = false;
   };
 
-  // 체크박스 토글
-  const toggleSelect = (productCode: string) => {
-    setSelectedCodes((prev) => {
+  const toggleSelect = (idx: number) => {
+    const item = products.find((p) => p.orderDetailIdx === idx);
+    if (item?.isUsed) return;
+    setSelectedIdxList((prev) => {
       const next = new Set(prev);
-      if (next.has(productCode)) {
-        next.delete(productCode);
+      if (next.has(idx)) {
+        next.delete(idx);
       } else {
-        next.add(productCode);
+        next.add(idx);
       }
       return next;
     });
   };
 
-  // 전체 선택/해제
+  // 전체 선택/해제 (미사용 상품만 대상)
   const toggleSelectAll = () => {
-    if (selectedCodes.size === products.length) {
-      setSelectedCodes(new Set());
+    const unusedItems = products.filter((p) => !p.isUsed);
+    if (selectedIdxList.size === unusedItems.length && unusedItems.length > 0) {
+      setSelectedIdxList(new Set());
     } else {
-      setSelectedCodes(new Set(products.map((p) => p.productCode)));
+      setSelectedIdxList(new Set(unusedItems.map((p) => p.orderDetailIdx)));
     }
   };
 
@@ -65,7 +72,7 @@ export default function QRCheckoutScreen() {
   const closeModal = () => {
     setModalVisible(false);
     setProducts([]);
-    setSelectedCodes(new Set());
+    setSelectedIdxList(new Set());
     scannedToken.current = "";
     resetScan();
   };
@@ -79,9 +86,8 @@ export default function QRCheckoutScreen() {
 
     (async () => {
       try {
-        // TODO: 백엔드 API 경로 및 파라미터 확인 후 수정
         const response = await apiGet(
-          `/store/qr/products?qrToken=${encodeURIComponent(data)}`,
+          `/store/app/qr/check/${encodeURIComponent(data)}`,
         );
         const result = await response.json();
 
@@ -96,7 +102,9 @@ export default function QRCheckoutScreen() {
             return;
           }
           setProducts(list);
-          setSelectedCodes(new Set(list.map((p) => p.productCode)));
+          setSelectedIdxList(
+            new Set(list.filter((p) => !p.isUsed).map((p) => p.orderDetailIdx)),
+          );
           setModalVisible(true);
         } else {
           const errorMsg =
@@ -120,36 +128,66 @@ export default function QRCheckoutScreen() {
 
   // 선택한 상품 수령 처리
   const handleConfirm = async () => {
-    if (selectedCodes.size === 0) {
+    if (selectedIdxList.size === 0) {
       Alert.alert("알림", "수령 처리할 상품을 선택해주세요.");
       return;
     }
     setIsSubmitting(true);
+    const confirmedCount = selectedIdxList.size;
     try {
-      // TODO: 백엔드 API 경로 및 요청 바디 확인 후 수정
-      const response = await apiPost("/store/qr/confirm", {
-        qrToken: scannedToken.current,
-        productCodes: Array.from(selectedCodes),
+      const response = await apiPost("/store/app/qr/confirm", {
+        orderDetailIdxList: Array.from(selectedIdxList),
       });
-      const result = await response.json();
+
+      // 응답 바디가 없거나 JSON이 아닐 수 있으므로 안전하게 파싱
+      let result: Record<string, unknown> = {};
+      try {
+        result = await response.json();
+      } catch {
+        // 빈 바디 또는 비JSON 응답 허용
+      }
 
       if (response.ok) {
+        // 갱신된 상품 목록 재조회, 실패 시 로컬에서 isUsed 업데이트
+        let refreshed = false;
+        try {
+          const refreshResponse = await apiGet(
+            `/store/app/qr/check/${encodeURIComponent(scannedToken.current)}`,
+          );
+          if (refreshResponse.ok) {
+            const refreshResult = await refreshResponse.json();
+            const list: ProductItem[] = Array.isArray(refreshResult)
+              ? refreshResult
+              : (refreshResult.products ?? []);
+            setProducts(list);
+            setSelectedIdxList(new Set());
+            refreshed = true;
+          }
+        } catch {
+          // 재조회 실패 시 무시
+        }
+        if (!refreshed) {
+          // 백엔드 재조회 불가 시 로컬에서 처리한 항목을 사용됨으로 표시
+          setProducts((prev) =>
+            prev.map((p) =>
+              selectedIdxList.has(p.orderDetailIdx)
+                ? { ...p, isUsed: true }
+                : p,
+            ),
+          );
+          setSelectedIdxList(new Set());
+        }
         Alert.alert(
           "수령 처리 완료",
-          `${selectedCodes.size}개 상품이 수령 처리되었습니다.`,
-          [
-            {
-              text: "확인",
-              onPress: () => {
-                setModalVisible(false);
-                router.back();
-              },
-            },
-          ],
+          `${confirmedCount}개 상품이 수령 처리되었습니다.`,
+          [{ text: "확인" }],
           { cancelable: false },
         );
       } else {
-        Alert.alert("처리 실패", result.message ?? "수령 처리에 실패했습니다.");
+        Alert.alert(
+          "처리 실패",
+          (result.message as string) ?? "수령 처리에 실패했습니다.",
+        );
       }
     } catch {
       Alert.alert("오류", "네트워크 오류가 발생했습니다.");
@@ -229,7 +267,9 @@ export default function QRCheckoutScreen() {
           barcodeScannerSettings={{
             barcodeTypes: ["qr"],
           }}
-          onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+          onBarcodeScanned={
+            scanned || modalVisible ? undefined : handleBarcodeScanned
+          }
         />
 
         {/* 스캔 가이드 오버레이 */}
@@ -262,13 +302,10 @@ export default function QRCheckoutScreen() {
       <Modal
         visible={modalVisible}
         animationType="slide"
+        presentationStyle="fullScreen"
         onRequestClose={closeModal}
       >
         <View style={styles.modalContainer}>
-          {insets.top > 0 && (
-            <View style={{ height: insets.top, backgroundColor: "#FFF" }} />
-          )}
-
           {/* 모달 헤더 */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>교환 상품 목록</Text>
@@ -285,48 +322,108 @@ export default function QRCheckoutScreen() {
             style={styles.selectAllRow}
             onPress={toggleSelectAll}
           >
-            <View
-              style={[
-                styles.checkbox,
-                selectedCodes.size === products.length &&
-                  products.length > 0 &&
-                  styles.checkboxChecked,
-              ]}
-            >
-              {selectedCodes.size === products.length &&
-                products.length > 0 && <Text style={styles.checkmark}>✓</Text>}
-            </View>
-            <Text style={styles.selectAllText}>
-              전체 선택 ({selectedCodes.size}/{products.length})
-            </Text>
+            {(() => {
+              const unusedCount = products.filter((p) => !p.isUsed).length;
+              const allUnusedSelected =
+                selectedIdxList.size === unusedCount && unusedCount > 0;
+              return (
+                <>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      allUnusedSelected && styles.checkboxChecked,
+                    ]}
+                  >
+                    {allUnusedSelected && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={styles.selectAllText}>
+                    전체 선택 ({selectedIdxList.size}/{products.length})
+                  </Text>
+                </>
+              );
+            })()}
           </TouchableOpacity>
 
           {/* 상품 목록 */}
           <FlatList
             data={products}
-            keyExtractor={(item) => item.productCode}
+            keyExtractor={(item) => item.orderDetailIdx.toString()}
             contentContainerStyle={styles.productList}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={styles.productRow}
-                onPress={() => toggleSelect(item.productCode)}
-                activeOpacity={0.7}
+                style={[styles.productRow, item.isUsed && { opacity: 0.5 }]}
+                onPress={() => toggleSelect(item.orderDetailIdx)}
+                activeOpacity={item.isUsed ? 1 : 0.7}
+                disabled={item.isUsed}
               >
+                {/* 체크박스 */}
                 <View
                   style={[
                     styles.checkbox,
-                    selectedCodes.has(item.productCode) &&
+                    selectedIdxList.has(item.orderDetailIdx) &&
                       styles.checkboxChecked,
                   ]}
                 >
-                  {selectedCodes.has(item.productCode) && (
+                  {selectedIdxList.has(item.orderDetailIdx) && (
                     <Text style={styles.checkmark}>✓</Text>
                   )}
                 </View>
+
+                {/* 이미지 + 라벨 */}
+                <View style={styles.productImageWrapper}>
+                  {item.imgs?.files?.[0]?.fileUrl ? (
+                    <Image
+                      source={{ uri: item.imgs.files[0].fileUrl }}
+                      style={styles.productImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.productImagePlaceholder} />
+                  )}
+                  <View
+                    style={[
+                      styles.usageBadge,
+                      item.isUsed
+                        ? styles.usageBadgeUsed
+                        : styles.usageBadgeNew,
+                    ]}
+                  >
+                    <Text style={styles.usageBadgeText}>
+                      {item.isUsed ? "사용" : "미사용"}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* 상품 정보 */}
                 <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{item.productNm}</Text>
+                  <Text style={styles.categoryNm}>{item.categoryNm}</Text>
+                  <Text style={styles.productName} numberOfLines={2}>
+                    {item.productNm}
+                  </Text>
+                  {item.paymentDateTime && (
+                    <Text style={styles.productDetail}>
+                      결제일:{" "}
+                      {new Date(item.paymentDateTime).toLocaleDateString(
+                        "ko-KR",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        },
+                      )}{" "}
+                      {new Date(item.paymentDateTime).toLocaleTimeString(
+                        "ko-KR",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
+                    </Text>
+                  )}
                   <Text style={styles.productDetail}>
-                    수량: {item.quantity}
+                    수량: {item.productAmount}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -336,22 +433,30 @@ export default function QRCheckoutScreen() {
           {/* 확인 버튼 */}
           <View style={styles.modalFooter}>
             {insets.bottom > 0 && <View style={{ height: 8 }} />}
-            <TouchableOpacity
-              style={[
-                styles.confirmButton,
-                (selectedCodes.size === 0 || isSubmitting) &&
-                  styles.confirmButtonDisabled,
-              ]}
-              onPress={handleConfirm}
-              disabled={selectedCodes.size === 0 || isSubmitting}
-            >
-              <Text style={styles.confirmButtonText}>
-                {isSubmitting
-                  ? "처리 중..."
-                  : `선택 상품 수령 처리 (${selectedCodes.size}개)`}
-              </Text>
-            </TouchableOpacity>
-            {insets.bottom > 0 && <View style={{ height: insets.bottom }} />}
+            <View style={styles.footerButtonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.confirmButton,
+                  (selectedIdxList.size === 0 || isSubmitting) &&
+                    styles.confirmButtonDisabled,
+                ]}
+                onPress={handleConfirm}
+                disabled={selectedIdxList.size === 0 || isSubmitting}
+              >
+                <Text style={styles.confirmButtonText}>
+                  {isSubmitting
+                    ? "처리 중..."
+                    : `사용 처리 (${selectedIdxList.size}개)`}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={closeModal}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.cancelButtonText}>창닫기</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

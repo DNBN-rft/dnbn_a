@@ -129,19 +129,23 @@ export const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#EFEFEF",
+    position: "relative",
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: "#1A1A1A",
+    textAlign: "center",
   },
   modalCloseButton: {
     padding: 4,
+    position: "absolute",
+    right: 20,
   },
   modalCloseText: {
     fontSize: 20,
@@ -168,10 +172,47 @@ export const styles = StyleSheet.create({
   productRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
+    gap: 12,
+  },
+  productImageWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+    flexShrink: 0,
+  },
+  productImage: {
+    width: "100%",
+    height: "100%",
+  },
+  productImagePlaceholder: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#E8E8E8",
+  },
+  usageBadge: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderBottomRightRadius: 6,
+  },
+  usageBadgeNew: {
+    backgroundColor: "#EF7810",
+  },
+  usageBadgeUsed: {
+    backgroundColor: "#999",
+  },
+  usageBadgeText: {
+    color: "#FFF",
+    fontSize: 11,
+    fontWeight: "700",
   },
   checkbox: {
     width: 22,
@@ -194,16 +235,23 @@ export const styles = StyleSheet.create({
     lineHeight: 16,
   },
   productInfo: {
-    marginLeft: 14,
     flex: 1,
   },
+  categoryNm: {
+    fontSize: 11,
+    color: "#EF7810",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
   productName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: "#1A1A1A",
+    lineHeight: 20,
+    marginBottom: 4,
   },
   productDetail: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#888",
     marginTop: 2,
   },
@@ -215,7 +263,26 @@ export const styles = StyleSheet.create({
     borderTopColor: "#EFEFEF",
     backgroundColor: "#FFF",
   },
+  footerButtonRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#CCC",
+    backgroundColor: "#FFF",
+  },
+  cancelButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontWeight: "600",
+  },
   confirmButton: {
+    flex: 1,
     backgroundColor: "#EF7810",
     borderRadius: 10,
     paddingVertical: 14,
@@ -230,4 +297,3 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
-
