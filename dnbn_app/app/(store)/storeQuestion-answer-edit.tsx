@@ -133,7 +133,9 @@ export default function StoreQuestionAnswerEdit() {
         : "jpg";
       const rawName = asset.fileName || asset.uri.split("/").pop() || "";
       const hasExt = rawName.includes(".");
-      const name = hasExt ? rawName : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      const name = hasExt
+        ? rawName
+        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
       setImages([...images, { uri: asset.uri, name, isNew: true }]);
     };
 
@@ -143,17 +145,23 @@ export default function StoreQuestionAnswerEdit() {
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-              { text: "취소", style: "cancel" },
-            ]);
+            Alert.alert(
+              "카메라 권한 필요",
+              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              [
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
+                { text: "취소", style: "cancel" },
+              ],
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled) addFromAsset(result.assets[0]);
         },
@@ -162,10 +170,9 @@ export default function StoreQuestionAnswerEdit() {
         text: "갤러리에서 선택",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled) addFromAsset(result.assets[0]);
         },
@@ -410,10 +417,7 @@ export default function StoreQuestionAnswerEdit() {
 
         <View style={styles.submitButtonContainer}>
           <Pressable
-            style={[
-              styles.submitButton,
-              submitting && { opacity: 0.6 },
-            ]}
+            style={[styles.submitButton, submitting && { opacity: 0.6 }]}
             onPress={submitQuestion}
             disabled={submitting}
           >
@@ -443,7 +447,7 @@ export default function StoreQuestionAnswerEdit() {
           onPress={() => setQuestionTypeModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => { }}>
+            <TouchableWithoutFeedback onPress={() => {}}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>문의유형 선택</Text>
                 <Pressable
