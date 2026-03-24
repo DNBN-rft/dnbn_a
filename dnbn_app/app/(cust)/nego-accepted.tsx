@@ -70,11 +70,9 @@ export default function NegoAcceptedScreen() {
         setPage(pageNum);
       } else {
         setError(true);
-        console.error("승인된 네고 목록 조회 실패:", response.status);
       }
     } catch (error) {
       setError(true);
-      console.error("승인된 네고 목록 조회 중 오류:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -138,16 +136,10 @@ export default function NegoAcceptedScreen() {
       orderCode: item.orderCode,
     };
     try {
-      console.log(
-        "[Toss 결제 요청 데이터 - 네고]",
-        JSON.stringify(body, null, 2),
-      );
-
       const response = await apiPost("/cust/payment/toss/prepare", body);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("[Toss 결제 준비 실패 - 네고]", errorData);
         Alert.alert(
           "결제 오류 (디버그)",
           `[요청 body]\n${JSON.stringify(body, null, 2)}\n\n[서버 응답]\n${JSON.stringify(errorData, null, 2)}`,
@@ -156,10 +148,6 @@ export default function NegoAcceptedScreen() {
       }
 
       const data = await response.json();
-      console.log(
-        "[Toss 결제 준비 응답 데이터 - 네고]",
-        JSON.stringify(data, null, 2),
-      );
 
       const paymentUrl: string = data.paymentUrl;
       if (!paymentUrl) {
@@ -172,7 +160,6 @@ export default function NegoAcceptedScreen() {
         params: { paymentUrl },
       });
     } catch (error) {
-      console.error("[Toss 결제 준비 오류 - 네고]", error);
       Alert.alert(
         "결제 오류",
         "결제 중 오류가 발생했습니다. 다시 시도해주세요.",
