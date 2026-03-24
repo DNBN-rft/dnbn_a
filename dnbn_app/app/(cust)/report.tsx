@@ -7,10 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Modal,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ReportReasonModal } from "./components/ReportReasonModal";
-import { styles } from "./report.styles";
+import { styles, loadingOverlayStyles } from "./report.styles";
 
 export default function ReportPage() {
   const { storeCode, type } = useLocalSearchParams<{
@@ -93,20 +93,46 @@ export default function ReportPage() {
     }
   };
 
-  const pickImage = async () => {
+  const pickImage = () => {
     if (attachments.length >= 3) {
       showAlert("알림", "최대 3개까지 첨부 가능합니다.");
       return;
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setAttachments([...attachments, result.assets[0].uri]);
-    }
+    Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
+      {
+        text: "카메라로 촬영",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ]);
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+          });
+          if (!result.canceled && result.assets[0]) {
+            setAttachments([...attachments, result.assets[0].uri]);
+          }
+        },
+      },
+      {
+        text: "갤러리에서 선택",
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            allowsEditing: true,
+          });
+          if (!result.canceled && result.assets[0]) {
+            setAttachments([...attachments, result.assets[0].uri]);
+          }
+        },
+      },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   const removeAttachment = (index: number) => {
@@ -300,17 +326,3 @@ export default function ReportPage() {
   );
 }
 
-const loadingOverlayStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  text: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

@@ -166,7 +166,7 @@ export const validateBizInfo = (
   }
 
   if (!formData.bizRegDate) {
-    return { isValid: false, message: "개업일을 입력해주세요." };
+    return { isValid: false, message: "사업자 등록일을 입력해주세요." };
   }
 
   if (!formData.bizType || !formData.bizType.trim()) {
@@ -304,7 +304,7 @@ export const validateFileInfo = (
   }
 
   if (!formData.bizRegDate) {
-    return { isValid: false, message: "개업일을 입력해주세요." };
+    return { isValid: false, message: "사업자 등록일을 입력해주세요." };
   }
 
   // Step 3 검증 (가맹점 정보)

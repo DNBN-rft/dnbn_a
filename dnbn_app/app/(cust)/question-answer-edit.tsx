@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -109,33 +110,50 @@ export default function QuestionAnswerEdit() {
   };
 
   // 이미지 선택 함수
-  const pickImage = async () => {
-    // 이미 3개 선택된 경우
+  const pickImage = () => {
     if (questionFiles.length >= 3) {
       Alert.alert("알림", "최대 3개까지 첨부 가능합니다.");
       return;
     }
-
-    // 권한 요청
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      Alert.alert("알림", "갤러리 접근 권한이 필요합니다.");
-      return;
-    }
-
-    // 이미지 선택
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setQuestionFiles([...questionFiles, result.assets[0].uri]);
-    }
+    Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
+      {
+        text: "카메라로 촬영",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ]);
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+          if (!result.canceled && result.assets[0]) {
+            setQuestionFiles([...questionFiles, result.assets[0].uri]);
+          }
+        },
+      },
+      {
+        text: "갤러리에서 선택",
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+          if (!result.canceled && result.assets[0]) {
+            setQuestionFiles([...questionFiles, result.assets[0].uri]);
+          }
+        },
+      },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   // 이미지 삭제 함수

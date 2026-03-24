@@ -7,6 +7,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   ScrollView,
@@ -37,7 +38,6 @@ export default function ProductReportModal({
   const [selectedReason, setSelectedReason] = useState("");
   const [reportContent, setReportContent] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
-  const [reasonPickerVisible, setReasonPickerVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -68,14 +68,43 @@ export default function ProductReportModal({
       showAlert("알림", "최대 3개까지 첨부 가능합니다.");
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setAttachments((prev) => [...prev, result.assets[0].uri]);
-    }
+
+    const launchPicker = async (useCamera: boolean) => {
+      if (useCamera) {
+        const { status } =
+          await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
+            { text: "취소", style: "cancel" },
+            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+          ]);
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          quality: 1,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setAttachments((prev) => [...prev, result.assets[0].uri]);
+        }
+      } else {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          quality: 1,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setAttachments((prev) => [...prev, result.assets[0].uri]);
+        }
+      }
+    };
+
+    Alert.alert("사진 첨부", "사진을 선택해주세요.", [
+      { text: "카메라", onPress: () => launchPicker(true) },
+      { text: "갤러리", onPress: () => launchPicker(false) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   const showAlert = (title: string, message?: string) => {
@@ -139,6 +168,21 @@ export default function ProductReportModal({
     }
   };
 
+  const openReasonPicker = () => {
+    if (reportReasons.length === 0) return;
+    Alert.alert(
+      "신고 사유 선택",
+      undefined,
+      [
+        ...reportReasons.map((r) => ({
+          text: r.label,
+          onPress: () => setSelectedReason(r.value),
+        })),
+        { text: "취소", style: "cancel" as const },
+      ]
+    );
+  };
+
   const selectedReasonLabel =
     reportReasons.find((r) => r.value === selectedReason)?.label || "";
 
@@ -155,129 +199,87 @@ export default function ProductReportModal({
       >
         <View style={styles.overlay}>
           <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>상품 신고</Text>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Ionicons name="close" size={22} color="#333" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* 신고 사유 선택 */}
-            <Text style={styles.label}>신고 사유</Text>
-            <TouchableOpacity
-              style={styles.selectBox}
-              onPress={() => setReasonPickerVisible(true)}
-            >
-              <Text
-                style={[
-                  styles.selectBoxText,
-                  !selectedReason && styles.selectBoxPlaceholder,
-                ]}
-              >
-                {selectedReasonLabel || "신고 사유를 선택하세요"}
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color="#999" />
-            </TouchableOpacity>
-
-            {/* 신고 내용 */}
-            <Text style={styles.label}>신고 내용</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="신고 내용을 입력해주세요"
-              placeholderTextColor="#999"
-              multiline
-              value={reportContent}
-              onChangeText={setReportContent}
-            />
-
-            {/* 이미지 첨부 */}
-            <Text style={styles.label}>
-              사진 첨부 ({attachments.length}/3)
-            </Text>
-            <View style={styles.imageRow}>
-              {attachments.map((uri, index) => (
-                <View key={index} style={styles.imageBox}>
-                  <Image source={{ uri }} style={styles.imageThumb} />
-                  <TouchableOpacity
-                    style={styles.removeIcon}
-                    onPress={() =>
-                      setAttachments((prev) =>
-                        prev.filter((_, i) => i !== index),
-                      )
-                    }
-                  >
-                    <Ionicons name="close-circle" size={16} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              {attachments.length < 3 && (
-                <TouchableOpacity
-                  style={styles.addImageButton}
-                  onPress={pickImage}
-                >
-                  <Ionicons name="camera-outline" size={24} color="#aaa" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}
-              disabled={submitting}
-            >
-              {submitting ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.submitButtonText}>신고하기</Text>
-              )}
-            </TouchableOpacity>
-          </ScrollView>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-      <Modal
-        visible={reasonPickerVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setReasonPickerVisible(false)}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.container}>
             <View style={styles.header}>
-              <Text style={styles.title}>신고 사유 선택</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setReasonPickerVisible(false)}
-              >
+              <Text style={styles.title}>상품 신고</Text>
+              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                 <Ionicons name="close" size={22} color="#333" />
               </TouchableOpacity>
             </View>
-            <ScrollView>
-              {reportReasons.map((reason) => (
-                <TouchableOpacity
-                  key={reason.value}
-                  style={styles.reasonItem}
-                  onPress={() => {
-                    setSelectedReason(reason.value);
-                    setReasonPickerVisible(false);
-                  }}
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* 신고 사유 선택 */}
+              <Text style={styles.label}>신고 사유</Text>
+              <TouchableOpacity
+                style={styles.selectBox}
+                onPress={openReasonPicker}
+              >
+                <Text
+                  style={[
+                    styles.selectBoxText,
+                    !selectedReason && styles.selectBoxPlaceholder,
+                  ]}
                 >
-                  <Text
-                    style={[
-                      styles.reasonItemText,
-                      selectedReason === reason.value &&
-                        styles.reasonItemSelected,
-                    ]}
+                  {selectedReasonLabel || "신고 사유를 선택하세요"}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color="#999" />
+              </TouchableOpacity>
+
+              {/* 신고 내용 */}
+              <Text style={styles.label}>신고 내용</Text>
+              <TextInput
+                style={styles.textArea}
+                placeholder="신고 내용을 입력해주세요"
+                placeholderTextColor="#999"
+                multiline
+                value={reportContent}
+                onChangeText={setReportContent}
+              />
+
+              {/* 이미지 첨부 */}
+              <Text style={styles.label}>
+                사진 첨부 ({attachments.length}/3)
+              </Text>
+              <View style={styles.imageRow}>
+                {attachments.map((uri, index) => (
+                  <View key={index} style={styles.imageBox}>
+                    <Image source={{ uri }} style={styles.imageThumb} />
+                    <TouchableOpacity
+                      style={styles.removeIcon}
+                      onPress={() =>
+                        setAttachments((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        )
+                      }
+                    >
+                      <Ionicons name="close-circle" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {attachments.length < 3 && (
+                  <TouchableOpacity
+                    style={styles.addImageButton}
+                    onPress={pickImage}
                   >
-                    {reason.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Ionicons name="camera-outline" size={24} color="#aaa" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>신고하기</Text>
+                )}
+              </TouchableOpacity>
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

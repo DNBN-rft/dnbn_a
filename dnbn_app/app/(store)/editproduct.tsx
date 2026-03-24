@@ -10,6 +10,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -204,74 +205,107 @@ export default function EditProductPage() {
     }
   }, [categories, isLoading]);
 
-  const pickImage = async () => {
+  const pickImage = () => {
     if (images.length >= 3) {
       Alert.alert("알림", "이미지는 최대 3개까지만 등록할 수 있습니다");
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.3,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-
-      // mimeType에서 확장자 추출 (image/jpeg → jpg, image/png → png 등)
+    const addFromAsset = (asset: ImagePicker.ImagePickerAsset) => {
       const extFromMime = asset.mimeType
         ? asset.mimeType.split("/").pop()?.replace("jpeg", "jpg") || "jpg"
         : "jpg";
-
-      // asset.fileName이 있고 확장자가 포함된 경우 우선 사용, 없으면 URI 마지막 세그먼트 사용
       const rawName = asset.fileName || asset.uri.split("/").pop() || "";
       const hasExt = rawName.includes(".");
-      const name = hasExt
-        ? rawName
-        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      const name = hasExt ? rawName : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      setImages([...images, { uri: asset.uri, name, isNew: true }]);
+    };
 
-      setImages([
-        ...images,
-        {
-          uri: asset.uri,
-          name,
-          isNew: true,
+    Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
+      {
+        text: "카메라로 촬영",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ]);
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.3,
+          });
+          if (!result.canceled) addFromAsset(result.assets[0]);
         },
-      ]);
-    }
+      },
+      {
+        text: "갤러리에서 선택",
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.3,
+          });
+          if (!result.canceled) addFromAsset(result.assets[0]);
+        },
+      },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleInsertDescriptionImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 0.3,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
-      const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
-      const mimeType = asset.mimeType || "image/jpeg";
-      const dataUrl = `data:${mimeType};base64,${asset.base64}`;
-
-      // 에디터에 base64로 미리보기 삽입
-      setEditorHeight((prev) => prev + 400);
-      richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;display:block;"');
-      // 이미지 삽입 후 에디터 하단으로 스크롤
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
-      }, 100);
-      // 제출 시 업로드할 이미지 보관 (dataUrl 제외)
-      setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
-    }
+  const handleInsertDescriptionImage = () => {
+    const insertImage = async (fromCamera: boolean) => {
+      if (fromCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
+            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+            { text: "취소", style: "cancel" },
+          ]);
+          return;
+        }
+      }
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 0.3,
+            base64: true,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 0.3,
+            base64: true,
+          });
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+        const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
+        const mimeType = asset.mimeType || "image/jpeg";
+        const dataUrl = `data:${mimeType};base64,${asset.base64}`;
+        setEditorHeight((prev) => prev + 400);
+        richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;display:block;"');
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
+        }, 100);
+        setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
+      }
+    };
+    Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
+      { text: "카메라로 촬영", onPress: () => insertImage(true) },
+      { text: "갤러리에서 선택", onPress: () => insertImage(false) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   const handleUpdate = async () => {
