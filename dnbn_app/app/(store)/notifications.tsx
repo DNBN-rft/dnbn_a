@@ -49,7 +49,7 @@ const getCategoryFromAlarmType = (alarmType: string): string => {
   // 백엔드에서 한글로 오는 경우
   if (alarmType === "주문" || alarmType === "할인") return "product";
   if (alarmType === "네고" || alarmType === "네고 요청") return "nego";
-  if (alarmType === "리뷰" || alarmType === "리뷰 요청") return "review";
+  if (alarmType === "리뷰") return "review";
   if (
     alarmType === "상품신고" ||
     alarmType === "리뷰신고" ||
@@ -85,6 +85,9 @@ function AlarmItemComponent({
         break;
 
       case "리뷰":
+        router.push("/(store)/review-manage");
+        break;
+
       case "리뷰신고":
         router.push({
           pathname: "/(store)/review-answer",
@@ -119,12 +122,11 @@ function AlarmItemComponent({
         break;
 
       case "리뷰 숨김":
-      case "리뷰 요청":
         router.push("/(store)/review-manage");
         break;
 
       case "할인":
-        router.push("/(store)/discounthistory");
+        router.push("/(store)/tabs/storesale");
         break;
 
       case "문의":
