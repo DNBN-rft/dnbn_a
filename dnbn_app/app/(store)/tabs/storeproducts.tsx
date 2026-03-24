@@ -249,7 +249,7 @@ export default function StoreProducts() {
             style={styles.addButton}
             onPress={() => router.push("/(store)/addproduct")}
           >
-            <Ionicons name="add" size={28} color="#EF7810" />
+            <Text style={{ color: "#EF7810", fontSize: 15, fontWeight: "600" }}>새상품 등록</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -37,8 +37,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   addButton: {
-    width: 44,
-    height: 44,
+    paddingHorizontal: 12,
+    height: 36,
     borderWidth: 1,
     borderColor: "#EF7810",
     borderRadius: 8,
