@@ -2,7 +2,7 @@ import CategorySelectModal from "@/components/modal/CategorySelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 
-import { apiGet, apiPostFormDataWithImage, apiPutFormDataWithImage } from "@/utils/api";
+import { apiGet, apiPutFormDataWithImage } from "@/utils/api";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -18,6 +18,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
@@ -56,7 +58,6 @@ interface ProductDetailResponse {
   imgs: {
     files: images[];
   };
-  descriptionFileMasterIdx: number | null;
 }
 
 interface ImageFile {
@@ -78,14 +79,20 @@ export default function EditProductPage() {
   const [serviceType, setServiceType] = useState<"일반" | "서비스">("일반");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
-  const [descriptionFileMasterIdx, setDescriptionFileMasterIdx] = useState<number | null>(null);
+  const [pendingDescImages, setPendingDescImages] = useState<{ uri: string; name: string; mimeType: string }[]>([]);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const richEditorRef = useRef<RichEditor>(null);
-  const [editorHeight, setEditorHeight] = useState(200);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const editorYRef = useRef(0);
+  const scrollOffsetRef = useRef(0);
+  const [editorHeight, setEditorHeight] = useState(300);
+  const [editorKey, setEditorKey] = useState(0);
   const [editorInitialized, setEditorInitialized] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
+  const editorHeightRef = useRef(300);
 
   // 상품 상세 조회
   useEffect(() => {
@@ -109,7 +116,6 @@ export default function EditProductPage() {
           setServiceType(data.isStock ? "일반" : "서비스");
           setStock(data.productAmount.toString());
           setDescription(data.productDetailDescription);
-          setDescriptionFileMasterIdx(data.descriptionFileMasterIdx ?? null);
 
           // 이미지 설정
           const imageList =
@@ -120,6 +126,10 @@ export default function EditProductPage() {
             })) || [];
           setImages(imageList);
           setEditorInitialized(false);
+          setEditorReady(false);
+          setEditorHeight(300);
+          editorHeightRef.current = 300;
+          setEditorKey((prev) => prev + 1);
         } else {
           Alert.alert("알림", "상품 정보를 불러올 수 없습니다");
         }
@@ -133,6 +143,20 @@ export default function EditProductPage() {
 
     loadProductDetail();
   }, [productCode]);
+
+  // 에디터 초기화 후 원격 이미지 로드 감시 (라이브러리 내부 UPDATE_HEIGHT가 1회만 실행되므로 직접 주입)
+  useEffect(() => {
+    if (editorInitialized && richEditorRef.current) {
+      const injectImageWatcher = () => {
+        richEditorRef.current?.commandDOM(
+          "var content=$('#content');if(content){var imgs=content.querySelectorAll('img');imgs.forEach(function(img){if(!img.complete){img.addEventListener('load',function(){var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));});}});var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));}"  
+        );
+      };
+      const t1 = setTimeout(injectImageWatcher, 300);
+      const t2 = setTimeout(injectImageWatcher, 1500);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [editorInitialized]);
 
   // 카테고리 조회
   useEffect(() => {
@@ -190,7 +214,7 @@ export default function EditProductPage() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.3,
     });
 
     if (!result.canceled) {
@@ -227,7 +251,8 @@ export default function EditProductPage() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.3,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -235,28 +260,17 @@ export default function EditProductPage() {
       const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
       const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
       const mimeType = asset.mimeType || "image/jpeg";
+      const dataUrl = `data:${mimeType};base64,${asset.base64}`;
 
-      try {
-        const formData = new FormData();
-        formData.append("file", { uri: asset.uri, name, type: mimeType } as any);
-
-        const url = descriptionFileMasterIdx
-          ? `/store/app/product/description-image?fileMasterIdx=${descriptionFileMasterIdx}`
-          : `/store/app/product/description-image`;
-
-        const response = await apiPostFormDataWithImage(url, formData);
-        if (!response.ok) {
-          Alert.alert("오류", "이미지 업로드에 실패했습니다");
-          return;
-        }
-        const data = await response.json();
-        richEditorRef.current?.insertImage(data.fileUrl, 'style="max-width:100%;height:auto;"');
-        if (descriptionFileMasterIdx === null) {
-          setDescriptionFileMasterIdx(Number(data.fileMasterIdx));
-        }
-      } catch (e) {
-        Alert.alert("오류", "이미지 업로드 중 오류가 발생했습니다");
-      }
+      // 에디터에 base64로 미리보기 삽입
+      setEditorHeight((prev) => prev + 400);
+      richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;display:block;"');
+      // 이미지 삽입 후 에디터 하단으로 스크롤
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
+      }, 100);
+      // 제출 시 업로드할 이미지 보관 (dataUrl 제외)
+      setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
     }
   };
 
@@ -286,6 +300,13 @@ export default function EditProductPage() {
     setIsSaving(true);
 
     try {
+      // base64 img src를 placeholder로 교체 (regex 방식 - 큰 문자열 검색 없이 빠른 교체)
+      let imgIndex = 0;
+      const finalDescription = description.replace(
+        /src="data:[^"]*"/g,
+        () => `src="__PENDING_IMG_${imgIndex++}__"`
+      );
+
       // FormData 생성
       const formData = new FormData();
       formData.append("categoryIdx", category.categoryIdx.toString());
@@ -298,10 +319,10 @@ export default function EditProductPage() {
         "productAmount",
         (serviceType === "서비스" ? 0 : parseInt(stock)).toString(),
       );
-      formData.append("productDetailDescription", description);
-      if (descriptionFileMasterIdx !== null) {
-        formData.append("descriptionFileMasterIdx", descriptionFileMasterIdx.toString());
-      }
+      formData.append("productDetailDescription", finalDescription);
+      pendingDescImages.forEach((img) => {
+        formData.append("productDescriptionImgs", { uri: img.uri, name: img.name, type: img.mimeType } as any);
+      });
 
       // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
       // 유지할 기존 이미지(isNew: false) + 새 이미지(isNew: true) 모두 전송
@@ -386,7 +407,15 @@ export default function EditProductPage() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+            scrollEventThrottle={16}
+          >
         <View style={styles.formGroup}>
           <Text style={styles.label}>상품명</Text>
           <TextInput
@@ -532,7 +561,10 @@ export default function EditProductPage() {
           />
         </View>
 
-        <View style={styles.formGroup}>
+        <View
+          style={styles.formGroup}
+          onLayout={(e) => { editorYRef.current = e.nativeEvent.layout.y; }}
+        >
           <Text style={styles.label}>
             상품 상세정보 <Text style={{ color: "#EF7810" }}>*</Text>
           </Text>
@@ -551,16 +583,44 @@ export default function EditProductPage() {
             iconTint="#333"
             selectedIconTint="#EF7810"
           />
+          {!editorReady && (
+            <View style={[richEditorStyles.editor, { height: 300, alignItems: "center", justifyContent: "center" }]}>
+              <Text style={{ color: "#999", fontSize: 14 }}>불러오는 중...</Text>
+            </View>
+          )}
           <RichEditor
+            key={editorKey}
             ref={richEditorRef}
-            style={[richEditorStyles.editor, { height: editorHeight }]}
+            style={[richEditorStyles.editor, { height: editorHeight }, !editorReady && { position: "absolute", opacity: 0 }]}
             placeholder="상품에 대한 상세 설명을 입력하세요"
             initialContentHTML={description}
             onChange={setDescription}
-            onHeightChange={(h) => setEditorHeight(Math.max(200, h + 20))}
+            onHeightChange={(h) => {
+              if (h > 0) {
+                editorHeightRef.current = h;
+                setEditorHeight(h + 50);
+                if (editorInitialized) {
+                  setEditorReady(true);
+                }
+              }
+            }}
             scrollEnabled={false}
-            initialHeight={200}
-            onLoadEnd={() => setEditorInitialized(true)}
+            initialHeight={300}
+            onLoadEnd={() => {
+              setEditorInitialized(true);
+              // onHeightChange가 먼저 실행되어 height 측정이 끝났으면 바로 ready 처리
+              if (editorHeightRef.current > 300) {
+                setEditorReady(true);
+              }
+            }}
+            onCursorPosition={(offsetY) => {
+              const absY = editorYRef.current + offsetY;
+              const visibleTop = scrollOffsetRef.current;
+              const visibleBottom = visibleTop + 500;
+              if (absY > visibleBottom - 80 || absY < visibleTop + 40) {
+                scrollViewRef.current?.scrollTo({ y: absY - 200, animated: true });
+              }
+            }}
           />
         </View>
 
@@ -645,7 +705,7 @@ const richEditorStyles = StyleSheet.create({
     borderBottomRightRadius: 8,
     borderWidth: 1,
     borderColor: "#E0E0E0",
-    minHeight: 200,
+    minHeight: 300,
     paddingHorizontal: 4,
   },
 });

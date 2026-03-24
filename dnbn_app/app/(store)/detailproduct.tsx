@@ -215,11 +215,11 @@ export default function DetailProductPage() {
                 재고: {product.productAmount}개
               </Text>
               <WebView
-                source={{ html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:8px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;}</style></head><body>${product.productDetailDescription}</body></html>` }}
+                source={{ html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:8px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;display:block;}</style></head><body>${product.productDetailDescription}</body></html>` }}
                 style={{ height: descriptionHeight }}
                 scrollEnabled={false}
-                injectedJavaScript="(function(){function h(){window.ReactNativeWebView.postMessage(JSON.stringify({height:document.body.scrollHeight}));}h();setTimeout(h,500);})();true;"
-                onMessage={(e) => { try { const d = JSON.parse(e.nativeEvent.data); if (d.height) setDescriptionHeight(d.height); } catch {} }}
+                injectedJavaScript="(function(){function h(){window.ReactNativeWebView.postMessage(JSON.stringify({height:document.body.scrollHeight}));}h();setTimeout(h,500);setTimeout(h,1500);var imgs=document.querySelectorAll('img');var loaded=0;imgs.forEach(function(img){if(img.complete){loaded++;if(loaded===imgs.length)h();}else{img.addEventListener('load',function(){loaded++;if(loaded===imgs.length)h();});}});})();true;"
+                onMessage={(e) => { try { const d = JSON.parse(e.nativeEvent.data); if (d.height && d.height > descriptionHeight) setDescriptionHeight(d.height + 16); } catch {} }}
               />
             </View>
           </View>

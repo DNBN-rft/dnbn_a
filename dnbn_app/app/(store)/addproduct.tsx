@@ -17,6 +17,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
@@ -46,11 +48,14 @@ export default function AddProduct() {
   const [serviceType, setServiceType] = useState<"일반" | "서비스">("일반");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
-  const [descriptionFileMasterIdx, setDescriptionFileMasterIdx] = useState<number | null>(null);
+  const [pendingDescImages, setPendingDescImages] = useState<{ uri: string; name: string; mimeType: string }[]>([]);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const richEditorRef = useRef<RichEditor>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const editorYRef = useRef(0);
+  const scrollOffsetRef = useRef(0);
   const [editorHeight, setEditorHeight] = useState(200);
 
   // 카테고리 조회
@@ -85,7 +90,7 @@ export default function AddProduct() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.3,
     });
 
     if (!result.canceled) {
@@ -108,7 +113,8 @@ export default function AddProduct() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.3,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -116,28 +122,17 @@ export default function AddProduct() {
       const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
       const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
       const mimeType = asset.mimeType || "image/jpeg";
+      const dataUrl = `data:${mimeType};base64,${asset.base64}`;
 
-      try {
-        const formData = new FormData();
-        formData.append("file", { uri: asset.uri, name, type: mimeType } as any);
-
-        const url = descriptionFileMasterIdx
-          ? `/store/app/product/description-image?fileMasterIdx=${descriptionFileMasterIdx}`
-          : `/store/app/product/description-image`;
-
-        const response = await apiPostFormDataWithImage(url, formData);
-        if (!response.ok) {
-          Alert.alert("오류", "이미지 업로드에 실패했습니다");
-          return;
-        }
-        const data = await response.json();
-        richEditorRef.current?.insertImage(data.fileUrl, 'style="max-width:100%;height:auto;"');
-        if (descriptionFileMasterIdx === null) {
-          setDescriptionFileMasterIdx(Number(data.fileMasterIdx));
-        }
-      } catch (e) {
-        Alert.alert("오류", "이미지 업로드 중 오류가 발생했습니다");
-      }
+      // 에디터에 base64로 미리보기 삽입
+      setEditorHeight((prev) => prev + 300);
+      richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;"');
+      // 이미지 삽입 후 에디터 하단으로 스크롤
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
+      }, 100);
+      // 제출 시 업로드할 이미지 보관 (dataUrl 제외)
+      setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
     }
   };
 
@@ -171,6 +166,13 @@ export default function AddProduct() {
     try {
       setIsLoading(true);
 
+      // base64 img src를 placeholder로 교체 (regex 방식 - 순서 보장)
+      let imgIndex = 0;
+      const finalDescription = description.replace(
+        /src="data:[^"]*"/g,
+        () => `src="__PENDING_IMG_${imgIndex++}__"`
+      );
+
       // FormData 생성
       const formData = new FormData();
       formData.append("categoryIdx", category.categoryIdx.toString());
@@ -183,10 +185,10 @@ export default function AddProduct() {
         "productAmount",
         (serviceType === "서비스" ? 0 : parseInt(stock)).toString(),
       );
-      formData.append("productDetailDescription", description);
-      if (descriptionFileMasterIdx !== null) {
-        formData.append("descriptionFileMasterIdx", descriptionFileMasterIdx.toString());
-      }
+      formData.append("productDetailDescription", finalDescription);
+      pendingDescImages.forEach((img) => {
+        formData.append("productDescriptionImgs", { uri: img.uri, name: img.name, type: img.mimeType } as any);
+      });
 
       // 이미지 추가
       images.forEach((img) => {
@@ -248,7 +250,15 @@ export default function AddProduct() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false} keyboardDismissMode="on-drag" keyboardShouldPersistTaps="handled">
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+            scrollEventThrottle={16}
+          >
             <View style={styles.formGroup}>
               <Text style={styles.label}>상품명</Text>
               <TextInput
@@ -393,7 +403,10 @@ export default function AddProduct() {
               />
             </View>
 
-            <View style={styles.formGroup}>
+            <View
+              style={styles.formGroup}
+              onLayout={(e) => { editorYRef.current = e.nativeEvent.layout.y; }}
+            >
               <Text style={styles.label}>상품 상세정보</Text>
               <RichToolbar
                 editor={richEditorRef}
@@ -415,9 +428,17 @@ export default function AddProduct() {
                 style={[richEditorStyles.editor, { height: editorHeight }]}
                 placeholder="상품에 대한 상세 설명을 입력하세요"
                 onChange={setDescription}
-                onHeightChange={(h) => setEditorHeight(Math.max(200, h + 20))}
+                onHeightChange={(h) => setEditorHeight(Math.max(200, h + 50))}
                 scrollEnabled={false}
                 initialHeight={200}
+                onCursorPosition={(offsetY) => {
+                  const absY = editorYRef.current + offsetY;
+                  const visibleTop = scrollOffsetRef.current;
+                  const visibleBottom = visibleTop + 500;
+                  if (absY > visibleBottom - 80 || absY < visibleTop + 40) {
+                    scrollViewRef.current?.scrollTo({ y: absY - 200, animated: true });
+                  }
+                }}
               />
             </View>
 
