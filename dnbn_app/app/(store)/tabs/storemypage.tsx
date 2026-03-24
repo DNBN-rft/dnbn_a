@@ -3,6 +3,7 @@ import { clearAuthData } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
+  Alert,
   Platform,
   ScrollView,
   Text,
@@ -16,15 +17,28 @@ export default function StoreMypage() {
   const insets = useSafeAreaInsets();
   const { logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await clearAuthData("store");
-      logout();
-    } catch {
-      // Storage 정리 실패 시도 로그인 페이지로 이동
-    } finally {
-      router.replace("/(guest)/tabs/guesthome");
-    }
+  const handleLogout = () => {
+    Alert.alert(
+      "로그아웃",
+      "정말로 로그아웃 하시겠습니까?",
+      [
+        {
+          text: "로그아웃",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await clearAuthData("store");
+              logout();
+            } catch {
+              // Storage 정리 실패 시도 로그인 페이지로 이동
+            } finally {
+              router.replace("/(guest)/tabs/guesthome");
+            }
+          },
+        },
+        { text: "취소", style: "cancel" },
+      ]
+    );
   };
 
   return (

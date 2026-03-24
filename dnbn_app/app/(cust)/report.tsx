@@ -4,10 +4,13 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -31,6 +34,7 @@ export default function ReportPage() {
     { label: string; value: string }[]
   >([{ label: "신고 사유를 선택하세요", value: "" }]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const insets = useSafeAreaInsets();
 
   // 신고 사유 목록 가져오기
@@ -125,6 +129,7 @@ export default function ReportPage() {
         text: "신고",
         onPress: async () => {
           try {
+            setSubmitting(true);
             const formData = new FormData();
             formData.append("reportType", type || "");
             formData.append("storeCode", storeCode || "");
@@ -168,12 +173,14 @@ export default function ReportPage() {
               },
             ]);
           } catch (error) {
-            console.error("신고 제출 실패:", error);
-            showAlert(
-              "오류",
-              "신고 접수 중 오류가 발생했습니다. 다시 시도해주세요.",
-            );
-          }
+              console.error("신고 제출 실패:", error);
+              showAlert(
+                "오류",
+                "신고 접수 중 오류가 발생했습니다. 다시 시도해주세요.",
+              );
+            } finally {
+              setSubmitting(false);
+            }
         },
       },
     ]);
@@ -272,16 +279,38 @@ export default function ReportPage() {
       </ScrollView>
 
       <View style={styles.footerContainer}>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={submitting}>
           <Text style={styles.submitButtonText}>신고</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
           <Text style={styles.cancelButtonText}>취소</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal visible={submitting} transparent animationType="none">
+        <View style={loadingOverlayStyles.container}>
+          <ActivityIndicator size="large" color="#EF7810" />
+          <Text style={loadingOverlayStyles.text}>신고 접수 중...</Text>
+        </View>
+      </Modal>
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
     </View>
   );
 }
+
+const loadingOverlayStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  text: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
