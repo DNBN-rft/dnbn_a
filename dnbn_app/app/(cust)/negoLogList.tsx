@@ -1,7 +1,7 @@
 import { apiDelete, apiGet, apiPut } from "@/utils/api";
 import { getStorageItem } from "@/utils/storageUtil";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -53,7 +53,9 @@ export type NegoStatus = "CURRENT" | "COMPLETE";
 
 export default function NegoLogListScreen() {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<TabType>("current");
+  const params = useLocalSearchParams<{ activeTab?: TabType }>();
+  const initialTab = params.activeTab;
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab ?? "current");
   const [currentNegoList, setCurrentNegoList] = useState<
     CustNegoCurrentResponse[]
   >([]);

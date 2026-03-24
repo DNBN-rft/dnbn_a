@@ -139,13 +139,19 @@ function AlarmItemComponent({
         break;
 
       case "네고 요청":
-        router.push("/(cust)/negoList");
+        router.push("/(cust)/negoLogList");
         break;
 
       case "네고 요청 승인":
+        router.push("/(cust)/nego-accepted");
+        break;
+
       case "네고 요청 거절":
       case "네고 요청 취소":
-        router.push("/(cust)/negoLogList");
+        router.push({
+          pathname: "/(cust)/negoLogList",
+          params: { activeTab: "complete" },
+        });
         break;
 
       case "리뷰요청":
@@ -179,7 +185,10 @@ function AlarmItemComponent({
         break;
 
       case "신고 답변":
-        router.push("/(cust)/faqList");
+        router.push({
+          pathname: "/(cust)/reportDetail",
+          params: { reportIdx: alarm.navigationLink },
+        });
         break;
 
       default:
