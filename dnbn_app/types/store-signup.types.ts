@@ -36,7 +36,7 @@ export interface BizInfoData {
   ownerTelNo: string; // 대표 전화번호 (010-1234-5678)
   bizNm: string; // 사업명
   bizNo: string; // 사업자 번호 (123-45-67890)
-  bizRegDate: string; // 개업일 (YYYY-MM-DD)
+  bizRegDate: string; // 사업자 등록일 (YYYY-MM-DD)
   bizType: string; // 업종/업태
   storeAccNo: string; // 계좌번호
   bankId?: string; // 은행 ID

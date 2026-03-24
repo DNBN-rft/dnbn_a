@@ -188,9 +188,7 @@ export default function StoreInfo() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>
-            {loading ? "로딩중..." : storeInfo?.storeNm || "가맹점 정보"}
-          </Text>
+          <Text style={styles.title}>가맹점 정보</Text>
         </View>
         <View style={styles.rightSection} />
       </View>

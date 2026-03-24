@@ -474,6 +474,9 @@ export default function StoreSignupBizInfoScreen() {
               keyboardType={Platform.OS === "ios" ? "number-pad" : "numeric"}
               maxLength={10}
             />
+            <Text style={styles.helperText}>
+              사업자 등록증에 기재된 등록일 8자리를 입력해주세요.
+            </Text>
           </View>
         </ScrollView>
 
