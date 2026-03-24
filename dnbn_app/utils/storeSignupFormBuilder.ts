@@ -15,6 +15,7 @@ export const buildStoreSignupFormData = (
   fileUpload: FileUploadData,
   fcmToken: string | null = null,
   pushSet: boolean = false,
+  marketingAgreed: boolean = false,
 ): FormData => {
   const formData = new FormData();
 
@@ -53,6 +54,7 @@ export const buildStoreSignupFormData = (
 
   // 약관 동의
   formData.append("agreed", "true");
+  formData.append("marketingAgreed", String(marketingAgreed));
   formData.append("pushSet", String(pushSet));
   if (fcmToken) {
     formData.append("fcmToken", fcmToken);

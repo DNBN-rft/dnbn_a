@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../report.styles";
 
 interface ReportReason {
@@ -31,7 +32,9 @@ export function ReportReasonModal({
   onSelectReason,
 }: ReportReasonModalProps) {
   const slideAnim = useRef(new Animated.Value(1000)).current;
-
+  
+  const insets = useSafeAreaInsets();
+  
   useEffect(() => {
     if (visible) {
       // 모달 열기: 오른쪽에서 왼쪽으로 슬라이드
@@ -70,6 +73,9 @@ export function ReportReasonModal({
           },
         ]}
       >
+        {insets.top > 0 && (
+          <View style={{ height: insets.top, backgroundColor: "#fff" }} />
+        )}
         <View style={styles.modalHeader}>
           <TouchableOpacity onPress={onClose} style={styles.modalBackButton}>
             <Ionicons name="arrow-back" size={24} color="#333" />
@@ -104,6 +110,9 @@ export function ReportReasonModal({
               </TouchableOpacity>
             ))}
         </ScrollView>
+        {insets.bottom > 0 && (
+          <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+        )}
       </Animated.View>
     </Modal>
   );

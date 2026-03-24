@@ -21,6 +21,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -38,72 +39,112 @@ export default function StoreSignupFileUploadScreen() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   /**
-   * 이미지 권한 요청
-   */
-  const requestPermission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("권한 필요", "갤러리 접근 권한이 필요합니다.");
-      return false;
-    }
-    return true;
-  };
-
-  /**
    * 가게 대표 이미지 선택
    */
   const handlePickStoreImage = async () => {
-    const hasPermission = await requestPermission();
-    if (!hasPermission) return;
+    const launchPicker = async (useCamera: boolean) => {
+      if (useCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
+            { text: "취소", style: "cancel" },
+            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+          ]);
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          updateFileUpload({
+            storeImage: {
+              uri: asset.uri,
+              type: "image/jpeg",
+              name: `store_${Date.now()}.jpg`,
+            },
+          });
+        }
+      } else {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          updateFileUpload({
+            storeImage: {
+              uri: asset.uri,
+              type: "image/jpeg",
+              name: `store_${Date.now()}.jpg`,
+            },
+          });
+        }
+      }
+    };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      updateFileUpload({
-        storeImage: {
-          uri: asset.uri,
-          type: "image/jpeg",
-          name: `store_${Date.now()}.jpg`,
-        },
-      });
-    }
+    Alert.alert("사진 선택", "사진을 선택해주세요.", [
+      { text: "카메라", onPress: () => launchPicker(true) },
+      { text: "갤러리", onPress: () => launchPicker(false) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   /**
    * 사업자등록증 이미지 추가
    */
   const handlePickBusinessDoc = async () => {
-    const hasPermission = await requestPermission();
-    if (!hasPermission) return;
-
     if (fileUpload.businessDocs.length >= 3) {
       Alert.alert("알림", "첨부파일은 최대 3개까지 등록 가능합니다.");
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 0.8,
-    });
+    const launchPicker = async (useCamera: boolean) => {
+      if (useCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
+            { text: "취소", style: "cancel" },
+            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+          ]);
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: "images",
+          allowsEditing: false,
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          updateFileUpload({
+            businessDocs: [...fileUpload.businessDocs, { uri: asset.uri, type: "image/jpeg", name: `biz_doc_${Date.now()}.jpg` }],
+          });
+        }
+      } else {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: "images",
+          allowsEditing: false,
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets[0]) {
+          const asset = result.assets[0];
+          updateFileUpload({
+            businessDocs: [...fileUpload.businessDocs, { uri: asset.uri, type: "image/jpeg", name: `biz_doc_${Date.now()}.jpg` }],
+          });
+        }
+      }
+    };
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      const newDoc = {
-        uri: asset.uri,
-        type: "image/jpeg",
-        name: `biz_doc_${Date.now()}.jpg`,
-      };
-      updateFileUpload({
-        businessDocs: [...fileUpload.businessDocs, newDoc],
-      });
-    }
+    Alert.alert("사진 선택", "사진을 선택해주세요.", [
+      { text: "카메라", onPress: () => launchPicker(true) },
+      { text: "갤러리", onPress: () => launchPicker(false) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   /**
@@ -162,6 +203,7 @@ export default function StoreSignupFileUploadScreen() {
         storeInfo,
         fileUpload,
         fcmToken,
+        marketingAgreed,
         marketingAgreed,
       );
 

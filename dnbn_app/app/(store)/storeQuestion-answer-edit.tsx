@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -120,41 +121,57 @@ export default function StoreQuestionAnswerEdit() {
   };
 
   // 이미지 선택 함수
-  const pickImage = async () => {
+  const pickImage = () => {
     if (images.length >= 3) {
       Alert.alert("알림", "이미지는 최대 3개까지만 등록할 수 있습니다");
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-
+    const addFromAsset = (asset: ImagePicker.ImagePickerAsset) => {
       const extFromMime = asset.mimeType
         ? asset.mimeType.split("/").pop()?.replace("jpeg", "jpg") || "jpg"
         : "jpg";
-
       const rawName = asset.fileName || asset.uri.split("/").pop() || "";
       const hasExt = rawName.includes(".");
-      const name = hasExt
-        ? rawName
-        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      const name = hasExt ? rawName : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      setImages([...images, { uri: asset.uri, name, isNew: true }]);
+    };
 
-      setImages([
-        ...images,
-        {
-          uri: asset.uri,
-          name,
-          isNew: true,
+    Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
+      {
+        text: "카메라로 촬영",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ]);
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+          if (!result.canceled) addFromAsset(result.assets[0]);
         },
-      ]);
-    }
+      },
+      {
+        text: "갤러리에서 선택",
+        onPress: async () => {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+          if (!result.canceled) addFromAsset(result.assets[0]);
+        },
+      },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   // 이미지 삭제 함수
