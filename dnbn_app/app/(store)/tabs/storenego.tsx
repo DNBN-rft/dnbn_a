@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPost } from "@/utils/api";
+import { formatDateTime } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -15,7 +16,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/storenego.styles";
-import { formatDateTime } from "@/utils/dateUtil";
 
 // 네고 리스트 API 응답 타입 정의
 interface ImageFile {
@@ -27,7 +27,6 @@ interface ImageFile {
 interface NegoImages {
   files: ImageFile[];
 }
-
 
 interface NegoListItem {
   negoIdx: number;
@@ -102,8 +101,11 @@ interface NegoRequestResponse {
 export default function StoreNego() {
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList<any>>(null);
-  const { tab } = useLocalSearchParams<{ tab?: "list" | "request" }>();
-  const [activeTab, setActiveTab] = useState<"list" | "request">("list");
+  const params = useLocalSearchParams<{ activeTab?: "list" | "request" }>();
+  const initialTab = params.activeTab;
+  const [activeTab, setActiveTab] = useState<"list" | "request">(
+    initialTab ?? "list",
+  );
 
   // 네고 리스트 상태
   const [negoList, setNegoList] = useState<NegoListItem[]>([]);
@@ -272,7 +274,7 @@ export default function StoreNego() {
   // 초기 데이터 로드
   useFocusEffect(
     useCallback(() => {
-      const newTab = tab || "list";
+      const newTab = initialTab || "list";
       setActiveTab(newTab);
 
       if (newTab === "list" && negoList.length === 0) {
@@ -280,7 +282,7 @@ export default function StoreNego() {
       } else if (newTab === "request" && negoRequestList.length === 0) {
         fetchNegoRequestList(0, true);
       }
-    }, [tab]),
+    }, [initialTab]),
   );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -360,7 +362,7 @@ export default function StoreNego() {
           }
           onPress={() => {
             setActiveTab("list");
-            router.setParams({ tab: undefined });
+            router.setParams({ activeTab: undefined });
           }}
         >
           <Text
@@ -420,7 +422,9 @@ export default function StoreNego() {
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
                 <View style={styles.productImageContainer}>
-                  {item.images?.files && item.images.files.length > 0 && item.images.files[0]?.fileUrl ? (
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  item.images.files[0]?.fileUrl ? (
                     <Image
                       style={styles.productImage}
                       source={{ uri: item.images.files[0].fileUrl }}
@@ -436,7 +440,7 @@ export default function StoreNego() {
                   <View>
                     <Text
                       style={
-                         item.negoStatus === "진행 중"
+                        item.negoStatus === "진행 중"
                           ? styles.negoActiveBadge
                           : styles.negoBeforeBadge
                       }
@@ -462,8 +466,8 @@ export default function StoreNego() {
                       {item.negoStatus === "진행 중"
                         ? `종료: ${formatDateTime(item.endDateTime)}`
                         : item.negoStatus === "예정"
-                        ? `시작: ${formatDateTime(item.startDateTime)}`
-                        : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
+                          ? `시작: ${formatDateTime(item.startDateTime)}`
+                          : `${formatDateTime(item.startDateTime)} ~ ${formatDateTime(item.endDateTime)}`}
                     </Text>
                   </View>
                 </View>
@@ -515,7 +519,9 @@ export default function StoreNego() {
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
                 <View style={styles.negoRequestProductImageContainer}>
-                  {item.images?.files && item.images.files.length > 0 && item.images.files[0]?.fileUrl ? (
+                  {item.images?.files &&
+                  item.images.files.length > 0 &&
+                  item.images.files[0]?.fileUrl ? (
                     <Image
                       style={styles.productImage}
                       source={{ uri: item.images.files[0].fileUrl }}
