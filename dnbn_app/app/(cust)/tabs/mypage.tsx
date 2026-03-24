@@ -10,6 +10,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "../styles/mypage.styles";
@@ -40,19 +41,32 @@ export default function Mypage() {
     setOpenInfo((prev) => !prev);
   };
 
-  const handleLogout = async () => {
-    try {
-      await apiPost("/cust/logout", {});
-    } catch (error) {
-      // 서버 로그아웃 실패 시 무시하고 로컬 정리 진행
-    }
-    try {
-      await clearAuthData("cust");
-    } catch {
-      // Storage 정리 실패 시도 로그인 페이지로 이동
-    } finally {
-      router.replace("/(guest)/tabs/guesthome");
-    }
+  const handleLogout = () => {
+    Alert.alert(
+      "로그아웃",
+      "정말로 로그아웃 하시겠습니까?",
+      [
+        {
+          text: "로그아웃",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await apiPost("/cust/logout", {});
+            } catch {
+              // 서버 로그아웃 실패 시 무시하고 로컬 정리 진행
+            }
+            try {
+              await clearAuthData("cust");
+            } catch {
+              // Storage 정리 실패 시도 로그인 페이지로 이동
+            } finally {
+              router.replace("/(guest)/tabs/guesthome");
+            }
+          },
+        },
+        { text: "취소", style: "cancel" },
+      ]
+    );
   };
 
   return (

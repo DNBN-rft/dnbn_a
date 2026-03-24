@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ReviewCard } from "./components/ReviewCard";
 import { styles } from "./nego-product-detail.styles";
 import type { Review } from "./types/storeInfo.types";
+import WebView from "react-native-webview";
 
 // 백엔드에서 받는 리뷰 아이템 타입
 interface BackendReviewItem {
@@ -76,6 +77,7 @@ export default function ProductDetailScreen() {
   const [tab, setTab] = useState<"description" | "reviews" | "details">(
     "description",
   );
+  const [descriptionHeight, setDescriptionHeight] = useState(200);
   const [negoModalVisible, setNegoModalVisible] = useState(false);
   const [negoAmount, setNegoAmount] = useState("");
   const [productData, setProductData] =
@@ -482,7 +484,13 @@ export default function ProductDetailScreen() {
 
               <View style={styles.tabContentContainer}>
                 <View style={styles.descriptionContent}>
-                  <Text style={styles.tabContent}>{product.description}</Text>
+                  <WebView
+                    source={{ html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:8px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;}</style></head><body>${product.description}</body></html>` }}
+                    style={{ height: descriptionHeight }}
+                    scrollEnabled={false}
+                    injectedJavaScript="(function(){function h(){window.ReactNativeWebView.postMessage(JSON.stringify({height:document.body.scrollHeight}));}h();setTimeout(h,500);})();true;"
+                    onMessage={(e) => { try { const d = JSON.parse(e.nativeEvent.data); if (d.height) setDescriptionHeight(d.height); } catch {} }}
+                  />
                 </View>
               </View>
             </View>
