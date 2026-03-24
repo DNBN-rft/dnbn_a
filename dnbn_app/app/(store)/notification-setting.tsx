@@ -1,8 +1,12 @@
+import { apiGet, apiPost } from "@/utils/api";
+import { permitCheck } from "@/utils/notificationUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
+  Linking,
   Pressable,
   Text,
   TouchableOpacity,
@@ -13,6 +17,61 @@ import { styles } from "./notification-setting.styles";
 
 export default function NotificationSetting() {
   const insets = useSafeAreaInsets();
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [alarmEnabled, setAlarmEnabled] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await apiGet("/store/app/alarm");
+      if (response.ok) {
+        const data = await response.json();
+        setPushEnabled(data.pushSet);
+        setAlarmEnabled(data.alarmSet);
+      }
+    } catch (error) {
+      console.error("알림 설정 조회 오류:", error);
+    }
+  };
+
+  const saveSettings = async () => {
+    let fcmToken: string | null = null;
+    if (pushEnabled) {
+      fcmToken = await permitCheck();
+      if (!fcmToken) {
+        Alert.alert(
+          "알림 권한 필요",
+          "마케팅 알림을 받으려면 기기 설정에서 알림 권한을 허용해주세요.",
+          [
+            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+            { text: "취소", style: "cancel" },
+          ]
+        );
+        return;
+      }
+    }
+
+    try {
+      const response = await apiPost("/store/app/alarm", {
+        alarmSet: alarmEnabled,
+        marketAgreed: pushEnabled,
+        fcmToken,
+      });
+      if (response.ok) {
+        Alert.alert("완료", "알림 설정이 저장되었습니다.", [
+          { text: "확인", onPress: () => router.back() },
+        ]);
+      } else {
+        Alert.alert("오류", "알림 설정 저장에 실패했습니다.");
+      }
+    } catch (error) {
+      Alert.alert("오류", "알림 설정 저장에 실패했습니다.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       {insets.top > 0 && (
@@ -36,34 +95,18 @@ export default function NotificationSetting() {
 
       <View style={styles.notificationContainer}>
         <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
+          <Text>푸시 알림 (마케팅 수신)</Text>
+          <CumtomToggle isOn={pushEnabled} onToggle={setPushEnabled} />
         </View>
         <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text>알림 설정 페이지임</Text>
-          <CumtomToggle />
+          <Text>알림 설정</Text>
+          <CumtomToggle isOn={alarmEnabled} onToggle={setAlarmEnabled} />
         </View>
       </View>
+
+      <TouchableOpacity style={styles.submitButton} onPress={saveSettings}>
+        <Text style={styles.submitButtonText}>저장</Text>
+      </TouchableOpacity>
 
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
@@ -72,8 +115,13 @@ export default function NotificationSetting() {
   );
 }
 
-function CumtomToggle() {
-  const [isOn, setIsOn] = useState(false);
+function CumtomToggle({
+  isOn,
+  onToggle,
+}: {
+  isOn: boolean;
+  onToggle: (value: boolean) => void;
+}) {
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -92,7 +140,7 @@ function CumtomToggle() {
   return (
     <Pressable
       style={[styles.toggle, isOn && styles.toggleOn]}
-      onPress={() => setIsOn((prev) => !prev)}
+      onPress={() => onToggle(!isOn)}
     >
       <Animated.View style={[styles.circle, { transform: [{ translateX }] }]} />
     </Pressable>
