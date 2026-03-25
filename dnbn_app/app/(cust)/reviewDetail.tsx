@@ -1,3 +1,4 @@
+import { formatDateToLocalString } from "@/utils/dateUtil";
 import { apiDelete } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -35,6 +36,9 @@ export default function ReviewDetailScreen() {
     reviewRate,
     reviewContent,
     reviewImages,
+    reviewAnswerContent,
+    reviewAnswerRegDateTime,
+    reviewRegDate,
   } = useLocalSearchParams();
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -166,18 +170,35 @@ export default function ReviewDetailScreen() {
           </View>
         )}
 
-        {/* 별점 영역 */}
-        <View style={styles.ratingSection}>
-          <View style={styles.ratingContainer}>
-            {renderStarRating(parseInt(reviewRate as string))}
-            <Text style={styles.ratingText}>{reviewRate}점</Text>
+        {/* 별점 + 내용 통합 카드 */}
+        <View style={styles.reviewCard}>
+          <View style={styles.ratingRow}>
+            <View style={styles.ratingContainer}>
+              {renderStarRating(parseInt(reviewRate as string))}
+              <Text style={styles.ratingText}>{reviewRate}점</Text>
+            </View>
+            {reviewRegDate ? (
+              <Text style={styles.regDateText}>
+                {formatDateToLocalString(new Date(reviewRegDate as string))}
+              </Text>
+            ) : null}
           </View>
-        </View>
-
-        {/* 리뷰 내용 영역 */}
-        <View style={styles.contentSection}>
+          <View style={styles.divider} />
           <Text style={styles.contentText}>{reviewContent}</Text>
         </View>
+
+        {/* 리뷰 답변 영역 */}
+        {reviewAnswerContent ? (
+          <View style={styles.answerSection}>
+            <Text style={styles.answerLabel}>사장님 답변</Text>
+            <Text style={styles.answerContent}>{reviewAnswerContent}</Text>
+            {reviewAnswerRegDateTime ? (
+              <Text style={styles.answerDate}>
+                {formatDateToLocalString(new Date(reviewAnswerRegDateTime as string))}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         {/* 수정/삭제 버튼 */}
         <View style={styles.actionButtonsContainer}>
@@ -210,7 +231,7 @@ export default function ReviewDetailScreen() {
       </ScrollView>
 
       {insets.bottom > 0 && (
-        <View style={[{ height: insets.bottom }, styles.safeAreaBottom]} />
+        <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
 
       {/* 삭제 확인 모달 */}
