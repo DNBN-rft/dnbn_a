@@ -291,7 +291,11 @@ export default function StoreInfoPage() {
 
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>주소</Text>
-                <Text style={styles.infoValue} numberOfLines={1} ellipsizeMode="tail">
+                <Text
+                  style={styles.infoValue}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {storeInfo.storeAddr} {storeInfo.storeAddrDetail}
                 </Text>
               </View>
