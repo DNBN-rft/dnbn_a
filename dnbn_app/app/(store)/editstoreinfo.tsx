@@ -394,7 +394,6 @@ export default function EditStoreInfoPage() {
             mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.8,
           });
           if (!result.canceled && result.assets.length > 0) {
             const selectedAsset = result.assets[0];
