@@ -1,6 +1,7 @@
 import CartAddModal from "@/components/modal/CartAddModal";
 import ProductReportModal from "@/components/modal/ProductReportModal";
 import PurchaseModal from "@/components/modal/PurchaseModal";
+import { ProductDescriptionWebView } from "@/components/ui/ProductDescriptionWebView";
 import { apiGet, apiPost } from "@/utils/api";
 import { shareProduct } from "@/utils/kakaoShareUtil";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +21,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ProductDescriptionWebView } from "@/components/ui/ProductDescriptionWebView";
 import { styles } from "./product-detail.styles";
 
 interface ProductImage {
@@ -35,6 +35,9 @@ interface Review {
   reviewRegDate: string;
   reviewRate: number;
   reviewAnswerContent: string | null;
+  reviewImgs?: {
+    files: { originalName: string; fileUrl: string; order: number }[];
+  };
 }
 
 interface ProductData {
@@ -87,6 +90,10 @@ export default function ProductDetailScreen() {
 
         if (response.ok) {
           const data = await response.json();
+          console.log(
+            "[product-detail] reviewList:",
+            JSON.stringify(data.reviewList, null, 2),
+          );
           setProductData(data);
         } else {
           console.error("상품 조회 실패:", response.status);
@@ -548,18 +555,41 @@ export default function ProductDetailScreen() {
                       <Text style={styles.reviewContent}>
                         {review.reviewContent}
                       </Text>
+                      {review.reviewAnswerContent && (
+                        <>
+                          <View style={styles.reviewDivider} />
+                          <View style={styles.reviewAnswerContainer}>
+                            <Text style={styles.reviewAnswerLabel}>
+                              판매자 답변
+                            </Text>
+                            <Text style={styles.reviewAnswerText}>
+                              {review.reviewAnswerContent}
+                            </Text>
+                          </View>
+                        </>
+                      )}
+                      {review.reviewImgs?.files &&
+                        review.reviewImgs.files.length > 0 && (
+                          <View style={styles.reviewImgGallery}>
+                            {review.reviewImgs.files.map((img, imgIndex) => (
+                              <Image
+                                key={imgIndex}
+                                source={{ uri: img.fileUrl }}
+                                style={styles.reviewImgThumbnail}
+                                contentFit="cover"
+                              />
+                            ))}
+                          </View>
+                        )}
                     </View>
                   ))
                 ) : (
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      color: "#999",
-                      paddingVertical: 20,
-                    }}
-                  >
-                    작성된 리뷰가 없습니다.
-                  </Text>
+                  <View style={styles.noReviewsContainer}>
+                    <Ionicons name="chatbox-outline" size={48} color="#ccc" />
+                    <Text style={styles.noReviewsText}>
+                      등록된 리뷰가 없습니다
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>

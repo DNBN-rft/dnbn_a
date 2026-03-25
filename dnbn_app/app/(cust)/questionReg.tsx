@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles, loadingOverlayStyles } from "./questionreg.styles";
+import { loadingOverlayStyles, styles } from "./questionreg.styles";
 
 type QuestionType = "QR" | "PAYMENT" | "REFUND" | "MOD_REQUEST" | "ETC";
 
@@ -49,17 +49,23 @@ export default function NoticeDetailScreen() {
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-              { text: "취소", style: "cancel" },
-            ]);
+            Alert.alert(
+              "카메라 권한 필요",
+              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              [
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
+                { text: "취소", style: "cancel" },
+              ],
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
@@ -70,10 +76,9 @@ export default function NoticeDetailScreen() {
         text: "갤러리에서 선택",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
@@ -315,7 +320,11 @@ export default function NoticeDetailScreen() {
         </View>
 
         <View style={styles.submitButtonContainer}>
-          <Pressable style={styles.submitButton} onPress={submitQuestion} disabled={submitting}>
+          <Pressable
+            style={styles.submitButton}
+            onPress={submitQuestion}
+            disabled={submitting}
+          >
             <Text style={styles.submitButtonText}>문의하기</Text>
           </Pressable>
           <Pressable style={styles.cancelButton} onPress={() => router.back()}>
@@ -405,4 +414,3 @@ export default function NoticeDetailScreen() {
     </View>
   );
 }
-

@@ -93,8 +93,8 @@ export const styles = StyleSheet.create({
   },
   // 가게 이름과 주소 컨테이너
   nameAddressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     marginBottom: 6,
     gap: 8,
   },

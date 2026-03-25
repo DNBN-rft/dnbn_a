@@ -30,6 +30,7 @@ export interface Review {
   regDateTime: string;
   reviewContent: string;
   productNm: string;
+  reviewAnswerContent?: string | null;
 }
 
 // 매장 기본 정보 API 응답 타입

@@ -67,6 +67,18 @@ export function ReviewCard({ item, productCode }: ReviewCardProps) {
         <Text style={styles.reviewContentText}>{item.reviewContent}</Text>
       </View>
 
+      {item.reviewAnswerContent && (
+        <>
+          <View style={styles.reviewAnswerDivider} />
+          <View style={styles.reviewAnswerContainer}>
+            <Text style={styles.reviewAnswerLabel}>판매자 답변</Text>
+            <Text style={styles.reviewAnswerText}>
+              {item.reviewAnswerContent}
+            </Text>
+          </View>
+        </>
+      )}
+
       {item.reviewImage?.files && item.reviewImage.files.length > 0 && (
         <View style={styles.reviewImgGallery}>
           {item.reviewImage.files.map((img, index) => (

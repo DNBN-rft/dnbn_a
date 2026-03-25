@@ -11,6 +11,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Linking,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -19,11 +21,13 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
 } from "react-native";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import { styles } from "./editproduct.styles";
 
 interface Category {
@@ -80,7 +84,9 @@ export default function EditProductPage() {
   const [serviceType, setServiceType] = useState<"일반" | "서비스">("일반");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
-  const [pendingDescImages, setPendingDescImages] = useState<{ uri: string; name: string; mimeType: string }[]>([]);
+  const [pendingDescImages, setPendingDescImages] = useState<
+    { uri: string; name: string; mimeType: string }[]
+  >([]);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -150,12 +156,15 @@ export default function EditProductPage() {
     if (editorInitialized && richEditorRef.current) {
       const injectImageWatcher = () => {
         richEditorRef.current?.commandDOM(
-          "var content=$('#content');if(content){var imgs=content.querySelectorAll('img');imgs.forEach(function(img){if(!img.complete){img.addEventListener('load',function(){var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));});}});var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));}"  
+          "var content=$('#content');if(content){var imgs=content.querySelectorAll('img');imgs.forEach(function(img){if(!img.complete){img.addEventListener('load',function(){var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));});}});var h=content.scrollHeight;window.ReactNativeWebView.postMessage(JSON.stringify({type:'OFFSET_HEIGHT',data:h}));}",
         );
       };
       const t1 = setTimeout(injectImageWatcher, 300);
       const t2 = setTimeout(injectImageWatcher, 1500);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
   }, [editorInitialized]);
 
@@ -217,7 +226,9 @@ export default function EditProductPage() {
         : "jpg";
       const rawName = asset.fileName || asset.uri.split("/").pop() || "";
       const hasExt = rawName.includes(".");
-      const name = hasExt ? rawName : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
+      const name = hasExt
+        ? rawName
+        : `${rawName || `image_${Date.now()}`}.${extFromMime}`;
       setImages([...images, { uri: asset.uri, name, isNew: true }]);
     };
 
@@ -227,17 +238,23 @@ export default function EditProductPage() {
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-              { text: "취소", style: "cancel" },
-            ]);
+            Alert.alert(
+              "카메라 권한 필요",
+              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              [
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
+                { text: "취소", style: "cancel" },
+              ],
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.3,
           });
           if (!result.canceled) addFromAsset(result.assets[0]);
         },
@@ -246,10 +263,9 @@ export default function EditProductPage() {
         text: "갤러리에서 선택",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.3,
           });
           if (!result.canceled) addFromAsset(result.assets[0]);
         },
@@ -267,38 +283,53 @@ export default function EditProductPage() {
       if (fromCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-            { text: "취소", style: "cancel" },
-          ]);
+          Alert.alert(
+            "카메라 권한 필요",
+            "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+            [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ],
+          );
           return;
         }
       }
       const result = fromCamera
         ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: false,
-            quality: 0.3,
             base64: true,
           })
         : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: false,
-            quality: 0.3,
             base64: true,
           });
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
-        const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
+        const ext =
+          asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+        const name =
+          asset.fileName ||
+          asset.uri.split("/").pop() ||
+          `desc_image_${Date.now()}.${ext}`;
         const mimeType = asset.mimeType || "image/jpeg";
         const dataUrl = `data:${mimeType};base64,${asset.base64}`;
         setEditorHeight((prev) => prev + 400);
-        richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;display:block;"');
+        richEditorRef.current?.insertImage(
+          dataUrl,
+          'style="max-width:100%;height:auto;display:block;"',
+        );
         setTimeout(() => {
-          scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
+          scrollViewRef.current?.scrollTo({
+            y: editorYRef.current + editorHeight + 100,
+            animated: true,
+          });
         }, 100);
-        setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
+        setPendingDescImages((prev) => [
+          ...prev,
+          { uri: asset.uri, name, mimeType },
+        ]);
       }
     };
     Alert.alert("이미지 추가", "어떤 방법으로 추가할까요?", [
@@ -326,7 +357,10 @@ export default function EditProductPage() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
-    if (!description.replace(/<[^>]*>/g, "").trim() && !description.includes("<img")) {
+    if (
+      !description.replace(/<[^>]*>/g, "").trim() &&
+      !description.includes("<img")
+    ) {
       Alert.alert("알림", "상품 상세정보를 입력하세요");
       return;
     }
@@ -338,7 +372,7 @@ export default function EditProductPage() {
       let imgIndex = 0;
       const finalDescription = description.replace(
         /src="data:[^"]*"/g,
-        () => `src="__PENDING_IMG_${imgIndex++}__"`
+        () => `src="__PENDING_IMG_${imgIndex++}__"`,
       );
 
       // FormData 생성
@@ -355,7 +389,11 @@ export default function EditProductPage() {
       );
       formData.append("productDetailDescription", finalDescription);
       pendingDescImages.forEach((img) => {
-        formData.append("productDescriptionImgs", { uri: img.uri, name: img.name, type: img.mimeType } as any);
+        formData.append("productDescriptionImgs", {
+          uri: img.uri,
+          name: img.name,
+          type: img.mimeType,
+        } as any);
       });
 
       // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
@@ -447,81 +485,83 @@ export default function EditProductPage() {
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
             keyboardShouldPersistTaps="handled"
-            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+              scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
+            }}
             scrollEventThrottle={16}
           >
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품명</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="상품명을 입력하세요"
-            value={productName}
-            onChangeText={setProductName}
-          />
-        </View>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품명</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="상품명을 입력하세요"
+                value={productName}
+                onChangeText={setProductName}
+              />
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 가격</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="가격을 입력하세요"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-        </View>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 가격</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="가격을 입력하세요"
+                value={price}
+                onChangeText={setPrice}
+                keyboardType="numeric"
+              />
+            </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>카테고리</Text>
-          <TouchableOpacity
-            style={styles.selectButton}
-            onPress={() => setShowCategoryModal(true)}
-            disabled={categoryLoading}
-          >
-            <Text
-              style={[
-                styles.selectButtonText,
-                !category && styles.selectButtonPlaceholder,
-              ]}
-            >
-              {categoryLoading
-                ? "로딩 중..."
-                : category
-                  ? category.categoryNm
-                  : "카테고리를 선택하세요"}
-            </Text>
-            <Ionicons name="chevron-down" size={20} color="#999" />
-          </TouchableOpacity>
-        </View>
-
-        <CategorySelectModal
-          visible={showCategoryModal}
-          categories={categories}
-          selectedCategory={category}
-          onSelect={setCategory}
-          onClose={() => setShowCategoryModal(false)}
-        />
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 구분</Text>
-          <View style={styles.toggleGroup}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                productType === "일반" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setProductType("일반")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  productType === "일반" && styles.toggleTextActive,
-                ]}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>카테고리</Text>
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => setShowCategoryModal(true)}
+                disabled={categoryLoading}
               >
-                일반
-              </Text>
-            </TouchableOpacity>
-{/* 성인 선택 버튼 - 추후 구현 예정
+                <Text
+                  style={[
+                    styles.selectButtonText,
+                    !category && styles.selectButtonPlaceholder,
+                  ]}
+                >
+                  {categoryLoading
+                    ? "로딩 중..."
+                    : category
+                      ? category.categoryNm
+                      : "카테고리를 선택하세요"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#999" />
+              </TouchableOpacity>
+            </View>
+
+            <CategorySelectModal
+              visible={showCategoryModal}
+              categories={categories}
+              selectedCategory={category}
+              onSelect={setCategory}
+              onClose={() => setShowCategoryModal(false)}
+            />
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 구분</Text>
+              <View style={styles.toggleGroup}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    productType === "일반" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setProductType("일반")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      productType === "일반" && styles.toggleTextActive,
+                    ]}
+                  >
+                    일반
+                  </Text>
+                </TouchableOpacity>
+                {/* 성인 선택 버튼 - 추후 구현 예정
             <TouchableOpacity
               style={[
                 styles.toggleButton,
@@ -539,181 +579,208 @@ export default function EditProductPage() {
               </Text>
             </TouchableOpacity>
 */}
-          </View>
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>서비스 구분</Text>
-          <View style={styles.toggleGroup}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                serviceType === "일반" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setServiceType("일반")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  serviceType === "일반" && styles.toggleTextActive,
-                ]}
-              >
-                일반
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                serviceType === "서비스" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setServiceType("서비스")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  serviceType === "서비스" && styles.toggleTextActive,
-                ]}
-              >
-                서비스
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>재고</Text>
-          <TextInput
-            style={[
-              styles.input,
-              serviceType === "서비스" && styles.inputDisabled,
-            ]}
-            placeholder="재고 수량을 입력하세요"
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="numeric"
-            editable={serviceType !== "서비스"}
-          />
-        </View>
-
-        <View
-          style={styles.formGroup}
-          onLayout={(e) => { editorYRef.current = e.nativeEvent.layout.y; }}
-        >
-          <Text style={styles.label}>
-            상품 상세정보 <Text style={{ color: "#EF7810" }}>*</Text>
-          </Text>
-          <RichToolbar
-            editor={richEditorRef}
-            actions={[
-              actions.setBold,
-              actions.setItalic,
-              actions.setUnderline,
-              actions.insertBulletsList,
-              actions.insertOrderedList,
-              actions.insertImage,
-            ]}
-            onPressAddImage={handleInsertDescriptionImage}
-            style={richEditorStyles.toolbar}
-            iconTint="#333"
-            selectedIconTint="#EF7810"
-          />
-          {!editorReady && (
-            <View style={[richEditorStyles.editor, { height: 300, alignItems: "center", justifyContent: "center" }]}>
-              <Text style={{ color: "#999", fontSize: 14 }}>불러오는 중...</Text>
+              </View>
             </View>
-          )}
-          <RichEditor
-            key={editorKey}
-            ref={richEditorRef}
-            style={[richEditorStyles.editor, { height: editorHeight }, !editorReady && { position: "absolute", opacity: 0 }]}
-            placeholder="상품에 대한 상세 설명을 입력하세요"
-            initialContentHTML={description}
-            onChange={setDescription}
-            onHeightChange={(h) => {
-              if (h > 0) {
-                editorHeightRef.current = h;
-                setEditorHeight(h + 50);
-                if (editorInitialized) {
-                  setEditorReady(true);
-                }
-              }
-            }}
-            scrollEnabled={false}
-            initialHeight={300}
-            onLoadEnd={() => {
-              setEditorInitialized(true);
-              // onHeightChange가 먼저 실행되어 height 측정이 끝났으면 바로 ready 처리
-              if (editorHeightRef.current > 300) {
-                setEditorReady(true);
-              }
-            }}
-            onCursorPosition={(offsetY) => {
-              const absY = editorYRef.current + offsetY;
-              const visibleTop = scrollOffsetRef.current;
-              const visibleBottom = visibleTop + 500;
-              if (absY > visibleBottom - 80 || absY < visibleTop + 40) {
-                scrollViewRef.current?.scrollTo({ y: absY - 200, animated: true });
-              }
-            }}
-          />
-        </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>상품 이미지</Text>
-          <Text style={styles.helpText}>
-            첫 번째 사진이 상품의 메인 이미지로 표시됩니다.
-          </Text>
-          <View style={styles.imageManagementBox}>
-            <View style={styles.imageGrid}>
-              {images.map((img, index) => (
-                <View key={index} style={styles.imagePreview}>
-                  <Image
-                    source={{ uri: img.uri }}
-                    style={styles.previewImage}
-                  />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => removeImage(index)}
-                  >
-                    <Ionicons name="close-circle" size={24} color="#ff4444" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity
-                style={[
-                  styles.addImageButton,
-                  images.length >= 3 && styles.disabledButton,
-                ]}
-                onPress={pickImage}
-                disabled={isSaving || images.length >= 3}
-              >
-                <Ionicons
-                  name="add"
-                  size={32}
-                  color={images.length >= 3 ? "#ccc" : "#999"}
-                />
-                <Text
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>서비스 구분</Text>
+              <View style={styles.toggleGroup}>
+                <TouchableOpacity
                   style={[
-                    styles.addImageText,
-                    images.length >= 3 && styles.disabledText,
+                    styles.toggleButton,
+                    serviceType === "일반" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setServiceType("일반")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      serviceType === "일반" && styles.toggleTextActive,
+                    ]}
+                  >
+                    일반
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    serviceType === "서비스" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setServiceType("서비스")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      serviceType === "서비스" && styles.toggleTextActive,
+                    ]}
+                  >
+                    서비스
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>재고</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  serviceType === "서비스" && styles.inputDisabled,
+                ]}
+                placeholder="재고 수량을 입력하세요"
+                value={stock}
+                onChangeText={setStock}
+                keyboardType="numeric"
+                editable={serviceType !== "서비스"}
+              />
+            </View>
+
+            <View
+              style={styles.formGroup}
+              onLayout={(e) => {
+                editorYRef.current = e.nativeEvent.layout.y;
+              }}
+            >
+              <Text style={styles.label}>
+                상품 상세정보 <Text style={{ color: "#EF7810" }}>*</Text>
+              </Text>
+              <RichToolbar
+                editor={richEditorRef}
+                actions={[
+                  actions.setBold,
+                  actions.setItalic,
+                  actions.setUnderline,
+                  actions.insertBulletsList,
+                  actions.insertOrderedList,
+                  actions.insertImage,
+                ]}
+                onPressAddImage={handleInsertDescriptionImage}
+                style={richEditorStyles.toolbar}
+                iconTint="#333"
+                selectedIconTint="#EF7810"
+              />
+              {!editorReady && (
+                <View
+                  style={[
+                    richEditorStyles.editor,
+                    {
+                      height: 300,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
                   ]}
                 >
-                  {images.length >= 3 ? "완료" : "추가"}
-                </Text>
-              </TouchableOpacity>
+                  <Text style={{ color: "#999", fontSize: 14 }}>
+                    불러오는 중...
+                  </Text>
+                </View>
+              )}
+              <RichEditor
+                key={editorKey}
+                ref={richEditorRef}
+                style={[
+                  richEditorStyles.editor,
+                  { height: editorHeight },
+                  !editorReady && { position: "absolute", opacity: 0 },
+                ]}
+                placeholder="상품에 대한 상세 설명을 입력하세요"
+                initialContentHTML={description}
+                onChange={setDescription}
+                onHeightChange={(h) => {
+                  if (h > 0) {
+                    editorHeightRef.current = h;
+                    setEditorHeight(h + 50);
+                    if (editorInitialized) {
+                      setEditorReady(true);
+                    }
+                  }
+                }}
+                scrollEnabled={false}
+                initialHeight={300}
+                onLoadEnd={() => {
+                  setEditorInitialized(true);
+                  // onHeightChange가 먼저 실행되어 height 측정이 끝났으면 바로 ready 처리
+                  if (editorHeightRef.current > 300) {
+                    setEditorReady(true);
+                  }
+                }}
+                onCursorPosition={(offsetY) => {
+                  const absY = editorYRef.current + offsetY;
+                  const visibleTop = scrollOffsetRef.current;
+                  const visibleBottom = visibleTop + 500;
+                  if (absY > visibleBottom - 80 || absY < visibleTop + 40) {
+                    scrollViewRef.current?.scrollTo({
+                      y: absY - 200,
+                      animated: true,
+                    });
+                  }
+                }}
+              />
             </View>
-          </View>
-        </View>
 
-        <TouchableOpacity
-          style={[styles.submitButton, isSaving && styles.submitButtonDisabled]}
-          onPress={handleUpdate}
-          disabled={isSaving}
-        >
-          <Text style={styles.submitButtonText}>
-            {isSaving ? "수정 중..." : "수정 완료"}
-          </Text>
-        </TouchableOpacity>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>상품 이미지</Text>
+              <Text style={styles.helpText}>
+                첫 번째 사진이 상품의 메인 이미지로 표시됩니다.
+              </Text>
+              <View style={styles.imageManagementBox}>
+                <View style={styles.imageGrid}>
+                  {images.map((img, index) => (
+                    <View key={index} style={styles.imagePreview}>
+                      <Image
+                        source={{ uri: img.uri }}
+                        style={styles.previewImage}
+                      />
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={() => removeImage(index)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          size={24}
+                          color="#ff4444"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.addImageButton,
+                      images.length >= 3 && styles.disabledButton,
+                    ]}
+                    onPress={pickImage}
+                    disabled={isSaving || images.length >= 3}
+                  >
+                    <Ionicons
+                      name="add"
+                      size={32}
+                      color={images.length >= 3 ? "#ccc" : "#999"}
+                    />
+                    <Text
+                      style={[
+                        styles.addImageText,
+                        images.length >= 3 && styles.disabledText,
+                      ]}
+                    >
+                      {images.length >= 3 ? "완료" : "추가"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isSaving && styles.submitButtonDisabled,
+              ]}
+              onPress={handleUpdate}
+              disabled={isSaving}
+            >
+              <Text style={styles.submitButtonText}>
+                {isSaving ? "수정 중..." : "수정 완료"}
+              </Text>
+            </TouchableOpacity>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

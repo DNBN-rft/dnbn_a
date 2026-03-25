@@ -1,5 +1,6 @@
 import { apiPostFormDataWithImage } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -17,7 +18,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./storeQuestionreg.styles";
 
@@ -48,17 +48,23 @@ export default function StoreQuestionReg() {
         onPress: async () => {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            Alert.alert("카메라 권한 필요", "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.", [
-              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-              { text: "취소", style: "cancel" },
-            ]);
+            Alert.alert(
+              "카메라 권한 필요",
+              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              [
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
+                { text: "취소", style: "cancel" },
+              ],
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
@@ -69,10 +75,9 @@ export default function StoreQuestionReg() {
         text: "갤러리에서 선택",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
           });
           if (!result.canceled && result.assets[0]) {
             setQuestionFiles([...questionFiles, result.assets[0].uri]);
@@ -309,10 +314,7 @@ export default function StoreQuestionReg() {
 
         <View style={styles.submitButtonContainer}>
           <Pressable
-            style={[
-              styles.submitButton,
-              loading && { opacity: 0.6 },
-            ]}
+            style={[styles.submitButton, loading && { opacity: 0.6 }]}
             onPress={submitQuestion}
             disabled={loading}
           >

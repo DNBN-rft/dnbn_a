@@ -32,9 +32,9 @@ export function ReportReasonModal({
   onSelectReason,
 }: ReportReasonModalProps) {
   const slideAnim = useRef(new Animated.Value(1000)).current;
-  
+
   const insets = useSafeAreaInsets();
-  
+
   useEffect(() => {
     if (visible) {
       // 모달 열기: 오른쪽에서 왼쪽으로 슬라이드
@@ -111,7 +111,7 @@ export function ReportReasonModal({
             ))}
         </ScrollView>
         {insets.bottom > 0 && (
-          <View style={{ height: insets.bottom, backgroundColor: "#fff" }} />
+          <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
         )}
       </Animated.View>
     </Modal>

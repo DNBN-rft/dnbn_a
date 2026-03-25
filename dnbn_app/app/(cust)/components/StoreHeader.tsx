@@ -102,7 +102,7 @@ export function StoreHeader({
           style={styles.addressRow}
           onPress={() => {
             router.push({
-              pathname: "/(cust)/tabs/map",
+              pathname: "/(cust)/map-view",
               params: { searchAddress: storeInfo.storeAddress },
             });
           }}

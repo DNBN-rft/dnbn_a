@@ -119,7 +119,7 @@ export const styles = StyleSheet.create({
   },
   storeNameContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     gap: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
@@ -304,11 +304,8 @@ export const styles = StyleSheet.create({
   tabs: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
   },
   tab: {
     flex: 1,
@@ -331,22 +328,29 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
   tabContentContainer: {
-    padding: 20,
-    backgroundColor: "#fafafa",
-    minHeight: 250,
+    backgroundColor: "#fff",
+    minHeight: 400,
   },
   tabContent: {
     fontSize: 14,
     color: "#333",
     lineHeight: 24,
   },
-  descriptionContent: {},
-  detailsContent: {},
+  descriptionContent: {
+    width: "100%",
+  },
+  detailsContent: {
+    width: "100%",
+    paddingHorizontal: 16,
+  },
   reviewsContent: {},
   reviewItem: {
+    width: "100%",
     paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
+    backgroundColor: "#fff",
   },
   reviewHeader: {
     flexDirection: "row",
@@ -380,6 +384,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
+    backgroundColor: "#fff",
   },
   detailLabel: {
     fontSize: 14,
@@ -395,7 +400,7 @@ export const styles = StyleSheet.create({
   detailDropdownContent: {
     paddingHorizontal: 4,
     paddingVertical: 12,
-    backgroundColor: "#fafafa",
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
@@ -472,8 +477,13 @@ export const styles = StyleSheet.create({
   reviewAnswerContainer: {
     marginTop: 8,
     padding: 12,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#fff",
     borderRadius: 8,
+  },
+  reviewDivider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+    marginVertical: 12,
   },
   reviewAnswerLabel: {
     fontSize: 12,
@@ -483,6 +493,19 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginTop: 4,
+  },
+  reviewImgGallery: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
+  reviewImgThumbnail: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
   },
   noReviewsContainer: {
     padding: 40,
