@@ -2,9 +2,10 @@ import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -34,71 +35,72 @@ export default function UsedGift() {
   const insets = useSafeAreaInsets();
   const searchParams = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState("useinfo");
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const [purchaseData, setPurchaseData] = useState<UsedQrCode | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const productListRef = useRef<FlatList>(null);
 
   const infoContainerHeight = (height - insets.top - insets.bottom - 64) * 0.5;
 
-  interface UsedQrCode {
-    storeNm: string;
-    productNm: string;
-    orderCode: string;
-    orderDetailPrice: number;
-    orderDetailAmount: number;
-    orderDetailTotal: number;
-    orderDateTime: string;
-    qrUsed: boolean;
-    qrUsedAt: string;
-    cancelReason: string;
-    orderRefundTime: string;
-    qrImg: Img | null;
-    productImg: Img | null;
-  }
-
-  interface Img {
+  interface FileResponse {
     originalName: string;
     fileUrl: string;
     order: number;
   }
 
-  useEffect(() => {
-    const fetchPurchaseDetail = async () => {
-      try {
-        setLoading(true);
-        const orderDetailIdx = searchParams.orderDetailIdx as string;
+  interface ProductItem {
+    productImg: FileResponse | null;
+    storeNm: string;
+    productNm: string;
+    price: number;
+    amount: number;
+    totalPrice: number;
+    qrUsed: boolean;
+    qrUsedAt: string;
+  }
 
-        if (!orderDetailIdx) {
-          setError("주문 상세 정보를 찾을 수 없습니다.");
-          setLoading(false);
-          return;
-        }
+  interface UsedQrCode {
+    productItems: ProductItem[];
+    orderCode: string;
+    totalProductPrice: number;
+  }
 
-        const response = await apiGet(
-          `/cust/purchase-list/used/${orderDetailIdx}`,
-        );
+  const fetchPurchaseDetail = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const orderCode = searchParams.orderCode as string;
 
-        if (!response.ok) {
-          setError("구매 상세 정보를 불러오는 데 실패했습니다.");
-          setLoading(false);
-          return;
-        }
-
-        const data = await response.json();
-
-        setPurchaseData(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
-        console.error("Purchase detail fetch error:", err);
-      } finally {
+      if (!orderCode) {
+        setError("주문 상세 정보를 찾을 수 없습니다.");
         setLoading(false);
+        return;
       }
-    };
 
+      const response = await apiGet(`/cust/purchase-list/used/${orderCode}`);
+
+      if (!response.ok) {
+        setError("구매 상세 정보를 불러오는 데 실패했습니다.");
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      setPurchaseData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
+      console.error("Purchase detail fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams.orderCode]);
+
+  useEffect(() => {
     fetchPurchaseDetail();
-  }, [searchParams.orderDetailIdx]);
+  }, [fetchPurchaseDetail]);
 
   if (loading) {
     return (
@@ -156,32 +158,82 @@ export default function UsedGift() {
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.infoContainer, { height: infoContainerHeight }]}>
-          {purchaseData.productImg ? (
-            <Image
-              source={purchaseData.productImg.fileUrl}
-              style={styles.giftImage}
-              contentFit="contain"
-            />
-          ) : (
+        <View>
+          <FlatList
+            ref={productListRef}
+            data={purchaseData.productItems}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, idx) => idx.toString()}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.x / width);
+              setSelectedIndex(index);
+            }}
+            renderItem={({ item }) => (
+              <View style={{ width, alignItems: "center" }}>
+                <View
+                  style={[
+                    styles.infoContainer,
+                    { height: infoContainerHeight },
+                  ]}
+                >
+                  {item.productImg ? (
+                    <Image
+                      source={item.productImg.fileUrl}
+                      style={styles.giftImage}
+                      contentFit="contain"
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.giftImage,
+                        {
+                          justifyContent: "center",
+                          alignItems: "center",
+                          backgroundColor: "#f0f0f0",
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: "#999",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        삭제된 상품입니다
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={styles.storeName}>{item.storeNm}</Text>
+                  <Text style={styles.productName}>{item.productNm}</Text>
+                </View>
+              </View>
+            )}
+          />
+          {purchaseData.productItems.length > 1 && (
             <View
-              style={[
-                styles.giftImage,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "#f0f0f0",
-                },
-              ]}
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                paddingVertical: 8,
+              }}
             >
-              <Text style={{ fontSize: 16, color: "#999", fontWeight: "bold" }}>
-                삭제된 상품입니다
-              </Text>
+              {purchaseData.productItems.map((_, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: idx === selectedIndex ? "#ef7810" : "#ccc",
+                    marginHorizontal: 3,
+                  }}
+                />
+              ))}
             </View>
           )}
-
-          <Text style={styles.storeName}>{purchaseData.storeNm}</Text>
-          <Text style={styles.productName}>{purchaseData.productNm}</Text>
         </View>
 
         <View style={styles.explanationContainer}>
@@ -259,7 +311,11 @@ export default function UsedGift() {
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>QR 사용일</Text>
             <Text style={styles.giftDetailValue}>
-              {formatDateTime(purchaseData.qrUsedAt)}
+              {purchaseData.productItems[selectedIndex]?.qrUsedAt
+                ? formatDateTime(
+                    purchaseData.productItems[selectedIndex].qrUsedAt,
+                  )
+                : "-"}
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
@@ -269,41 +325,37 @@ export default function UsedGift() {
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailAmount}개
+              {purchaseData.productItems[selectedIndex]?.amount}개
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>단가</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailPrice.toLocaleString()}원
+              {purchaseData.productItems[selectedIndex]?.price.toLocaleString()}
+              원
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
-            <Text style={styles.giftDetailLabel}>금액</Text>
+            <Text style={styles.giftDetailLabel}>총금액</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailTotal.toLocaleString()}원
+              {purchaseData.productItems[
+                selectedIndex
+              ]?.totalPrice.toLocaleString()}
+              원
+            </Text>
+          </View>
+          <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>주문 총금액</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.totalProductPrice.toLocaleString()}원
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.storeNm}</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.productItems[selectedIndex]?.storeNm}
+            </Text>
           </View>
-          {purchaseData.cancelReason && (
-            <View style={styles.giftDetailRow}>
-              <Text style={styles.giftDetailLabel}>환불 사유</Text>
-              <Text style={styles.giftDetailValue}>
-                {purchaseData.cancelReason}
-              </Text>
-            </View>
-          )}
-          {purchaseData.orderRefundTime && (
-            <View style={styles.giftDetailRow}>
-              <Text style={styles.giftDetailLabel}>환불 시간</Text>
-              <Text style={styles.giftDetailValue}>
-                {formatDateTime(purchaseData.orderRefundTime)}
-              </Text>
-            </View>
-          )}
         </View>
       </ScrollView>
       {insets.bottom > 0 && (
