@@ -53,6 +53,7 @@ export default function StoreHome() {
       };
     }, []),
   );
+  const [isNavigating, setIsNavigating] = useState(false);
   const [todayOrderCount, setTodayOrderCount] = useState<number>(0);
   const [progressOrderCount, setProgressOrderCount] = useState<number>(0);
   const [completeOrderCount, setCompleteOrderCount] = useState<number>(0);
@@ -152,6 +153,7 @@ export default function StoreHome() {
   // 페이지 접근 시 API 호출
   useFocusEffect(
     useCallback(() => {
+      setIsNavigating(false);
       checkUnreadAlarm();
       const fetchStoreHomeData = async () => {
         try {
@@ -232,7 +234,11 @@ export default function StoreHome() {
               {hasAuthority("STORE_PRODUCT") && (
                 <TouchableOpacity
                   style={styles.menuItem}
-                  onPress={() => router.push("/(store)/addproduct")}
+                  disabled={isNavigating}
+                  onPress={() => {
+                    setIsNavigating(true);
+                    router.push("/(store)/addproduct");
+                  }}
                 >
                   <Ionicons
                     name="duplicate-outline"
