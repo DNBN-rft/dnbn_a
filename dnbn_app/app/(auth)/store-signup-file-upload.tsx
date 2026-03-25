@@ -46,17 +46,20 @@ export default function StoreSignupFileUploadScreen() {
       if (useCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
-            { text: "취소", style: "cancel" },
-            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-          ]);
+          Alert.alert(
+            "카메라 권한 필요",
+            "설정에서 카메라 권한을 허용해주세요.",
+            [
+              { text: "취소", style: "cancel" },
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+            ],
+          );
           return;
         }
         const result = await ImagePicker.launchCameraAsync({
           mediaTypes: "images",
           allowsEditing: true,
           aspect: [4, 3],
-          quality: 0.8,
         });
         if (!result.canceled && result.assets[0]) {
           const asset = result.assets[0];
@@ -73,7 +76,6 @@ export default function StoreSignupFileUploadScreen() {
           mediaTypes: "images",
           allowsEditing: true,
           aspect: [4, 3],
-          quality: 0.8,
         });
         if (!result.canceled && result.assets[0]) {
           const asset = result.assets[0];
@@ -108,33 +110,49 @@ export default function StoreSignupFileUploadScreen() {
       if (useCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
-            { text: "취소", style: "cancel" },
-            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-          ]);
+          Alert.alert(
+            "카메라 권한 필요",
+            "설정에서 카메라 권한을 허용해주세요.",
+            [
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
+            ],
+          );
           return;
         }
         const result = await ImagePicker.launchCameraAsync({
           mediaTypes: "images",
           allowsEditing: false,
-          quality: 0.8,
         });
         if (!result.canceled && result.assets[0]) {
           const asset = result.assets[0];
           updateFileUpload({
-            businessDocs: [...fileUpload.businessDocs, { uri: asset.uri, type: "image/jpeg", name: `biz_doc_${Date.now()}.jpg` }],
+            businessDocs: [
+              ...fileUpload.businessDocs,
+              {
+                uri: asset.uri,
+                type: "image/jpeg",
+                name: `biz_doc_${Date.now()}.jpg`,
+              },
+            ],
           });
         }
       } else {
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: "images",
           allowsEditing: false,
-          quality: 0.8,
         });
         if (!result.canceled && result.assets[0]) {
           const asset = result.assets[0];
           updateFileUpload({
-            businessDocs: [...fileUpload.businessDocs, { uri: asset.uri, type: "image/jpeg", name: `biz_doc_${Date.now()}.jpg` }],
+            businessDocs: [
+              ...fileUpload.businessDocs,
+              {
+                uri: asset.uri,
+                type: "image/jpeg",
+                name: `biz_doc_${Date.now()}.jpg`,
+              },
+            ],
           });
         }
       }

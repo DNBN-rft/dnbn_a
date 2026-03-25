@@ -105,6 +105,10 @@ export default function StoreInfo() {
       if (!response.ok) throw new Error("리뷰 목록을 불러오는데 실패했습니다.");
 
       const data: ReviewsPageResponse = await response.json();
+      console.log(
+        "[storeInfo] reviews:",
+        JSON.stringify(data.content, null, 2),
+      );
       setReviews(Array.isArray(data.content) ? data.content : []);
       setHasMoreReviews(!data.last);
       setReviewPage(0);
@@ -188,9 +192,7 @@ export default function StoreInfo() {
           </TouchableOpacity>
         </View>
         <View style={styles.centerSection}>
-          <Text style={styles.title}>
-            {loading ? "로딩중..." : storeInfo?.storeNm || "가맹점 정보"}
-          </Text>
+          <Text style={styles.title}>가맹점 정보</Text>
         </View>
         <View style={styles.rightSection} />
       </View>

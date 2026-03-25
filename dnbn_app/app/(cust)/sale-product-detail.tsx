@@ -30,6 +30,9 @@ interface ReviewItem {
   reviewRegDate: string;
   reviewRate: number;
   reviewAnswerContent: string | null;
+  reviewImgs?: {
+    files: { originalName: string; fileUrl: string; order: number }[];
+  };
 }
 
 interface ProductImageFile {
@@ -589,15 +592,31 @@ export default function ProductDetailScreen() {
                           {review.reviewContent}
                         </Text>
                         {review.reviewAnswerContent && (
-                          <View style={styles.reviewAnswerContainer}>
-                            <Text style={styles.reviewAnswerLabel}>
-                              판매자 답변
-                            </Text>
-                            <Text style={styles.reviewAnswerText}>
-                              {review.reviewAnswerContent}
-                            </Text>
-                          </View>
+                          <>
+                            <View style={styles.reviewDivider} />
+                            <View style={styles.reviewAnswerContainer}>
+                              <Text style={styles.reviewAnswerLabel}>
+                                판매자 답변
+                              </Text>
+                              <Text style={styles.reviewAnswerText}>
+                                {review.reviewAnswerContent}
+                              </Text>
+                            </View>
+                          </>
                         )}
+                        {review.reviewImgs?.files &&
+                          review.reviewImgs.files.length > 0 && (
+                            <View style={styles.reviewImgGallery}>
+                              {review.reviewImgs.files.map((img, imgIndex) => (
+                                <Image
+                                  key={imgIndex}
+                                  source={{ uri: img.fileUrl }}
+                                  style={styles.reviewImgThumbnail}
+                                  contentFit="cover"
+                                />
+                              ))}
+                            </View>
+                          )}
                       </View>
                     ))
                   ) : (

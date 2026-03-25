@@ -675,7 +675,7 @@ export default function ProductDetailScreen() {
       {/* FloatingButton - 최상단 이동 */}
       {!loading && !error && (
         <TouchableOpacity
-          style={styles.scrollToTopButton}
+          style={[styles.scrollToTopButton, { bottom: 90 + insets.bottom }]}
           onPress={scrollToTop}
         >
           <Ionicons name="chevron-up" size={24} color="#ef7810" />

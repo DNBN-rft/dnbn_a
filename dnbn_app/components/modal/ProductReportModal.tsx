@@ -71,19 +71,21 @@ export default function ProductReportModal({
 
     const launchPicker = async (useCamera: boolean) => {
       if (useCamera) {
-        const { status } =
-          await ImagePicker.requestCameraPermissionsAsync();
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("카메라 권한 필요", "설정에서 카메라 권한을 허용해주세요.", [
-            { text: "취소", style: "cancel" },
-            { text: "설정으로 이동", onPress: () => Linking.openSettings() },
-          ]);
+          Alert.alert(
+            "카메라 권한 필요",
+            "설정에서 카메라 권한을 허용해주세요.",
+            [
+              { text: "취소", style: "cancel" },
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+            ],
+          );
           return;
         }
         const result = await ImagePicker.launchCameraAsync({
           mediaTypes: "images",
           allowsEditing: true,
-          quality: 1,
         });
         if (!result.canceled && result.assets[0]) {
           setAttachments((prev) => [...prev, result.assets[0].uri]);
@@ -92,7 +94,6 @@ export default function ProductReportModal({
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: "images",
           allowsEditing: true,
-          quality: 1,
         });
         if (!result.canceled && result.assets[0]) {
           setAttachments((prev) => [...prev, result.assets[0].uri]);
@@ -170,17 +171,13 @@ export default function ProductReportModal({
 
   const openReasonPicker = () => {
     if (reportReasons.length === 0) return;
-    Alert.alert(
-      "신고 사유 선택",
-      undefined,
-      [
-        ...reportReasons.map((r) => ({
-          text: r.label,
-          onPress: () => setSelectedReason(r.value),
-        })),
-        { text: "취소", style: "cancel" as const },
-      ]
-    );
+    Alert.alert("신고 사유 선택", undefined, [
+      ...reportReasons.map((r) => ({
+        text: r.label,
+        onPress: () => setSelectedReason(r.value),
+      })),
+      { text: "취소", style: "cancel" as const },
+    ]);
   };
 
   const selectedReasonLabel =

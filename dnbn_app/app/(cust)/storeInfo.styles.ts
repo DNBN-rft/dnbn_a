@@ -374,4 +374,23 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  reviewAnswerDivider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+    marginVertical: 12,
+  },
+  reviewAnswerContainer: {
+    padding: 12,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 8,
+  },
+  reviewAnswerLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
+  reviewAnswerText: {
+    fontSize: 14,
+    color: "#333",
+    marginTop: 4,
+  },
 });

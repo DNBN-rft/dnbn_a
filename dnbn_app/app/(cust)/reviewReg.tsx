@@ -19,10 +19,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./reviewreg.styles";
 
-interface ReviewImageFile {
-  fileUrl: string;
-  order?: number;
-  originalName?: string;
+interface ReviewImageItem {
+  uri: string;
+  name: string;
+  isNew: boolean;
 }
 
 export default function ReviewRegScreen() {
@@ -46,8 +46,7 @@ export default function ReviewRegScreen() {
   const [reviewText, setReviewText] = useState(
     isEditMode ? (initialContent as string) || "" : "",
   );
-  const [images, setImages] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<ReviewImageFile[]>([]);
+  const [images, setImages] = useState<ReviewImageItem[]>([]);
   const [mediaLibraryPermission, requestMediaLibraryPermission] =
     ImagePicker.useMediaLibraryPermissions();
   const [cameraPermission, requestCameraPermission] =
@@ -63,17 +62,24 @@ export default function ReviewRegScreen() {
     if (isEditMode && initialReviewImages) {
       try {
         const parsed = JSON.parse(initialReviewImages as string);
-        setExistingImages(Array.isArray(parsed) ? parsed : []);
+        if (Array.isArray(parsed)) {
+          setImages(
+            parsed.map((img: any) => ({
+              uri: img.fileUrl,
+              name: img.originalName || `existing_${img.order ?? 0}.jpg`,
+              isNew: false,
+            }))
+          );
+        }
       } catch (error) {
-        setExistingImages([]);
+        setImages([]);
       }
     }
   }, [requestCameraPermission]);
 
   // 사진 촬영
   const takePhoto = async () => {
-    const totalImages = existingImages.length + images.length;
-    if (totalImages >= 3) return;
+    if (images.length >= 3) return;
 
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
@@ -90,16 +96,19 @@ export default function ReviewRegScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      setImages((prev) =>
-        [...prev, result.assets[0].uri].slice(0, 3 - existingImages.length),
-      );
+      const asset = result.assets[0];
+      const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+      const rawName = asset.fileName || asset.uri.split("/").pop() || "";
+      const name = rawName.includes(".")
+        ? rawName
+        : `${rawName || `review_${Date.now()}`}.${ext}`;
+      setImages((prev) => [...prev, { uri: asset.uri, name, isNew: true }].slice(0, 3));
     }
   };
 
   // 앨범에서 선택
   const pickImage = async () => {
-    const totalImages = existingImages.length + images.length;
-    if (totalImages >= 3) return;
+    if (images.length >= 3) return;
 
     if (!mediaLibraryPermission?.granted) {
       const result = await requestMediaLibraryPermission();
@@ -112,26 +121,30 @@ export default function ReviewRegScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      selectionLimit: 3 - totalImages,
+      selectionLimit: 3 - images.length,
       quality: 1,
     });
 
     if (!result.canceled) {
-      const newUris = result.assets.map((asset) => asset.uri);
-      setImages((prev) =>
-        [...prev, ...newUris].slice(0, 3 - existingImages.length),
-      );
+      const newItems = result.assets.map((asset) => {
+        const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+        const rawName = asset.fileName || asset.uri.split("/").pop() || "";
+        const name = rawName.includes(".")
+          ? rawName
+          : `${rawName || `review_${Date.now()}`}.${ext}`;
+        return { uri: asset.uri, name, isNew: true };
+      });
+      setImages((prev) => [...prev, ...newItems].slice(0, 3));
     }
   };
 
   // 이미지 추가 옵션 선택
   const handleAddImage = () => {
-    const totalImages = existingImages.length + images.length;
-    if (totalImages >= 3) return;
+    if (images.length >= 3) return;
 
     // 웹은 카메라 촬영 불가 - 앨범에서만 선택
     if (Platform.OS === "web") {
-      pickImage();
+      void pickImage();
       return;
     }
 
@@ -159,10 +172,6 @@ export default function ReviewRegScreen() {
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
-  };
-
-  const removeExistingImage = (index: number) => {
-    setExistingImages(existingImages.filter((_, i) => i !== index));
   };
 
   const handleSubmitReview = async () => {
@@ -202,22 +211,33 @@ export default function ReviewRegScreen() {
         formData.append("rating", String(rating));
       }
 
-      // 이미지 추가 (플랫폼별로 다르게 처리)
+      // 이미지 추가 (기존 이미지 + 신규 이미지 모두 전송, 플랫폼별로 다르게 처리)
+      // 백엔드는 기존 이미지를 전체 삭제 후 전달받은 이미지를 전체 저장하므로
+      // 유지할 기존 이미지(isNew: false) + 새 이미지(isNew: true) 모두 전송
       for (let i = 0; i < images.length; i++) {
-        const imageUri = images[i];
+        const img = images[i];
+        const ext = img.name.split(".").pop()?.toLowerCase() || "jpg";
+        const mimeType =
+          ext === "png"
+            ? "image/png"
+            : ext === "gif"
+              ? "image/gif"
+              : ext === "webp"
+                ? "image/webp"
+                : "image/jpeg";
 
         if (Platform.OS === "web") {
-          // 웹: Blob으로 변환하여 전송
-          const response = await fetch(imageUri);
+          // 웹: Blob으로 변환하여 전송 (로컬 URI든 서버 URL이든 동일하게 처리)
+          const response = await fetch(img.uri);
           const blob = await response.blob();
-          const typedBlob = new Blob([blob], { type: "image/jpeg" });
-          formData.append("reviewImgs", typedBlob as any, `review_${i}.jpg`);
+          const typedBlob = new Blob([blob], { type: mimeType });
+          formData.append("reviewImgs", typedBlob as any, img.name);
         } else {
-          // 네이티브: URI를 직접 FormData에 추가
+          // 네이티브: URI를 직접 FormData에 추가 (로컬 URI든 서버 URL이든 동일하게 처리)
           formData.append("reviewImgs", {
-            uri: imageUri,
-            type: "image/jpeg",
-            name: `review_${i}.jpg`,
+            uri: img.uri,
+            type: mimeType,
+            name: img.name,
           } as any);
         }
       }
@@ -376,39 +396,16 @@ export default function ReviewRegScreen() {
 
               <View style={styles.photoContainer}>
                 <Text style={styles.photoLabel}>
-                  사진 첨부 ({existingImages.length + images.length}/3)
+                  사진 첨부 ({images.length}/3)
                 </Text>
 
                 <View style={styles.photoGridContainer}>
-                  {/* 기존 이미지 표시 */}
-                  {existingImages.map((image, index) => (
-                    <View key={`existing-${index}`} style={styles.photoSlot}>
+                  {/* 이미지 표시 (기존 + 새로운 이미지 통합) */}
+                  {images.map((img, index) => (
+                    <View key={`img-${index}`} style={styles.photoSlot}>
                       <View style={styles.photoWrapper}>
                         <Image
-                          source={{ uri: image.fileUrl }}
-                          style={styles.photoImage}
-                          resizeMode="contain"
-                        />
-                        <Pressable
-                          style={styles.removePhotoButton}
-                          onPress={() => removeExistingImage(index)}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={24}
-                            color="#FF6B35"
-                          />
-                        </Pressable>
-                      </View>
-                    </View>
-                  ))}
-
-                  {/* 새로운 이미지 표시 */}
-                  {images.map((imageUri, index) => (
-                    <View key={`new-${index}`} style={styles.photoSlot}>
-                      <View style={styles.photoWrapper}>
-                        <Image
-                          source={{ uri: imageUri }}
+                          source={{ uri: img.uri }}
                           style={styles.photoImage}
                           resizeMode="contain"
                         />
@@ -428,22 +425,18 @@ export default function ReviewRegScreen() {
 
                   {/* 빈 슬롯 (최대 3개까지) */}
                   {Array.from({
-                    length: 3 - existingImages.length - images.length,
+                    length: 3 - images.length,
                   }).map((_, index) => (
                     <View key={`empty-${index}`} style={styles.photoSlot}>
                       <Pressable
                         style={styles.photoUploadButton}
                         onPress={handleAddImage}
-                        disabled={existingImages.length + images.length >= 3}
+                        disabled={images.length >= 3}
                       >
                         <Ionicons
                           name="camera"
                           size={32}
-                          color={
-                            existingImages.length + images.length >= 3
-                              ? "#ccc"
-                              : "#888"
-                          }
+                          color={images.length >= 3 ? "#ccc" : "#888"}
                         />
                       </Pressable>
                     </View>

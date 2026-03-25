@@ -22,7 +22,7 @@ export function ProductDescriptionWebView({ html }: ProductDescriptionWebViewPro
   const [height, setHeight] = useState(200);
 
   const source = {
-    html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:8px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;display:block;}</style></head><body>${html}</body></html>`,
+    html: `<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1.0,maximum-scale=1.0'><style>body{margin:0;padding:16px;font-family:-apple-system,sans-serif;font-size:14px;color:#333;word-break:break-word;}img{max-width:100%;height:auto;display:block;}</style></head><body>${html}</body></html>`,
   };
 
   return (

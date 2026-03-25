@@ -586,14 +586,17 @@ export default function ProductDetailScreen() {
                           {review.reviewContent}
                         </Text>
                         {review.reviewAnswerContent && (
-                          <View style={styles.reviewAnswerContainer}>
-                            <Text style={styles.reviewAnswerLabel}>
-                              판매자 답변
-                            </Text>
-                            <Text style={styles.reviewAnswerText}>
-                              {review.reviewAnswerContent}
-                            </Text>
-                          </View>
+                          <>
+                            <View style={styles.reviewDivider} />
+                            <View style={styles.reviewAnswerContainer}>
+                              <Text style={styles.reviewAnswerLabel}>
+                                판매자 답변
+                              </Text>
+                              <Text style={styles.reviewAnswerText}>
+                                {review.reviewAnswerContent}
+                              </Text>
+                            </View>
+                          </>
                         )}
                       </View>
                     ))

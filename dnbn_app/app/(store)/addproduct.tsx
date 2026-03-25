@@ -10,6 +10,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Linking,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
   ScrollView,
   StyleSheet,
@@ -18,11 +20,13 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
 } from "react-native";
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from "react-native-pell-rich-editor";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RichEditor, RichToolbar, actions } from "react-native-pell-rich-editor";
 import { styles } from "./addproduct.styles";
 
 interface Category {
@@ -49,7 +53,9 @@ export default function AddProduct() {
   const [serviceType, setServiceType] = useState<"일반" | "서비스">("일반");
   const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
-  const [pendingDescImages, setPendingDescImages] = useState<{ uri: string; name: string; mimeType: string }[]>([]);
+  const [pendingDescImages, setPendingDescImages] = useState<
+    { uri: string; name: string; mimeType: string }[]
+  >([]);
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(true);
@@ -96,21 +102,29 @@ export default function AddProduct() {
               "카메라 권한 필요",
               "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
               [
-                { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+                {
+                  text: "설정으로 이동",
+                  onPress: () => Linking.openSettings(),
+                },
                 { text: "취소", style: "cancel" },
-              ]
+              ],
             );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.3,
           });
           if (!result.canceled) {
             const asset = result.assets[0];
-            setImages([...images, { uri: asset.uri, name: asset.uri.split("/").pop() || "image.jpg" }]);
+            setImages([
+              ...images,
+              {
+                uri: asset.uri,
+                name: asset.uri.split("/").pop() || "image.jpg",
+              },
+            ]);
           }
         },
       },
@@ -118,14 +132,19 @@ export default function AddProduct() {
         text: "갤러리에서 선택",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.3,
           });
           if (!result.canceled) {
             const asset = result.assets[0];
-            setImages([...images, { uri: asset.uri, name: asset.uri.split("/").pop() || "image.jpg" }]);
+            setImages([
+              ...images,
+              {
+                uri: asset.uri,
+                name: asset.uri.split("/").pop() || "image.jpg",
+              },
+            ]);
           }
         },
       },
@@ -148,7 +167,7 @@ export default function AddProduct() {
             [
               { text: "설정으로 이동", onPress: () => Linking.openSettings() },
               { text: "취소", style: "cancel" },
-            ]
+            ],
           );
           return;
         }
@@ -156,31 +175,42 @@ export default function AddProduct() {
 
       const result = fromCamera
         ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: false,
-            quality: 0.3,
             base64: true,
           })
         : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: false,
-            quality: 0.3,
             base64: true,
           });
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        const ext = asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
-        const name = asset.fileName || asset.uri.split("/").pop() || `desc_image_${Date.now()}.${ext}`;
+        const ext =
+          asset.mimeType?.split("/").pop()?.replace("jpeg", "jpg") || "jpg";
+        const name =
+          asset.fileName ||
+          asset.uri.split("/").pop() ||
+          `desc_image_${Date.now()}.${ext}`;
         const mimeType = asset.mimeType || "image/jpeg";
         const dataUrl = `data:${mimeType};base64,${asset.base64}`;
 
         setEditorHeight((prev) => prev + 300);
-        richEditorRef.current?.insertImage(dataUrl, 'style="max-width:100%;height:auto;"');
+        richEditorRef.current?.insertImage(
+          dataUrl,
+          'style="max-width:100%;height:auto;"',
+        );
         setTimeout(() => {
-          scrollViewRef.current?.scrollTo({ y: editorYRef.current + editorHeight + 100, animated: true });
+          scrollViewRef.current?.scrollTo({
+            y: editorYRef.current + editorHeight + 100,
+            animated: true,
+          });
         }, 100);
-        setPendingDescImages((prev) => [...prev, { uri: asset.uri, name, mimeType }]);
+        setPendingDescImages((prev) => [
+          ...prev,
+          { uri: asset.uri, name, mimeType },
+        ]);
       }
     };
 
@@ -213,7 +243,10 @@ export default function AddProduct() {
       Alert.alert("알림", "올바른 재고를 입력하세요");
       return;
     }
-    if (!description.replace(/<[^>]*>/g, "").trim() && !description.includes("<img")) {
+    if (
+      !description.replace(/<[^>]*>/g, "").trim() &&
+      !description.includes("<img")
+    ) {
       Alert.alert("알림", "상품 상세 정보를 입력하세요");
       return;
     }
@@ -225,7 +258,7 @@ export default function AddProduct() {
       let imgIndex = 0;
       const finalDescription = description.replace(
         /src="data:[^"]*"/g,
-        () => `src="__PENDING_IMG_${imgIndex++}__"`
+        () => `src="__PENDING_IMG_${imgIndex++}__"`,
       );
 
       // FormData 생성
@@ -242,7 +275,11 @@ export default function AddProduct() {
       );
       formData.append("productDetailDescription", finalDescription);
       pendingDescImages.forEach((img) => {
-        formData.append("productDescriptionImgs", { uri: img.uri, name: img.name, type: img.mimeType } as any);
+        formData.append("productDescriptionImgs", {
+          uri: img.uri,
+          name: img.name,
+          type: img.mimeType,
+        } as any);
       });
 
       // 이미지 추가
@@ -311,7 +348,9 @@ export default function AddProduct() {
             showsVerticalScrollIndicator={false}
             keyboardDismissMode="on-drag"
             keyboardShouldPersistTaps="handled"
-            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
+            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+              scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
+            }}
             scrollEventThrottle={16}
           >
             <View style={styles.formGroup}>
@@ -401,7 +440,6 @@ export default function AddProduct() {
                     성인
                   </Text>
                 </TouchableOpacity>
-
               </View>
             </View>
 
@@ -460,7 +498,9 @@ export default function AddProduct() {
 
             <View
               style={styles.formGroup}
-              onLayout={(e) => { editorYRef.current = e.nativeEvent.layout.y; }}
+              onLayout={(e) => {
+                editorYRef.current = e.nativeEvent.layout.y;
+              }}
             >
               <Text style={styles.label}>상품 상세정보</Text>
               <RichToolbar
@@ -491,7 +531,10 @@ export default function AddProduct() {
                   const visibleTop = scrollOffsetRef.current;
                   const visibleBottom = visibleTop + 500;
                   if (absY > visibleBottom - 80 || absY < visibleTop + 40) {
-                    scrollViewRef.current?.scrollTo({ y: absY - 200, animated: true });
+                    scrollViewRef.current?.scrollTo({
+                      y: absY - 200,
+                      animated: true,
+                    });
                   }
                 }}
               />
@@ -501,7 +544,9 @@ export default function AddProduct() {
               <Text style={styles.label}>
                 상품 이미지 <Text style={styles.requiredMark}>*</Text>
               </Text>
-              <Text style={styles.imageHint}>최소 1개 이상 등록 필수 (최대 3개)</Text>
+              <Text style={styles.imageHint}>
+                최소 1개 이상 등록 필수 (최대 3개)
+              </Text>
               <TouchableOpacity
                 style={[
                   styles.imageUploadButton,

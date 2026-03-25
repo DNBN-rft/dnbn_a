@@ -1,4 +1,5 @@
 import ProductReportModal from "@/components/modal/ProductReportModal";
+import { ProductDescriptionWebView } from "@/components/ui/ProductDescriptionWebView";
 import { apiGet, apiPost } from "@/utils/api";
 import { formatCountdown } from "@/utils/dateUtil";
 import { shareProduct } from "@/utils/kakaoShareUtil";
@@ -22,7 +23,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ReviewCard } from "./components/ReviewCard";
 import { styles } from "./nego-product-detail.styles";
-import { ProductDescriptionWebView } from "@/components/ui/ProductDescriptionWebView";
 import type { Review } from "./types/storeInfo.types";
 
 // 백엔드에서 받는 리뷰 아이템 타입
@@ -644,7 +644,7 @@ export default function ProductDetailScreen() {
       {/* FloatingButton - 최상단 이동 */}
       {!loading && !error && (
         <TouchableOpacity
-          style={styles.scrollToTopButton}
+          style={[styles.scrollToTopButton, { bottom: 90 + insets.bottom }]}
           onPress={scrollToTop}
         >
           <Ionicons name="chevron-up" size={24} color="#ef7810" />
