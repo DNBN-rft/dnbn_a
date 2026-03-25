@@ -51,6 +51,7 @@ export default function StoreProducts() {
   const [negoModal, setNegoModal] = useState(false);
 
   // API 연동용 state
+  const [isNavigating, setIsNavigating] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [currentPage] = useState(0);
   const [limitTime, setLimitTime] = useState<number>(24);
@@ -222,6 +223,7 @@ export default function StoreProducts() {
   // 화면 포커스 시 새로고침
   useFocusEffect(
     useCallback(() => {
+      setIsNavigating(false);
       loadProducts();
     }, [loadProducts]),
   );
@@ -247,7 +249,11 @@ export default function StoreProducts() {
         <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => router.push("/(store)/addproduct")}
+            disabled={isNavigating}
+            onPress={() => {
+              setIsNavigating(true);
+              router.push("/(store)/addproduct");
+            }}
           >
             <Text style={{ color: "#EF7810", fontSize: 15, fontWeight: "600" }}>새상품 등록</Text>
           </TouchableOpacity>
@@ -417,8 +423,10 @@ export default function StoreProducts() {
 
             <TouchableOpacity
               style={styles.modalButton}
+              disabled={isNavigating}
               onPress={() => {
                 setDetailModal(false);
+                setIsNavigating(true);
                 // 수정 페이지로 이동 (상품 ID 전달)
                 router.push({
                   pathname: "/(store)/editproduct",
