@@ -13,6 +13,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  Linking,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -84,7 +85,17 @@ export default function ReviewRegScreen() {
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
-        Alert.alert("알림", "카메라 접근 권한이 필요합니다.");
+        Alert.alert(
+          "카메라 권한 필요",
+          "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
+          [
+            {
+              text: "설정으로 이동",
+              onPress: () => Linking.openSettings(),
+            },
+            { text: "취소", style: "cancel" },
+          ],
+        );
         return;
       }
     }
@@ -113,7 +124,17 @@ export default function ReviewRegScreen() {
     if (!mediaLibraryPermission?.granted) {
       const result = await requestMediaLibraryPermission();
       if (!result.granted) {
-        Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
+        Alert.alert(
+          "카메라 권한 필요",
+          "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
+          [
+            {
+              text: "설정으로 이동",
+              onPress: () => Linking.openSettings(),
+            },
+            { text: "취소", style: "cancel" },
+          ],
+        );
         return;
       }
     }
@@ -448,7 +469,7 @@ export default function ReviewRegScreen() {
                 style={[
                   styles.submitButton,
                   (reviewText.trim().length === 0 || isSubmitting) &&
-                    styles.submitButtonDisabled,
+                  styles.submitButtonDisabled,
                 ]}
                 onPress={handleSubmitReview}
                 disabled={reviewText.trim().length === 0 || isSubmitting}
@@ -460,7 +481,7 @@ export default function ReviewRegScreen() {
                     style={[
                       styles.submitButtonText,
                       (reviewText.trim().length === 0 || isSubmitting) &&
-                        styles.submitButtonTextDisabled,
+                      styles.submitButtonTextDisabled,
                     ]}
                   >
                     {isEditMode ? "리뷰 수정" : "리뷰 등록"}
