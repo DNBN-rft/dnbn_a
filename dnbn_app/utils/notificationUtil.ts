@@ -24,7 +24,13 @@ export async function permitCheck(): Promise<string | null> {
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
   const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
 
-  if (Platform.OS === "web" || !Device.isDevice || status !== "granted" || !projectId) return null;
+  if (
+    Platform.OS === "web" ||
+    !Device.isDevice ||
+    status !== "granted" ||
+    !projectId
+  )
+    return null;
 
   return tokenData.data;
 }
