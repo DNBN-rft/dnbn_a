@@ -1,8 +1,8 @@
 import { initializeKakaoSDK } from "@react-native-kakao/core";
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -69,6 +69,7 @@ function RootLayoutContent() {
           name="(cust)"
           options={{
             headerShown: false,
+            gestureEnabled: false, // iOS 스와이프 백으로 guestHome 이동 방지
             // cust, store 접근 가능하도록 나중에 처리 필요
           }}
         />
@@ -76,6 +77,7 @@ function RootLayoutContent() {
           name="(store)"
           options={{
             headerShown: false,
+            gestureEnabled: false, // iOS 스와이프 백으로 guestHome 이동 방지
             // store만 접근 가능하도록 나중에 처리 필요
           }}
         />
