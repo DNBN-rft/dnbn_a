@@ -21,7 +21,6 @@ export default function NotificationSetting() {
   const insets = useSafeAreaInsets();
   const [appPushEnabled, setAppPushEnabled] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
-  const [marketingEnabled, setMarketingEnabled] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 페이지 로드 시 알림 설정 정보 가져오기
@@ -37,7 +36,6 @@ export default function NotificationSetting() {
         const data = await response.json();
         setAppPushEnabled(data.pushSet);
         setNotificationEnabled(data.alarmSet);
-        setMarketingEnabled(data.marketAgreed ?? false);
       }
     } catch (error) {
       console.error("알림 설정 정보를 가져오는 중 오류:", error);
@@ -50,7 +48,7 @@ export default function NotificationSetting() {
       const custCode = await getStorageItem("custCode");
 
       let fcmToken: string | null = null;
-      if (marketingEnabled) {
+      if (appPushEnabled) {
         fcmToken = await permitCheck();
         if (!fcmToken) {
           Alert.alert(
@@ -66,7 +64,7 @@ export default function NotificationSetting() {
 
       const response = await apiPost("/cust/alarm", {
         alarmSet: notificationEnabled,
-        marketAgreed: marketingEnabled,
+        marketAgreed: appPushEnabled,
         fcmToken,
         custCode: custCode,
       });

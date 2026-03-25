@@ -20,9 +20,12 @@ interface WrittenReview {
   orderDateTime: string;
   orderCode: string;
   storeNm: string;
+  reviewRegDate: string;
   reviewRate: number;
   reviewContent: string;
   reviewImages: FileMasterResponse | null;
+  reviewAnswerContent?: string;
+  reviewAnswerRegDateTime?: string;
 }
 
 interface FileMasterResponse {
@@ -217,11 +220,14 @@ export default function CustReviewListScreen() {
                         item.productImages?.files?.[0]?.fileUrl || "",
                       storeNm: item.storeNm,
                       productName: item.productNm,
+                      reviewRegDate: item.reviewRegDate,
                       reviewRate: item.reviewRate?.toString() || "0",
                       reviewContent: item.reviewContent,
                       reviewImages: item.reviewImages
                         ? JSON.stringify(item.reviewImages.files || [])
                         : JSON.stringify([]),
+                      reviewAnswerContent: item.reviewAnswerContent || "",
+                      reviewAnswerRegDateTime: item.reviewAnswerRegDateTime || "",
                     },
                   })
                 }

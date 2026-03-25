@@ -208,3 +208,18 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export const loadingOverlayStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  text: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});

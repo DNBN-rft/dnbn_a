@@ -50,8 +50,8 @@ export default function StoreSignupFileUploadScreen() {
             "카메라 권한 필요",
             "설정에서 카메라 권한을 허용해주세요.",
             [
-              { text: "취소", style: "cancel" },
               { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+              { text: "취소", style: "cancel" },
             ],
           );
           return;

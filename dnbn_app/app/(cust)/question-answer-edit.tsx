@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -19,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./question-answer-edit.styles";
+import { loadingOverlayStyles, styles } from "./question-answer-edit.styles";
 
 interface QuestionImage {
   originalName: string;
@@ -57,6 +58,7 @@ export default function QuestionAnswerEdit() {
   const insets = useSafeAreaInsets();
   const { questionId } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [questionTypeModalVisible, setQuestionTypeModalVisible] =
     useState(false);
   const [selectedQuestionType, setSelectedQuestionType] =
@@ -118,7 +120,7 @@ export default function QuestionAnswerEdit() {
           if (status !== "granted") {
             Alert.alert(
               "카메라 권한 필요",
-              "카메라로 촬영하려면 기기 설정에서 카메라 접근 권한을 허용해주세요.",
+              "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
               [
                 {
                   text: "설정으로 이동",
@@ -178,6 +180,7 @@ export default function QuestionAnswerEdit() {
     }
 
     try {
+      setSubmitting(true);
       const formData = new FormData();
 
       // storage에서 custCode 가져오기
@@ -282,6 +285,8 @@ export default function QuestionAnswerEdit() {
       } else {
         Alert.alert("실패", "문의 수정 중 오류가 발생했습니다.");
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -416,7 +421,7 @@ export default function QuestionAnswerEdit() {
         </View>
 
         <View style={styles.submitButtonContainer}>
-          <Pressable style={styles.submitButton} onPress={submitQuestion}>
+          <Pressable style={styles.submitButton} onPress={submitQuestion} disabled={submitting}>
             <Text style={styles.submitButtonText}>수정하기</Text>
           </Pressable>
           <Pressable style={styles.cancelButton} onPress={() => router.back()}>
@@ -491,6 +496,12 @@ export default function QuestionAnswerEdit() {
       {insets.bottom > 0 && (
         <View style={{ height: insets.bottom, backgroundColor: "#000" }} />
       )}
+      <Modal visible={submitting} transparent animationType="none">
+        <View style={loadingOverlayStyles.container}>
+          <ActivityIndicator size="large" color="#EF7810" />
+          <Text style={loadingOverlayStyles.text}>문의 수정 중...</Text>
+        </View>
+      </Modal>
     </View>
   );
 }
