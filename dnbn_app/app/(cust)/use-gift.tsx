@@ -58,6 +58,9 @@ export default function UseGift() {
     amount: number;
     totalPrice: number;
     qrUsed: boolean;
+    qrUsedAt: string;
+    orderCancelTime: string;
+    orderRefundTime: string;
   }
 
   interface UnusedQrCode {
@@ -172,7 +175,19 @@ export default function UseGift() {
         <View>
           <FlatList
             ref={productListRef}
-            data={purchaseData.productItems}
+            data={[...purchaseData.productItems].sort((a, b) => {
+              const aUsed = !!(
+                a.qrUsedAt ||
+                a.orderCancelTime ||
+                a.orderRefundTime
+              );
+              const bUsed = !!(
+                b.qrUsedAt ||
+                b.orderCancelTime ||
+                b.orderRefundTime
+              );
+              return Number(aUsed) - Number(bUsed);
+            })}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -189,34 +204,71 @@ export default function UseGift() {
                     { height: infoContainerHeight },
                   ]}
                 >
-                  {item.productImg ? (
-                    <Image
-                      source={item.productImg.fileUrl}
-                      style={styles.giftImage}
-                      contentFit="contain"
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.giftImage,
-                        {
-                          justifyContent: "center",
-                          alignItems: "center",
-                          backgroundColor: "#f0f0f0",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: "#999",
-                          fontWeight: "bold",
-                        }}
+                  <View style={styles.giftImageContainer}>
+                    {item.productImg ? (
+                      <Image
+                        source={item.productImg.fileUrl}
+                        style={styles.giftImage}
+                        contentFit="contain"
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.giftImage,
+                          {
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#f0f0f0",
+                          },
+                        ]}
                       >
-                        삭제된 상품입니다
-                      </Text>
-                    </View>
-                  )}
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            color: "#999",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          삭제된 상품입니다
+                        </Text>
+                      </View>
+                    )}
+                    {(item.qrUsedAt ||
+                      item.orderCancelTime ||
+                      item.orderRefundTime) && (
+                      <>
+                        <View
+                          style={[
+                            styles.statusOverlayBg,
+                            item.qrUsedAt ? styles.bgUsed : styles.bgCanceled,
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.statusStamp,
+                            item.qrUsedAt
+                              ? styles.stampUsed
+                              : styles.stampCanceled,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusText,
+                              item.qrUsedAt
+                                ? styles.textUsed
+                                : styles.textCanceled,
+                            ]}
+                          >
+                            {item.qrUsedAt
+                              ? "사용 완료"
+                              : item.orderCancelTime
+                                ? "취소"
+                                : "환불"}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                  </View>
                   <Text style={styles.storeName}>{item.storeNm}</Text>
                   <Text style={styles.productName}>{item.productNm}</Text>
                 </View>

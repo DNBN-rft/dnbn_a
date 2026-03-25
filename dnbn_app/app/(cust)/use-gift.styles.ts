@@ -46,11 +46,55 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 5,
   },
+  giftImageContainer: {
+    width: 180,
+    height: 180,
+    position: "relative",
+  },
   giftImage: {
     width: 180,
     height: 180,
     resizeMode: "contain",
-    marginTop: 0,
+  },
+  statusOverlayBg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  bgUsed: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  bgCanceled: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  statusStamp: {
+    position: "absolute",
+    top: 20,
+    right: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 3,
+    borderRadius: 6,
+    transform: [{ rotate: "15deg" }],
+  },
+  stampUsed: {
+    borderColor: "#ffb366",
+  },
+  stampCanceled: {
+    borderColor: "#ff8888",
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  textUsed: {
+    color: "#ffb366",
+  },
+  textCanceled: {
+    color: "#ff8888",
   },
   storeName: {
     fontSize: 14,
