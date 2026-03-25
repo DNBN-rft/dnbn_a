@@ -381,7 +381,8 @@ export default function CategoryScreen() {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          (selectedCategories.length === 0 || isSubmitting) && styles.submitButtonDisabled,
+          (selectedCategories.length === 0 || isSubmitting) &&
+            styles.submitButtonDisabled,
         ]}
         onPress={handleSave}
         disabled={selectedCategories.length === 0 || isSubmitting}
@@ -389,7 +390,8 @@ export default function CategoryScreen() {
         <Text
           style={[
             styles.submitButtonText,
-            (selectedCategories.length === 0 || isSubmitting) && styles.submitButtonTextDisabled,
+            (selectedCategories.length === 0 || isSubmitting) &&
+              styles.submitButtonTextDisabled,
           ]}
         >
           {isSubmitting ? "저장 중..." : "저장"}
