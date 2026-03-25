@@ -14,6 +14,7 @@ import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Linking,
   Modal,
   Platform,
   ScrollView,
@@ -368,35 +369,50 @@ export default function EditStoreInfoPage() {
   };
 
   const pickImage = async () => {
-    try {
-      // 카메라와 라이브러리 접근 권한 요청
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
-        return;
+    const launchPicker = async (useCamera: boolean) => {
+      try {
+        if (useCamera) {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert("카메라 권한 필요", "사진 촬영을 위해 카메라 접근 권한이 필요합니다.", [
+              { text: "취소", style: "cancel" },
+              { text: "설정으로 이동", onPress: () => Linking.openSettings() },
+            ]);
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: "images",
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.8,
+          });
+          if (!result.canceled && result.assets.length > 0) {
+            const selectedAsset = result.assets[0];
+            setMainImage({ fileUrl: selectedAsset.uri, originalName: selectedAsset.fileName || "image", order: 0 });
+          }
+        } else {
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "images",
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.8,
+          });
+          if (!result.canceled && result.assets.length > 0) {
+            const selectedAsset = result.assets[0];
+            setMainImage({ fileUrl: selectedAsset.uri, originalName: selectedAsset.fileName || "image", order: 0 });
+          }
+        }
+      } catch (error) {
+        console.error("이미지 선택 오류:", error);
+        Alert.alert("오류", "이미지를 선택하는 중 오류가 발생했습니다.");
       }
+    };
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets.length > 0) {
-        const selectedAsset = result.assets[0];
-        // mainImage를 새 이미지로 업데이트
-        setMainImage({
-          fileUrl: selectedAsset.uri,
-          originalName: selectedAsset.fileName || "image",
-          order: 0,
-        });
-      }
-    } catch (error) {
-      console.error("이미지 선택 오류:", error);
-      Alert.alert("오류", "이미지를 선택하는 중 오류가 발생했습니다.");
-    }
+    Alert.alert("사진 선택", "사진을 선택해주세요.", [
+      { text: "카메라", onPress: () => launchPicker(true) },
+      { text: "갤러리", onPress: () => launchPicker(false) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   const handleUpdate = async () => {

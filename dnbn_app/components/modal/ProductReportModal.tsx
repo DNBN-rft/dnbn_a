@@ -75,7 +75,7 @@ export default function ProductReportModal({
         if (status !== "granted") {
           Alert.alert(
             "카메라 권한 필요",
-            "설정에서 카메라 권한을 허용해주세요.",
+            "사진 촬영을 위해 카메라 접근 권한이 필요합니다.",
             [
               { text: "취소", style: "cancel" },
               { text: "설정으로 이동", onPress: () => Linking.openSettings() },
