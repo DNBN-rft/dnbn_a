@@ -26,7 +26,7 @@ export default function FaqListScreen() {
   useFocusEffect(
     useCallback(() => {
       setIsNavigating(false);
-    }, [])
+    }, []),
   );
   const [faqData, setFaqData] = useState<
     {
