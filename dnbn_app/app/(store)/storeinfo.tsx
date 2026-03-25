@@ -126,10 +126,12 @@ export default function StoreInfoPage() {
   const [storeInfo, setStoreInfo] = useState<StoreInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // 페이지 포커스 시마다 데이터를 새로 로드
   useFocusEffect(
     useCallback(() => {
+      setIsNavigating(false);
       const fetchStoreInfo = async () => {
         try {
           setLoading(true);
@@ -205,7 +207,9 @@ export default function StoreInfoPage() {
         <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.editButton}
+            disabled={isNavigating}
             onPress={() => {
+              setIsNavigating(true);
               router.push({
                 pathname: "/(store)/editstoreinfo",
                 params: {
