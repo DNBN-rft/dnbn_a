@@ -46,10 +46,10 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   giftImage: {
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
     resizeMode: "contain",
-    marginTop: 5,
+    marginTop: 0,
   },
   storeName: {
     fontSize: 14,
