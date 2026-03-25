@@ -43,6 +43,7 @@ export default function CategoryScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isInitialSetup, setIsInitialSetup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -161,6 +162,7 @@ export default function CategoryScreen() {
     const categoryIdxList = selectedCategories.map((id) => Number(id));
 
     try {
+      setIsSubmitting(true);
       let custCode = null;
 
       if (Platform.OS === "web") {
@@ -228,6 +230,8 @@ export default function CategoryScreen() {
       } else {
         Alert.alert("오류", "카테고리 저장 중 오류가 발생했습니다");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -377,18 +381,20 @@ export default function CategoryScreen() {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          selectedCategories.length === 0 && styles.submitButtonDisabled,
+          (selectedCategories.length === 0 || isSubmitting) &&
+            styles.submitButtonDisabled,
         ]}
         onPress={handleSave}
-        disabled={selectedCategories.length === 0}
+        disabled={selectedCategories.length === 0 || isSubmitting}
       >
         <Text
           style={[
             styles.submitButtonText,
-            selectedCategories.length === 0 && styles.submitButtonTextDisabled,
+            (selectedCategories.length === 0 || isSubmitting) &&
+              styles.submitButtonTextDisabled,
           ]}
         >
-          저장
+          {isSubmitting ? "저장 중..." : "저장"}
         </Text>
       </TouchableOpacity>
       {insets.bottom > 0 && (

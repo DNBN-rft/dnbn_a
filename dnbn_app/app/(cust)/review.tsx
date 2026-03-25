@@ -1,7 +1,7 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -56,7 +56,14 @@ export default function CustReviewListScreen() {
     [],
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+    }, []),
+  );
 
   const insets = useSafeAreaInsets();
 
@@ -382,7 +389,9 @@ export default function CustReviewListScreen() {
               {/* 리뷰작성 버튼 */}
               <TouchableOpacity
                 style={styles.reviewWriteButton}
-                onPress={() =>
+                disabled={isNavigating}
+                onPress={() => {
+                  setIsNavigating(true);
                   router.push({
                     pathname: "/(cust)/reviewReg",
                     params: {
@@ -391,8 +400,8 @@ export default function CustReviewListScreen() {
                       productName: item.productNm,
                       productImage: item.productImg?.fileUrl || "",
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <Text style={styles.reviewWriteButtonText}>리뷰 작성</Text>
               </TouchableOpacity>

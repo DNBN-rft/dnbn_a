@@ -51,6 +51,7 @@ export default function StoreProducts() {
   const [negoModal, setNegoModal] = useState(false);
 
   // API 연동용 state
+  const [isNavigating, setIsNavigating] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [currentPage] = useState(0);
   const [limitTime, setLimitTime] = useState<number>(24);
@@ -91,23 +92,28 @@ export default function StoreProducts() {
   };
 
   // 상품 목록 조회 함수
-  const loadProducts = useCallback(async (page: number = currentPage) => {
-    try {
-      const response = await apiGet(`/store/app/product?page=${page}&size=10`);
-      if (response.ok) {
-        const data = await response.json();
-        const productList = data.products?.content || [];
-        setLimitTime(data.limitTime ?? 24);
-        setSaleCnt(data.saleCnt ?? 0);
-        setNegoCnt(data.negoCnt ?? 0);
-        setProducts(productList);
-      } else {
-        console.error("상품 목록 로드 실패:", response.status);
+  const loadProducts = useCallback(
+    async (page: number = currentPage) => {
+      try {
+        const response = await apiGet(
+          `/store/app/product?page=${page}&size=10`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const productList = data.products?.content || [];
+          setLimitTime(data.limitTime ?? 24);
+          setSaleCnt(data.saleCnt ?? 0);
+          setNegoCnt(data.negoCnt ?? 0);
+          setProducts(productList);
+        } else {
+          console.error("상품 목록 로드 실패:", response.status);
+        }
+      } catch (error) {
+        console.error("상품 목록 로드 오류:", error);
       }
-    } catch (error) {
-      console.error("상품 목록 로드 오류:", error);
-    }
-  }, [currentPage]);
+    },
+    [currentPage],
+  );
 
   // 페이지 변경 시 상품 조회
   useEffect(() => {
@@ -222,6 +228,7 @@ export default function StoreProducts() {
   // 화면 포커스 시 새로고침
   useFocusEffect(
     useCallback(() => {
+      setIsNavigating(false);
       loadProducts();
     }, [loadProducts]),
   );
@@ -247,9 +254,15 @@ export default function StoreProducts() {
         <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => router.push("/(store)/addproduct")}
+            disabled={isNavigating}
+            onPress={() => {
+              setIsNavigating(true);
+              router.push("/(store)/addproduct");
+            }}
           >
-            <Text style={{ color: "#EF7810", fontSize: 15, fontWeight: "600" }}>새상품 등록</Text>
+            <Text style={{ color: "#EF7810", fontSize: 15, fontWeight: "600" }}>
+              새상품 등록
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -313,50 +326,56 @@ export default function StoreProducts() {
 
                 return (
                   <>
-              <TouchableOpacity
-                style={[styles.saleButton, isSaleDisabled && styles.disabledActionButton]}
-                disabled={isSaleDisabled}
-                onPress={() => {
-                  setSelectedProductCode(product.productCode);
-                  setSaleModal(true);
-                }}
-              >
-                <Ionicons
-                  name="pricetag-outline"
-                  size={16}
-                  color={isSaleDisabled ? "#9CA3AF" : "#EF7810"}
-                />
-                <Text
-                  style={[
-                    styles.saleButtonText,
-                    isSaleDisabled && styles.disabledActionButtonText,
-                  ]}
-                >
-                  할인 등록
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.negoButton, isNegoDisabled && styles.disabledActionButton]}
-                disabled={isNegoDisabled}
-                onPress={() => {
-                  setSelectedProductCode(product.productCode);
-                  setNegoModal(true);
-                }}
-              >
-                <Ionicons
-                  name="chatbubble-outline"
-                  size={16}
-                  color={isNegoDisabled ? "#9CA3AF" : "#4B5563"}
-                />
-                <Text
-                  style={[
-                    styles.negoButtonText,
-                    isNegoDisabled && styles.disabledActionButtonText,
-                  ]}
-                >
-                  네고 등록
-                </Text>
-              </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.saleButton,
+                        isSaleDisabled && styles.disabledActionButton,
+                      ]}
+                      disabled={isSaleDisabled}
+                      onPress={() => {
+                        setSelectedProductCode(product.productCode);
+                        setSaleModal(true);
+                      }}
+                    >
+                      <Ionicons
+                        name="pricetag-outline"
+                        size={16}
+                        color={isSaleDisabled ? "#9CA3AF" : "#EF7810"}
+                      />
+                      <Text
+                        style={[
+                          styles.saleButtonText,
+                          isSaleDisabled && styles.disabledActionButtonText,
+                        ]}
+                      >
+                        할인 등록
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.negoButton,
+                        isNegoDisabled && styles.disabledActionButton,
+                      ]}
+                      disabled={isNegoDisabled}
+                      onPress={() => {
+                        setSelectedProductCode(product.productCode);
+                        setNegoModal(true);
+                      }}
+                    >
+                      <Ionicons
+                        name="chatbubble-outline"
+                        size={16}
+                        color={isNegoDisabled ? "#9CA3AF" : "#4B5563"}
+                      />
+                      <Text
+                        style={[
+                          styles.negoButtonText,
+                          isNegoDisabled && styles.disabledActionButtonText,
+                        ]}
+                      >
+                        네고 등록
+                      </Text>
+                    </TouchableOpacity>
                   </>
                 );
               })()}
@@ -417,8 +436,10 @@ export default function StoreProducts() {
 
             <TouchableOpacity
               style={styles.modalButton}
+              disabled={isNavigating}
               onPress={() => {
                 setDetailModal(false);
+                setIsNavigating(true);
                 // 수정 페이지로 이동 (상품 ID 전달)
                 router.push({
                   pathname: "/(store)/editproduct",
@@ -500,7 +521,7 @@ export default function StoreProducts() {
         productPrice={
           selectedProductCode
             ? products.find((p) => p.productCode === selectedProductCode)
-              ?.productPrice
+                ?.productPrice
             : undefined
         }
         onConfirm={async (data) => {

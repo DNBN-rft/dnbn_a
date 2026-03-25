@@ -21,6 +21,7 @@ export default function NotificationSetting() {
   const insets = useSafeAreaInsets();
   const [appPushEnabled, setAppPushEnabled] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 페이지 로드 시 알림 설정 정보 가져오기
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function NotificationSetting() {
 
   const saveNotificationSettings = async () => {
     try {
+      setIsSubmitting(true);
       const custCode = await getStorageItem("custCode");
 
       let fcmToken: string | null = null;
@@ -55,8 +57,7 @@ export default function NotificationSetting() {
             [
               { text: "설정으로 이동", onPress: () => Linking.openSettings() },
               { text: "취소", style: "cancel" },
-
-            ]
+            ],
           );
         }
       }
@@ -95,6 +96,8 @@ export default function NotificationSetting() {
       } else {
         Alert.alert("오류", "알림 설정 저장에 실패했습니다.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -134,10 +137,13 @@ export default function NotificationSetting() {
       </View>
 
       <TouchableOpacity
-        style={styles.submitButton}
+        style={[styles.submitButton, isSubmitting && { opacity: 0.5 }]}
         onPress={saveNotificationSettings}
+        disabled={isSubmitting}
       >
-        <Text style={styles.submitButtonText}>저장</Text>
+        <Text style={styles.submitButtonText}>
+          {isSubmitting ? "저장 중..." : "저장"}
+        </Text>
       </TouchableOpacity>
 
       {insets.bottom > 0 && (

@@ -714,7 +714,9 @@ export default function ProductDetailScreen() {
                       setNegoModalVisible(false);
                       setNegoAmount("");
                     } else {
-                      Alert.alert("오류", "네고 요청에 실패했습니다.");
+                      Alert.alert(
+                        "네고 요청 목록을 확인 하거나 다시 시도해주세요.",
+                      );
                     }
                   } catch (error) {
                     console.error("네고 요청 실패:", error);

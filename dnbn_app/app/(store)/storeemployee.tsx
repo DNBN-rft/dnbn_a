@@ -20,10 +20,10 @@ interface Employee {
   memberNm: string;
   memberId: string;
   memberTelNo: string;
-  menuAuth: Array<{
+  menuAuth: {
     code: string;
     displayName: string;
-  }>;
+  }[];
   memberEmail: string;
   memberType: string;
 }
@@ -34,6 +34,7 @@ export default function StoreEmployeeManageScreen() {
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const MAX_EMPLOYEES = 3;
   const remainingSlots = MAX_EMPLOYEES - employees.length;
@@ -67,6 +68,7 @@ export default function StoreEmployeeManageScreen() {
   // 화면 포커스 될 때마다 목록 새로고침
   useFocusEffect(
     useCallback(() => {
+      setIsNavigating(false);
       loadEmployees();
     }, []),
   );
@@ -222,10 +224,11 @@ export default function StoreEmployeeManageScreen() {
               styles.addButton,
               !canAddEmployee && styles.addButtonDisabled,
             ]}
-            onPress={() =>
-              canAddEmployee && router.push("/(store)/addemployee")
-            }
-            disabled={!canAddEmployee}
+            disabled={!canAddEmployee || isNavigating}
+            onPress={() => {
+              setIsNavigating(true);
+              router.push("/(store)/addemployee");
+            }}
           >
             <Ionicons
               name="add-circle-outline"

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Image, Linking, Pressable, Text, View } from "react-native";
 import { shareStore } from "@/utils/kakaoShareUtil";
 import { styles } from "../storeInfo.styles";
@@ -22,6 +23,14 @@ export function StoreHeader({
   isWishStore,
   storeCode,
 }: StoreHeaderProps) {
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+    }, [])
+  );
+
   return (
     <>
       {/* 가게 이미지 */}
@@ -76,9 +85,11 @@ export function StoreHeader({
 
         <Pressable
           style={styles.actionButton}
-          onPress={() =>
-            router.push(`/(cust)/report?storeCode=${storeCode}&type=STORE`)
-          }
+          disabled={isNavigating}
+          onPress={() => {
+            setIsNavigating(true);
+            router.push(`/(cust)/report?storeCode=${storeCode}&type=STORE`);
+          }}
         >
           <Ionicons name="flag-outline" size={24} color="#666" />
           <Text style={styles.actionButtonText}>신고</Text>

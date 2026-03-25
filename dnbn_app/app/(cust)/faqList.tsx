@@ -1,7 +1,7 @@
 import { apiGet } from "@/utils/api";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
-import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -19,8 +19,15 @@ export default function FaqListScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [selectedSubject, setSelectedSubject] = useState("전체");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+    }, []),
+  );
   const [faqData, setFaqData] = useState<
     {
       faqType: string;
@@ -203,7 +210,11 @@ export default function FaqListScreen() {
           <View style={styles.questionBtnContainer}>
             <TouchableOpacity
               style={styles.questionReqButton}
-              onPress={() => router.push("/(cust)/questionReg")}
+              disabled={isNavigating}
+              onPress={() => {
+                setIsNavigating(true);
+                router.push("/(cust)/questionReg");
+              }}
             >
               <Text style={styles.questionReqButtonText}>1:1 문의하기</Text>
             </TouchableOpacity>
