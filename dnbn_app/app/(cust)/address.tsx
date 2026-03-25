@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Platform,
@@ -29,12 +30,11 @@ export default function AddressScreen() {
   );
 
   const [addr, setAddr] = useState<AddressData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 주소 정보 불러오기
   const fetchAddresses = useCallback(async () => {
     try {
-      setIsLoading(true);
       const response = await apiGet(`/cust/location`);
 
       if (response.ok) {
@@ -45,8 +45,6 @@ export default function AddressScreen() {
       }
     } catch (error) {
       console.error("주소 정보 불러오기 오류:", error);
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -139,6 +137,7 @@ export default function AddressScreen() {
   const handleSetDefaultAddress = useCallback(async () => {
     if (selectedAddressId) {
       try {
+        setIsLoading(true);
         const response = await apiPut(
           `/cust/location/change?locationIdx=${selectedAddressId}`,
         );
@@ -176,6 +175,8 @@ export default function AddressScreen() {
         } else {
           Alert.alert("오류", "기본 주소 설정 중 오류가 발생했습니다.");
         }
+      } finally {
+        setIsLoading(false);
       }
     }
   }, [selectedAddressId]);
@@ -319,12 +320,16 @@ export default function AddressScreen() {
         <Pressable
           style={[
             styles.submitButton,
-            !selectedAddressId && styles.submitButtonDisabled,
+            (!selectedAddressId || isLoading) && styles.submitButtonDisabled,
           ]}
           onPress={handleSetDefaultAddress}
-          disabled={!selectedAddressId}
+          disabled={!selectedAddressId || isLoading}
         >
-          <Text style={styles.submitButtonText}>기본 주소로 설정</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>기본 주소로 설정</Text>
+          )}
         </Pressable>
       </View>
 

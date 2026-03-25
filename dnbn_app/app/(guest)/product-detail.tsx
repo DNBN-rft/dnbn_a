@@ -516,15 +516,12 @@ export default function ProductDetailScreen() {
                     </View>
                   ))
                 ) : (
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      color: "#999",
-                      paddingVertical: 20,
-                    }}
-                  >
-                    작성된 리뷰가 없습니다.
-                  </Text>
+                  <View style={styles.noReviewsContainer}>
+                    <Ionicons name="chatbox-outline" size={48} color="#ccc" />
+                    <Text style={styles.noReviewsText}>
+                      등록된 리뷰가 없습니다
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>

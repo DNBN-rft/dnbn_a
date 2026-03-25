@@ -171,6 +171,14 @@ export default function CustLayout() {
         }}
       />
       <Stack.Screen
+        name="map-view"
+        options={{
+          title: "지도",
+          headerShown: false,
+          headerTitle: "매장 찾기",
+        }}
+      />
+      <Stack.Screen
         name="storeInfo"
         options={{
           title: "가게 정보",
