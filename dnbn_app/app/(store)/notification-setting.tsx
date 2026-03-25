@@ -50,7 +50,7 @@ export default function NotificationSetting() {
           [
             { text: "설정으로 이동", onPress: () => Linking.openSettings() },
             { text: "취소", style: "cancel" },
-          ]
+          ],
         );
         setIsSubmitting(false);
         return;
