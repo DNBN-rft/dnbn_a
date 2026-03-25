@@ -45,11 +45,55 @@ export const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
   },
+  giftImageContainer: {
+    width: 180,
+    height: 180,
+    position: "relative",
+  },
   giftImage: {
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
     resizeMode: "contain",
-    marginTop: 5,
+  },
+  statusOverlayBg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  bgUsed: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  bgCanceled: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+  },
+  statusStamp: {
+    position: "absolute",
+    top: 20,
+    right: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 3,
+    borderRadius: 6,
+    transform: [{ rotate: "15deg" }],
+  },
+  stampUsed: {
+    borderColor: "#ffb366",
+  },
+  stampCanceled: {
+    borderColor: "#ff8888",
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  textUsed: {
+    color: "#ffb366",
+  },
+  textCanceled: {
+    color: "#ff8888",
   },
   storeName: {
     fontSize: 14,
@@ -159,5 +203,35 @@ export const styles = StyleSheet.create({
   useButtonText: {
     color: "#EF7810",
     fontSize: 16,
+  },
+  centeredContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#FF6B6B",
+    marginBottom: 20,
+  },
+  noImagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+  deletedProductText: {
+    fontSize: 16,
+    color: "#999",
+    fontWeight: "bold",
+  },
+  dotIndicatorRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
   },
 });

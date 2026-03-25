@@ -2,9 +2,10 @@ import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -34,48 +35,56 @@ export default function UseGift() {
   const insets = useSafeAreaInsets();
   const searchParams = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState("useinfo");
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const [purchaseData, setPurchaseData] = useState<UnusedQrCode | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const productListRef = useRef<FlatList>(null);
 
   const infoContainerHeight = (height - insets.top - insets.bottom - 64) * 0.5;
 
-  interface UnusedQrCode {
-    storeNm: string;
-    productNm: string;
-    orderCode: string;
-    qrExpiredAt: string;
-    orderDetailPrice: number;
-    orderDetailAmount: number;
-    orderDetailTotal: number;
-    orderDateTime: string;
-    qrUsed: boolean;
-    qrImg: Img | null;
-    productImg: Img | null;
-  }
-
-  interface Img {
+  interface FileResponse {
     originalName: string;
     fileUrl: string;
     order: number;
+  }
+
+  interface ProductItem {
+    productImg: FileResponse | null;
+    storeNm: string;
+    productNm: string;
+    price: number;
+    amount: number;
+    totalPrice: number;
+    qrUsed: boolean;
+    qrUsedAt: string;
+    orderCancelTime: string;
+    orderRefundTime: string;
+  }
+
+  interface UnusedQrCode {
+    productItems: ProductItem[];
+    qrImg: FileResponse | null;
+    qrExpiredAt: string;
+    orderCode: string;
+    totalProductPrice: number;
+    orderDateTime: string;
   }
 
   const fetchPurchaseDetail = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const orderDetailIdx = searchParams.orderDetailIdx as string;
+      const orderCode = searchParams.orderCode as string;
 
-      if (!orderDetailIdx) {
+      if (!orderCode) {
         setError("주문 상세 정보를 찾을 수 없습니다.");
         setLoading(false);
         return;
       }
 
-      const response = await apiGet(
-        `/cust/purchase-list/unused/${orderDetailIdx}`,
-      );
+      const response = await apiGet(`/cust/purchase-list/unused/${orderCode}`);
 
       if (!response.ok) {
         setError("구매 정보를 가져오는데 실패했습니다.");
@@ -92,7 +101,7 @@ export default function UseGift() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams.orderDetailIdx]);
+  }, [searchParams.orderCode]);
 
   useEffect(() => {
     fetchPurchaseDetail();
@@ -100,12 +109,7 @@ export default function UseGift() {
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={[styles.container, styles.centeredContainer]}>
         <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
@@ -113,27 +117,22 @@ export default function UseGift() {
 
   if (error || !purchaseData) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={[styles.container, styles.centeredContainer]}>
         <Ionicons name="alert-circle-outline" size={60} color="#999" />
-        <Text style={{ fontSize: 16, color: "#FF6B6B", marginVertical: 20 }}>
+        <Text style={styles.errorText}>
           {error || "구매 정보를 불러올 수 없습니다."}
         </Text>
         <TouchableOpacity
-          style={[styles.useButton, { marginBottom: 12 }]}
+          style={[styles.useButton, styles.useButtonRetry]}
           onPress={fetchPurchaseDetail}
         >
           <Text style={styles.useButtonText}>다시 시도</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.useButton, { backgroundColor: "#ccc" }]}
+          style={[styles.useButton, styles.useButtonDisabled]}
           onPress={() => router.back()}
         >
-          <Text style={[styles.useButtonText, { color: "#333" }]}>
+          <Text style={[styles.useButtonText, styles.useButtonDisabledText]}>
             돌아가기
           </Text>
         </TouchableOpacity>
@@ -163,31 +162,112 @@ export default function UseGift() {
       </View>
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.infoContainer, { height: infoContainerHeight }]}>
-          {purchaseData.productImg ? (
-            <Image
-              source={purchaseData.productImg.fileUrl}
-              style={styles.giftImage}
-              contentFit="contain"
-            />
-          ) : (
-            <View
-              style={[
-                styles.giftImage,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "#f0f0f0",
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 16, color: "#999", fontWeight: "bold" }}>
-                삭제된 상품입니다
-              </Text>
+        <View>
+          <FlatList
+            ref={productListRef}
+            data={[...purchaseData.productItems].sort((a, b) => {
+              const aUsed = !!(
+                a.qrUsedAt ||
+                a.orderCancelTime ||
+                a.orderRefundTime
+              );
+              const bUsed = !!(
+                b.qrUsedAt ||
+                b.orderCancelTime ||
+                b.orderRefundTime
+              );
+              return Number(aUsed) - Number(bUsed);
+            })}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, idx) => idx.toString()}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.x / width);
+              setSelectedIndex(index);
+            }}
+            renderItem={({ item }) => (
+              <View style={{ width, alignItems: "center" }}>
+                <View
+                  style={[
+                    styles.infoContainer,
+                    { height: infoContainerHeight },
+                  ]}
+                >
+                  <View style={styles.giftImageContainer}>
+                    {item.productImg ? (
+                      <Image
+                        source={item.productImg.fileUrl}
+                        style={styles.giftImage}
+                        contentFit="contain"
+                      />
+                    ) : (
+                      <View
+                        style={[styles.giftImage, styles.noImagePlaceholder]}
+                      >
+                        <Text style={styles.deletedProductText}>
+                          삭제된 상품입니다
+                        </Text>
+                      </View>
+                    )}
+                    {(item.qrUsedAt ||
+                      item.orderCancelTime ||
+                      item.orderRefundTime) && (
+                      <>
+                        <View
+                          style={[
+                            styles.statusOverlayBg,
+                            item.qrUsedAt ? styles.bgUsed : styles.bgCanceled,
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.statusStamp,
+                            item.qrUsedAt
+                              ? styles.stampUsed
+                              : styles.stampCanceled,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusText,
+                              item.qrUsedAt
+                                ? styles.textUsed
+                                : styles.textCanceled,
+                            ]}
+                          >
+                            {item.qrUsedAt
+                              ? "사용 완료"
+                              : item.orderCancelTime
+                                ? "취소"
+                                : "환불"}
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                  </View>
+                  <Text style={styles.storeName}>{item.storeNm}</Text>
+                  <Text style={styles.productName}>{item.productNm}</Text>
+                </View>
+              </View>
+            )}
+          />
+          {purchaseData.productItems.length > 1 && (
+            <View style={styles.dotIndicatorRow}>
+              {purchaseData.productItems.map((_, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor:
+                        idx === selectedIndex ? "#ef7810" : "#ccc",
+                    },
+                  ]}
+                />
+              ))}
             </View>
           )}
-          <Text style={styles.storeName}>{purchaseData.storeNm}</Text>
-          <Text style={styles.productName}>{purchaseData.productNm}</Text>
         </View>
 
         <View style={styles.explanationContainer}>
@@ -275,24 +355,36 @@ export default function UseGift() {
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>수량</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailAmount}개
+              {purchaseData.productItems[selectedIndex]?.amount}개
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>단가</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailPrice.toLocaleString()}원
+              {purchaseData.productItems[selectedIndex]?.price.toLocaleString()}
+              원
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>총금액</Text>
             <Text style={styles.giftDetailValue}>
-              {purchaseData.orderDetailTotal.toLocaleString()}원
+              {purchaseData.productItems[
+                selectedIndex
+              ]?.totalPrice.toLocaleString()}
+              원
+            </Text>
+          </View>
+          <View style={styles.giftDetailRow}>
+            <Text style={styles.giftDetailLabel}>주문 총금액</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.totalProductPrice.toLocaleString()}원
             </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>교환처</Text>
-            <Text style={styles.giftDetailValue}>{purchaseData.storeNm}</Text>
+            <Text style={styles.giftDetailValue}>
+              {purchaseData.productItems[selectedIndex]?.storeNm}
+            </Text>
           </View>
           <View style={styles.giftDetailRow}>
             <Text style={styles.giftDetailLabel}>주문일</Text>

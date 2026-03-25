@@ -7,23 +7,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { styles } from "./purchase-box.styles";
 
 interface UnusedProduct {
-  orderDetailIdx: number;
+  orderCode: string;
   storeNm: string;
   productImageUrl: string;
   productNm: string;
   orderDateTime: string;
-  orderCode: string;
-  productCode: string;
 }
 
 interface UsedProduct {
-  orderDetailIdx: number;
+  orderCode: string;
   storeNm: string;
   productImageUrl: string;
   productNm: string;
-  usedDateTime: string;
-  orderCode: string;
-  productCode: string;
+  orderDateTime: string;
   state: string;
 }
 
@@ -123,7 +119,7 @@ export default function PurchaseBox() {
                   data={unusedProducts}
                   numColumns={2}
                   columnWrapperStyle={{ justifyContent: "space-between" }}
-                  keyExtractor={(item) => item.orderDetailIdx.toString()}
+                  keyExtractor={(item) => item.orderCode}
                   renderItem={({ item: notUsed }) => (
                     <TouchableOpacity
                       style={styles.products}
@@ -131,7 +127,7 @@ export default function PurchaseBox() {
                         router.push({
                           pathname: "/(cust)/use-gift",
                           params: {
-                            orderDetailIdx: notUsed.orderDetailIdx.toString(),
+                            orderCode: notUsed.orderCode,
                           },
                         })
                       }
@@ -194,7 +190,7 @@ export default function PurchaseBox() {
                 data={usedProducts}
                 numColumns={2}
                 columnWrapperStyle={{ justifyContent: "space-between" }}
-                keyExtractor={(item) => item.orderDetailIdx.toString()}
+                keyExtractor={(item) => item.orderCode}
                 renderItem={({ item: used }) => (
                   <TouchableOpacity
                     style={styles.products}
@@ -202,7 +198,7 @@ export default function PurchaseBox() {
                       router.push({
                         pathname: "/(cust)/used-gift",
                         params: {
-                          orderDetailIdx: used.orderDetailIdx.toString(),
+                          orderCode: used.orderCode,
                         },
                       })
                     }
@@ -261,7 +257,7 @@ export default function PurchaseBox() {
                         {used.productNm}
                       </Text>
                       <Text style={styles.datetimeText}>
-                        {used.usedDateTime}
+                        {used.orderDateTime}
                       </Text>
                     </View>
                   </TouchableOpacity>
