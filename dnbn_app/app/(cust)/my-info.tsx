@@ -1,8 +1,8 @@
 import { apiGet } from "@/utils/api";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Image,
   Modal,
@@ -42,7 +42,14 @@ export default function MyInfoScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [custInfo, setCustInfo] = useState<CustInfoData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const insets = useSafeAreaInsets();
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(false);
+    }, []),
+  );
 
   // 전화번호 포맷팅 함수
   const formatPhoneNumber = (text: string) => {
@@ -111,7 +118,11 @@ export default function MyInfoScreen() {
         <View style={styles.rightSection}>
           <TouchableOpacity
             style={styles.editButton}
-            onPress={() => router.push("/(cust)/EditMyInfo")}
+            onPress={() => {
+              setIsLoading(true);
+              router.push("/(cust)/EditMyInfo");
+            }}
+            disabled={isLoading}
           >
             <Ionicons name="create-outline" size={20} color="#EF7810" />
             <Text style={styles.editText}>수정</Text>
@@ -200,7 +211,11 @@ export default function MyInfoScreen() {
           <View style={styles.sectionCard}>
             <Pressable
               style={styles.sectionHeaderPressable}
-              onPress={() => router.push("/(cust)/address")}
+              onPress={() => {
+                setIsLoading(true);
+                router.push("/(cust)/address");
+              }}
+              disabled={isLoading}
             >
               <View style={styles.sectionTitleContainer}>
                 <Ionicons name="location" size={22} color="#EF7810" />
@@ -230,7 +245,11 @@ export default function MyInfoScreen() {
           <View style={styles.sectionCard}>
             <Pressable
               style={styles.sectionHeaderPressable}
-              onPress={() => router.push("/(cust)/purchase-box")}
+              onPress={() => {
+                setIsLoading(true);
+                router.push("/(cust)/purchase-box");
+              }}
+              disabled={isLoading}
             >
               <View style={styles.sectionTitleContainer}>
                 <Ionicons name="cube" size={22} color="#EF7810" />
