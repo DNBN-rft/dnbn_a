@@ -22,9 +22,20 @@ export async function requestNotificationPermission(): Promise<void> {
 export async function permitCheck(): Promise<string | null> {
   const { status } = await Notifications.getPermissionsAsync();
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
 
-  if (Platform.OS === "web" || !Device.isDevice || status !== "granted" || !projectId) return null;
+  if (
+    Platform.OS === "web" ||
+    !Device.isDevice ||
+    status !== "granted" ||
+    !projectId
+  )
+    return null;
 
-  return tokenData.data;
+  try {
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+    return tokenData.data;
+  } catch (error) {
+    console.error("[permitCheck] FCM 토큰 발급 실패:", error);
+    return null;
+  }
 }

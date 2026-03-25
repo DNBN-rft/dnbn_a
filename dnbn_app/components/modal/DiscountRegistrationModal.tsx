@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Keyboard,
     Modal,
@@ -50,6 +50,14 @@ export default function DiscountRegistrationModal({
   };
 
   const [selectedTime, setSelectedTime] = useState(getInitialTime());
+
+  // 모달이 열릴 때마다 날짜와 시간을 현재 기준으로 초기화
+  useEffect(() => {
+    if (visible) {
+      setSaleStartDate(new Date());
+      setSelectedTime(getInitialTime());
+    }
+  }, [visible]);
 
   // 시간 옵션 생성 (30분 단위, 선택된 날짜가 오늘이면 현재 시간 이후만)
   const generateTimeOptions = () => {
