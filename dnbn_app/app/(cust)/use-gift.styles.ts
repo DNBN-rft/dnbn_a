@@ -207,4 +207,43 @@ export const styles = StyleSheet.create({
     color: "#EF7810",
     fontSize: 16,
   },
+  centeredContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#FF6B6B",
+    marginVertical: 20,
+  },
+  useButtonRetry: {
+    marginBottom: 12,
+  },
+  useButtonDisabled: {
+    backgroundColor: "#ccc",
+  },
+  useButtonDisabledText: {
+    color: "#333",
+  },
+  noImagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+  deletedProductText: {
+    fontSize: 16,
+    color: "#999",
+    fontWeight: "bold",
+  },
+  dotIndicatorRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
+  },
 });

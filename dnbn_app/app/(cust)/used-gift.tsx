@@ -106,12 +106,7 @@ export default function UsedGift() {
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
+      <View style={[styles.container, styles.centeredContainer]}>
         <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
@@ -119,13 +114,8 @@ export default function UsedGift() {
 
   if (error || !purchaseData) {
     return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Text style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 20 }}>
+      <View style={[styles.container, styles.centeredContainer]}>
+        <Text style={styles.errorText}>
           {error || "구매 정보를 불러올 수 없습니다."}
         </Text>
         <TouchableOpacity
@@ -201,22 +191,9 @@ export default function UsedGift() {
                       />
                     ) : (
                       <View
-                        style={[
-                          styles.giftImage,
-                          {
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "#f0f0f0",
-                          },
-                        ]}
+                        style={[styles.giftImage, styles.noImagePlaceholder]}
                       >
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: "#999",
-                            fontWeight: "bold",
-                          }}
-                        >
+                        <Text style={styles.deletedProductText}>
                           삭제된 상품입니다
                         </Text>
                       </View>
@@ -264,23 +241,17 @@ export default function UsedGift() {
             )}
           />
           {purchaseData.productItems.length > 1 && (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-                paddingVertical: 8,
-              }}
-            >
+            <View style={styles.dotIndicatorRow}>
               {purchaseData.productItems.map((_, idx) => (
                 <View
                   key={idx}
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: idx === selectedIndex ? "#ef7810" : "#ccc",
-                    marginHorizontal: 3,
-                  }}
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor:
+                        idx === selectedIndex ? "#ef7810" : "#ccc",
+                    },
+                  ]}
                 />
               ))}
             </View>
