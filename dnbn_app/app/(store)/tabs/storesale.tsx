@@ -1,8 +1,8 @@
 import { apiDelete, apiGet } from "@/utils/api";
 import { formatDateTime } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -88,9 +88,11 @@ export default function StoreSale() {
     }
   };
 
-  useEffect(() => {
-    fetchSaleList();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchSaleList();
+    }, []),
+  );
 
   const handleDelete = async (productCode: string) => {
     if (!productCode) return;

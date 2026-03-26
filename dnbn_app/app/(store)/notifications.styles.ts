@@ -35,15 +35,35 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  tabContainer: {
-    flexDirection: "row",
+  tabWrapper: {
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
     backgroundColor: "#fff",
-    paddingHorizontal: 12,
+    overflow: "hidden",
+  },
+  tabFadeRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 48,
+  },
+  tabFadeLeft: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 48,
+  },
+  tabScrollView: {
+    flexGrow: 0,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 8,
   },
   tab: {
-    flex: 1,
+    width: 72,
     paddingVertical: 12,
     paddingHorizontal: 4,
     borderBottomWidth: 3,

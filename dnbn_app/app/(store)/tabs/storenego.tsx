@@ -418,6 +418,14 @@ export default function StoreNego() {
               </View>
             ) : null
           }
+          ListEmptyComponent={
+            !loading ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="pricetag-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyText}>등록된 상품이 없습니다</Text>
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
@@ -512,6 +520,14 @@ export default function StoreNego() {
             requestLoading && !requestRefreshing ? (
               <View style={{ padding: 20, alignItems: "center" }}>
                 <ActivityIndicator size="small" color="#000" />
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={
+            !requestLoading ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="chatbubble-ellipses-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyText}>새로운 요청이 없습니다</Text>
               </View>
             ) : null
           }

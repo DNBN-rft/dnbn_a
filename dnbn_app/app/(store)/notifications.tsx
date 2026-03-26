@@ -1,5 +1,6 @@
 import { apiGet, apiPut } from "@/utils/api";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
@@ -165,6 +166,8 @@ export default function NotificationsScreen() {
   const [selectedTab, setSelectedTab] = useState<
     "all" | "product" | "nego" | "review" | "customer" | "etc"
   >("all");
+  const [tabScrolledToEnd, setTabScrolledToEnd] = useState(false);
+  const [tabScrolledFromStart, setTabScrolledFromStart] = useState(false);
 
   // 알림 목록 조회
   useEffect(() => {
@@ -262,23 +265,56 @@ export default function NotificationsScreen() {
         <View style={styles.rightSection} />
       </View>
 
-      <View style={styles.tabContainer}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={[styles.tab, selectedTab === tab.id && styles.tabActive]}
-            onPress={() => setSelectedTab(tab.id)}
-          >
-            <Text
-              style={[
-                styles.tabLabel,
-                selectedTab === tab.id && styles.tabLabelActive,
-              ]}
+      <View style={styles.tabWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabScrollView}
+          contentContainerStyle={styles.tabContainer}
+          onScroll={(e) => {
+            const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+            setTabScrolledToEnd(
+              contentOffset.x + layoutMeasurement.width >= contentSize.width - 4,
+            );
+            setTabScrolledFromStart(contentOffset.x > 4);
+          }}
+          scrollEventThrottle={16}
+        >
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.id}
+              style={[styles.tab, selectedTab === tab.id && styles.tabActive]}
+              onPress={() => setSelectedTab(tab.id)}
             >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.tabLabel,
+                  selectedTab === tab.id && styles.tabLabelActive,
+                ]}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {tabScrolledFromStart && (
+          <LinearGradient
+            colors={["rgba(255,255,255,0.95)", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            pointerEvents="none"
+            style={styles.tabFadeLeft}
+          />
+        )}
+        {!tabScrolledToEnd && (
+          <LinearGradient
+            colors={["transparent", "rgba(255,255,255,0.95)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            pointerEvents="none"
+            style={styles.tabFadeRight}
+          />
+        )}
       </View>
 
       <ScrollView style={styles.content}>

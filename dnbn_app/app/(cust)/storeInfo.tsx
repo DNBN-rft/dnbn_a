@@ -367,6 +367,14 @@ export default function StoreInfo() {
                   </View>
                 </View>
               }
+              ListEmptyComponent={
+                !loadingProducts ? (
+                  <View style={styles.centerContainer}>
+                    <Ionicons name="cube-outline" size={48} color="#999" />
+                    <Text style={styles.emptyText}>등록된 상품이 없습니다</Text>
+                  </View>
+                ) : null
+              }
               ListFooterComponent={
                 loadingProducts ? (
                   <View style={styles.loadingFooter}>
