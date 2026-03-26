@@ -77,8 +77,22 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   productListWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
+  productFadeLeft: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 100,
+  },
+  productFadeRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 100,
   },
   arrowButton: {
     width: 50,

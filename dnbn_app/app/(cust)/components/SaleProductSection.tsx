@@ -1,13 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { styles } from "../styles/custhome.styles";
 
@@ -27,10 +29,20 @@ interface SaleProductSectionProps {
 export default function SaleProductSection({
   products,
 }: SaleProductSectionProps) {
+  const [scrolledToEnd, setScrolledToEnd] = useState(false);
+  const [scrolledFromStart, setScrolledFromStart] = useState(false);
+
   return (
     <View style={styles.contentSection}>
       <View style={sectionStyles.headerContainer}>
-        <Text style={sectionStyles.headerTitle}>할인</Text>
+        <View style={sectionStyles.headerRow}>
+          <Text style={sectionStyles.headerTitle}>할인</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/(cust)/saleProductList")}
+          >
+            <Text style={sectionStyles.viewAllText}>+ 상품 전체 보기</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={sectionStyles.headerSubtitle}>
           내 근처 할인 상품을 만나보세요!
         </Text>
@@ -47,6 +59,16 @@ export default function SaleProductSection({
             keyExtractor={(item) => item.id}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
+            onScroll={(e) => {
+              const { layoutMeasurement, contentOffset, contentSize } =
+                e.nativeEvent;
+              setScrolledToEnd(
+                contentOffset.x + layoutMeasurement.width >=
+                  contentSize.width - 4,
+              );
+              setScrolledFromStart(contentOffset.x > 4);
+            }}
+            scrollEventThrottle={16}
             renderItem={({ item }) => (
               <Pressable
                 style={styles.productCard}
@@ -62,7 +84,11 @@ export default function SaleProductSection({
                   <View
                     style={[
                       styles.productImage,
-                      { backgroundColor: "#f0f0f0", justifyContent: "center", alignItems: "center" },
+                      {
+                        backgroundColor: "#f0f0f0",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      },
                     ]}
                   >
                     <Ionicons name="image-outline" size={40} color="#ccc" />
@@ -85,12 +111,24 @@ export default function SaleProductSection({
               </Pressable>
             )}
           />
-          <TouchableOpacity
-            style={styles.arrowButton}
-            onPress={() => router.push("/(cust)/saleProductList")}
-          >
-            <Ionicons name="chevron-forward" size={28} color="#666" />
-          </TouchableOpacity>
+          {scrolledFromStart && (
+            <LinearGradient
+              colors={["rgba(255,255,255,0.95)", "transparent"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              pointerEvents="none"
+              style={styles.productFadeLeft}
+            />
+          )}
+          {!scrolledToEnd && (
+            <LinearGradient
+              colors={["transparent", "rgba(255,255,255,0.95)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              pointerEvents="none"
+              style={styles.productFadeRight}
+            />
+          )}
         </View>
       )}
     </View>
@@ -104,11 +142,27 @@ const sectionStyles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: "#fff",
   },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: "#333",
-    marginBottom: 4,
+  },
+  viewAllText: {
+    fontSize: 12,
+    color: "#EF7810",
+    fontWeight: "600",
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    overflow: "hidden",
   },
   headerSubtitle: {
     fontSize: 14,

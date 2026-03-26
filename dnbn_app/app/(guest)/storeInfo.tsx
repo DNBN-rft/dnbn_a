@@ -103,7 +103,7 @@ export default function StoreInfo() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiGet(`/guest/storeinfo?storeCode=${storeCode}&productType=NORMAL`);
+      const response = await apiGet(`/guest/storeinfo/products?storeCode=${storeCode}&productType=NORMAL`);
       if (!response.ok) throw new Error("매장 정보를 불러오는데 실패했습니다.");
 
       const data: StoreInfoResponse = await response.json();
