@@ -120,7 +120,6 @@ export const styles = StyleSheet.create({
   storeNameContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     marginBottom: 12,

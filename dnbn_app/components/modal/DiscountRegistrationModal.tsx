@@ -3,6 +3,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
 import {
+    Alert,
     Keyboard,
     Modal,
     Platform,
@@ -114,6 +115,15 @@ export default function DiscountRegistrationModal({
   };
 
   const handleConfirm = () => {
+    if (!discountValue || discountValue.trim() === "") {
+      if (Platform.OS === "web") {
+        alert("할인 값을 입력해주세요.");
+      } else {
+        Alert.alert("안내", "할인 값을 입력해주세요.");
+      }
+      return;
+    }
+
     // 선택된 날짜에 시간 적용
     const [hour, minute] = selectedTime.split(":").map(Number);
     const startDate = new Date(saleStartDate);

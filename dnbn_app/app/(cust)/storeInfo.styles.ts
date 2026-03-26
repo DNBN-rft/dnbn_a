@@ -393,4 +393,37 @@ export const styles = StyleSheet.create({
     color: "#333",
     marginTop: 4,
   },
+  // 상품 서브탭 (일반/할인/네고)
+  productSubTabContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    backgroundColor: "#fafafa",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  productSubTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  productSubTabActive: {
+    backgroundColor: "#EF7810",
+    borderColor: "#EF7810",
+  },
+  productSubTabText: {
+    fontSize: 13,
+    color: "#888",
+    fontWeight: "500",
+  },
+  productSubTabTextActive: {
+    color: "#fff",
+    fontWeight: "700",
+  },
 });

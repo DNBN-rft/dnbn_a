@@ -139,7 +139,7 @@ export function StoreHeader({
               activeTab === "product" && styles.tabTextActive,
             ]}
           >
-            상품({storeInfo.totalProductCount || 0})
+            상품
           </Text>
         </Pressable>
         <Pressable

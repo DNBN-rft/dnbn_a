@@ -22,6 +22,20 @@ import type {
   StoreInfoResponse,
 } from "./types/storeInfo.types";
 
+type ProductTabType = "normal" | "sale" | "nego";
+
+const PRODUCT_TYPE_MAP: Record<ProductTabType, string> = {
+  normal: "NORMAL",
+  sale: "SALE",
+  nego: "NEGO",
+};
+
+const PRODUCT_TAB_LABELS: Record<ProductTabType, string> = {
+  normal: "일반",
+  sale: "할인",
+  nego: "네고",
+};
+
 export default function StoreInfo() {
   const [activeTab, setActiveTab] = useState<"product" | "review">("product");
   const insets = useSafeAreaInsets();
@@ -35,15 +49,46 @@ export default function StoreInfo() {
   const [error, setError] = useState<string | null>(null);
   const [isWishStore, setIsWishStore] = useState(false);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [productPage, setProductPage] = useState(0);
-  const [hasMoreProducts, setHasMoreProducts] = useState(false);
+  const [productsByTab, setProductsByTab] = useState<
+    Record<ProductTabType, Product[]>
+  >({
+    normal: [],
+    sale: [],
+    nego: [],
+  });
+  const [productPageByTab, setProductPageByTab] = useState<
+    Record<ProductTabType, number>
+  >({
+    normal: 0,
+    sale: 0,
+    nego: 0,
+  });
+  const [hasMoreByTab, setHasMoreByTab] = useState<
+    Record<ProductTabType, boolean>
+  >({
+    normal: false,
+    sale: false,
+    nego: false,
+  });
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadedTabs, setLoadedTabs] = useState<Set<ProductTabType>>(
+    new Set<ProductTabType>(["normal"]),
+  );
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewPage, setReviewPage] = useState(0);
   const [hasMoreReviews, setHasMoreReviews] = useState(false);
   const [loadingReviews, setLoadingReviews] = useState(false);
+
+  const [activeProductTab, setActiveProductTab] =
+    useState<ProductTabType>("normal");
+  const [productTotals, setProductTotals] = useState<
+    Record<ProductTabType, number>
+  >({
+    normal: 0,
+    sale: 0,
+    nego: 0,
+  });
 
   const fetchStoreInfo = useCallback(async () => {
     if (!storeCode) {
@@ -55,15 +100,28 @@ export default function StoreInfo() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiGet(`/cust/storeinfo?storeCode=${storeCode}`);
+      const response = await apiGet(
+        `/cust/storeinfo?storeCode=${storeCode}&productType=NORMAL`,
+      );
       if (!response.ok) throw new Error("매장 정보를 불러오는데 실패했습니다.");
 
       const data: StoreInfoResponse = await response.json();
       setStoreInfo(data);
       setIsWishStore(data.isWishStore);
-      setProducts(Array.isArray(data.products) ? data.products : []);
-      setHasMoreProducts(data.hasMoreProducts || false);
-      setProductPage(0);
+      setProductsByTab((prev) => ({
+        ...prev,
+        normal: Array.isArray(data.products) ? data.products : [],
+      }));
+      setHasMoreByTab((prev) => ({
+        ...prev,
+        normal: data.hasMoreProducts || false,
+      }));
+      setProductPageByTab((prev) => ({ ...prev, normal: 0 }));
+      setProductTotals({
+        normal: data.totalProductCount ?? 0,
+        sale: data.totalSaleProductCount ?? 0,
+        nego: data.totalNegoProductCount ?? 0,
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.",
@@ -74,25 +132,38 @@ export default function StoreInfo() {
   }, [storeCode]);
 
   const fetchMoreProducts = useCallback(async () => {
-    if (!storeCode || loadingProducts || !hasMoreProducts) return;
+    if (!storeCode || loadingProducts || !hasMoreByTab[activeProductTab])
+      return;
 
     try {
       setLoadingProducts(true);
-      const nextPage = productPage + 1;
+      const nextPage = productPageByTab[activeProductTab] + 1;
       const response = await apiGet(
-        `/cust/storeinfo/products?storeCode=${storeCode}&page=${nextPage}`,
+        `/cust/storeinfo/products?storeCode=${storeCode}&productType=${PRODUCT_TYPE_MAP[activeProductTab]}&page=${nextPage}`,
       );
       if (!response.ok) throw new Error("상품 목록을 불러오는데 실패했습니다.");
 
       const data: ProductsPageResponse = await response.json();
       const newProducts = Array.isArray(data.content) ? data.content : [];
-      setProducts((prev) => [...prev, ...newProducts]);
-      setHasMoreProducts(!data.last);
-      setProductPage(nextPage);
+      setProductsByTab((prev) => ({
+        ...prev,
+        [activeProductTab]: [...prev[activeProductTab], ...newProducts],
+      }));
+      setHasMoreByTab((prev) => ({ ...prev, [activeProductTab]: !data.last }));
+      setProductPageByTab((prev) => ({
+        ...prev,
+        [activeProductTab]: nextPage,
+      }));
     } finally {
       setLoadingProducts(false);
     }
-  }, [storeCode, productPage, hasMoreProducts, loadingProducts]);
+  }, [
+    storeCode,
+    productPageByTab,
+    hasMoreByTab,
+    loadingProducts,
+    activeProductTab,
+  ]);
 
   const fetchReviews = useCallback(async () => {
     if (!storeCode || loadingReviews) return;
@@ -148,6 +219,38 @@ export default function StoreInfo() {
       }
     },
     [reviews.length, fetchReviews],
+  );
+
+  const handleProductTabChange = useCallback(
+    async (tab: ProductTabType) => {
+      if (tab === activeProductTab) return;
+      setActiveProductTab(tab);
+      productListRef.current?.scrollToOffset({ offset: 0, animated: false });
+
+      if (loadedTabs.has(tab)) return;
+      if (!storeCode) return;
+      try {
+        setLoadingProducts(true);
+        const response = await apiGet(
+          `/cust/storeinfo/products?storeCode=${storeCode}&productType=${PRODUCT_TYPE_MAP[tab]}&page=0`,
+        );
+        if (!response.ok)
+          throw new Error("상품 목록을 불러오는데 실패했습니다.");
+        const data: ProductsPageResponse = await response.json();
+        setProductsByTab((prev) => ({
+          ...prev,
+          [tab]: Array.isArray(data.content) ? data.content : [],
+        }));
+        setHasMoreByTab((prev) => ({ ...prev, [tab]: !data.last }));
+        setProductPageByTab((prev) => ({ ...prev, [tab]: 0 }));
+        setLoadedTabs((prev) => new Set([...prev, tab]));
+      } catch (err) {
+        console.error("상품 목록 로드 실패:", err);
+      } finally {
+        setLoadingProducts(false);
+      }
+    },
+    [activeProductTab, storeCode, loadedTabs],
   );
 
   const handleWishClick = async () => {
@@ -219,7 +322,7 @@ export default function StoreInfo() {
           {activeTab === "product" && (
             <FlatList
               ref={productListRef}
-              data={products}
+              data={productsByTab[activeProductTab]}
               numColumns={2}
               keyExtractor={(item) => item.productCode}
               columnWrapperStyle={styles.productGridContainer}
@@ -228,14 +331,41 @@ export default function StoreInfo() {
               onEndReachedThreshold={0.5}
               showsVerticalScrollIndicator={false}
               ListHeaderComponent={
-                <StoreHeader
-                  storeInfo={storeInfo}
-                  activeTab={activeTab}
-                  onTabChange={handleTabChange}
-                  onWishClick={handleWishClick}
-                  isWishStore={isWishStore}
-                  storeCode={String(storeCode)}
-                />
+                <View>
+                  <StoreHeader
+                    storeInfo={storeInfo}
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange}
+                    onWishClick={handleWishClick}
+                    isWishStore={isWishStore}
+                    storeCode={String(storeCode)}
+                  />
+                  <View style={styles.productSubTabContainer}>
+                    {(["normal", "sale", "nego"] as ProductTabType[]).map(
+                      (tab) => (
+                        <TouchableOpacity
+                          key={tab}
+                          style={[
+                            styles.productSubTab,
+                            activeProductTab === tab &&
+                              styles.productSubTabActive,
+                          ]}
+                          onPress={() => handleProductTabChange(tab)}
+                        >
+                          <Text
+                            style={[
+                              styles.productSubTabText,
+                              activeProductTab === tab &&
+                                styles.productSubTabTextActive,
+                            ]}
+                          >
+                            {PRODUCT_TAB_LABELS[tab]}({productTotals[tab]})
+                          </Text>
+                        </TouchableOpacity>
+                      ),
+                    )}
+                  </View>
+                </View>
               }
               ListFooterComponent={
                 loadingProducts ? (
