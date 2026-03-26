@@ -34,8 +34,11 @@ interface SearchProduct {
 
 interface SearchResponse {
   content: any[];
-  number: number;
+  pageNumber: number;
   totalElements: number;
+  saleCount: number;
+  negoCount: number;
+  normalCount: number;
 }
 
 export default function GuestCategorySearchView() {
@@ -105,7 +108,7 @@ export default function GuestCategorySearchView() {
           (item: any) => ({
             productCode: item.productCode,
             productImageUrl: item.productImageUrl || "",
-            storeName: item.storeName,
+            storeName: item.storeNm,
             productName: item.productNm,
             price: item.price,
             originalPrice: item.originalPrice,
@@ -117,13 +120,12 @@ export default function GuestCategorySearchView() {
             endDateTime: item.endDateTime ?? null,
           }),
         );
-        const firstItem = data.content?.[0];
         setProducts(mapped);
         setTotalElements(data.totalElements ?? 0);
-        setPage(data.number ?? currentPage);
-        setSaleCount(firstItem?.saleCount ?? 0);
-        setNegoCount(firstItem?.negoCount ?? 0);
-        setNormalCount(firstItem?.normalCount ?? 0);
+        setPage(data.pageNumber ?? currentPage);
+        setSaleCount(data.saleCount ?? 0);
+        setNegoCount(data.negoCount ?? 0);
+        setNormalCount(data.normalCount ?? 0);
       } else {
         console.error("상품 검색 실패:", response.status);
       }

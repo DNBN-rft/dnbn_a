@@ -34,8 +34,11 @@ interface SearchProduct {
 
 interface SearchResponse {
   content: any[];
-  number: number;
+  pageNumber: number;
   totalElements: number;
+  saleCount: number;
+  negoCount: number;
+  normalCount: number;
 }
 
 export default function SearchView() {
@@ -112,13 +115,12 @@ export default function SearchView() {
         startDateTime: item.startDateTime ?? null,
         endDateTime: item.endDateTime ?? null,
       }));
-      const firstItem = data.content?.[0];
       setProducts(mapped);
       setTotalElements(data.totalElements ?? 0);
-      setPage(data.number ?? pg);
-      setSaleCount(firstItem?.saleCount ?? 0);
-      setNegoCount(firstItem?.negoCount ?? 0);
-      setNormalCount(firstItem?.normalCount ?? 0);
+      setPage(data.pageNumber ?? pg);
+      setSaleCount(data.saleCount ?? 0);
+      setNegoCount(data.negoCount ?? 0);
+      setNormalCount(data.normalCount ?? 0);
     } catch (error) {
       console.error("상품 검색 오류:", error);
     } finally {
@@ -364,7 +366,7 @@ export default function SearchView() {
         </View>
         {/* 최상단 스크롤 버튼 */}
         <TouchableOpacity
-          style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+          style={[styles.scrollToTopButton, { bottom: insets.bottom }]}
           onPress={scrollToTop}
         >
           <Ionicons name="chevron-up" size={24} color="#EF7810" />
