@@ -10,8 +10,8 @@ export interface FileMasterResponse {
 }
 
 // 할인 상품 타입
-export type SaleType = "RATE" | "AMOUNT";
-export type SaleStatus = "ONGOING" | "UPCOMING";
+export type SaleType = "할인률" | "할인가";
+export type SaleStatus = "할인 중" | "할인 전";
 
 export interface SaleProduct {
   productImage: FileMasterResponse;
@@ -27,7 +27,7 @@ export interface SaleProduct {
 }
 
 // 네고 상품 타입
-export type NegoStatus = "ONGOING" | "UPCOMING";
+export type NegoStatus = "진행 중" | "예정";
 
 export interface NegoProduct {
   productImage: FileMasterResponse;

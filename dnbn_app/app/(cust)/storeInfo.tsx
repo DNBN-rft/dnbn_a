@@ -15,10 +15,14 @@ import { ReviewCard } from "./components/ReviewCard";
 import { StoreHeader } from "./components/StoreHeader";
 import { styles } from "./storeInfo.styles";
 import type {
+  NegoProduct,
   Product,
   ProductsPageResponse,
   Review,
   ReviewsPageResponse,
+  SaleProduct,
+  SaleProductsPageResponse,
+  NegoProductsPageResponse,
   StoreInfoResponse,
 } from "./types/storeInfo.types";
 
@@ -50,7 +54,7 @@ export default function StoreInfo() {
   const [isWishStore, setIsWishStore] = useState(false);
 
   const [productsByTab, setProductsByTab] = useState<
-    Record<ProductTabType, Product[]>
+    Record<ProductTabType, (Product | SaleProduct | NegoProduct)[]>
   >({
     normal: [],
     sale: [],
@@ -71,9 +75,6 @@ export default function StoreInfo() {
     nego: false,
   });
   const [loadingProducts, setLoadingProducts] = useState(false);
-  const [loadedTabs, setLoadedTabs] = useState<Set<ProductTabType>>(
-    new Set<ProductTabType>(["normal"]),
-  );
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewPage, setReviewPage] = useState(0);
@@ -143,7 +144,7 @@ export default function StoreInfo() {
       );
       if (!response.ok) throw new Error("상품 목록을 불러오는데 실패했습니다.");
 
-      const data: ProductsPageResponse = await response.json();
+      const data: ProductsPageResponse | SaleProductsPageResponse | NegoProductsPageResponse = await response.json();
       const newProducts = Array.isArray(data.content) ? data.content : [];
       setProductsByTab((prev) => ({
         ...prev,
@@ -176,10 +177,6 @@ export default function StoreInfo() {
       if (!response.ok) throw new Error("리뷰 목록을 불러오는데 실패했습니다.");
 
       const data: ReviewsPageResponse = await response.json();
-      console.log(
-        "[storeInfo] reviews:",
-        JSON.stringify(data.content, null, 2),
-      );
       setReviews(Array.isArray(data.content) ? data.content : []);
       setHasMoreReviews(!data.last);
       setReviewPage(0);
@@ -227,7 +224,6 @@ export default function StoreInfo() {
       setActiveProductTab(tab);
       productListRef.current?.scrollToOffset({ offset: 0, animated: false });
 
-      if (loadedTabs.has(tab)) return;
       if (!storeCode) return;
       try {
         setLoadingProducts(true);
@@ -236,21 +232,20 @@ export default function StoreInfo() {
         );
         if (!response.ok)
           throw new Error("상품 목록을 불러오는데 실패했습니다.");
-        const data: ProductsPageResponse = await response.json();
+        const data: ProductsPageResponse | SaleProductsPageResponse | NegoProductsPageResponse = await response.json();
         setProductsByTab((prev) => ({
           ...prev,
           [tab]: Array.isArray(data.content) ? data.content : [],
         }));
         setHasMoreByTab((prev) => ({ ...prev, [tab]: !data.last }));
         setProductPageByTab((prev) => ({ ...prev, [tab]: 0 }));
-        setLoadedTabs((prev) => new Set([...prev, tab]));
       } catch (err) {
         console.error("상품 목록 로드 실패:", err);
       } finally {
         setLoadingProducts(false);
       }
     },
-    [activeProductTab, storeCode, loadedTabs],
+    [activeProductTab, storeCode],
   );
 
   const handleWishClick = async () => {

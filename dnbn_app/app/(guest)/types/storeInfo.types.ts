@@ -9,7 +9,38 @@ export interface FileMasterResponse {
   files: FileInfo[];
 }
 
-// 상품 타입
+// 할인 상품 타입
+export type SaleType = "할인률" | "할인가";
+export type SaleStatus = "할인 중" | "할인 전";
+
+export interface SaleProduct {
+  productImage: FileMasterResponse;
+  productCode: string;
+  productNm: string;
+  originalPrice: number;
+  saleValue: number;
+  discountedPrice: number;
+  saleType: SaleType;
+  saleStatus: SaleStatus;
+  startDateTime: string;
+  endDateTime: string;
+}
+
+// 네고 상품 타입
+export type NegoStatus = "진행 중" | "예정";
+
+export interface NegoProduct {
+  productImage: FileMasterResponse;
+  productCode: string;
+  productNm: string;
+  productPrice: number;
+  negoStatus: NegoStatus;
+  startDateTime: string;
+  endDateTime: string;
+  categoryNm: string;
+}
+
+// 일반 상품 타입
 export interface Product {
   productImage: FileMasterResponse;
   productCode: string;
@@ -41,6 +72,8 @@ export interface StoreInfoResponse {
   storeTel: string;
   storeAddress: string;
   totalProductCount: number;
+  totalSaleProductCount: number;
+  totalNegoProductCount: number;
   totalReviewCount: number;
   averageReviewRating: number;
   products: Product[];
@@ -51,6 +84,36 @@ export interface StoreInfoResponse {
 // 상품 목록 페이지네이션 응답
 export interface ProductsPageResponse {
   content: Product[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
+
+// 할인 상품 목록 페이지네이션 응답
+export interface SaleProductsPageResponse {
+  content: SaleProduct[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+}
+
+// 네고 상품 목록 페이지네이션 응답
+export interface NegoProductsPageResponse {
+  content: NegoProduct[];
   pageable: {
     pageNumber: number;
     pageSize: number;

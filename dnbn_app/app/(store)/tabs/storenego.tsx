@@ -526,7 +526,11 @@ export default function StoreNego() {
           ListEmptyComponent={
             !requestLoading ? (
               <View style={styles.emptyContainer}>
-                <Ionicons name="chatbubble-ellipses-outline" size={48} color="#ccc" />
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={48}
+                  color="#ccc"
+                />
                 <Text style={styles.emptyText}>새로운 요청이 없습니다</Text>
               </View>
             ) : null
@@ -613,7 +617,12 @@ export default function StoreNego() {
       )}
 
       <TouchableOpacity
-        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        style={[
+          styles.scrollToTopButton,
+          Platform.OS === "ios"
+            ? { bottom: 65 + insets.bottom }
+            : { bottom: insets.bottom },
+        ]}
         onPress={scrollToTop}
       >
         <Ionicons name="chevron-up" size={24} color="#EF7810" />

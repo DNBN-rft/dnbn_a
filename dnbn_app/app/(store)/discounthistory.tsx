@@ -392,7 +392,7 @@ export default function DiscountHistoryPage() {
           />
 
           <TouchableOpacity
-            style={[styles.scrollToTopButton, { bottom: 30 + insets.bottom }]}
+            style={[styles.scrollToTopButton, { bottom: 20 + insets.bottom }]}
             onPress={scrollToTop}
           >
             <Ionicons name="chevron-up" size={24} color="#ef7810" />
