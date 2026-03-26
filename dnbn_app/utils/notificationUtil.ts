@@ -20,17 +20,19 @@ export async function requestNotificationPermission(): Promise<void> {
  * - 권한이 없으면 Alert 없이 null 반환 (권한 요청은 앱 최초 실행 시 이미 완료).
  */
 export async function permitCheck(): Promise<string | null> {
+  if (Platform.OS === "web" || !Device.isDevice) return null;
+
   const { status } = await Notifications.getPermissionsAsync();
+  if (status !== "granted") return null;
+
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+  if (!projectId) return null;
 
-  if (
-    Platform.OS === "web" ||
-    !Device.isDevice ||
-    status !== "granted" ||
-    !projectId
-  )
+  try {
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+    return tokenData.data;
+  } catch (e) {
+    console.warn("FCM 토큰 발급 실패:", e);
     return null;
-
-  return tokenData.data;
+  }
 }
