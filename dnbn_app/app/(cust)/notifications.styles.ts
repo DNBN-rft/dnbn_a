@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
     backgroundColor: "#fff",
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
   },
   tab: {
     flex: 1,

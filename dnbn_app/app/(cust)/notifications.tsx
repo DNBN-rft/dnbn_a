@@ -29,7 +29,7 @@ type CustAlarmType =
   | "신고 답변"
   | "문의 답변";
 
-type TabType = "주문/상품" | "리뷰" | "관심매장" | "고객센터";
+type TabType = "전체" | "주문/상품" | "리뷰" | "관심매장" | "고객센터";
 
 const TAB_TYPE_MAP: Record<CustAlarmType, TabType> = {
   결제: "주문/상품",
@@ -228,7 +228,7 @@ function mapResponseToAlarm(response: CustAlarmListResponse): Alarm {
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedTab, setSelectedTab] = useState<TabType>("주문/상품");
+  const [selectedTab, setSelectedTab] = useState<TabType>("전체");
   const [notifications, setNotifications] = useState<Alarm[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -316,11 +316,15 @@ export default function NotificationsScreen() {
     }
   };
 
-  const filteredNotifications = notifications.filter(
-    (alarm) => TAB_TYPE_MAP[alarm.type] === selectedTab,
-  );
+  const filteredNotifications =
+    selectedTab === "전체"
+      ? notifications
+      : notifications.filter(
+          (alarm) => TAB_TYPE_MAP[alarm.type] === selectedTab,
+        );
 
   const tabs: { id: TabType; label: string }[] = [
+    { id: "전체", label: "전체" },
     { id: "주문/상품", label: "주문/상품" },
     { id: "리뷰", label: "리뷰" },
     { id: "관심매장", label: "관심매장" },
