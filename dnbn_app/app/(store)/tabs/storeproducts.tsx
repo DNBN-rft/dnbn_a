@@ -398,7 +398,12 @@ export default function StoreProducts() {
       />
 
       <TouchableOpacity
-        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        style={[
+          styles.scrollToTopButton,
+          Platform.OS === "ios"
+            ? { bottom: 65 + insets.bottom }
+            : { bottom: insets.bottom },
+        ]}
         onPress={scrollToTop}
       >
         <Ionicons name="chevron-up" size={24} color="#EF7810" />

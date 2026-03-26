@@ -418,6 +418,14 @@ export default function StoreNego() {
               </View>
             ) : null
           }
+          ListEmptyComponent={
+            !loading ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="pricetag-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyText}>등록된 상품이 없습니다</Text>
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View style={styles.negoProduct}>
               <View style={styles.productContainer}>
@@ -515,6 +523,18 @@ export default function StoreNego() {
               </View>
             ) : null
           }
+          ListEmptyComponent={
+            !requestLoading ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons
+                  name="chatbubble-ellipses-outline"
+                  size={48}
+                  color="#ccc"
+                />
+                <Text style={styles.emptyText}>새로운 요청이 없습니다</Text>
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <View style={styles.negoRequestProduct}>
               <View style={styles.negoRequestProductContainer}>
@@ -597,7 +617,12 @@ export default function StoreNego() {
       )}
 
       <TouchableOpacity
-        style={[styles.scrollToTopButton, { bottom: 65 + insets.bottom }]}
+        style={[
+          styles.scrollToTopButton,
+          Platform.OS === "ios"
+            ? { bottom: 65 + insets.bottom }
+            : { bottom: insets.bottom },
+        ]}
         onPress={scrollToTop}
       >
         <Ionicons name="chevron-up" size={24} color="#EF7810" />

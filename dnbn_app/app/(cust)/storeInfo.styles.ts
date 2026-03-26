@@ -226,16 +226,21 @@ export const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: 5,
     paddingVertical: 12,
+    paddingHorizontal: 10,
+  },
+  storeProductImgWrapper: {
+    width: "100%",
+    position: "relative",
+    marginBottom: 10,
   },
   storeProductImgContainer: {
-    width: 180,
+    width: "100%",
     height: 140,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
   },
   storeProductNmText: {
     fontSize: 14,
@@ -244,10 +249,31 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
   originalPriceText: {
-    fontSize: 13,
+    fontSize: 12,
     textDecorationLine: "line-through",
     color: "#999",
+  },
+  saleOriginalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     marginBottom: 2,
+  },
+  discountBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#FF6B6B",
+  },
+  saleTimeText: {
+    fontSize: 11,
+    color: "#888",
+    marginTop: 2,
+  },
+  negoBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#4A90D9",
+    marginTop: 2,
   },
   priceText: {
     fontSize: 17,
@@ -392,5 +418,38 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginTop: 4,
+  },
+  // 상품 서브탭 (일반/할인/네고)
+  productSubTabContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    backgroundColor: "#fafafa",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  productSubTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  productSubTabActive: {
+    backgroundColor: "#EF7810",
+    borderColor: "#EF7810",
+  },
+  productSubTabText: {
+    fontSize: 13,
+    color: "#888",
+    fontWeight: "500",
+  },
+  productSubTabTextActive: {
+    color: "#fff",
+    fontWeight: "700",
   },
 });

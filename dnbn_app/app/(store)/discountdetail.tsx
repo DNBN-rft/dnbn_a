@@ -166,12 +166,13 @@ export default function DiscountDetailPage() {
 
   const displayImages =
     discountData.files?.files?.map((file) => file.fileUrl) || [];
-  const finalPrice = discountData.originalPrice - discountData.discountedPrice;
   const discountRate =
     discountData.saleType === "할인률"
       ? discountData.saleValue
       : Math.round(
-          (discountData.discountedPrice / discountData.originalPrice) * 100,
+          ((discountData.originalPrice - discountData.discountedPrice) /
+            discountData.originalPrice) *
+            100,
         );
 
   return (

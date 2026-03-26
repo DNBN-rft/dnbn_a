@@ -392,4 +392,16 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     boxShadow: "0 0 5px rgba(0,0,0,0.2)",
   },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: "#aaa",
+    fontWeight: "500",
+  },
 });
