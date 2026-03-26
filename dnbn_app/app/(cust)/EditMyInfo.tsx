@@ -293,7 +293,7 @@ export default function EditMyInfoScreen() {
         isSocialValue = localStorage.getItem("isSocial");
       } else {
         custCode = await SecureStore.getItemAsync("custCode");
-        isSocialValue = await SecureStore.getItemAsync("isSocial");  
+        isSocialValue = await SecureStore.getItemAsync("isSocial");
       }
 
       if (isSocialValue === "true") {
@@ -426,6 +426,22 @@ export default function EditMyInfoScreen() {
                   )}
                 </View>
                 <Text style={styles.genderButtonText}>여성</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.genderButton}
+                onPress={() => setGender("N")}
+              >
+                <View
+                  style={[
+                    styles.genderRadioButton,
+                    gender === "N" && styles.genderRadioButtonActive,
+                  ]}
+                >
+                  {gender === "N" && (
+                    <View style={styles.genderRadioButtonInner} />
+                  )}
+                </View>
+                <Text style={styles.genderButtonText}>선택 안함</Text>
               </TouchableOpacity>
             </View>
           </View>
