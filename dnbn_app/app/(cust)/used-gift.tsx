@@ -40,6 +40,7 @@ export default function UsedGift() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [openDetail, setOpenDetail] = useState<string | null>(null);
   const productListRef = useRef<FlatList>(null);
 
   const infoContainerHeight = (height - insets.top - insets.bottom - 64) * 0.5;
@@ -308,22 +309,61 @@ export default function UsedGift() {
               </Text>
             ) : (
               <View style={styles.explanationTextToggle}>
-                <View style={styles.explanationToggle}>
-                  <Text>상품고시정보</Text>
-                  <Ionicons name="arrow-down-outline" size={20} color="#666" />
-                </View>
-                <View style={styles.explanationToggle}>
-                  <Text>취소/환불 정책 및 방법</Text>
-                  <Ionicons name="arrow-down-outline" size={20} color="#666" />
-                </View>
-                <View style={styles.explanationToggle}>
-                  <Text>거래 조건에 관한 정보</Text>
-                  <Ionicons name="arrow-down-outline" size={20} color="#666" />
-                </View>
-                <View style={styles.explanationToggle}>
-                  <Text>구매 시 주의사항</Text>
-                  <Ionicons name="arrow-down-outline" size={20} color="#666" />
-                </View>
+                {[
+                  {
+                    key: "notice",
+                    label: "상품고시정보",
+                    content:
+                      "[상품 정보 제공 고시 관련 안내]\n본 플랫폼은 통신판매중개자로서 재화·용역의 직접 판매자가 아니므로, 「전자상거래 등에서의 상품 등의 정보제공에 관한 고시」에 따른 상품고시정보 작성·표시 의무는 입점 판매자에게 있습니다.\n\n• 판매자는 상품 등록 시 해당 품목의 필수 정보를 정확히 입력해야 하며, 소비자는 상품 상세 페이지에서 확인할 수 있습니다.\n• 플랫폼은 판매자의 정보 입력을 시스템적으로 요구하나, 정보의 진위 여부에 대한 책임은 판매자에게 있습니다.\n• 상품 관련 문의(소재, 사이즈, 성분, 유통기한 등)는 해당 판매자에게 직접 문의하시기 바랍니다.",
+                  },
+                  {
+                    key: "refund",
+                    label: "취소/환불 정책 및 방법",
+                    content:
+                      "취소·환불 안내 (통신판매중개 플랫폼 운영 원칙)\n본 플랫폼은 통신판매중개자로서 재화·용역의 직접 공급·판매 당사자가 아닙니다. 따라서 취소, 환불, 교환 등은 해당 상품의 판매자(입점 판매자)가 직접 처리합니다.\n\n주문 취소: 주문 접수 후 판매자에게 직접 취소 요청 가능\n청약철회(반품·환불): 소비자는 「전자상거래법」 제17조에 따라 수령일로부터 7일 이내 청약철회 가능하나, 청약철회 신청·처리·반품 배송·환불은 판매자가 직접 담당합니다.\n환불 절차: 판매자가 청약철회를 수락하면 판매자가 대금을 환급하며, 플랫폼은 환불 지연 시 판매자에게 이행 촉구 및 분쟁 조정 지원을 할 수 있습니다.\n환불 지연 시: 판매자가 3영업일 이내 환급하지 않을 경우 플랫폼 고객센터로 문의하시면 판매자에 대한 조치를 취할 수 있습니다.\n왕복 배송비: 단순 변심 반품 시 소비자 부담 (판매자와 별도 협의 가능).\n\n플랫폼은 판매자의 청약철회·환불 이행을 모니터링하며, 미이행 시 판매 중지 등의 조치를 취할 수 있습니다.",
+                  },
+                  {
+                    key: "terms",
+                    label: "거래 조건에 관한 정보",
+                    content:
+                      "거래 조건 안내\n본 플랫폼은 통신판매중개 서비스를 제공하며, 실제 거래 당사자는 소비자와 입점 판매자입니다.\n\n교환·반품: 판매자가 정한 조건에 따릅니다.\n대금 지급: 플랫폼 결제 시스템을 통해 판매자에게 지급되며, 플랫폼은 결제대행(PG) 역할만 수행합니다.\n청약철회 제한 사유: 「전자상거래법」 제17조 제2항에 따라 판매자가 정한 제한 사유 적용\n판매자 신원정보: 각 상품 페이지 또는 주문서에 판매자 상호, 사업자등록번호, 연락처 등이 표시됩니다.\n플랫폼 역할: 거래 당사자가 아니므로 상품 품질·정보 정확성·배송 지연 등에 대한 직접 책임은 지지 않으나, 분쟁 발생 시 조정을 지원할 수 있습니다.",
+                  },
+                  {
+                    key: "caution",
+                    label: "구매 시 주의사항",
+                    content:
+                      "구매 전 반드시 확인해 주세요.\n\n본 플랫폼은 중개 서비스만 제공하므로, 상품·거래 관련 모든 책임은 해당 판매자에게 있습니다.\n상품 정보(소재, 사이즈, 유통기한, 원산지 등)는 판매자가 직접 입력·관리하며, 플랫폼은 정보의 정확성을 보증하지 않습니다. 구매 전 판매자에게 문의하시기 바랍니다.\n청약철회·반품·취소·환불은 입점 판매자와 직접 진행되며, 판매자 응답 지연 시 플랫폼 고객센터로 연락 주시면 지원할 수 있습니다.\n주문 제작·맞춤 상품, 개봉 시 가치 훼손 상품 등은 청약철회가 제한될 수 있습니다.\n분쟁 발생 시 공정거래위원회 또는 한국소비자원 분쟁조정 신청 가능합니다(플랫폼은 조정 과정 협조).\n해외 판매자 상품의 경우 관세·부가세, 국제 배송 지연 등이 발생할 수 있습니다.",
+                  },
+                ].map((item) => (
+                  <View key={item.key}>
+                    <TouchableOpacity
+                      style={styles.detailRow}
+                      onPress={() =>
+                        setOpenDetail(
+                          openDetail === item.key ? null : item.key,
+                        )
+                      }
+                    >
+                      <Text style={styles.detailLabel}>{item.label}</Text>
+                      <Ionicons
+                        name={
+                          openDetail === item.key
+                            ? "chevron-up"
+                            : "chevron-down"
+                        }
+                        size={20}
+                        color="#666"
+                      />
+                    </TouchableOpacity>
+                    {openDetail === item.key && (
+                      <View style={styles.detailDropdownContent}>
+                        <Text style={styles.detailDropdownText}>
+                          {item.content}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
               </View>
             )}
           </View>

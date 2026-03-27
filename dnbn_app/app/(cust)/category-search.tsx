@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { formatDateTime } from "../../utils/dateUtil";
 import {
   ActivityIndicator,
   FlatList,
@@ -22,10 +23,13 @@ interface SearchProduct {
   storeName: string;
   productName: string;
   price: string;
+  originalPrice: string;
   averageRate: number;
   reviewCount: number;
   isNego: boolean;
   isSale: boolean;
+  startDateTime: string | null;
+  endDateTime: string | null;
 }
 
 interface SearchResponse {
@@ -36,6 +40,9 @@ interface SearchResponse {
   totalPages: number;
   hasNext: boolean;
   hasPrevious: boolean;
+  saleCount: number;
+  negoCount: number;
+  normalCount: number;
 }
 
 export default function SearchView() {
@@ -52,7 +59,11 @@ export default function SearchView() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [saleCount, setSaleCount] = useState(0);
+  const [negoCount, setNegoCount] = useState(0);
+  const [normalCount, setNormalCount] = useState(0);
   const [sortType, setSortType] = useState("LATEST");
+  const [productType, setProductType] = useState("SALE");
   const flatListRef = useRef<FlatList<SearchProduct>>(null);
 
   const scrollToTop = () => {
@@ -84,6 +95,7 @@ export default function SearchView() {
     searchTerm: string = "",
     currentPage: number = 0,
     sortValue: string = "LATEST",
+    typeValue: string = productType,
   ) => {
     if (!categoryId || isNaN(categoryId)) {
       console.error("유효하지 않은 categoryId:", params.categoryId);
@@ -92,7 +104,7 @@ export default function SearchView() {
     setLoading(true);
     try {
       const response = await apiGet(
-        `/cust/search/categories/${categoryId}/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
+        `/cust/search/categories/${categoryId}/products?searchKeyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15&productType=${typeValue}`,
       );
 
       if (response.ok) {
@@ -100,6 +112,9 @@ export default function SearchView() {
         setProducts(data.content);
         setTotalElements(data.totalElements);
         setPage(data.currentPage);
+        setSaleCount(data.saleCount ?? 0);
+        setNegoCount(data.negoCount ?? 0);
+        setNormalCount(data.normalCount ?? 0);
       } else {
         console.error("상품 검색 실패:", response.status);
       }
@@ -112,7 +127,7 @@ export default function SearchView() {
 
   // 초기 로드
   useEffect(() => {
-    fetchProducts("", 0, sortType);
+    fetchProducts("", 0, "LATEST", "SALE");
   }, []);
 
   // 검색어가 params로 전달되었을 때 검색 실행
@@ -122,7 +137,8 @@ export default function SearchView() {
       setSearchKeyword(keyword);
       // 새로운 검색 시 정렬 초기화
       setSortType("LATEST");
-      fetchProducts(keyword, 0, "LATEST");
+      setProductType("SALE");
+      fetchProducts(keyword, 0, "LATEST", "SALE");
     }
   }, [params.keyword, params.categoryId]);
 
@@ -130,7 +146,8 @@ export default function SearchView() {
   const handleSearch = () => {
     // 검색 시 정렬 초기화
     setSortType("LATEST");
-    fetchProducts(searchKeyword, 0, "LATEST");
+    setProductType("SALE");
+    fetchProducts(searchKeyword, 0, "LATEST", "SALE");
   };
 
   const openFilterModal = () => {
@@ -150,7 +167,12 @@ export default function SearchView() {
   const handleFilterSelect = (value: string) => {
     setSortType(value);
     closeFilterModal();
-    fetchProducts(searchKeyword, 0, value);
+    fetchProducts(searchKeyword, 0, value, productType);
+  };
+
+  const handleProductTypeSelect = (type: string) => {
+    setProductType(type);
+    fetchProducts(searchKeyword, 0, sortType, type);
   };
 
   return (
@@ -194,15 +216,42 @@ export default function SearchView() {
         {/* 필터 헤더 */}
         <View style={styles.filterHeader}>
           <Text style={styles.resultCountText}>총 {totalElements}개 상품</Text>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={openFilterModal}
-          >
-            <Ionicons name="filter-outline" size={18} color="#666" />
-            <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
-          </TouchableOpacity>
+          <View style={styles.filterRightSection}>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={openFilterModal}
+            >
+              <Ionicons name="filter-outline" size={18} color="#666" />
+              <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.productResultContainer}>
+          <View style={styles.productTypeTabs}>
+              {[
+                { key: "SALE", label: "할인", count: saleCount },
+                { key: "NEGO", label: "네고", count: negoCount },
+                { key: "NORMAL", label: "일반", count: normalCount },
+              ].map(({ key, label, count }) => (
+                <TouchableOpacity
+                  key={key}
+                  style={[
+                    styles.productTypeTab,
+                    productType === key && styles.productTypeTabActive,
+                  ]}
+                  onPress={() => handleProductTypeSelect(key)}
+                >
+                  <Text
+                    style={[
+                      styles.productTypeTabText,
+                      productType === key && styles.productTypeTabTextActive,
+                    ]}
+                  >
+                    {label} ({count})
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#EF7810" />
@@ -221,12 +270,17 @@ export default function SearchView() {
               contentContainerStyle={styles.listContent}
               renderItem={({ item: product }) => (
                 <TouchableOpacity
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(cust)/product-detail",
-                      params: { productCode: product.productCode },
-                    })
-                  }
+                  onPress={() => {
+                    const now = new Date();
+                    const isUpcoming = product.startDateTime && new Date(product.startDateTime) > now;
+                    if (product.isSale && !isUpcoming) {
+                      router.push({ pathname: "/(cust)/sale-product-detail", params: { productCode: product.productCode } });
+                    } else if (product.isNego && !isUpcoming) {
+                      router.push({ pathname: "/(cust)/nego-product-detail", params: { productCode: product.productCode } });
+                    } else {
+                      router.push({ pathname: "/(cust)/product-detail", params: { productCode: product.productCode } });
+                    }
+                  }}
                   style={styles.gridItem}
                 >
                   <View style={styles.imageContainer}>
@@ -250,20 +304,6 @@ export default function SearchView() {
                         <Ionicons name="image-outline" size={40} color="#ccc" />
                       </View>
                     )}
-                    {(product.isNego || product.isSale) && (
-                      <View style={styles.badgeContainer}>
-                        {product.isNego && (
-                          <View style={[styles.badge, styles.negoBadge]}>
-                            <Text style={styles.badgeText}>네고</Text>
-                          </View>
-                        )}
-                        {product.isSale && (
-                          <View style={[styles.badge, styles.saleBadge]}>
-                            <Text style={styles.badgeText}>할인</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
                   </View>
                   <View style={styles.gridInfo}>
                     <Text style={styles.gridStoreName} numberOfLines={1}>
@@ -272,6 +312,13 @@ export default function SearchView() {
                     <Text style={styles.gridProductName} numberOfLines={1}>
                       {product.productName}
                     </Text>
+                    {product.isSale &&
+                      product.originalPrice &&
+                      product.originalPrice !== product.price && (
+                        <Text style={styles.gridOriginalPrice}>
+                          {Number(product.originalPrice).toLocaleString()}원
+                        </Text>
+                      )}
                     <Text style={styles.gridPrice}>
                       {Number(product.price).toLocaleString()}원
                     </Text>

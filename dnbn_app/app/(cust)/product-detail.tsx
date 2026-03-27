@@ -69,6 +69,7 @@ export default function ProductDetailScreen() {
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [cartModalVisible, setCartModalVisible] = useState(false);
+  const [availableStock, setAvailableStock] = useState(0);
   const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
@@ -687,7 +688,41 @@ export default function ProductDetailScreen() {
       <View style={styles.actionButtonsContainer}>
         <TouchableOpacity
           style={styles.cartButton}
-          onPress={() => setCartModalVisible(true)}
+          onPress={async () => {
+            if (!productData) return;
+            try {
+              const res = await apiGet(`/cust/cart`);
+              if (res.ok) {
+                const data = await res.json();
+                const cartQty: number = (data as any[])
+                  .flatMap((store: any) => store.items as any[])
+                  .filter(
+                    (item: any) => item.productCode === productData.productCode,
+                  )
+                  .reduce((sum: number, item: any) => sum + item.quantity, 0);
+                if (cartQty > 0) {
+                  Alert.alert(
+                    "이미 담긴 상품",
+                    `장바구니에 이미 담겨있는 상품입니다. 장바구니로 이동하시겠습니까?`,
+                    [
+                      {
+                        text: "장바구니 가기",
+                        onPress: () => router.push("/(cust)/cart"),
+                      },
+                      { text: "취소", style: "cancel" },
+                    ],
+                  );
+                  return;
+                }
+                setAvailableStock(productData.productAmount);
+              } else {
+                setAvailableStock(productData.productAmount);
+              }
+            } catch {
+              setAvailableStock(productData.productAmount);
+            }
+            setCartModalVisible(true);
+          }}
         >
           <Ionicons name="cart-outline" size={24} color="#EF7810" />
         </TouchableOpacity>
@@ -718,7 +753,7 @@ export default function ProductDetailScreen() {
           productCode={productData.productCode}
           storeCode={productData.storeCode}
           price={productData.price}
-          stock={productData.productAmount}
+          stock={availableStock}
           onClose={() => setCartModalVisible(false)}
           onAddToCart={handleAddToCart}
         />

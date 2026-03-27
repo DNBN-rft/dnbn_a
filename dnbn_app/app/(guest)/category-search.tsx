@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { formatDateTime } from "../../utils/dateUtil";
 import {
   ActivityIndicator,
   FlatList,
@@ -19,19 +20,26 @@ import { styles } from "./search-result.styles";
 interface SearchProduct {
   productCode: string;
   productImageUrl: string;
-  storeName: string;
-  productName: string;
-  price: number;
+  storeNm: string;
+  productNm: string;
+  price: string;
+  originalPrice: string;
   averageRate: number;
   reviewCount: number;
   isNego: boolean;
   isSale: boolean;
+  productType: "SALE" | "NEGO" | "NORMAL";
+  startDateTime: string | null;
+  endDateTime: string | null;
 }
 
 interface SearchResponse {
   content: any[];
-  number: number;
+  pageNumber: number;
   totalElements: number;
+  saleCount: number;
+  negoCount: number;
+  normalCount: number;
 }
 
 export default function GuestCategorySearchView() {
@@ -48,7 +56,11 @@ export default function GuestCategorySearchView() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [saleCount, setSaleCount] = useState(0);
+  const [negoCount, setNegoCount] = useState(0);
+  const [normalCount, setNormalCount] = useState(0);
   const [sortType, setSortType] = useState("LATEST");
+  const [productType, setProductType] = useState("SALE");
   const flatListRef = useRef<FlatList<SearchProduct>>(null);
 
   const scrollToTop = () => {
@@ -74,11 +86,12 @@ export default function GuestCategorySearchView() {
     return labels[type] || "최신순";
   };
 
-  // GET /guest/search/{categoryIdx}?keyword=&productSortType=&page=&size=
+  // GET /guest/search/{categoryIdx}?keyword=&productSortType=&page=&size=&productType=
   const fetchProducts = async (
     searchTerm: string = "",
     currentPage: number = 0,
     sortValue: string = "LATEST",
+    typeValue: string = productType,
   ) => {
     if (!categoryId || isNaN(categoryId)) {
       console.error("유효하지 않은 categoryId:", params.categoryId);
@@ -87,28 +100,34 @@ export default function GuestCategorySearchView() {
     setLoading(true);
     try {
       const response = await apiGet(
-        `/guest/search/${categoryId}?keyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15`,
+        `/guest/search/${categoryId}?keyword=${encodeURIComponent(searchTerm)}&productSortType=${sortValue}&page=${currentPage}&size=15&productType=${typeValue}`,
       );
 
       if (response.ok) {
         const data: SearchResponse = await response.json();
-        // 백엔드 productImaegUrl 오타 대응 및 필드명 매핑
         const mapped: SearchProduct[] = (data.content || []).map(
           (item: any) => ({
             productCode: item.productCode,
-            productImageUrl: item.productImaegUrl || item.productImageUrl || "",
-            storeName: item.storeNm,
-            productName: item.productNm,
+            productImageUrl: item.productImageUrl || "",
+            storeNm: item.storeNm,
+            productNm: item.productNm,
             price: item.price,
-            averageRate: item.avgRate,
-            reviewCount: item.reviewCnt,
+            originalPrice: item.originalPrice,
+            averageRate: item.averageRate,
+            reviewCount: item.reviewCount,
             isNego: item.isNego,
             isSale: item.isSale,
+            productType: item.productType,
+            startDateTime: item.startDateTime ?? null,
+            endDateTime: item.endDateTime ?? null,
           }),
         );
         setProducts(mapped);
         setTotalElements(data.totalElements ?? 0);
-        setPage(data.number ?? currentPage);
+        setPage(data.pageNumber ?? currentPage);
+        setSaleCount(data.saleCount ?? 0);
+        setNegoCount(data.negoCount ?? 0);
+        setNormalCount(data.normalCount ?? 0);
       } else {
         console.error("상품 검색 실패:", response.status);
       }
@@ -120,7 +139,7 @@ export default function GuestCategorySearchView() {
   };
 
   useEffect(() => {
-    fetchProducts("", 0, sortType);
+    fetchProducts("", 0, "LATEST", "SALE");
   }, []);
 
   useEffect(() => {
@@ -128,13 +147,15 @@ export default function GuestCategorySearchView() {
     if (keyword && categoryId && !isNaN(categoryId)) {
       setSearchKeyword(keyword);
       setSortType("LATEST");
-      fetchProducts(keyword, 0, "LATEST");
+      setProductType("SALE");
+      fetchProducts(keyword, 0, "LATEST", "SALE");
     }
   }, [params.keyword, params.categoryId]);
 
   const handleSearch = () => {
     setSortType("LATEST");
-    fetchProducts(searchKeyword, 0, "LATEST");
+    setProductType("SALE");
+    fetchProducts(searchKeyword, 0, "LATEST", "SALE");
   };
 
   const openFilterModal = () => {
@@ -154,7 +175,13 @@ export default function GuestCategorySearchView() {
   const handleFilterSelect = (value: string) => {
     setSortType(value);
     closeFilterModal();
-    fetchProducts(searchKeyword, 0, value);
+    fetchProducts(searchKeyword, 0, value, productType);
+  };
+
+  const handleProductTypeSelect = (type: string) => {
+    setProductType(type);
+    setPage(0);
+    fetchProducts(searchKeyword, 0, sortType, type);
   };
 
   return (
@@ -199,16 +226,43 @@ export default function GuestCategorySearchView() {
         {/* 필터 헤더 */}
         <View style={styles.filterHeader}>
           <Text style={styles.resultCountText}>총 {totalElements}개 상품</Text>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={openFilterModal}
-          >
-            <Ionicons name="filter-outline" size={18} color="#666" />
-            <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
-          </TouchableOpacity>
+          <View style={styles.filterRightSection}>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={openFilterModal}
+            >
+              <Ionicons name="filter-outline" size={18} color="#666" />
+              <Text style={styles.filterText}>{getSortLabel(sortType)}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.productResultContainer}>
+          <View style={styles.productTypeTabs}>
+            {[
+              { key: "SALE", label: "할인", count: saleCount },
+              { key: "NEGO", label: "네고", count: negoCount },
+              { key: "NORMAL", label: "일반", count: normalCount },
+            ].map(({ key, label, count }) => (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  styles.productTypeTab,
+                  productType === key && styles.productTypeTabActive,
+                ]}
+                onPress={() => handleProductTypeSelect(key)}
+              >
+                <Text
+                  style={[
+                    styles.productTypeTabText,
+                    productType === key && styles.productTypeTabTextActive,
+                  ]}
+                >
+                  {label} ({count})
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#EF7810" />
@@ -227,12 +281,15 @@ export default function GuestCategorySearchView() {
               contentContainerStyle={styles.listContent}
               renderItem={({ item: product }) => (
                 <TouchableOpacity
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(guest)/product-detail",
-                      params: { productCode: product.productCode },
-                    })
-                  }
+                  onPress={() => {
+                    if (product.productType === "SALE") {
+                      router.push({ pathname: "/(guest)/sale-product-detail", params: { productCode: product.productCode } });
+                    } else if (product.productType === "NEGO") {
+                      router.push({ pathname: "/(guest)/nego-product-detail", params: { productCode: product.productCode } });
+                    } else {
+                      router.push({ pathname: "/(guest)/product-detail", params: { productCode: product.productCode } });
+                    }
+                  }}
                   style={styles.gridItem}
                 >
                   <View style={styles.imageContainer}>
@@ -256,28 +313,21 @@ export default function GuestCategorySearchView() {
                         <Ionicons name="image-outline" size={40} color="#ccc" />
                       </View>
                     )}
-                    {(product.isNego || product.isSale) && (
-                      <View style={styles.badgeContainer}>
-                        {product.isNego && (
-                          <View style={[styles.badge, styles.negoBadge]}>
-                            <Text style={styles.badgeText}>네고</Text>
-                          </View>
-                        )}
-                        {product.isSale && (
-                          <View style={[styles.badge, styles.saleBadge]}>
-                            <Text style={styles.badgeText}>할인</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
                   </View>
                   <View style={styles.gridInfo}>
                     <Text style={styles.gridStoreName} numberOfLines={1}>
-                      {product.storeName}
+                      {product.storeNm}
                     </Text>
                     <Text style={styles.gridProductName} numberOfLines={1}>
-                      {product.productName}
+                      {product.productNm}
                     </Text>
+                    {product.isSale &&
+                      product.originalPrice &&
+                      product.originalPrice !== product.price && (
+                        <Text style={styles.gridOriginalPrice}>
+                          {Number(product.originalPrice).toLocaleString()}원
+                        </Text>
+                      )}
                     <Text style={styles.gridPrice}>
                       {Number(product.price).toLocaleString()}원
                     </Text>

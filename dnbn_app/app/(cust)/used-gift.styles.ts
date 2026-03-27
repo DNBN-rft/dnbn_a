@@ -155,13 +155,32 @@ export const styles = StyleSheet.create({
   explanationTextToggle: {
     flex: 1,
   },
-  explanationToggle: {
+  detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    paddingVertical: 10,
+    borderBottomColor: "#f0f0f0",
+    backgroundColor: "#fff",
+  },
+  detailLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+  },
+  detailDropdownContent: {
+    paddingHorizontal: 4,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  detailDropdownText: {
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
   },
   giftDetailInfo: {
     marginTop: 30,

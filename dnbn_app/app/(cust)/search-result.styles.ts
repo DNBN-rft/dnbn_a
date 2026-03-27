@@ -82,8 +82,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e8e8e8",
   },
   resultCountText: {
     fontSize: 14,
@@ -306,5 +304,61 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     color: "#999",
     marginLeft: 2,
+  },
+  filterRightSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  productTypeTabs: {
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e8e8e8",
+  },
+  productTypeTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginHorizontal: 3,
+    marginBottom: 10,
+  },
+  productTypeTabActive: {
+    backgroundColor: "#EF7810",
+    borderColor: "#EF7810",
+  },
+  productTypeTabText: {
+    fontSize: 13,
+    color: "#666",
+  },
+  productTypeTabTextActive: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  gridOriginalPrice: {
+    fontSize: 12,
+    color: "#999",
+    textDecorationLine: "line-through",
+    marginBottom: 2,
+  },
+  timeInfoContainer: {
+    marginTop: 4,
+    marginBottom: 2,
+  },
+  timeStatusLabel: {
+    fontSize: 11,
+    color: "#888",
+    fontWeight: "600",
+    marginBottom: 1,
+  },
+  timeStatusLabelUpcoming: {
+    color: "#2196F3",
+  },
+  timeText: {
+    fontSize: 10,
+    color: "#999",
   },
 });
