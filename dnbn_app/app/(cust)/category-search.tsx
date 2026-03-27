@@ -322,17 +322,6 @@ export default function SearchView() {
                     <Text style={styles.gridPrice}>
                       {Number(product.price).toLocaleString()}원
                     </Text>
-                    {product.startDateTime &&
-                      new Date(product.startDateTime) > new Date() && (
-                        <View style={styles.timeInfoContainer}>
-                          <Text style={styles.timeStatusLabelUpcoming}>
-                            {product.isSale ? "할인" : "네고"} 예정
-                          </Text>
-                          <Text style={styles.timeText}>
-                            {`${formatDateTime(product.startDateTime)}${product.endDateTime ? ` ~ ${formatDateTime(product.endDateTime)}` : ""}`}
-                          </Text>
-                        </View>
-                      )}
                     <View style={styles.ratingContainer}>
                       <Ionicons name="star" size={14} color="#FFB800" />
                       <Text style={styles.ratingText}>
