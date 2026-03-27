@@ -20,14 +20,15 @@ import { styles } from "./search-result.styles";
 interface SearchProduct {
   productCode: string;
   productImageUrl: string;
-  storeName: string;
-  productName: string;
+  storeNm: string;
+  productNm: string;
   price: string;
   originalPrice: string;
   averageRate: number;
   reviewCount: number;
   isNego: boolean;
   isSale: boolean;
+  productType: "SALE" | "NEGO" | "NORMAL";
   startDateTime: string | null;
   endDateTime: string | null;
 }
@@ -108,14 +109,15 @@ export default function GuestCategorySearchView() {
           (item: any) => ({
             productCode: item.productCode,
             productImageUrl: item.productImageUrl || "",
-            storeName: item.storeNm,
-            productName: item.productNm,
+            storeNm: item.storeNm,
+            productNm: item.productNm,
             price: item.price,
             originalPrice: item.originalPrice,
             averageRate: item.averageRate,
             reviewCount: item.reviewCount,
             isNego: item.isNego,
             isSale: item.isSale,
+            productType: item.productType,
             startDateTime: item.startDateTime ?? null,
             endDateTime: item.endDateTime ?? null,
           }),
@@ -280,11 +282,9 @@ export default function GuestCategorySearchView() {
               renderItem={({ item: product }) => (
                 <TouchableOpacity
                   onPress={() => {
-                    const now = new Date();
-                    const isUpcoming = product.startDateTime && new Date(product.startDateTime) > now;
-                    if (product.isSale && !isUpcoming) {
+                    if (product.productType === "SALE") {
                       router.push({ pathname: "/(guest)/sale-product-detail", params: { productCode: product.productCode } });
-                    } else if (product.isNego && !isUpcoming) {
+                    } else if (product.productType === "NEGO") {
                       router.push({ pathname: "/(guest)/nego-product-detail", params: { productCode: product.productCode } });
                     } else {
                       router.push({ pathname: "/(guest)/product-detail", params: { productCode: product.productCode } });
@@ -316,10 +316,10 @@ export default function GuestCategorySearchView() {
                   </View>
                   <View style={styles.gridInfo}>
                     <Text style={styles.gridStoreName} numberOfLines={1}>
-                      {product.storeName}
+                      {product.storeNm}
                     </Text>
                     <Text style={styles.gridProductName} numberOfLines={1}>
-                      {product.productName}
+                      {product.productNm}
                     </Text>
                     {product.isSale &&
                       product.originalPrice &&
@@ -331,17 +331,6 @@ export default function GuestCategorySearchView() {
                     <Text style={styles.gridPrice}>
                       {Number(product.price).toLocaleString()}원
                     </Text>
-                    {product.startDateTime &&
-                      new Date(product.startDateTime) > new Date() && (
-                        <View style={styles.timeInfoContainer}>
-                          <Text style={styles.timeStatusLabelUpcoming}>
-                            {product.isSale ? "할인" : "네고"} 예정
-                          </Text>
-                          <Text style={styles.timeText}>
-                            {`${formatDateTime(product.startDateTime)}${product.endDateTime ? ` ~ ${formatDateTime(product.endDateTime)}` : ""}`}
-                          </Text>
-                        </View>
-                      )}
                     <View style={styles.ratingContainer}>
                       <Ionicons name="star" size={14} color="#FFB800" />
                       <Text style={styles.ratingText}>

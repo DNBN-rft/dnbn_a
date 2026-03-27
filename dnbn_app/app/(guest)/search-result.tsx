@@ -28,6 +28,7 @@ interface SearchProduct {
   reviewCount: number;
   isNego: boolean;
   isSale: boolean;
+  productType: "SALE" | "NEGO" | "NORMAL";
   startDateTime: string | null;
   endDateTime: string | null;
 }
@@ -112,6 +113,7 @@ export default function SearchView() {
         reviewCount: item.reviewCount,
         isNego: item.isNego,
         isSale: item.isSale,
+        productType: item.productType,
         startDateTime: item.startDateTime ?? null,
         endDateTime: item.endDateTime ?? null,
       }));
@@ -284,11 +286,9 @@ export default function SearchView() {
               renderItem={({ item: product }) => (
                 <TouchableOpacity
                   onPress={() => {
-                    const now = new Date();
-                    const isUpcoming = product.startDateTime && new Date(product.startDateTime) > now;
-                    if (product.isSale && !isUpcoming) {
+                    if (product.productType === "SALE") {
                       router.push({ pathname: "/(guest)/sale-product-detail", params: { productCode: product.productCode } });
-                    } else if (product.isNego && !isUpcoming) {
+                    } else if (product.productType === "NEGO") {
                       router.push({ pathname: "/(guest)/nego-product-detail", params: { productCode: product.productCode } });
                     } else {
                       router.push({ pathname: "/(guest)/product-detail", params: { productCode: product.productCode } });
@@ -336,17 +336,6 @@ export default function SearchView() {
                     <Text style={styles.gridPrice}>
                       {Number(product.price).toLocaleString()}원
                     </Text>
-                    {product.startDateTime &&
-                      new Date(product.startDateTime) > new Date() && (
-                        <View style={styles.timeInfoContainer}>
-                          <Text style={styles.timeStatusLabelUpcoming}>
-                            {product.isSale ? "할인" : "네고"} 예정
-                          </Text>
-                          <Text style={styles.timeText}>
-                            {`${formatDateTime(product.startDateTime)}${product.endDateTime ? ` ~ ${formatDateTime(product.endDateTime)}` : ""}`}
-                          </Text>
-                        </View>
-                      )}
                     <View style={styles.ratingContainer}>
                       <Ionicons name="star" size={14} color="#FFB800" />
                       <Text style={styles.ratingText}>
