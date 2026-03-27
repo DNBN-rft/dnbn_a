@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef } from "react";
 import {
+  Animated,
   FlatList,
   Image,
   Pressable,
@@ -27,8 +28,23 @@ interface NegoProductSectionProps {
 export default function NegoProductSection({
   products,
 }: NegoProductSectionProps) {
-  const [scrolledToEnd, setScrolledToEnd] = useState(false);
-  const [scrolledFromStart, setScrolledFromStart] = useState(false);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const maxScrollX = useRef(new Animated.Value(9999)).current;
+  const layoutWidth = useRef(0);
+  const leftOpacity = useRef(
+    scrollX.interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+  const rightOpacity = useRef(
+    Animated.subtract(maxScrollX, scrollX).interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
 
   return (
     <View style={styles.contentSection}>
@@ -55,10 +71,15 @@ export default function NegoProductSection({
             keyExtractor={(item) => item.id}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
-            onScroll={(e) => {
-              const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
-              setScrolledToEnd(contentOffset.x + layoutMeasurement.width >= contentSize.width - 4);
-              setScrolledFromStart(contentOffset.x > 4);
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false },
+            )}
+            onContentSizeChange={(contentW) => {
+              maxScrollX.setValue(Math.max(0, contentW - layoutWidth.current));
+            }}
+            onLayout={(e) => {
+              layoutWidth.current = e.nativeEvent.layout.width;
             }}
             scrollEventThrottle={16}
             renderItem={({ item }) => (
@@ -104,24 +125,28 @@ export default function NegoProductSection({
               </Pressable>
             )}
           />
-          {scrolledFromStart && (
+          <Animated.View
+            style={[styles.productFadeLeft, { opacity: leftOpacity }]}
+            pointerEvents="none"
+          >
             <LinearGradient
               colors={["rgba(255,255,255,0.95)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              pointerEvents="none"
-              style={styles.productFadeLeft}
+              style={{ flex: 1 }}
             />
-          )}
-          {!scrolledToEnd && (
+          </Animated.View>
+          <Animated.View
+            style={[styles.productFadeRight, { opacity: rightOpacity }]}
+            pointerEvents="none"
+          >
             <LinearGradient
               colors={["transparent", "rgba(255,255,255,0.95)"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              pointerEvents="none"
-              style={styles.productFadeRight}
+              style={{ flex: 1 }}
             />
-          )}
+          </Animated.View>
         </View>
       )}
     </View>

@@ -136,6 +136,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 20,
   },
+  //카테고리 아이콘 디자인 수정
   categoryImageBox: {
     width: 70,
     height: 70,
@@ -165,11 +166,45 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e8e8e8",
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 12,
     color: "#333",
+  },
+  viewAllText: {
+    fontSize: 12,
+    color: "#EF7810",
+    fontWeight: "600",
+    borderWidth: 1,
+    borderColor: "#EF7810",
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    overflow: "hidden",
+  },
+  productListWrapper: {
+    position: "relative",
+    overflow: "hidden",
+  },
+  productFadeLeft: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 70,
+  },
+  productFadeRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 70,
   },
   galleryContainer: {
     paddingVertical: 10,

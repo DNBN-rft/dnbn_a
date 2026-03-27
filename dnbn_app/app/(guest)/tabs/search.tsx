@@ -1,26 +1,28 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Animated,
+    FlatList,
+    Image,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  addRecentSearch,
-  clearRecentSearches,
-  getRecentSearches,
-  removeRecentSearch,
-} from "../../../utils/recentSearchStorage";
 import { apiGet } from "../../../utils/api";
+import {
+    addRecentSearch,
+    clearRecentSearches,
+    getRecentSearches,
+    removeRecentSearch,
+} from "../../../utils/recentSearchStorage";
 import { styles } from "../styles/search.styles";
 
 export default function SearchView() {
@@ -40,6 +42,61 @@ export default function SearchView() {
 
   // 데이터 로드 여부 추적
   const [hasLoadedData, setHasLoadedData] = useState(false);
+
+  // gradient — scrollX 위치에 따라 실시간으로 opacity 계산
+  const discountScrollX = useRef(new Animated.Value(0)).current;
+  const discountMaxScrollX = useRef(new Animated.Value(9999)).current;
+  const discountLayoutWidth = useRef(0);
+  const discountLeftOpacity = useRef(
+    discountScrollX.interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+  const discountRightOpacity = useRef(
+    Animated.subtract(discountMaxScrollX, discountScrollX).interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+
+  const negoScrollX = useRef(new Animated.Value(0)).current;
+  const negoMaxScrollX = useRef(new Animated.Value(9999)).current;
+  const negoLayoutWidth = useRef(0);
+  const negoLeftOpacity = useRef(
+    negoScrollX.interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+  const negoRightOpacity = useRef(
+    Animated.subtract(negoMaxScrollX, negoScrollX).interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+
+  const normalScrollX = useRef(new Animated.Value(0)).current;
+  const normalMaxScrollX = useRef(new Animated.Value(9999)).current;
+  const normalLayoutWidth = useRef(0);
+  const normalLeftOpacity = useRef(
+    normalScrollX.interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
+  const normalRightOpacity = useRef(
+    Animated.subtract(normalMaxScrollX, normalScrollX).interpolate({
+      inputRange: [0, 60],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+  ).current;
 
   // 초기 데이터 로드
   useFocusEffect(
@@ -89,9 +146,7 @@ export default function SearchView() {
       const discountData =
         data.guestRecommendSaleItems?.map((item: any) => ({
           id: item.productCode,
-          uri: item.productImageUrl
-            ? { uri: item.productImageUrl }
-            : null,
+          uri: item.productImageUrl ? { uri: item.productImageUrl } : null,
           storeName: item.storeNm,
           name: item.productNm,
           saleType: item.saleType,
@@ -170,9 +225,7 @@ export default function SearchView() {
   };
 
   const getProductsWithMore = (products: any[], type: string) => {
-    const maxItems = 5;
-    const displayProducts = products.slice(0, maxItems);
-    return [...displayProducts, { id: `more-${type}`, isMore: true, type }];
+    return products.slice(0, 5);
   };
 
   return (
@@ -303,7 +356,19 @@ export default function SearchView() {
 
             {/* 추천 할인 상품 섹션 */}
             <View style={styles.productSection}>
-              <Text style={styles.sectionTitle}>추천 할인 상품</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>추천 할인 상품</Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(guest)/saleProductList",
+                      params: { from: "search" },
+                    })
+                  }
+                >
+                  <Text style={styles.viewAllText}>+ 상품 전체 보기</Text>
+                </TouchableOpacity>
+              </View>
               {discountProducts.length === 0 ? (
                 <View style={styles.emptyProductContainer}>
                   <Ionicons name="cart-outline" size={40} color="#ccc" />
@@ -312,30 +377,30 @@ export default function SearchView() {
                   </Text>
                 </View>
               ) : (
-                <FlatList
-                  data={getProductsWithMore(discountProducts, "discount")}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => {
-                    if (item.isMore) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            router.push({
-                              pathname: "/(guest)/saleProductList",
-                              params: { from: "search" },
-                            })
-                          }
-                          style={styles.moreButton}
-                        >
-                          <Ionicons
-                            name="ellipsis-horizontal"
-                            size={22}
-                            color="#999"
-                          />
-                        </TouchableOpacity>
+                <View style={styles.productListWrapper}>
+                  <FlatList
+                    data={getProductsWithMore(discountProducts, "discount")}
+                    keyExtractor={(item) => item.id}
+                    onScroll={Animated.event(
+                      [
+                        {
+                          nativeEvent: {
+                            contentOffset: { x: discountScrollX },
+                          },
+                        },
+                      ],
+                      { useNativeDriver: false },
+                    )}
+                    onContentSizeChange={(contentW) => {
+                      discountMaxScrollX.setValue(
+                        Math.max(0, contentW - discountLayoutWidth.current),
                       );
-                    }
-                    return (
+                    }}
+                    onLayout={(e) => {
+                      discountLayoutWidth.current = e.nativeEvent.layout.width;
+                    }}
+                    scrollEventThrottle={16}
+                    renderItem={({ item }) => (
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
@@ -351,7 +416,9 @@ export default function SearchView() {
                             style={styles.galleryImage}
                           />
                         ) : (
-                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                          <View
+                            style={[styles.galleryImage, styles.noImageBox]}
+                          >
                             <Ionicons
                               name="image-outline"
                               size={50}
@@ -381,18 +448,58 @@ export default function SearchView() {
                           </Text>
                         </View>
                       </TouchableOpacity>
-                    );
-                  }}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.galleryContainer}
-                />
+                    )}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.galleryContainer}
+                  />
+                  <Animated.View
+                    style={[
+                      styles.productFadeLeft,
+                      { opacity: discountLeftOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["rgba(255,255,255,0.9)", "transparent"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                  <Animated.View
+                    style={[
+                      styles.productFadeRight,
+                      { opacity: discountRightOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["transparent", "rgba(255,255,255,0.9)"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                </View>
               )}
             </View>
 
             {/* 추천 네고 상품 섹션 */}
             <View style={styles.productSection}>
-              <Text style={styles.sectionTitle}>추천 네고 상품</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>추천 네고 상품</Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(guest)/negoList",
+                      params: { from: "search" },
+                    })
+                  }
+                >
+                  <Text style={styles.viewAllText}>+ 상품 전체 보기</Text>
+                </TouchableOpacity>
+              </View>
               {negoProducts.length === 0 ? (
                 <View style={styles.emptyProductContainer}>
                   <Ionicons name="cart-outline" size={40} color="#ccc" />
@@ -401,30 +508,24 @@ export default function SearchView() {
                   </Text>
                 </View>
               ) : (
-                <FlatList
-                  data={getProductsWithMore(negoProducts, "nego")}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => {
-                    if (item.isMore) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            router.push({
-                              pathname: "/(guest)/negoList",
-                              params: { from: "search" },
-                            })
-                          }
-                          style={styles.moreButton}
-                        >
-                          <Ionicons
-                            name="ellipsis-horizontal"
-                            size={22}
-                            color="#999"
-                          />
-                        </TouchableOpacity>
+                <View style={styles.productListWrapper}>
+                  <FlatList
+                    data={getProductsWithMore(negoProducts, "nego")}
+                    keyExtractor={(item) => item.id}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { x: negoScrollX } } }],
+                      { useNativeDriver: false },
+                    )}
+                    onContentSizeChange={(contentW) => {
+                      negoMaxScrollX.setValue(
+                        Math.max(0, contentW - negoLayoutWidth.current),
                       );
-                    }
-                    return (
+                    }}
+                    onLayout={(e) => {
+                      negoLayoutWidth.current = e.nativeEvent.layout.width;
+                    }}
+                    scrollEventThrottle={16}
+                    renderItem={({ item }) => (
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
@@ -440,7 +541,9 @@ export default function SearchView() {
                             style={styles.galleryImage}
                           />
                         ) : (
-                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                          <View
+                            style={[styles.galleryImage, styles.noImageBox]}
+                          >
                             <Ionicons
                               name="image-outline"
                               size={50}
@@ -457,18 +560,53 @@ export default function SearchView() {
                           </Text>
                         </View>
                       </TouchableOpacity>
-                    );
-                  }}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.galleryContainer}
-                />
+                    )}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.galleryContainer}
+                  />
+                  <Animated.View
+                    style={[
+                      styles.productFadeLeft,
+                      { opacity: negoLeftOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["rgba(255,255,255,0.9)", "transparent"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                  <Animated.View
+                    style={[
+                      styles.productFadeRight,
+                      { opacity: negoRightOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["transparent", "rgba(255,255,255,0.9)"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                </View>
               )}
             </View>
 
             {/* 추천 일반 상품 섹션 */}
             <View style={styles.productSection}>
-              <Text style={styles.sectionTitle}>추천 일반 상품</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>추천 일반 상품</Text>
+                <TouchableOpacity
+                  onPress={() => router.push("/(guest)/productList")}
+                >
+                  <Text style={styles.viewAllText}>+ 상품 전체 보기</Text>
+                </TouchableOpacity>
+              </View>
               {normalProducts.length === 0 ? (
                 <View style={styles.emptyProductContainer}>
                   <Ionicons name="cart-outline" size={40} color="#ccc" />
@@ -477,25 +615,28 @@ export default function SearchView() {
                   </Text>
                 </View>
               ) : (
-                <FlatList
-                  data={getProductsWithMore(normalProducts, "normal")}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => {
-                    if (item.isMore) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => router.push("/(guest)/productList")}
-                          style={styles.moreButton}
-                        >
-                          <Ionicons
-                            name="ellipsis-horizontal"
-                            size={22}
-                            color="#999"
-                          />
-                        </TouchableOpacity>
+                <View style={styles.productListWrapper}>
+                  <FlatList
+                    data={getProductsWithMore(normalProducts, "normal")}
+                    keyExtractor={(item) => item.id}
+                    onScroll={Animated.event(
+                      [
+                        {
+                          nativeEvent: { contentOffset: { x: normalScrollX } },
+                        },
+                      ],
+                      { useNativeDriver: false },
+                    )}
+                    onContentSizeChange={(contentW) => {
+                      normalMaxScrollX.setValue(
+                        Math.max(0, contentW - normalLayoutWidth.current),
                       );
-                    }
-                    return (
+                    }}
+                    onLayout={(e) => {
+                      normalLayoutWidth.current = e.nativeEvent.layout.width;
+                    }}
+                    scrollEventThrottle={16}
+                    renderItem={({ item }) => (
                       <TouchableOpacity
                         onPress={() =>
                           router.push(
@@ -511,7 +652,9 @@ export default function SearchView() {
                             style={styles.galleryImage}
                           />
                         ) : (
-                          <View style={[styles.galleryImage, styles.noImageBox]}>
+                          <View
+                            style={[styles.galleryImage, styles.noImageBox]}
+                          >
                             <Ionicons
                               name="image-outline"
                               size={50}
@@ -531,12 +674,40 @@ export default function SearchView() {
                           </Text>
                         </View>
                       </TouchableOpacity>
-                    );
-                  }}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.galleryContainer}
-                />
+                    )}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.galleryContainer}
+                  />
+                  <Animated.View
+                    style={[
+                      styles.productFadeLeft,
+                      { opacity: normalLeftOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["rgba(255,255,255,0.9)", "transparent"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                  <Animated.View
+                    style={[
+                      styles.productFadeRight,
+                      { opacity: normalRightOpacity },
+                    ]}
+                    pointerEvents="none"
+                  >
+                    <LinearGradient
+                      colors={["transparent", "rgba(255,255,255,0.9)"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1 }}
+                    />
+                  </Animated.View>
+                </View>
               )}
             </View>
           </View>
